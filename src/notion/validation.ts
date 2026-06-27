@@ -1,12 +1,13 @@
 import type { DatabaseDefinition } from "../schema/database.js";
 import type { PropertyCollection } from "../schema/database.js";
 
-import { isTranslatablePropertyType, type TranslatablePropertyType } from "./properties/index.js";
+import {
+  isTranslatablePropertyType,
+  type TranslatablePropertyType,
+} from "./properties/index.js";
 
 export interface NotionTranslationIssue {
-  readonly code:
-    | "UNSUPPORTED_PROPERTY_TYPE"
-    | "DUPLICATE_NOTION_PROPERTY_NAME";
+  readonly code: "UNSUPPORTED_PROPERTY_TYPE" | "DUPLICATE_NOTION_PROPERTY_NAME";
   readonly message: string;
 }
 
@@ -20,6 +21,10 @@ const SUPPORTED_TYPES: readonly TranslatablePropertyType[] = [
   "text",
   "number",
   "select",
+  "multi_select",
+  "date",
+  "checkbox",
+  "url",
 ] as const;
 
 export function validateNotionTranslation<
