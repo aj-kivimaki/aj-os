@@ -2,114 +2,164 @@
 
 This roadmap defines the planned evolution of AJ-OS.
 
-The project follows an iterative development approach.
+AJ-OS is developed iteratively.
 
-Each version delivers a complete, working improvement.
+Each milestone delivers a complete, working improvement while preserving a stable architecture.
 
 ---
 
-# v0.1 — Foundation
+# v0.1 — Foundation ✅
 
-Goal:
+## Goal
 
 Create the project foundation.
 
-Deliverables:
+## Deliverables
 
 - Repository
 - Documentation
+- Architecture Decision Records (ADRs)
+- AI development workflow
 - TypeScript setup
-- Notion API connection
 - Environment configuration
+- Notion API connection
 
-Status:
+## Status
 
-In Progress
+Completed
 
 ---
 
-# v0.2 — Projects Module
+# v0.2 — Schema Engine ✅
 
-Goal:
+## Goal
 
-Create the first business database.
+Create the core schema language used throughout AJ-OS.
 
-Deliverables:
+This milestone establishes AJ-OS as an application independent of the Notion SDK.
 
-- Projects database
+## Deliverables
+
+- DatabaseDefinition
+- PropertyDefinition
+- Schema validation
+- DatabaseBuilder
+- Reusable schema API
+- Strong TypeScript typing
+
+## Status
+
+Completed
+
+---
+
+# v0.3 — Notion Translation Layer
+
+## Goal
+
+Translate AJ-OS schema definitions into Notion API payloads.
+
+The translation layer isolates the rest of the application from the Notion SDK.
+
+## Deliverables
+
+- Notion translator
+- Property translators
+- Database payload generation
+- Translation validation
+- Foundation for database synchronization
+
+---
+
+# v0.4 — Projects Module
+
+## Goal
+
+Implement the first real business module.
+
+Projects become the central entity of AJ-OS.
+
+## Deliverables
+
+- Projects database definition
 - Project properties
+- Project validation
+- Database synchronization
 - Project template
-- Schema synchronization
 
 ---
 
-# v0.3 — CRM Module
+# v0.5 — CRM Module
 
-Goal:
+## Goal
 
 Track professional relationships.
 
-Deliverables:
+## Deliverables
 
 - Contacts database
 - Studios database
 - Relationship tracking
 - Follow-up reminders
+- Links to Projects
 
 ---
 
-# v0.4 — Portfolio Module
+# v0.6 — Portfolio Module
 
-Goal:
+## Goal
 
-Track public work.
+Track public portfolio work.
 
-Deliverables:
+## Deliverables
 
 - Portfolio database
 - Showcase templates
-- Links to GitHub
-- Website integration
+- GitHub links
+- Website links
+- Project relationships
 
 ---
 
-# v0.5 — Production Music
+# v0.7 — Production Music Module
 
-Goal:
+## Goal
 
 Manage the production music catalogue.
 
-Deliverables:
+## Deliverables
 
 - Cue database
 - Library tracking
-- Royalty tracking
 - Submission history
+- Royalty tracking
 
 ---
 
-# v0.6 — Game Jams
+# v0.8 — Game Jam Module
 
-Goal:
+## Goal
 
 Track networking and collaborations.
 
-Deliverables:
+## Deliverables
 
 - Game Jam database
-- Team members
+- Teams
+- Participants
 - Lessons learned
-- Portfolio links
+- Portfolio relationships
+- Contact relationships
 
 ---
 
-# v0.7 — Learning
+# v0.9 — Learning Module
 
-Goal:
+## Goal
 
 Create a personal knowledge system.
 
-Deliverables:
+## Deliverables
 
 - Learning Notes
 - Wwise notes
@@ -117,96 +167,84 @@ Deliverables:
 - GDC notes
 - Books
 - Courses
+- Personal knowledge base
 
 ---
 
-# v0.8 — Finance
+# v1.0 — Business Operating System
 
-Goal:
+## Goal
 
-Business management.
+Release the first complete AJ-OS operating system.
 
-Deliverables:
-
-- Income tracking
-- Expenses
-- Taxes
-- Equipment
-- Monthly reports
-
----
-
-# v0.9 — Dashboards
-
-Goal:
-
-Create business dashboards.
-
-Deliverables:
-
-- CEO Dashboard
-- Weekly Dashboard
-- Finance Dashboard
-- Production Dashboard
-
----
-
-# v1.0 — AJ-OS
-
-Goal:
-
-Release the first complete operating system.
-
-Features:
+## Features
 
 - Connected databases
+- Database synchronization
+- Relationships
 - Dashboards
 - Templates
-- Relations
-- Synchronization
 - Documentation
 - Testing
+- Complete freelance workflow
 
-AJ-OS should be capable of managing the entire freelance business.
+AJ-OS should be capable of managing the entire freelance game audio business from a single workspace.
 
 ---
 
-# Future Versions
+# v1.x
 
-## v1.x
+## Business Expansion
 
-Improvements
+Improvements include:
 
+- Finance module
+- Goals module
+- Assets module
+- Weekly reviews
 - Better dashboards
 - Better templates
 - Additional automations
-- Analytics
+- Reporting
 
 ---
 
-## v2.0
+# v2.0
 
-Business Intelligence
+## Business Intelligence
+
+AJ-OS evolves from an operating system into a business intelligence platform.
+
+Features include:
 
 - Revenue analytics
-- Goal tracking
+- Client analytics
 - Project analytics
 - Networking insights
 - Production music analytics
+- Goal tracking
 - AI-assisted workflows
+- Decision support dashboards
 
 ---
 
 # Development Workflow
 
-Every feature follows the same lifecycle.
+Every milestone follows the same lifecycle.
 
-1. Document
-2. Design
-3. Implement
-4. Test
+1. Architecture
+2. Documentation
+3. Prompt
+4. Implementation
 5. Review
-6. Commit
-7. Update Documentation
+6. Testing
+7. Commit
+8. Push
 
-Documentation always precedes implementation.
+Documentation changes only when the architecture changes.
+
+Implementation follows the documented architecture.
+
+Small milestones are preferred over large rewrites.
+
+Every milestone should leave AJ-OS in a working state.
