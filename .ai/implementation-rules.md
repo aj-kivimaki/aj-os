@@ -2,32 +2,44 @@
 
 Before writing code:
 
-1. Read all documentation inside `/docs`.
+1. Read every document inside /docs.
 
-2. Follow the documented architecture.
+2. Read every document inside /.ai.
 
-3. Never invent new architecture without being asked.
+3. Follow the documented architecture.
 
-4. Never modify documentation automatically.
+4. Never invent new architecture.
 
-5. Implement only the requested milestone.
+5. Never modify documentation automatically.
 
-6. Keep changes as small as possible.
+6. Implement only the requested milestone.
 
-7. Prefer composition over inheritance.
+7. Keep changes as small as possible.
 
-8. Prefer functions over classes unless classes clearly improve the design.
+8. Prefer composition over inheritance.
 
-9. Avoid unnecessary abstractions.
+9. Prefer functions over classes unless classes clearly improve the design.
 
 10. Keep files focused on a single responsibility.
 
 11. Follow existing naming conventions.
 
-12. Do not introduce new dependencies without justification.
+12. Do not introduce new dependencies without explanation.
 
-13. Explain important design decisions.
+13. Produce production-quality TypeScript.
 
-14. Produce production-quality TypeScript.
+14. Use strict typing.
 
-15. If unsure, choose the simpler solution.
+15. If uncertain, choose the simpler solution.
+
+---
+
+# Before Finishing
+
+Before completing a milestone:
+
+- Verify TypeScript compiles.
+- Remove unused code.
+- Keep functions small.
+- Explain important design decisions.
+- Suggest improvements separately rather than implementing them.

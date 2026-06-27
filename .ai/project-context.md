@@ -6,11 +6,11 @@ The TypeScript application is the single source of truth.
 
 The Notion workspace is generated and maintained through the Notion API.
 
-This project is intended to be production quality software.
+The project is intended to be production-quality software.
 
 ---
 
-## Purpose
+# Purpose
 
 AJ-OS manages:
 
@@ -22,32 +22,43 @@ AJ-OS manages:
 - Game Jams
 - Learning
 - Finance
-- Reviews
+- Weekly Reviews
+- Goals
 - Assets
 
 ---
 
-## Architecture
+# Architecture
 
-Read the documentation in `/docs` before making implementation decisions.
+Before writing code read:
 
-The documentation is the source of truth for architecture.
+- docs/
+- .ai/implementation-rules.md
+- .ai/coding-standards.md
+- .ai/engineering-philosophy.md
 
----
+Documentation defines the architecture.
 
-## Development Philosophy
-
-- Documentation first
-- Small iterations
-- Modular architecture
-- Strong typing
-- Idempotent operations
-- Long-term maintainability
+Implementation follows the documentation.
 
 ---
 
-## Current Milestone
+# Development Philosophy
 
-Refer to `docs/roadmap.md`.
+- Documentation First
+- Code First
+- Strong Typing
+- Modular Architecture
+- Idempotent Operations
+- Small Iterations
+- Production Quality
+
+---
+
+# Current Milestone
+
+Read docs/roadmap.md.
 
 Implement only the requested milestone.
+
+Never implement future roadmap items.

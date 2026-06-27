@@ -3,10 +3,9 @@
 ## TypeScript
 
 - Strict mode
-- Explicit types when useful
-- Avoid `any`
-- Prefer immutable values
-- Prefer readonly where appropriate
+- Avoid any
+- Prefer readonly values where appropriate
+- Explicit types when they improve readability
 
 ---
 
@@ -24,7 +23,7 @@ Prefer pure functions.
 
 Keep functions short.
 
-Avoid deeply nested logic.
+Avoid deep nesting.
 
 ---
 
@@ -32,17 +31,15 @@ Avoid deeply nested logic.
 
 Use descriptive names.
 
-Avoid abbreviations.
-
 Examples:
 
-ProjectDefinition
+- DatabaseDefinition
+- PropertyDefinition
+- DatabaseBuilder
+- createDatabase()
+- validateEnvironment()
 
-DatabaseBuilder
-
-createDatabase()
-
-validateEnvironment()
+Avoid abbreviations.
 
 ---
 
@@ -58,9 +55,9 @@ Avoid circular dependencies.
 
 Fail fast.
 
-Provide clear error messages.
+Provide meaningful error messages.
 
-Never silently ignore errors.
+Never silently ignore failures.
 
 ---
 
@@ -68,7 +65,7 @@ Never silently ignore errors.
 
 Explain why.
 
-Do not explain obvious code.
+Avoid comments that merely describe what the code already says.
 
 ---
 
@@ -76,8 +73,16 @@ Do not explain obvious code.
 
 Business logic belongs in builders.
 
-Notion API calls belong inside the Notion layer.
+Notion API code belongs in the Notion layer.
 
-Configuration belongs inside config.
+Configuration belongs in config.
 
 Utilities should remain generic.
+
+---
+
+## General Philosophy
+
+Readable code is preferred over clever code.
+
+Consistency is preferred over personal preference.
