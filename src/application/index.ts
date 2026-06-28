@@ -27,3 +27,8 @@ export {
   type WorkspaceSyncStatus,
   type WorkspaceSyncSummary,
 } from "./workspace-sync.js";
+export {
+  publishCEODashboard,
+  type PublishDashboardOptions,
+  type PublishDashboardResult,
+} from "./publish-dashboard.js";

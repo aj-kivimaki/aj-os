@@ -1,5 +1,7 @@
 import type { DatabaseDefinition } from "../schema/database.js";
+import { env } from "../config/env.js";
 import { getRegisteredModules } from "../modules/registry.js";
+import type { DashboardModuleKey } from "../dashboard/index.js";
 import {
   createDatabase,
   type CreatedDatabaseResult,
@@ -15,6 +17,10 @@ import {
   type DatabaseRelationUpdateResult,
   type RelationUpdateResult,
 } from "./update-database-relations.js";
+import {
+  publishCEODashboard,
+  type PublishDashboardResult,
+} from "./publish-dashboard.js";
 
 export interface WorkspaceModuleSyncTarget {
   readonly key: string;
@@ -39,6 +45,8 @@ export interface WorkspaceSyncSummary {
   readonly relationsCreated: number;
   readonly relationsSkipped: number;
   readonly relationsFailed: number;
+  readonly dashboardGenerated: number;
+  readonly dashboardFailed: number;
 }
 
 export interface WorkspaceRelationSyncItemResult {
@@ -50,6 +58,7 @@ export interface WorkspaceRelationSyncItemResult {
 export interface WorkspaceSyncResult {
   readonly items: readonly WorkspaceSyncItemResult[];
   readonly relationItems: readonly WorkspaceRelationSyncItemResult[];
+  readonly dashboardResult?: PublishDashboardResult;
   readonly summary: WorkspaceSyncSummary;
 }
 
@@ -155,6 +164,7 @@ function toErrorMessage(error: unknown): string {
 function buildSummary(
   items: readonly WorkspaceSyncItemResult[],
   relationItems: readonly WorkspaceRelationSyncItemResult[],
+  dashboardResult?: PublishDashboardResult,
 ): WorkspaceSyncSummary {
   const created = items.filter((item) => item.status === "created").length;
   const skipped = items.filter((item) => item.status === "skipped").length;
@@ -169,6 +179,8 @@ function buildSummary(
   const relationsFailed = relationResults.filter(
     (result) => result.status === "failed",
   ).length;
+  const dashboardGenerated = dashboardResult?.status === "generated" ? 1 : 0;
+  const dashboardFailed = dashboardResult?.status === "failed" ? 1 : 0;
 
   return {
     created,
@@ -177,6 +189,8 @@ function buildSummary(
     relationsCreated,
     relationsSkipped,
     relationsFailed,
+    dashboardGenerated,
+    dashboardFailed,
   };
 }
 
@@ -189,6 +203,24 @@ function printSummary(summary: WorkspaceSyncSummary): void {
   console.log(`Relations created: ${summary.relationsCreated}`);
   console.log(`Relations skipped: ${summary.relationsSkipped}`);
   console.log(`Relations failed: ${summary.relationsFailed}`);
+  console.log(`Dashboard generated: ${summary.dashboardGenerated}`);
+  console.log(`Dashboard failed: ${summary.dashboardFailed}`);
+}
+
+function printDashboardResult(result: PublishDashboardResult): void {
+  if (result.status === "generated") {
+    console.log("CEO Dashboard");
+    console.log("✓ Generated");
+    if (result.pageUrl) {
+      console.log(`  URL: ${result.pageUrl}`);
+    }
+    console.log("");
+    return;
+  }
+
+  console.log("CEO Dashboard");
+  console.log(`✗ Failed: ${result.errorMessage ?? "Unknown error"}`);
+  console.log("");
 }
 
 export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
@@ -198,12 +230,14 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
   const existingDatabases = await listChildDatabases();
   const byTitle = new Map(mapDatabasesByNormalizedTitle(existingDatabases));
   const dataSourceIdByModuleKey = new Map<string, string>();
+  const databaseByModuleKey = new Map<string, ExistingDatabase>();
 
   for (const target of workspaceSyncTargets) {
     const normalizedTitle = normalizeTitleForLookup(target.definition.name);
     const existingDatabase = byTitle.get(normalizedTitle);
     if (existingDatabase) {
       dataSourceIdByModuleKey.set(target.key, existingDatabase.dataSourceId);
+      databaseByModuleKey.set(target.key, existingDatabase);
     }
   }
 
@@ -218,6 +252,7 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
     if (existingDatabase) {
       printModuleSkipped(target);
       dataSourceIdByModuleKey.set(target.key, existingDatabase.dataSourceId);
+      databaseByModuleKey.set(target.key, existingDatabase);
       itemResults.push({
         module: target.label,
         status: "skipped",
@@ -232,6 +267,11 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
           dataSourceIdByModuleKey.get(moduleKey),
       });
       byTitle.set(normalizedTitle, {
+        id: createdDatabase.id,
+        dataSourceId: createdDatabase.dataSourceId,
+        title: createdDatabase.name,
+      });
+      databaseByModuleKey.set(target.key, {
         id: createdDatabase.id,
         dataSourceId: createdDatabase.dataSourceId,
         title: createdDatabase.name,
@@ -263,6 +303,7 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
 
     if (existingDatabase) {
       dataSourceIdByModuleKey.set(target.key, existingDatabase.dataSourceId);
+      databaseByModuleKey.set(target.key, existingDatabase);
     }
   }
 
@@ -312,13 +353,23 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
     }
   }
 
-  const summary = buildSummary(itemResults, relationItems);
+  printFlowStep("Generate CEO Dashboard");
+  const dashboardResult = await publishCEODashboard(env.NOTION_PARENT_PAGE_ID, {
+    databaseByModuleKey: databaseByModuleKey as ReadonlyMap<
+      DashboardModuleKey,
+      ExistingDatabase
+    >,
+  });
+  printDashboardResult(dashboardResult);
+
+  const summary = buildSummary(itemResults, relationItems, dashboardResult);
   printFlowStep("Summary");
   printSummary(summary);
 
   return {
     items: itemResults,
     relationItems,
+    dashboardResult,
     summary,
   };
 }

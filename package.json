@@ -1,12 +1,14 @@
 {
   "name": "aj-os",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "sync": "tsx src/index.ts",
+    "dev": "npm run sync",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@notionhq/client": "^2.3.0",
