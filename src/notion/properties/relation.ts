@@ -1,4 +1,4 @@
-import type { PropertyConfigurationRequest } from "@notionhq/client/build/src/api-endpoints.js";
+import type { PropertyConfigurationRequest } from "../types.js";
 
 import type { RelationDefinition } from "../../schema/relation.js";
 
@@ -51,7 +51,7 @@ export function translateRelationProperty(
     deferred,
     property: {
       relation: {
-        data_source_id: databaseId,
+        database_id: databaseId,
         type: "dual_property",
         dual_property: {},
       },

@@ -1,4 +1,4 @@
-import type { PropertyConfigurationRequest } from "@notionhq/client/build/src/api-endpoints.js";
+import type { PropertyConfigurationRequest } from "../types.js";
 
 import type { DatePropertyDefinition } from "../../schema/property.js";
 

@@ -1,6 +1,9 @@
 import { env } from "../config/env.js";
 import { getNotionClient } from "../notion/client.js";
-import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints/databases.js";
+import type {
+  DatabaseObjectResponse,
+  GetDatabaseResponse,
+} from "@notionhq/client/build/src/api-endpoints.js";
 
 export interface ExistingDatabase {
   readonly id: string;
@@ -38,22 +41,14 @@ function isChildDatabaseBlock(block: {
   return block.type === "child_database";
 }
 
-function isFullDatabaseResponse(response: {
-  object: "database";
-  id: string;
-}): response is DatabaseObjectResponse {
-  return "data_sources" in response;
+function isFullDatabaseResponse(
+  response: GetDatabaseResponse,
+): response is DatabaseObjectResponse {
+  return "url" in response;
 }
 
 function getPrimaryDataSourceId(database: DatabaseObjectResponse): string {
-  const primaryDataSource = database.data_sources[0];
-  if (!primaryDataSource) {
-    throw new Error(
-      `Database "${database.id}" does not expose any data sources in the API response.`,
-    );
-  }
-
-  return primaryDataSource.id;
+  return database.id;
 }
 
 async function resolveExistingDatabase(

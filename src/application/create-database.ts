@@ -1,4 +1,7 @@
-import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints/databases.js";
+import type {
+  CreateDatabaseResponse,
+  DatabaseObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints.js";
 
 import { env } from "../config/env.js";
 import { hasModule } from "../modules/registry.js";
@@ -21,11 +24,10 @@ export interface CreateDatabaseOptions {
   readonly resolveDatabaseId?: (moduleKey: string) => string | undefined;
 }
 
-function isFullDatabaseResponse(response: {
-  object: "database";
-  id: string;
-}): response is DatabaseObjectResponse {
-  return "url" in response;
+function isFullDatabaseResponse(
+  response: CreateDatabaseResponse,
+): response is DatabaseObjectResponse {
+  return "url" in response && "created_time" in response;
 }
 
 function extractDatabaseName(response: DatabaseObjectResponse): string {
@@ -34,14 +36,7 @@ function extractDatabaseName(response: DatabaseObjectResponse): string {
 }
 
 function extractPrimaryDataSourceId(response: DatabaseObjectResponse): string {
-  const primaryDataSource = response.data_sources[0];
-  if (!primaryDataSource) {
-    throw new Error(
-      `Database creation response for "${response.id}" did not include a data source id.`,
-    );
-  }
-
-  return primaryDataSource.id;
+  return response.id;
 }
 
 const translator = new NotionTranslator();

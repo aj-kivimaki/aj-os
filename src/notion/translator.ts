@@ -1,8 +1,7 @@
 import type {
-  InitialDataSourceRequest,
   PropertyConfigurationRequest,
   RichTextItemRequest,
-} from "@notionhq/client/build/src/api-endpoints.js";
+} from "./types.js";
 
 import type {
   DatabaseDefinition,
@@ -40,7 +39,7 @@ export interface NotionRelationPayload {
 export interface NotionDatabaseCreatePayload {
   readonly title: RichTextItemRequest[];
   readonly description?: RichTextItemRequest[];
-  readonly initial_data_source: InitialDataSourceRequest;
+  readonly properties: Record<string, PropertyConfigurationRequest>;
   readonly relationProperties: readonly NotionRelationPayload[];
 }
 
@@ -154,9 +153,7 @@ export class NotionTranslator {
       ...(definition.description
         ? { description: toRichText(definition.description) }
         : {}),
-      initial_data_source: {
-        properties: translatedProperties.properties,
-      },
+      properties: translatedProperties.properties,
       relationProperties: translatedProperties.relationProperties,
     };
   }

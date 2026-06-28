@@ -1,7 +1,8 @@
 import type {
-  DataSourceObjectResponse,
-  UpdateDataSourceParameters,
-} from "@notionhq/client/build/src/api-endpoints/data-sources.js";
+  DatabaseObjectResponse,
+  GetDatabaseResponse,
+  UpdateDatabaseParameters,
+} from "@notionhq/client/build/src/api-endpoints.js";
 
 import { hasModule } from "../modules/registry.js";
 import { getNotionClient } from "../notion/client.js";
@@ -31,7 +32,7 @@ export interface UpdateDatabaseRelationsOptions {
 }
 
 type DataSourcePropertyUpdates = NonNullable<
-  UpdateDataSourceParameters["properties"]
+  UpdateDatabaseParameters["properties"]
 >;
 type DataSourcePropertyUpdateValue = Exclude<
   DataSourcePropertyUpdates[string],
@@ -39,13 +40,12 @@ type DataSourcePropertyUpdateValue = Exclude<
 >;
 type RelationDataSourcePropertyUpdate = Extract<
   DataSourcePropertyUpdateValue,
-  { relation: { data_source_id: string } }
+  { relation: { database_id: string } }
 >;
 
-function isFullDataSourceResponse(response: {
-  object: "data_source";
-  id: string;
-}): response is DataSourceObjectResponse {
+function isFullDataSourceResponse(
+  response: GetDatabaseResponse,
+): response is DatabaseObjectResponse {
   return "url" in response;
 }
 
@@ -66,13 +66,13 @@ function toErrorMessage(error: unknown): string {
 }
 
 function getExistingRelationDataSourceId(
-  value: DataSourceObjectResponse["properties"][string],
+  value: DatabaseObjectResponse["properties"][string],
 ): string | undefined {
   if (value.type !== "relation") {
     return undefined;
   }
 
-  return value.relation.data_source_id;
+  return value.relation.database_id;
 }
 
 function validateTranslatedRelation(
@@ -98,7 +98,7 @@ function validateTranslatedRelation(
     return `Relation "${relation.name}" did not produce a relation payload.`;
   }
 
-  if (relationProperty.data_source_id !== relation.targetDatabaseId) {
+  if (relationProperty.database_id !== relation.targetDatabaseId) {
     return `Relation "${relation.name}" payload target id does not match resolved target id.`;
   }
 
@@ -114,7 +114,7 @@ function toRelationUpdateProperty(
 
   return {
     relation: {
-      data_source_id: relation.targetDatabaseId,
+      database_id: relation.targetDatabaseId,
       type: "dual_property",
       dual_property: {},
     },
@@ -145,8 +145,8 @@ export async function updateDatabaseRelations(
     };
   }
 
-  const dataSourceResponse = await notion.dataSources.retrieve({
-    data_source_id: sourceDataSourceId,
+  const dataSourceResponse = await notion.databases.retrieve({
+    database_id: sourceDataSourceId,
   });
 
   if (!isFullDataSourceResponse(dataSourceResponse)) {
@@ -211,8 +211,8 @@ export async function updateDatabaseRelations(
 
   if (relationNamesToCreate.length > 0) {
     try {
-      await notion.dataSources.update({
-        data_source_id: sourceDataSourceId,
+      await notion.databases.update({
+        database_id: sourceDataSourceId,
         properties: relationUpdates,
       });
 

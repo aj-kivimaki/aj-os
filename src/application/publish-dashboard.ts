@@ -1,8 +1,8 @@
 import type {
   BlockObjectRequest,
   PageObjectResponse,
-  RichTextItemRequest,
 } from "@notionhq/client/build/src/api-endpoints.js";
+import type { RichTextItemRequest } from "../notion/types.js";
 
 import {
   buildDashboardModel,
@@ -176,9 +176,8 @@ async function queryAllPages(
   let cursor: string | undefined;
 
   do {
-    const response = await notion.dataSources.query({
-      data_source_id: dataSourceId,
-      result_type: "page",
+    const response = await notion.databases.query({
+      database_id: dataSourceId,
       page_size: 100,
       ...(cursor ? { start_cursor: cursor } : {}),
     });
