@@ -1,5 +1,6 @@
 import type { DatabaseDefinition } from "../schema/database.js";
 import { crmModule } from "./crm/index.js";
+import { gameJamsModule } from "./game-jams/index.js";
 import { portfolioModule } from "./portfolio/index.js";
 import { productionMusicModule } from "./production-music/index.js";
 import { projectsModule } from "./projects/index.js";
@@ -56,6 +57,7 @@ export function hasModule(key: string): boolean {
 }
 
 registerModule(projectsModule);
+registerModule(gameJamsModule);
 registerModule(crmModule);
 registerModule(portfolioModule);
 registerModule(productionMusicModule);
