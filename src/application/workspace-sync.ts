@@ -1,0 +1,159 @@
+import type { DatabaseDefinition } from "../schema/database.js";
+import { crmDatabaseDefinition } from "../modules/crm/index.js";
+import { projectsDatabaseDefinition } from "../modules/projects/index.js";
+import {
+  createDatabase,
+  type CreatedDatabaseResult,
+} from "./create-database.js";
+import {
+  listChildDatabases,
+  mapDatabasesByNormalizedTitle,
+  normalizeTitleForLookup,
+  type ExistingDatabase,
+} from "./find-database.js";
+
+export interface WorkspaceModuleSyncTarget {
+  readonly label: string;
+  readonly definition: DatabaseDefinition;
+}
+
+export type WorkspaceSyncStatus = "created" | "skipped" | "failed";
+
+export interface WorkspaceSyncItemResult {
+  readonly module: string;
+  readonly status: WorkspaceSyncStatus;
+  readonly existingDatabase?: ExistingDatabase;
+  readonly createdDatabase?: CreatedDatabaseResult;
+  readonly errorMessage?: string;
+}
+
+export interface WorkspaceSyncSummary {
+  readonly created: number;
+  readonly skipped: number;
+  readonly failed: number;
+}
+
+export interface WorkspaceSyncResult {
+  readonly items: readonly WorkspaceSyncItemResult[];
+  readonly summary: WorkspaceSyncSummary;
+}
+
+export const workspaceSyncTargets: readonly WorkspaceModuleSyncTarget[] = [
+  {
+    label: "Projects",
+    definition: projectsDatabaseDefinition,
+  },
+  {
+    label: "CRM",
+    definition: crmDatabaseDefinition,
+  },
+];
+
+function printHeader(): void {
+  console.log("Workspace Synchronization");
+  console.log("");
+}
+
+function printModuleCreated(
+  target: WorkspaceModuleSyncTarget,
+  createdDatabase: CreatedDatabaseResult,
+): void {
+  console.log(target.label);
+  console.log("✓ Created");
+  console.log(`  ID: ${createdDatabase.id}`);
+  console.log(`  URL: ${createdDatabase.url}`);
+  console.log("");
+}
+
+function printModuleSkipped(target: WorkspaceModuleSyncTarget): void {
+  console.log(target.label);
+  console.log("✓ Already exists");
+  console.log("");
+}
+
+function printModuleFailed(
+  target: WorkspaceModuleSyncTarget,
+  errorMessage: string,
+): void {
+  console.log(target.label);
+  console.log(`✗ Failed: ${errorMessage}`);
+  console.log("");
+}
+
+function buildSummary(
+  items: readonly WorkspaceSyncItemResult[],
+): WorkspaceSyncSummary {
+  const created = items.filter((item) => item.status === "created").length;
+  const skipped = items.filter((item) => item.status === "skipped").length;
+  const failed = items.filter((item) => item.status === "failed").length;
+
+  return {
+    created,
+    skipped,
+    failed,
+  };
+}
+
+function printSummary(summary: WorkspaceSyncSummary): void {
+  console.log("Summary");
+  console.log("");
+  console.log(`Created: ${summary.created}`);
+  console.log(`Skipped: ${summary.skipped}`);
+  console.log(`Failed: ${summary.failed}`);
+}
+
+export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
+  printHeader();
+
+  const existingDatabases = await listChildDatabases();
+  const byTitle = new Map(mapDatabasesByNormalizedTitle(existingDatabases));
+
+  const itemResults: WorkspaceSyncItemResult[] = [];
+
+  for (const target of workspaceSyncTargets) {
+    const normalizedTitle = normalizeTitleForLookup(target.definition.name);
+    const existingDatabase = byTitle.get(normalizedTitle);
+
+    if (existingDatabase) {
+      printModuleSkipped(target);
+      itemResults.push({
+        module: target.label,
+        status: "skipped",
+        existingDatabase,
+      });
+      continue;
+    }
+
+    try {
+      const createdDatabase = await createDatabase(target.definition);
+      byTitle.set(normalizedTitle, {
+        id: createdDatabase.id,
+        title: createdDatabase.name,
+      });
+
+      printModuleCreated(target, createdDatabase);
+      itemResults.push({
+        module: target.label,
+        status: "created",
+        createdDatabase,
+      });
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      printModuleFailed(target, errorMessage);
+      itemResults.push({
+        module: target.label,
+        status: "failed",
+        errorMessage,
+      });
+    }
+  }
+
+  const summary = buildSummary(itemResults);
+  printSummary(summary);
+
+  return {
+    items: itemResults,
+    summary,
+  };
+}
