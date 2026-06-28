@@ -1,5 +1,6 @@
 export {
   createDatabase,
+  type CreateDatabaseOptions,
   type CreatedDatabaseResult,
 } from "./create-database.js";
 export {

@@ -16,6 +16,10 @@ export interface CreatedDatabaseResult {
   readonly createdTime: string;
 }
 
+export interface CreateDatabaseOptions {
+  readonly resolveDatabaseId?: (moduleKey: string) => string | undefined;
+}
+
 function isFullDatabaseResponse(response: {
   object: "database";
   id: string;
@@ -32,15 +36,21 @@ const translator = new NotionTranslator();
 
 export async function createDatabase<TProperties extends PropertyCollection>(
   definition: DatabaseDefinition<TProperties>,
+  options?: CreateDatabaseOptions,
 ): Promise<CreatedDatabaseResult> {
   const payload = translator.translateDatabase(definition, {
     hasModule,
+    ...(options?.resolveDatabaseId
+      ? { resolveDatabaseId: options.resolveDatabaseId }
+      : {}),
   });
+  const { relationProperties: _relationProperties, ...databasePayload } =
+    payload;
   const notion = getNotionClient();
 
   const response = await notion.databases.create({
     parent: { type: "page_id", page_id: env.NOTION_PARENT_PAGE_ID },
-    ...payload,
+    ...databasePayload,
   });
 
   if (!isFullDatabaseResponse(response)) {

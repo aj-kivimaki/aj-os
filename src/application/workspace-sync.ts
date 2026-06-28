@@ -12,6 +12,7 @@ import {
 } from "./find-database.js";
 
 export interface WorkspaceModuleSyncTarget {
+  readonly key: string;
   readonly label: string;
   readonly definition: DatabaseDefinition;
 }
@@ -39,6 +40,7 @@ export interface WorkspaceSyncResult {
 
 export const workspaceSyncTargets: readonly WorkspaceModuleSyncTarget[] = [
   ...getRegisteredModules().map((module) => ({
+    key: module.key,
     label: module.displayName,
     definition: module.databaseDefinition,
   })),
@@ -118,6 +120,15 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
 
   const existingDatabases = await listChildDatabases();
   const byTitle = new Map(mapDatabasesByNormalizedTitle(existingDatabases));
+  const databaseIdByModuleKey = new Map<string, string>();
+
+  for (const target of workspaceSyncTargets) {
+    const normalizedTitle = normalizeTitleForLookup(target.definition.name);
+    const existingDatabase = byTitle.get(normalizedTitle);
+    if (existingDatabase) {
+      databaseIdByModuleKey.set(target.key, existingDatabase.id);
+    }
+  }
 
   const itemResults: WorkspaceSyncItemResult[] = [];
 
@@ -127,6 +138,7 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
 
     if (existingDatabase) {
       printModuleSkipped(target);
+      databaseIdByModuleKey.set(target.key, existingDatabase.id);
       itemResults.push({
         module: target.label,
         status: "skipped",
@@ -136,11 +148,14 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
     }
 
     try {
-      const createdDatabase = await createDatabase(target.definition);
+      const createdDatabase = await createDatabase(target.definition, {
+        resolveDatabaseId: (moduleKey) => databaseIdByModuleKey.get(moduleKey),
+      });
       byTitle.set(normalizedTitle, {
         id: createdDatabase.id,
         title: createdDatabase.name,
       });
+      databaseIdByModuleKey.set(target.key, createdDatabase.id);
 
       printModuleCreated(target, createdDatabase);
       itemResults.push({

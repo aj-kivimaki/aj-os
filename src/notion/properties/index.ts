@@ -17,6 +17,12 @@ import { translateSelectProperty } from "./select.js";
 import { translateTextProperty } from "./text.js";
 import { translateTitleProperty } from "./title.js";
 import { translateUrlProperty } from "./url.js";
+export {
+  RELATION_DATABASE_ID_PLACEHOLDER_PREFIX,
+  translateRelationProperty,
+  type RelationTranslationContext,
+  type TranslatedRelationProperty,
+} from "./relation.js";
 
 export type TranslatablePropertyType =
   | "title"
