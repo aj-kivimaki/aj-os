@@ -25,6 +25,7 @@ const SUPPORTED_TYPES: readonly TranslatablePropertyType[] = [
   "date",
   "checkbox",
   "url",
+  "email",
 ] as const;
 
 export function validateNotionTranslation<

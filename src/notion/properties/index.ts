@@ -3,12 +3,14 @@ import type { PropertyConfigurationRequest } from "@notionhq/client/build/src/ap
 import type {
   CheckboxPropertyDefinition,
   DatePropertyDefinition,
+  EmailPropertyDefinition,
   MultiSelectPropertyDefinition,
   PropertyDefinition,
   UrlPropertyDefinition,
 } from "../../schema/property.js";
 import { translateCheckboxProperty } from "./checkbox.js";
 import { translateDateProperty } from "./date.js";
+import { translateEmailProperty } from "./email.js";
 import { translateMultiSelectProperty } from "./multi-select.js";
 import { translateNumberProperty } from "./number.js";
 import { translateSelectProperty } from "./select.js";
@@ -24,7 +26,8 @@ export type TranslatablePropertyType =
   | "multi_select"
   | "date"
   | "checkbox"
-  | "url";
+  | "url"
+  | "email";
 
 export function isTranslatablePropertyType(
   type: PropertyDefinition["type"],
@@ -37,7 +40,8 @@ export function isTranslatablePropertyType(
     type === "multi_select" ||
     type === "date" ||
     type === "checkbox" ||
-    type === "url"
+    type === "url" ||
+    type === "email"
   );
 }
 
@@ -63,6 +67,8 @@ export function translateProperty(
       return translateCheckboxProperty(property as CheckboxPropertyDefinition);
     case "url":
       return translateUrlProperty(property as UrlPropertyDefinition);
+    case "email":
+      return translateEmailProperty(property as EmailPropertyDefinition);
     default:
       throw new Error(
         `Unsupported property type for Notion translation: ${property.type}`,
