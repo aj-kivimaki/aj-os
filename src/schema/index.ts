@@ -25,6 +25,7 @@ export {
 } from "./relation.js";
 export {
   validateDatabaseDefinition,
+  type DatabaseValidationOptions,
   type ValidationIssue,
   type ValidationResult,
 } from "./validation.js";

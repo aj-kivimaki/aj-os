@@ -4,9 +4,14 @@ import type {
   RichTextItemRequest,
 } from "@notionhq/client/build/src/api-endpoints.js";
 
-import type { DatabaseDefinition } from "../schema/database.js";
-import type { PropertyCollection } from "../schema/database.js";
-import { validateDatabaseDefinition } from "../schema/validation.js";
+import type {
+  DatabaseDefinition,
+  PropertyCollection,
+} from "../schema/database.js";
+import {
+  validateDatabaseDefinition,
+  type DatabaseValidationOptions,
+} from "../schema/validation.js";
 import { translateProperty } from "./properties/index.js";
 import { validateNotionTranslation } from "./validation.js";
 
@@ -42,15 +47,19 @@ function buildNotionProperties<TProperties extends PropertyCollection>(
 export class NotionTranslator {
   public translateDatabase<TProperties extends PropertyCollection>(
     definition: DatabaseDefinition<TProperties>,
+    validationOptions?: DatabaseValidationOptions,
   ): NotionDatabaseCreatePayload {
-    const schemaValidation = validateDatabaseDefinition(definition);
+    const schemaValidation = validateDatabaseDefinition(
+      definition,
+      validationOptions,
+    );
     if (!schemaValidation.valid) {
       const issueText = schemaValidation.issues
         .map((issue) => `- ${issue.code}: ${issue.message}`)
         .join("\n");
 
       throw new Error(
-        `Schema validation failed for database \"${definition.key}\":\n${issueText}`,
+        `Schema validation failed for database "${definition.key}":\n${issueText}`,
       );
     }
 
@@ -61,7 +70,7 @@ export class NotionTranslator {
         .join("\n");
 
       throw new Error(
-        `Notion translation validation failed for database \"${definition.key}\":\n${issueText}`,
+        `Notion translation validation failed for database "${definition.key}":\n${issueText}`,
       );
     }
 

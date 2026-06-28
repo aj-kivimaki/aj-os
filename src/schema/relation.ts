@@ -1,6 +1,8 @@
 export type RelationType = "one_to_one" | "one_to_many" | "many_to_many";
 
-export interface RelationDefinition<TTargetDatabaseKey extends string = string> {
+export interface RelationDefinition<
+  TTargetDatabaseKey extends string = string,
+> {
   readonly name: string;
   readonly targetDatabaseKey: TTargetDatabaseKey;
   readonly type: RelationType;

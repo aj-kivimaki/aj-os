@@ -1,6 +1,5 @@
 import type { DatabaseDefinition } from "../schema/database.js";
-import { crmDatabaseDefinition } from "../modules/crm/index.js";
-import { projectsDatabaseDefinition } from "../modules/projects/index.js";
+import { getRegisteredModules } from "../modules/registry.js";
 import {
   createDatabase,
   type CreatedDatabaseResult,
@@ -39,14 +38,10 @@ export interface WorkspaceSyncResult {
 }
 
 export const workspaceSyncTargets: readonly WorkspaceModuleSyncTarget[] = [
-  {
-    label: "Projects",
-    definition: projectsDatabaseDefinition,
-  },
-  {
-    label: "CRM",
-    definition: crmDatabaseDefinition,
-  },
+  ...getRegisteredModules().map((module) => ({
+    label: module.displayName,
+    definition: module.databaseDefinition,
+  })),
 ];
 
 function printHeader(): void {
@@ -78,6 +73,22 @@ function printModuleFailed(
   console.log(target.label);
   console.log(`✗ Failed: ${errorMessage}`);
   console.log("");
+}
+
+function toErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return "Unknown error";
+  }
 }
 
 function buildSummary(
@@ -138,8 +149,7 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
         createdDatabase,
       });
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = toErrorMessage(error);
       printModuleFailed(target, errorMessage);
       itemResults.push({
         module: target.label,

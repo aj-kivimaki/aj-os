@@ -1,8 +1,16 @@
+import { crmDatabaseDefinition } from "./database.js";
+
 export {
   CRM_DATABASE_KEY,
   crmDatabaseDefinition,
   type CRMDatabaseDefinition,
 } from "./database.js";
+
+export const crmModule = {
+  key: crmDatabaseDefinition.key,
+  displayName: "CRM",
+  databaseDefinition: crmDatabaseDefinition,
+} as const;
 
 export {
   companyProperty,

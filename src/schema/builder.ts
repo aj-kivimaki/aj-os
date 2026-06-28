@@ -1,6 +1,8 @@
-import type { DatabaseDefinition } from "./database.js";
-import type { PropertyCollection } from "./database.js";
-import { validateDatabaseDefinition } from "./validation.js";
+import type { DatabaseDefinition, PropertyCollection } from "./database.js";
+import {
+  validateDatabaseDefinition,
+  type DatabaseValidationOptions,
+} from "./validation.js";
 
 export interface DatabaseBuildPlan {
   readonly databaseKey: string;
@@ -21,15 +23,19 @@ export class DatabaseBuilder<TOutput = DatabaseBuildPlan> {
 
   public build<TProperties extends PropertyCollection>(
     definition: DatabaseDefinition<TProperties>,
+    validationOptions?: DatabaseValidationOptions,
   ): TOutput {
-    const validation = validateDatabaseDefinition(definition);
+    const validation = validateDatabaseDefinition(
+      definition,
+      validationOptions,
+    );
     if (!validation.valid) {
       const issueText = validation.issues
         .map((issue) => `- ${issue.code}: ${issue.message}`)
         .join("\n");
 
       throw new Error(
-        `Schema validation failed for database \"${definition.key}\":\n${issueText}`,
+        `Schema validation failed for database "${definition.key}":\n${issueText}`,
       );
     }
 

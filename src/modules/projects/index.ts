@@ -1,3 +1,5 @@
+import { projectsDatabaseDefinition } from "./database.js";
+
 export {
   PROJECTS_DATABASE_KEY,
   projectRelations,
@@ -5,6 +7,12 @@ export {
   type ProjectRelation,
   type ProjectsDatabaseDefinition,
 } from "./database.js";
+
+export const projectsModule = {
+  key: projectsDatabaseDefinition.key,
+  displayName: "Projects",
+  databaseDefinition: projectsDatabaseDefinition,
+} as const;
 
 export {
   clientProperty,

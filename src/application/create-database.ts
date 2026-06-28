@@ -1,6 +1,7 @@
 import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints/databases.js";
 
 import { env } from "../config/env.js";
+import { hasModule } from "../modules/registry.js";
 import { getNotionClient } from "../notion/client.js";
 import { NotionTranslator } from "../notion/translator.js";
 import type {
@@ -32,7 +33,9 @@ const translator = new NotionTranslator();
 export async function createDatabase<TProperties extends PropertyCollection>(
   definition: DatabaseDefinition<TProperties>,
 ): Promise<CreatedDatabaseResult> {
-  const payload = translator.translateDatabase(definition);
+  const payload = translator.translateDatabase(definition, {
+    hasModule,
+  });
   const notion = getNotionClient();
 
   const response = await notion.databases.create({
