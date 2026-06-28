@@ -1,408 +1,208 @@
 # Business Rules
 
-## Purpose
+## Overview
 
-Business Rules transform raw business data into actionable information.
+Business Rules transform business data into actionable insights.
 
-They are the intelligence layer of AJ-OS.
-
-Business modules describe the business.
-
-Business Rules interpret the business.
-
-The CEO Dashboard consumes Business Rules to determine priorities, recommendations, warnings, and business health.
-
----
-
-# Design Philosophy
-
-Business Rules are deterministic.
-
-They do not use artificial intelligence.
-
-They do not make decisions for the user.
-
-Instead, they identify situations that require attention.
-
-The goal is to reduce cognitive load.
-
-The Dashboard should answer:
-
-> What needs my attention today?
-
-rather than:
-
-> What information exists?
-
----
-
-# Architecture
-
-Business Modules
-
-↓
-
-Synchronization
-
-↓
-
-Business Rules
-
-↓
-
-Dashboard Builder
-
-↓
-
-CEO Dashboard
+While Business Modules describe the structure of the business, Business Rules interpret that information and determine what deserves attention.
 
 Business Rules never modify business data.
 
-They only interpret it.
+Their responsibility is to evaluate the current state of the business and produce recommendations that support decision-making.
 
 ---
 
-# Rule Structure
+# Rule Evaluation Flow
 
-Every rule follows the same lifecycle.
+The following diagram illustrates how Business Rules are evaluated.
 
-Condition
+```mermaid
+flowchart LR
 
-↓
+    A[Business Data]
+    B[Business Rule]
+    C[Evaluation]
+    D[Recommendation]
+    E[CEO Dashboard]
 
-Evaluation
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+```
 
-↓
+Business data remains unchanged throughout the process.
 
-Priority
-
-↓
-
-Recommendation
-
-↓
-
-Dashboard Widget
-
-Rules are independent from one another.
-
-Each rule evaluates one business concern.
+Only insights and recommendations are produced.
 
 ---
 
-# Rule Categories
+# Responsibilities
 
-Business Rules are grouped into categories.
+Business Rules are responsible for:
 
-## Projects
+- Evaluating business data
+- Identifying priorities
+- Detecting overdue work
+- Calculating Business Health
+- Producing recommendations
+- Supplying executive insights to the CEO Dashboard
 
-Examples
-
-- Project deadline approaching
-- Overdue project
-- Blocked project
-- Too many active projects
-
----
-
-## CRM
-
-Examples
-
-- Follow-up overdue
-- No client contact for extended period
-- New contact requires action
+Business Rules never create, modify or synchronize business data.
 
 ---
 
-## Finance
+# Why Business Rules?
 
-Examples
+Raw business data answers questions such as:
 
-- Outstanding invoices
-- Monthly expenses exceed income
-- No income recorded this month
-- Large upcoming payment
+- How many projects exist?
+- How many contacts are in the CRM?
+- Which invoices are unpaid?
 
----
+Business Rules answer more valuable questions:
 
-## Production Music
+- Which project requires attention today?
+- Which client needs a follow-up?
+- Is the business financially healthy?
+- What should I focus on next?
 
-Examples
-
-- Ready tracks available for submission
-- Catalogue inactive for extended period
-- New royalty payment received
+This distinction transforms information into decision support.
 
 ---
 
-## Portfolio
+# Example Rule
 
-Examples
+A Business Rule evaluates a specific business condition.
 
-- No portfolio update recently
-- Featured work needs refreshing
-- Draft portfolio items available
+Example:
 
----
+```text
+IF
 
-## Game Jams
+Project Status = Active
 
-Examples
+AND
 
-- Upcoming event approaching
-- Registration deadline
-- No networking activity for extended period
+Target Date < Today
 
----
+THEN
 
-# Rule Severity
+Create Recommendation:
 
-Every rule has a severity.
+"Review overdue project."
+```
 
-Possible values
+The rule does not modify the project.
 
-Information
-
-Warning
-
-Critical
-
-Severity affects dashboard ordering.
-
-Critical items always appear first.
-
----
-
-# Rule Priority
-
-Rules also define priority.
-
-Suggested scale
-
-1
-
-Low
-
-2
-
-Normal
-
-3
-
-High
-
-4
-
-Urgent
-
-Priority determines dashboard ordering.
-
----
-
-# Recommendations
-
-Rules generate recommendations.
-
-Examples
-
-Project deadline approaching
-
-↓
-
-Finish milestone before Friday.
-
----
-
-Invoice overdue
-
-↓
-
-Contact client regarding payment.
-
----
-
-Five production music tracks ready
-
-↓
-
-Prepare next library submission.
-
----
-
-Portfolio inactive for sixty days
-
-↓
-
-Publish a new portfolio piece.
-
----
-
-CRM follow-up overdue
-
-↓
-
-Reconnect with the client.
-
-Recommendations should always describe an action.
+It simply identifies that attention is required.
 
 ---
 
 # Business Health
 
-Business Health summarizes the current state of the business.
+Multiple Business Rules contribute to an overall Business Health assessment.
 
-Possible values
+For example:
 
-🟢 Healthy
+```mermaid
+flowchart TD
 
-🟡 Needs Attention
+    A[Projects]
+    B[CRM]
+    C[Finance]
+    D[Portfolio]
 
-🔴 Critical
+    A --> E[Business Health]
+    B --> E
+    C --> E
+    D --> E
+```
 
-Business Health is calculated from active rules.
-
-The Dashboard never requires users to calculate business health manually.
-
----
-
-# Dashboard Integration
-
-The Dashboard consumes rule output.
-
-Each widget displays:
-
-Metrics
-
-↓
-
-Insight
-
-↓
-
-Recommendation
-
-Rules are responsible for generating the Insight and Recommendation.
-
-Widgets remain presentation components.
+The resulting evaluation provides a high-level summary of the current business state.
 
 ---
 
-# Rule Independence
+# Design Principles
 
-Rules must never depend directly on Notion.
+## Read-Only
 
-Rules evaluate the business model.
+Business Rules never modify business data.
 
-This allows future support for additional storage backends.
+They observe and evaluate.
 
 ---
 
-# Future Evolution
+## Independent
 
-Future versions may introduce:
+Each rule evaluates one business concern.
 
-- Rule configuration
-- User-defined rules
-- Rule scheduling
-- Trend analysis
+Rules remain small, focused and independently testable.
+
+---
+
+## Composable
+
+Multiple rules can contribute to a single dashboard widget or executive summary.
+
+No rule depends on another rule.
+
+---
+
+## Explainable
+
+Every recommendation should be understandable.
+
+Users should always be able to identify which rule produced an insight.
+
+---
+
+# Relationship to Other Layers
+
+Business Rules operate after synchronization has completed.
+
+```mermaid
+flowchart LR
+
+    A[(Notion Workspace)]
+    B[Business Rules]
+    C[CEO Dashboard]
+
+    A --> B
+    B --> C
+```
+
+Synchronization creates the business data.
+
+Business Rules interpret it.
+
+The CEO Dashboard presents the results.
+
+---
+
+# Future Opportunities
+
+The Business Rules framework enables increasingly sophisticated decision support.
+
+Potential future capabilities include:
+
+- Priority scoring
+- Risk assessment
+- Productivity analysis
+- Revenue forecasting
 - Goal tracking
+- Opportunity detection
+- Habit monitoring
 - AI-assisted recommendations
 
-These features extend the Business Rules system without replacing it.
+Each new capability can be introduced as an independent rule without affecting existing business logic.
 
 ---
 
-# Examples
+# Summary
 
-## Example
+Business Rules are the intelligence layer of AJ-OS.
 
-Condition
+They transform synchronized business data into meaningful recommendations without modifying the underlying information.
 
-Project deadline within seven days
-
-↓
-
-Severity
-
-Warning
-
-↓
-
-Recommendation
-
-Complete remaining milestone before deadline.
-
----
-
-## Example
-
-Condition
-
-No income this month
-
-↓
-
-Severity
-
-Critical
-
-↓
-
-Recommendation
-
-Focus on client outreach or production music submissions.
-
----
-
-## Example
-
-Condition
-
-Five or more production music cues ready
-
-↓
-
-Severity
-
-Information
-
-↓
-
-Recommendation
-
-Prepare the next library submission.
-
----
-
-## Example
-
-Condition
-
-Portfolio unchanged for sixty days
-
-↓
-
-Severity
-
-Warning
-
-↓
-
-Recommendation
-
-Publish a recent project to strengthen your portfolio.
-
----
-
-# Guiding Principle
-
-Business Rules transform business data into meaningful decisions.
-
-Business modules answer:
-
-"What exists?"
-
-Business Rules answer:
-
-"What matters?"
+By separating business evaluation from business storage, AJ-OS remains transparent, maintainable and extensible while helping users focus on the work that matters most.

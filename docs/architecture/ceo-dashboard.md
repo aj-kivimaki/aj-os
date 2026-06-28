@@ -1,429 +1,203 @@
 # CEO Dashboard
 
-## Purpose
+## Overview
 
-The CEO Dashboard is the primary entry point into AJ-OS.
+The CEO Dashboard is the primary user interface of AJ-OS.
 
-It provides a concise, automatically generated overview of the current state of the business.
+Rather than presenting raw databases, it provides an executive summary of the current business state.
 
-The dashboard is designed to answer one question:
+The dashboard aggregates information from every business module, applies Business Rules and presents the most important information in a single view.
 
-> **What does the business need from me today?**
+Its purpose is to answer one question:
 
-It is **not** intended to replace individual business databases.
-
-Instead, it summarizes them and highlights the information requiring attention.
-
----
-
-# Design Philosophy
-
-The dashboard follows four principles.
-
-## 1. Decision First
-
-Every section should help the user make a decision.
-
-The dashboard should never display information simply because it exists.
-
-Every widget should answer a business question.
-
----
-
-## 2. Executive Summary
-
-The dashboard should be understandable in under one minute.
-
-A user opening AJ-OS should immediately understand:
-
-- overall business health
-- current priorities
-- immediate risks
-- opportunities
-- next actions
-
----
-
-## 3. Generated, Never Edited
-
-The dashboard is generated automatically.
-
-Users do not manually edit dashboard content.
-
-Instead:
-
-Business Modules
-
-↓
-
-Synchronization
-
-↓
-
-Dashboard Builder
-
-↓
-
-CEO Dashboard
-
-The dashboard always reflects the current business state.
-
----
-
-## 4. Databases Store Information
-
-The dashboard stores no business data.
-
-Business modules remain the source of truth.
-
-The dashboard consumes information.
-
----
-
-# Dashboard Layout
-
-The dashboard is composed of independent widgets.
-
-Widgets may evolve independently.
-
-The initial layout is:
-
-```
-
-CEO Dashboard
-
-Executive Summary
-
-↓
-
-Today's Priorities
-
-↓
-
-Projects
-
-↓
-
-CRM
-
-↓
-
-Finance
-
-↓
-
-Production Music
-
-↓
-
-Portfolio
-
-↓
-
-Game Jams
-
-```
-
----
-
-# Widget Design
-
-Every widget follows the same structure.
-
-```
-
-Title
-
-↓
-
-Metrics
-
-↓
-
-Insight
-
-↓
-
-Recommended Action
-
-↓
-
-Link to Database
-
-```
-
-Example:
-
-```
-
-Production Music
-
-Ready: 5
-
-Published: 18
-
-Insight
-
-Your catalog is growing steadily.
-
-Recommendation
-
-Prepare another library submission.
-
-```
-
----
-
-# Executive Summary
-
-The Executive Summary appears first.
-
-It contains:
-
-- Business Health
-- Active Projects
-- Current Priorities
-- Financial Snapshot
-- Immediate Risks
-
-This section should be readable in less than 30 seconds.
-
----
-
-# Business Health
-
-Business Health is a single status indicator.
-
-Possible values:
-
-🟢 Healthy
-
-🟡 Needs Attention
-
-🔴 Critical
-
-The status is calculated from business rules.
-
-The Dashboard never asks the user to calculate business health manually.
-
----
-
-# Today's Priorities
-
-This section displays the highest-priority actions.
-
-Examples:
-
-- Project deadline approaching
-- Invoice overdue
-- CRM follow-up required
-- Production music ready for submission
-- Portfolio requires updating
-
-Only the highest-priority items appear.
-
-The goal is clarity rather than completeness.
-
----
-
-# Projects Widget
-
-Purpose
-
-Answer:
-
-> What am I currently building?
-
-Display:
-
-- Active projects
-- Upcoming deadlines
-- Blocked projects
-- Current focus
-
-The widget links to the Projects database.
-
----
-
-# CRM Widget
-
-Purpose
-
-Answer:
-
-> Who should I contact?
-
-Display:
-
-- Follow-ups due
-- Waiting replies
-- New contacts
-
-The widget links to CRM.
-
----
-
-# Finance Widget
-
-Purpose
-
-Answer:
-
-> Is the business financially healthy?
-
-Display:
-
-- Income
-- Expenses
-- Outstanding invoices
-- Monthly balance
-
-No accounting details appear here.
-
----
-
-# Production Music Widget
-
-Purpose
-
-Answer:
-
-> How is my catalogue growing?
-
-Display:
-
-- Draft cues
-- Ready cues
-- Submitted cues
-- Published cues
-
-The widget should recommend submissions when appropriate.
-
----
-
-# Portfolio Widget
-
-Purpose
-
-Answer:
-
-> Is my public work up to date?
-
-Display:
-
-- Published work
-- Featured work
-- Draft portfolio items
-
-The widget should recommend publishing when appropriate.
-
----
-
-# Game Jams Widget
-
-Purpose
-
-Answer:
-
-> What networking opportunities exist?
-
-Display:
-
-- Current jams
-- Upcoming jams
-- Recent participation
-
----
-
-# Widget Behaviour
-
-Widgets should remain concise.
-
-They summarize information.
-
-Detailed management always happens inside business databases.
-
-Widgets may collapse automatically when no relevant information exists.
-
-Example:
-
-No overdue CRM follow-ups
-
-↓
-
-Display
-
-✓ CRM is up to date
-
-instead of an empty table.
+> **What should I focus on today?**
 
 ---
 
 # Dashboard Generation
 
-The dashboard is rebuilt during synchronization.
+The following diagram illustrates how the dashboard is generated.
 
+```mermaid
+flowchart LR
+
+    A[Business Modules]
+    B[Workspace Synchronization]
+    C[Business Rules]
+    D[Dashboard Builder]
+    E[CEO Dashboard]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
 ```
 
-AJ-OS Sync
+The dashboard is generated from business data.
 
-↓
-
-Synchronize Business Modules
-
-↓
-
-Evaluate Business Rules
-
-↓
-
-Build Dashboard
-
-↓
-
-Publish Dashboard
-
-```
-
-No manual maintenance is required.
+It never becomes the source of truth.
 
 ---
 
-# Out of Scope
+# Responsibilities
 
-The following are intentionally excluded from v1.0.
+The CEO Dashboard is responsible for:
 
-- AI recommendations
-- Predictive analytics
-- Trend analysis
-- Custom dashboards
-- Dashboard editing
-- Notifications
-- Scheduling
+- Summarizing business activity
+- Highlighting priorities
+- Displaying Business Health
+- Presenting recommendations
+- Linking to business modules
+- Providing an executive overview
 
-These belong to future releases.
+It intentionally avoids replacing detailed database views.
 
 ---
 
-# Future Evolution
+# Why a Dashboard?
 
-Future versions may introduce:
+Individual databases answer detailed operational questions.
+
+For example:
+
+- Which projects are active?
+- Which invoices are unpaid?
+- Which contacts require follow-up?
+
+The dashboard answers higher-level questions.
+
+For example:
+
+- Is the business healthy?
+- What needs attention today?
+- Where should I focus next?
+- Which areas require action?
+
+This distinction allows users to understand the overall state of the business at a glance.
+
+---
+
+# Dashboard Components
+
+The dashboard is composed of independent widgets.
+
+Examples include:
+
+- Business Health
+- Active Projects
+- Upcoming Deadlines
+- Follow-ups
+- Financial Overview
+- Recent Activity
+- Recommendations
+
+Each widget summarizes a specific aspect of the business.
+
+---
+
+# Dashboard Flow
+
+```mermaid
+flowchart TD
+
+    A[Business Data]
+    B[Business Rules]
+    C[Dashboard Widgets]
+    D[CEO Dashboard]
+
+    A --> B
+    B --> C
+    C --> D
+```
+
+Business Rules interpret business information.
+
+Dashboard Widgets present those insights in a concise, actionable format.
+
+---
+
+# Design Principles
+
+## Executive First
+
+The dashboard prioritizes information that supports decision-making.
+
+It summarizes rather than replaces detailed business data.
+
+---
+
+## Read-Only
+
+The dashboard does not modify business information.
+
+Its purpose is to communicate insights.
+
+---
+
+## Action-Oriented
+
+Every widget should help answer:
+
+> **What should I do next?**
+
+Information without action has limited value.
+
+---
+
+## Focused
+
+Only the most important information should appear.
+
+A concise overview is more valuable than a complete data dump.
+
+---
+
+# Relationship to Other Layers
+
+The dashboard sits at the top of the AJ-OS architecture.
+
+```mermaid
+flowchart TD
+
+    A[Business Modules]
+    B[Schema Engine]
+    C[Workspace Synchronization]
+    D[Business Rules]
+    E[CEO Dashboard]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+```
+
+Every architectural layer contributes to the final executive view.
+
+---
+
+# Future Opportunities
+
+The dashboard is designed to evolve alongside the business.
+
+Potential future enhancements include:
 
 - Morning Brief
-- Weekly Report
-- Business Rule Engine
-- Revenue Analytics
-- Goal Tracking
-- AI Insights
+- Weekly summaries
+- Goal tracking
+- Trend analysis
+- Financial forecasting
+- AI-assisted recommendations
+- Custom widgets
+- Multiple dashboard layouts
 
-The Dashboard should support these features without architectural redesign.
+These capabilities extend the dashboard without changing the underlying architecture.
 
 ---
 
-# Guiding Principle
+# Summary
 
-The CEO Dashboard transforms business data into actionable decisions.
+The CEO Dashboard is the primary experience of AJ-OS.
 
-Business modules store information.
+It transforms synchronized business data into a clear executive overview, helping users understand the current state of their business and identify where to focus next.
 
-The Dashboard explains what matters.
+By combining Business Modules, Workspace Synchronization and Business Rules, the dashboard becomes the central decision-support interface of the Business Operating System.
