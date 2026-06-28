@@ -2,7 +2,7 @@
 
 All notable changes to AJ-OS are documented in this file.
 
-The format is based on **Keep a Changelog** and the project follows **Semantic Versioning**.
+The format is based on **Keep a Changelog**, and this project follows **Semantic Versioning**.
 
 ---
 
@@ -18,7 +18,7 @@ The format is based on **Keep a Changelog** and the project follows **Semantic V
 
 ---
 
-## [1.0.0] - 2026-06-XX
+## [1.0.0] - 2026-06-28
 
 ### Added
 
@@ -40,114 +40,23 @@ The format is based on **Keep a Changelog** and the project follows **Semantic V
 
 - Replaced one-time database creation with Workspace Synchronization
 - Added automatic relation synchronization
-- Introduced documentation-driven project structure
-- Reorganized architecture into layered components
+- Updated the Notion SDK integration to use the supported public API surface
+- Reorganized the documentation into a layered architecture with dedicated guides, module documentation and Architecture Decision Records (ADRs)
 
 ### Fixed
 
-- Duplicate database creation during synchronization
-- Relation synchronization reliability
-- Workspace idempotency
+- Restored compatibility with clean installations after dependency updates
+- Eliminated reliance on private Notion SDK imports
+- Improved compatibility with the current `@notionhq/client` API
 
 ### Documentation
 
 - Complete architecture documentation
 - Business module documentation
-- Installation and configuration guides
-- Development guide
-- AI-assisted development workflow
-- CONTRIBUTING guide
+- Installation, configuration and development guides
+- AI-assisted engineering workflow documentation
+- Documentation index
 - Updated README
-
----
-
-## [0.7.0-alpha]
-
-### Added
-
-- Workspace Synchronization
-- Existing database detection
-- Synchronization summary
-
-### Changed
-
-- Migrated synchronization into the Application Layer
-- Introduced idempotent synchronization workflow
-
----
-
-## [0.6.1]
-
-### Added
-
-- Email property translator
-
----
-
-## [0.6.0]
-
-### Added
-
-- CRM business module
-- CRM templates
-- Relationship management schema
-
----
-
-## [0.5.1]
-
-### Added
-
-- Date property translator
-- Multi-select property translator
-- URL property translator
-- Checkbox property translator
-
----
-
-## [0.5.0]
-
-### Added
-
-- Database creation workflow
-- End-to-end Notion integration
-
----
-
-## [0.4.0]
-
-### Added
-
-- Projects business module
-
----
-
-## [0.3.0]
-
-### Added
-
-- Translation Layer
-
----
-
-## [0.2.0]
-
-### Added
-
-- Schema Engine
-
----
-
-## [0.1.0]
-
-### Added
-
-- Project foundation
-- Initial documentation
-- Architecture Decision Records (ADRs)
-- Environment configuration
-- Notion client
-
-```
-
-```
+- CONTRIBUTING guide
+- ROADMAP
+- CHANGELOG
