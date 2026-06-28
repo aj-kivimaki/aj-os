@@ -1,6 +1,8 @@
 export {
   PROJECTS_DATABASE_KEY,
+  projectRelations,
   projectsDatabaseDefinition,
+  type ProjectRelation,
   type ProjectsDatabaseDefinition,
 } from "./database.js";
 

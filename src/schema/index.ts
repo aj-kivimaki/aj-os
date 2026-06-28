@@ -1,5 +1,6 @@
 export {
   defineDatabase,
+  getRelationByName,
   getPropertyByKey,
   type DatabaseDefinition,
   type PropertyCollection,
@@ -15,6 +16,13 @@ export {
   type PropertyDefinition,
   type PropertyType,
 } from "./property.js";
+export {
+  defineRelation,
+  type RelationCollection,
+  type RelationDefinition,
+  type RelationName,
+  type RelationType,
+} from "./relation.js";
 export {
   validateDatabaseDefinition,
   type ValidationIssue,
