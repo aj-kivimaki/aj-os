@@ -1,8 +1,10 @@
 import { env } from "../config/env.js";
 import { getNotionClient } from "../notion/client.js";
+import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints/databases.js";
 
 export interface ExistingDatabase {
   readonly id: string;
+  readonly dataSourceId: string;
   readonly title: string;
 }
 
@@ -36,6 +38,45 @@ function isChildDatabaseBlock(block: {
   return block.type === "child_database";
 }
 
+function isFullDatabaseResponse(response: {
+  object: "database";
+  id: string;
+}): response is DatabaseObjectResponse {
+  return "data_sources" in response;
+}
+
+function getPrimaryDataSourceId(database: DatabaseObjectResponse): string {
+  const primaryDataSource = database.data_sources[0];
+  if (!primaryDataSource) {
+    throw new Error(
+      `Database "${database.id}" does not expose any data sources in the API response.`,
+    );
+  }
+
+  return primaryDataSource.id;
+}
+
+async function resolveExistingDatabase(
+  notion: ReturnType<typeof getNotionClient>,
+  block: ChildDatabaseBlock,
+): Promise<ExistingDatabase> {
+  const databaseResponse = await notion.databases.retrieve({
+    database_id: block.id,
+  });
+
+  if (!isFullDatabaseResponse(databaseResponse)) {
+    throw new Error(
+      `Database lookup returned a partial response for "${block.id}".`,
+    );
+  }
+
+  return {
+    id: block.id,
+    dataSourceId: getPrimaryDataSourceId(databaseResponse),
+    title: block.child_database.title,
+  };
+}
+
 export async function listChildDatabases(
   parentPageId: string = env.NOTION_PARENT_PAGE_ID,
 ): Promise<readonly ExistingDatabase[]> {
@@ -52,18 +93,11 @@ export async function listChildDatabases(
     });
 
     for (const block of response.results) {
-      if (!isTypedBlock(block)) {
+      if (!isTypedBlock(block) || !isChildDatabaseBlock(block)) {
         continue;
       }
 
-      if (!isChildDatabaseBlock(block)) {
-        continue;
-      }
-
-      databases.push({
-        id: block.id,
-        title: block.child_database.title,
-      });
+      databases.push(await resolveExistingDatabase(notion, block));
     }
 
     cursor = response.has_more

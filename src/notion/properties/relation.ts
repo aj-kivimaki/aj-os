@@ -52,8 +52,8 @@ export function translateRelationProperty(
     property: {
       relation: {
         data_source_id: databaseId,
-        type: "single_property",
-        single_property: {},
+        type: "dual_property",
+        dual_property: {},
       },
     },
   };

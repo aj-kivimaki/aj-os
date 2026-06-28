@@ -11,6 +11,7 @@ import type {
 
 export interface CreatedDatabaseResult {
   readonly id: string;
+  readonly dataSourceId: string;
   readonly url: string;
   readonly name: string;
   readonly createdTime: string;
@@ -30,6 +31,17 @@ function isFullDatabaseResponse(response: {
 function extractDatabaseName(response: DatabaseObjectResponse): string {
   const firstTitle = response.title[0];
   return firstTitle?.plain_text ?? response.id;
+}
+
+function extractPrimaryDataSourceId(response: DatabaseObjectResponse): string {
+  const primaryDataSource = response.data_sources[0];
+  if (!primaryDataSource) {
+    throw new Error(
+      `Database creation response for "${response.id}" did not include a data source id.`,
+    );
+  }
+
+  return primaryDataSource.id;
 }
 
 const translator = new NotionTranslator();
@@ -61,6 +73,7 @@ export async function createDatabase<TProperties extends PropertyCollection>(
 
   return {
     id: response.id,
+    dataSourceId: extractPrimaryDataSourceId(response),
     url: response.url,
     name: extractDatabaseName(response),
     createdTime: response.created_time,

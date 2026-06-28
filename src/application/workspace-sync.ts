@@ -120,13 +120,13 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
 
   const existingDatabases = await listChildDatabases();
   const byTitle = new Map(mapDatabasesByNormalizedTitle(existingDatabases));
-  const databaseIdByModuleKey = new Map<string, string>();
+  const dataSourceIdByModuleKey = new Map<string, string>();
 
   for (const target of workspaceSyncTargets) {
     const normalizedTitle = normalizeTitleForLookup(target.definition.name);
     const existingDatabase = byTitle.get(normalizedTitle);
     if (existingDatabase) {
-      databaseIdByModuleKey.set(target.key, existingDatabase.id);
+      dataSourceIdByModuleKey.set(target.key, existingDatabase.dataSourceId);
     }
   }
 
@@ -138,7 +138,7 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
 
     if (existingDatabase) {
       printModuleSkipped(target);
-      databaseIdByModuleKey.set(target.key, existingDatabase.id);
+      dataSourceIdByModuleKey.set(target.key, existingDatabase.dataSourceId);
       itemResults.push({
         module: target.label,
         status: "skipped",
@@ -149,13 +149,15 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
 
     try {
       const createdDatabase = await createDatabase(target.definition, {
-        resolveDatabaseId: (moduleKey) => databaseIdByModuleKey.get(moduleKey),
+        resolveDatabaseId: (moduleKey) =>
+          dataSourceIdByModuleKey.get(moduleKey),
       });
       byTitle.set(normalizedTitle, {
         id: createdDatabase.id,
+        dataSourceId: createdDatabase.dataSourceId,
         title: createdDatabase.name,
       });
-      databaseIdByModuleKey.set(target.key, createdDatabase.id);
+      dataSourceIdByModuleKey.set(target.key, createdDatabase.dataSourceId);
 
       printModuleCreated(target, createdDatabase);
       itemResults.push({

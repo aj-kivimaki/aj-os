@@ -1,5 +1,6 @@
 import type { DatabaseDefinition } from "../schema/database.js";
 import { crmModule } from "./crm/index.js";
+import { portfolioModule } from "./portfolio/index.js";
 import { projectsModule } from "./projects/index.js";
 
 export interface RegisteredModule<
@@ -55,3 +56,4 @@ export function hasModule(key: string): boolean {
 
 registerModule(projectsModule);
 registerModule(crmModule);
+registerModule(portfolioModule);
