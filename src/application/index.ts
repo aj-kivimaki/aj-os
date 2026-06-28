@@ -4,6 +4,13 @@ export {
   type CreatedDatabaseResult,
 } from "./create-database.js";
 export {
+  updateDatabaseRelations,
+  type DatabaseRelationUpdateResult,
+  type RelationUpdateResult,
+  type RelationUpdateStatus,
+  type UpdateDatabaseRelationsOptions,
+} from "./update-database-relations.js";
+export {
   findDatabaseByTitle,
   listChildDatabases,
   mapDatabasesByNormalizedTitle,
@@ -14,6 +21,7 @@ export {
   synchronizeWorkspace,
   workspaceSyncTargets,
   type WorkspaceModuleSyncTarget,
+  type WorkspaceRelationSyncItemResult,
   type WorkspaceSyncItemResult,
   type WorkspaceSyncResult,
   type WorkspaceSyncStatus,

@@ -10,6 +10,11 @@ import {
   normalizeTitleForLookup,
   type ExistingDatabase,
 } from "./find-database.js";
+import {
+  updateDatabaseRelations,
+  type DatabaseRelationUpdateResult,
+  type RelationUpdateResult,
+} from "./update-database-relations.js";
 
 export interface WorkspaceModuleSyncTarget {
   readonly key: string;
@@ -31,10 +36,20 @@ export interface WorkspaceSyncSummary {
   readonly created: number;
   readonly skipped: number;
   readonly failed: number;
+  readonly relationsCreated: number;
+  readonly relationsSkipped: number;
+  readonly relationsFailed: number;
+}
+
+export interface WorkspaceRelationSyncItemResult {
+  readonly module: string;
+  readonly relationResults: readonly RelationUpdateResult[];
+  readonly errorMessage?: string;
 }
 
 export interface WorkspaceSyncResult {
   readonly items: readonly WorkspaceSyncItemResult[];
+  readonly relationItems: readonly WorkspaceRelationSyncItemResult[];
   readonly summary: WorkspaceSyncSummary;
 }
 
@@ -48,6 +63,11 @@ export const workspaceSyncTargets: readonly WorkspaceModuleSyncTarget[] = [
 
 function printHeader(): void {
   console.log("Workspace Synchronization");
+  console.log("");
+}
+
+function printFlowStep(step: string): void {
+  console.log(step);
   console.log("");
 }
 
@@ -77,6 +97,45 @@ function printModuleFailed(
   console.log("");
 }
 
+function printRelationSynchronizationResult(
+  target: WorkspaceModuleSyncTarget,
+  result: DatabaseRelationUpdateResult,
+): void {
+  if (result.relationResults.length === 0) {
+    return;
+  }
+
+  console.log(`${target.label} Relations`);
+
+  for (const relationResult of result.relationResults) {
+    if (relationResult.status === "created") {
+      console.log(`✓ Created relation: ${relationResult.name}`);
+      continue;
+    }
+
+    if (relationResult.status === "skipped") {
+      console.log(`✓ Relation exists: ${relationResult.name}`);
+      continue;
+    }
+
+    const errorSuffix = relationResult.errorMessage
+      ? ` (${relationResult.errorMessage})`
+      : "";
+    console.log(`✗ Failed relation: ${relationResult.name}${errorSuffix}`);
+  }
+
+  console.log("");
+}
+
+function printRelationSynchronizationFailed(
+  target: WorkspaceModuleSyncTarget,
+  errorMessage: string,
+): void {
+  console.log(`${target.label} Relations`);
+  console.log(`✗ Failed: ${errorMessage}`);
+  console.log("");
+}
+
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
@@ -95,15 +154,29 @@ function toErrorMessage(error: unknown): string {
 
 function buildSummary(
   items: readonly WorkspaceSyncItemResult[],
+  relationItems: readonly WorkspaceRelationSyncItemResult[],
 ): WorkspaceSyncSummary {
   const created = items.filter((item) => item.status === "created").length;
   const skipped = items.filter((item) => item.status === "skipped").length;
   const failed = items.filter((item) => item.status === "failed").length;
+  const relationResults = relationItems.flatMap((item) => item.relationResults);
+  const relationsCreated = relationResults.filter(
+    (result) => result.status === "created",
+  ).length;
+  const relationsSkipped = relationResults.filter(
+    (result) => result.status === "skipped",
+  ).length;
+  const relationsFailed = relationResults.filter(
+    (result) => result.status === "failed",
+  ).length;
 
   return {
     created,
     skipped,
     failed,
+    relationsCreated,
+    relationsSkipped,
+    relationsFailed,
   };
 }
 
@@ -113,11 +186,15 @@ function printSummary(summary: WorkspaceSyncSummary): void {
   console.log(`Created: ${summary.created}`);
   console.log(`Skipped: ${summary.skipped}`);
   console.log(`Failed: ${summary.failed}`);
+  console.log(`Relations created: ${summary.relationsCreated}`);
+  console.log(`Relations skipped: ${summary.relationsSkipped}`);
+  console.log(`Relations failed: ${summary.relationsFailed}`);
 }
 
 export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
   printHeader();
 
+  printFlowStep("Discover existing databases");
   const existingDatabases = await listChildDatabases();
   const byTitle = new Map(mapDatabasesByNormalizedTitle(existingDatabases));
   const dataSourceIdByModuleKey = new Map<string, string>();
@@ -131,6 +208,8 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
   }
 
   const itemResults: WorkspaceSyncItemResult[] = [];
+
+  printFlowStep("Create missing databases");
 
   for (const target of workspaceSyncTargets) {
     const normalizedTitle = normalizeTitleForLookup(target.definition.name);
@@ -176,11 +255,70 @@ export async function synchronizeWorkspace(): Promise<WorkspaceSyncResult> {
     }
   }
 
-  const summary = buildSummary(itemResults);
+  printFlowStep("Collect database IDs");
+
+  for (const target of workspaceSyncTargets) {
+    const normalizedTitle = normalizeTitleForLookup(target.definition.name);
+    const existingDatabase = byTitle.get(normalizedTitle);
+
+    if (existingDatabase) {
+      dataSourceIdByModuleKey.set(target.key, existingDatabase.dataSourceId);
+    }
+  }
+
+  printFlowStep("Resolve relations");
+  printFlowStep("Update databases");
+
+  const relationItems: WorkspaceRelationSyncItemResult[] = [];
+
+  for (const target of workspaceSyncTargets) {
+    const sourceDataSourceId = dataSourceIdByModuleKey.get(target.key);
+
+    if (!sourceDataSourceId) {
+      const errorMessage = `Source database id could not be resolved for module "${target.key}".`;
+      printRelationSynchronizationFailed(target, errorMessage);
+      relationItems.push({
+        module: target.label,
+        relationResults: [],
+        errorMessage,
+      });
+      continue;
+    }
+
+    try {
+      const result = await updateDatabaseRelations(
+        target.definition,
+        sourceDataSourceId,
+        {
+          resolveDatabaseId: (moduleKey) =>
+            dataSourceIdByModuleKey.get(moduleKey),
+        },
+      );
+
+      printRelationSynchronizationResult(target, result);
+
+      relationItems.push({
+        module: target.label,
+        relationResults: result.relationResults,
+      });
+    } catch (error: unknown) {
+      const errorMessage = toErrorMessage(error);
+      printRelationSynchronizationFailed(target, errorMessage);
+      relationItems.push({
+        module: target.label,
+        relationResults: [],
+        errorMessage,
+      });
+    }
+  }
+
+  const summary = buildSummary(itemResults, relationItems);
+  printFlowStep("Summary");
   printSummary(summary);
 
   return {
     items: itemResults,
+    relationItems,
     summary,
   };
 }
