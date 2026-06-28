@@ -1,5 +1,6 @@
 import type { DatabaseDefinition } from "../schema/database.js";
 import { crmModule } from "./crm/index.js";
+import { financeModule } from "./finance/index.js";
 import { gameJamsModule } from "./game-jams/index.js";
 import { portfolioModule } from "./portfolio/index.js";
 import { productionMusicModule } from "./production-music/index.js";
@@ -61,3 +62,4 @@ registerModule(gameJamsModule);
 registerModule(crmModule);
 registerModule(portfolioModule);
 registerModule(productionMusicModule);
+registerModule(financeModule);
