@@ -1,6 +1,6 @@
 # AJ-OS Project Context
 
-AJ-OS is a code-first Notion Operating System for managing a freelance game audio business.
+AJ-OS is a code-first business operating system. Notion is currently the primary business interface, while the platform is designed to expose business capabilities through multiple interfaces including CLI, REST APIs, dashboards and future AI services.
 
 The TypeScript application is the single source of truth.
 
