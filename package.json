@@ -8,7 +8,12 @@
     "dev": "npm run sync",
     "build": "tsc",
     "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "infra:up": "cd infrastructure && docker compose up -d",
+    "infra:down": "cd infrastructure && docker compose down",
+    "infra:restart": "cd infrastructure && docker compose restart",
+    "infra:logs": "cd infrastructure && docker compose logs -f",
+    "infra:ps": "cd infrastructure && docker compose ps"
   },
   "dependencies": {
     "@notionhq/client": "^2.3.0",
