@@ -1,270 +1,270 @@
 # AJ-OS
 
-> **A code-first business operating system that transforms business data into actionable decisions.**
-
-![License](https://img.shields.io/badge/license-MIT-green)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
-![Node.js](https://img.shields.io/badge/Node.js-22+-brightgreen)
-![Notion API](https://img.shields.io/badge/Notion-API-black)
-![Version](https://img.shields.io/badge/version-v1.0.0-blue)
-
-AJ-OS is an open-source TypeScript framework that generates and synchronizes a complete business workspace in Notion.
-
-Instead of manually creating databases, properties and relationships, AJ-OS treats your workspace as infrastructure. Business capabilities are defined in code, validated through a strongly typed schema, synchronized automatically, and presented through an executive dashboard.
-
-Originally built around the needs of a freelance game audio business, AJ-OS is designed as a reusable architecture that can support many different business domains.
-
----
-
-# Why AJ-OS?
-
-Traditional productivity systems begin by manually configuring a workspace.
-
-AJ-OS reverses that workflow.
-
-Business logic is modeled in TypeScript and the workspace is generated automatically.
-
-```mermaid
-flowchart LR
-
-    A[Model Business]
-    B[Write TypeScript]
-    C[Run Synchronization]
-    D[Generate Workspace]
-    E[Generate CEO Dashboard]
-
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-```
-
-The result is a reproducible, version-controlled business operating system.
-
----
-
-# Features
-
-### Code-First Business Modeling
-
-- Business modules defined in TypeScript
-- Strongly typed schema definitions
-- Version-controlled business infrastructure
-- Documentation-driven architecture
-
-### Workspace Synchronization
-
-- Idempotent database creation
-- Automatic relation synchronization
-- Safe repeated synchronization
-- Deterministic execution
-
-### Executive Dashboard
-
-- Automatically generated CEO Dashboard
-- Business Health overview
-- Executive summaries
-- Priority generation
-- Action recommendations
-
-### Business Modules
-
-Current modules include:
-
-- Projects
-- CRM
-- Portfolio
-- Production Music
-- Finance
-- Game Jams
-
-Every module is independent, strongly typed and automatically synchronized.
-
-### REST API & Handbook Agent
-
-- Fastify REST API server (`npm run serve`)
-- Handbook AI agent (Claude) that answers questions grounded in the handbook wiki
-- Inbox capture endpoints for notes and files
-- Bearer-token authentication
-- n8n workflows to drive the agent from a chat window or a phone (Telegram)
-
-See `docs/api/agent.md`.
-
----
-
-# Screenshots
-
-> Screenshots will be added for the v1.0 release.
-
-Recommended screenshots:
-
-- CEO Dashboard
-- Complete Workspace
-- Projects
-- CRM
-- Production Music
-- Finance
-
----
-
-# Quick Start
-
-## Requirements
-
-- Node.js 22+
-- npm
-- Notion account
-- Notion Integration
-- Anthropic API key — optional, only for the REST API & handbook agent
-
-Clone the repository:
-
-```bash
-git clone https://github.com/aj-kivimaki/aj-os.git
-
-cd aj-os
-
-npm install
-```
-
-Create a `.env` file:
-
-```env
-NOTION_API_KEY=your_notion_api_key
-NOTION_PARENT_PAGE_ID=your_parent_page_id
-```
-
-Synchronize your workspace:
-
-```bash
-npm run sync
-```
-
-AJ-OS will automatically:
-
-- Discover existing databases
-- Create missing databases
-- Synchronize relations
-- Generate the CEO Dashboard
-
-## Running the API & Handbook Agent
-
-The REST API and handbook agent run as a separate interface (the sync CLI above is unaffected).
-
-Add the agent configuration to your `.env` (see `docs/guides/configuration.md`):
-
-```env
-ANTHROPIC_API_KEY=your_anthropic_api_key
-HANDBOOK_PATH=/absolute/path/to/your/handbook
-API_AUTH_TOKEN=a_long_random_secret
-```
-
-Start the server:
-
-```bash
-npm run serve
-```
-
-Then ask the agent a question:
-
-```bash
-curl -s localhost:3000/agent/ask \
-  -H "Authorization: Bearer $API_AUTH_TOKEN" \
-  -H "content-type: application/json" \
-  -d '{"message":"What am I working on?"}'
-```
-
-To message the agent from a chat window or your phone, see `infrastructure/n8n/README.md`.
-
----
-
-# Example Output
-
-```text
-Workspace Synchronization
-
-Discover existing databases
-
-Create missing databases
-
-Collect database IDs
-
-Resolve relations
-
-Generate CEO Dashboard
-
-Summary
-
-Created: 0
-Skipped: 6
-Relations skipped: 5
-Dashboard generated: 1
-```
-
-Synchronization is fully idempotent.
-
-Running the command multiple times never creates duplicate databases or relations.
-
----
-
-# Documentation
-
-The documentation is organized into focused sections.
-
-| Documentation           | Purpose                                            |
-| ----------------------- | -------------------------------------------------- |
-| `docs/guides/`          | Installation, configuration and development guides |
-| `docs/architecture/`    | System architecture and design decisions           |
-| `docs/api/`             | REST API and handbook agent                        |
-| `docs/modules/`         | Business module documentation                      |
-| `infrastructure/n8n/`   | Driving the agent from n8n (chat, Telegram)        |
-| `ROADMAP.md`            | Future direction                                   |
-| `CHANGELOG.md`          | Release history                                    |
-| `CONTRIBUTING.md`       | Contribution guidelines                            |
-
----
-
-# Architecture
-
-AJ-OS follows a layered architecture.
-
-```mermaid
-flowchart TD
-
-    A[Business Modules]
-    B[Module Registry]
-    C[Schema Engine]
-    D[Translation Layer]
-    E[Application Layer]
-    F[CEO Dashboard]
-    G[(Notion Workspace)]
-
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    E --> G
-```
-
-Business logic remains independent from infrastructure.
+> **A knowledge-driven developer operating system for building software
+> with AI.**
+>
+> **Every project makes the next project better.**
+
+------------------------------------------------------------------------
+
+## Vision
+
+AJ-OS is an opinionated platform for developing software with AI through
+structured knowledge, engineering standards, reusable workflows, and
+continuous learning.
+
+Instead of treating AI as a coding assistant that starts from scratch
+every session, AJ-OS continuously transforms project work into reusable
+knowledge. That knowledge is reviewed, governed, and reused to improve
+every future project.
+
+The goal is not simply to generate code.
+
+The goal is to build a system that continuously improves how software is
+designed, implemented, documented, and maintained.
+
+------------------------------------------------------------------------
+
+# Philosophy
+
+AJ-OS is built around a simple idea:
+
+    Project Work
+          ↓
+    Reusable Knowledge
+          ↓
+    Structured Context
+          ↓
+    Better AI Assistance
+          ↓
+    Better Project Work
+
+Every completed project should permanently improve the next one.
+
+------------------------------------------------------------------------
+
+# Core Principles
+
+-   Standards before implementation.
+-   Specifications before coding.
+-   Knowledge before prompts.
+-   Human approval before canonical knowledge.
+-   Handbook as the single source of truth.
+-   Generated AI artifacts are disposable.
+-   Model-agnostic architecture.
+-   Small, composable services and workflows.
+
+------------------------------------------------------------------------
+
+# Platform Architecture
+
+    Architecture
+          ↓
+    Standards (AJS)
+          ↓
+    Specifications (SPEC)
+          ↓
+    Implementation
+          ↓
+    Project Documentation
+          ↓
+    Handbook (Canonical)
+          ↓
+    Generated LLM Wiki
+          ↓
+    Context Builder
+          ↓
+    Coding Agent
 
 For a complete architectural overview, see:
 
-- `docs/architecture/`
+-   `docs/architecture/ARCH-001-AJ-OS-Platform-Architecture.md`
 
----
+------------------------------------------------------------------------
+
+# Documentation Structure
+
+## Architecture
+
+High-level platform design.
+
+## Standards (AJS)
+
+Platform rules and governance.
+
+Examples:
+
+-   Developer Operating System
+-   Context Assembly
+-   Knowledge Standard
+-   Agent Specification
+-   Workflow Orchestration
+-   Knowledge Governance
+
+## Specifications (SPEC)
+
+Implementation blueprints for platform services and workflows.
+
+Examples:
+
+-   Project Kickoff Workflow
+-   Context Builder Agent
+-   End-of-Session Workflow
+-   Knowledge Review Workflow
+-   Wiki Generator Agent
+
+## Project Documentation
+
+Working documentation for individual projects.
+
+## Handbook
+
+The canonical knowledge base.
+
+Everything reusable is promoted here after review.
+
+## Generated LLM Wiki
+
+Automatically generated from the handbook.
+
+Optimized for AI retrieval.
+
+Never edited directly.
+
+------------------------------------------------------------------------
+
+# Knowledge Pipeline
+
+    Development
+          ↓
+    Project Documentation
+          ↓
+    End-of-Session Workflow
+          ↓
+    Candidate Knowledge
+          ↓
+    Knowledge Review
+          ↓
+    Handbook
+          ↓
+    Wiki Generator
+          ↓
+    Generated LLM Wiki
+          ↓
+    Context Builder
+          ↓
+    Coding Agent
+
+------------------------------------------------------------------------
+
+# Current Status
+
+AJ-OS is currently undergoing a major architectural redesign.
+
+The project is transitioning from an experimental collection of tools
+into a structured platform based on:
+
+-   Platform Standards (AJS)
+-   Engineering Specifications (SPEC)
+-   Platform Architecture (ARCH)
+-   Knowledge Governance
+-   Context Engineering
+-   Workflow Orchestration
+
+The current priority is implementing the platform according to these
+specifications.
+
+------------------------------------------------------------------------
+
+# Legacy Components (v1)
+
+The repository currently contains earlier implementations that predate
+the current architecture.
+
+These include:
+
+-   Code-first Notion database synchronization
+-   Notion schema generation
+-   REST API
+-   Handbook Agent
+-   n8n workflows
+-   Experimental AI agents
+
+These components remain valuable and will be reviewed individually.
+
+Where appropriate they will be:
+
+-   Migrated into the new architecture
+-   Refactored to comply with AJS and SPEC documents
+-   Replaced by newer platform services
+-   Archived if no longer relevant
+
+The Notion integration is now considered one possible knowledge provider
+rather than the center of the platform.
+
+------------------------------------------------------------------------
+
+# Roadmap
+
+## Phase 1 --- Platform Foundation ✅
+
+-   Architecture
+-   Standards
+-   Specifications
+
+## Phase 2 --- Core Platform Services
+
+-   Project Kickoff Workflow
+-   Context Builder Agent
+-   End-of-Session Workflow
+-   Knowledge Review Workflow
+-   Wiki Generator Agent
+
+## Phase 3 --- Supporting Platform Services
+
+-   Search
+-   Configuration
+-   Logging
+-   Agent Registry
+-   Workflow Registry
+
+## Phase 4 --- Productivity Services
+
+-   Portfolio Builder
+-   Job Finder
+-   Daily Planner
+-   Additional personal workflows
+
+------------------------------------------------------------------------
+
+# Design Goals
+
+AJ-OS aims to be:
+
+-   Modular
+-   Explainable
+-   Observable
+-   Extensible
+-   Testable
+-   Model-agnostic
+-   Human-governed
+-   Knowledge-driven
+
+------------------------------------------------------------------------
 
 # Contributing
 
-Contributions, discussions and architectural feedback are welcome.
+The architecture-first approach is intentional.
 
-Before contributing, please read:
+Before implementing new functionality:
 
-- `CONTRIBUTING.md`
-- `docs/guides/development.md`
+1.  Update or create the relevant AJS standard if platform rules change.
+2.  Write or update the appropriate SPEC document.
+3.  Implement the feature.
+4.  Validate the implementation.
+5.  Capture reusable knowledge through the End-of-Session workflow.
 
----
+------------------------------------------------------------------------
 
 # License
 
@@ -272,6 +272,6 @@ Released under the MIT License.
 
 See the `LICENSE` file for details.
 
----
+------------------------------------------------------------------------
 
-> **Model your business. Version your workflow. Synchronize your workspace.**
+> **Capture knowledge. Govern it. Reuse it.**

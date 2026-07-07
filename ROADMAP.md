@@ -1,140 +1,205 @@
 # AJ-OS Roadmap
 
-AJ-OS evolves by expanding business capabilities rather than redesigning its architecture.
+> **Roadmap Version:** v2.0\
+> **Status:** Active
 
-The goal is to establish a stable, code-first foundation that can support increasingly sophisticated business workflows while keeping the core architecture simple, maintainable and extensible.
+------------------------------------------------------------------------
 
----
+# Vision
+
+AJ-OS is evolving into a knowledge-driven developer operating system
+that continuously converts project work into reusable knowledge.
+
+The roadmap prioritizes building the platform itself before expanding
+into productivity features or integrations.
+
+------------------------------------------------------------------------
 
 # Guiding Principles
 
-The roadmap follows four principles:
+-   Architecture before implementation.
+-   Standards before features.
+-   Specifications before coding.
+-   Knowledge before prompts.
+-   Human governance over canonical knowledge.
+-   Small, composable platform services.
+-   Model-agnostic design.
 
-- Preserve a stable architecture.
-- Add capabilities through independent business modules.
-- Keep synchronization deterministic and idempotent.
-- Deliver complete, working milestones.
-
-Architecture should evolve slowly.
-
-Business capabilities should evolve continuously.
-
----
+------------------------------------------------------------------------
 
 # Current Status
 
-## Foundation ✅
+## ✅ Phase 1 --- Platform Foundation (Complete)
 
-The core architecture is complete.
+The architectural foundation has been established.
 
-Implemented capabilities include:
+Completed:
 
-- Code-first business modeling
-- Strongly typed Schema Engine
-- Module Registry
-- Translation Layer
-- Application Layer
-- Workspace Synchronization
-- Relation synchronization
-- CEO Dashboard
-- Business Modules
-- Documentation-driven development
+-   ARCH-001 Platform Architecture
+-   AJS-001 -- AJS-006 Platform Standards
+-   SPEC-000 Specification Writing Standard
+-   SPEC-001 -- SPEC-005 Core Platform Specifications
 
-AJ-OS is now capable of generating and synchronizing a complete business workspace.
+This phase defines **how AJ-OS is built**, not just what it does.
 
----
+------------------------------------------------------------------------
 
-# In Progress
+# Phase 2 --- Core Platform Implementation (Current Focus)
 
-The next focus is Business Intelligence.
+Implement the platform exactly as specified.
 
-Current priorities include:
+Priority order:
 
-- Business Rules
-- Dashboard widgets
-- Executive insights
-- Business Health evaluation
-- Daily recommendations
+1.  Project Kickoff Workflow
+2.  Context Builder Agent
+3.  End-of-Session Workflow
+4.  Knowledge Review Workflow
+5.  Wiki Generator Agent
 
-The objective is to transform synchronized business data into actionable information.
+Success criteria:
 
----
+-   All specifications implemented.
+-   Standards validated against implementation.
+-   End-to-end knowledge pipeline operational.
 
-# Planned
+------------------------------------------------------------------------
 
-## Automation
+# Phase 3 --- Supporting Platform Services
 
-Planned automation features include:
+Build reusable platform capabilities.
 
-- Scheduled synchronization
-- Morning business brief
-- Follow-up reminders
-- Recurring task generation
-- Business notifications
+Planned services:
 
-Automation should reduce manual administration without replacing business decision-making.
+-   Search
+-   Configuration
+-   Logging
+-   Agent Registry
+-   Workflow Registry
+-   Notification Service
+-   Knowledge Provider Interfaces
 
----
+During this phase existing integrations such as Notion will be adapted
+to the new architecture through provider interfaces.
 
-## Analytics
+------------------------------------------------------------------------
 
-Future analytical capabilities may include:
+# Phase 4 --- Legacy Migration
 
-- Productivity trends
-- Financial summaries
-- Portfolio growth
-- Production music catalogue metrics
-- Business health trends
+Review and migrate existing project components.
 
-Analytics should provide long-term visibility into business performance.
+Existing implementations include:
 
----
+-   Code-first Notion synchronization
+-   Schema engine
+-   REST API
+-   Handbook agent
+-   n8n workflows
+-   Experimental AI agents
 
-## Additional Business Modules
+Each component will be evaluated to determine whether it should be:
 
-The architecture is designed to support additional business domains.
+-   Migrated
+-   Refactored
+-   Replaced
+-   Archived
 
-Potential future modules include:
+The architecture remains the source of truth.
 
-- Learning
-- Marketing
-- Contracts
-- Equipment
-- Assets
-- Publishing
-- Goals
+------------------------------------------------------------------------
 
-New modules should integrate with the existing architecture without requiring infrastructure changes.
+# Phase 5 --- Productivity Services
 
----
+Build user-facing capabilities on top of the platform.
 
-## Future Backends
+Examples:
 
-Although AJ-OS currently targets Notion, the architecture intentionally separates business logic from infrastructure.
+-   Portfolio Builder
+-   Job Finder
+-   Daily Planner
+-   Documentation Assistant
+-   Career Dashboard
+-   Personal Automation Workflows
 
-Possible future synchronization targets include:
+These services should consume the platform rather than define it.
 
-- Local storage
-- SQL databases
-- Web applications
-- Custom business platforms
+------------------------------------------------------------------------
 
-Business Modules should remain unchanged regardless of the synchronization target.
+# Phase 6 --- Platform Evolution
 
----
+Long-term goals include:
 
-# Long-Term Vision
+-   MCP integration
+-   Public APIs
+-   Plugin architecture
+-   Multi-user support
+-   Distributed execution
+-   Additional knowledge providers
+-   Advanced retrieval and semantic search
 
-The long-term vision for AJ-OS is to become a reusable framework for building code-first business operating systems.
+------------------------------------------------------------------------
 
-Business logic, documentation and infrastructure remain independent, allowing organizations to model their workflows once and synchronize them across different execution environments.
+# Knowledge Roadmap
 
----
+The long-term knowledge flow is:
 
-# Design Philosophy
+``` text
+Project Work
+      ↓
+Project Documentation
+      ↓
+End-of-Session Workflow
+      ↓
+Candidate Knowledge
+      ↓
+Knowledge Review
+      ↓
+Handbook (Canonical)
+      ↓
+Wiki Generator
+      ↓
+Generated LLM Wiki
+      ↓
+Context Builder
+      ↓
+Better AI Context
+```
 
-The roadmap prioritizes architectural stability over rapid feature expansion.
+------------------------------------------------------------------------
 
-New capabilities should extend the existing architecture rather than introduce unnecessary complexity.
+# Success Metrics
 
-A stable foundation makes future development faster, safer and easier to maintain.
+AJ-OS succeeds when:
+
+-   Every project improves the next project.
+-   Canonical knowledge remains trusted and maintainable.
+-   AI context is generated automatically.
+-   Manual prompting is minimized.
+-   Platform components remain modular and replaceable.
+
+------------------------------------------------------------------------
+
+# Relationship to Documentation
+
+-   ARCH documents describe the platform.
+-   AJS documents define the governing rules.
+-   SPEC documents define implementations.
+-   Project documentation records execution.
+-   The handbook stores canonical knowledge.
+-   The generated wiki enables AI retrieval.
+
+------------------------------------------------------------------------
+
+# Roadmap Philosophy
+
+Implementation follows the architecture.
+
+Existing experiments are valuable but will be migrated only after the
+core platform has been implemented according to the current standards
+and specifications.
+
+The architecture---not legacy implementations---defines the future
+direction of AJ-OS.
+
+------------------------------------------------------------------------
+
+> **Every project makes the next project better.**
