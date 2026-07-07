@@ -44,17 +44,22 @@ This phase defines **how AJ-OS is built**, not just what it does.
 
 ------------------------------------------------------------------------
 
-# Phase 2 --- Core Platform Implementation (Current Focus)
+# Phase 2 --- Core Knowledge Platform (Current Focus)
 
 Implement the platform exactly as specified.
 
 Priority order:
 
-1.  Project Kickoff Workflow
-2.  Context Builder Agent
-3.  End-of-Session Workflow
-4.  Knowledge Review Workflow
-5.  Wiki Generator Agent
+1.  Context Builder Agent
+2.  End-of-Session Workflow
+3.  Knowledge Review Workflow
+4.  Wiki Generator Agent
+
+The goal of this phase is to complete the AJ-OS knowledge platform.
+
+Project Kickoff (SPEC-001) is intentionally postponed until the platform
+is operational, allowing it to become the first workflow that consumes
+the completed platform.
 
 Success criteria:
 
@@ -64,9 +69,16 @@ Success criteria:
 
 ------------------------------------------------------------------------
 
-# Phase 3 --- Supporting Platform Services
+# Phase 3 --- Developer Experience
 
-Build reusable platform capabilities.
+Complete the first platform consumer before expanding reusable platform
+capabilities.
+
+Priority:
+
+-   Project Kickoff Workflow (SPEC-001)
+
+Supporting services:
 
 Planned services:
 

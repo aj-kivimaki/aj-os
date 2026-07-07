@@ -1,4 +1,4 @@
-# ADR-001 — Architecture Freeze Before Implementation
+# ADR-001 --- Architecture Freeze Before Implementation
 
 **Status:** Accepted
 
@@ -6,35 +6,38 @@
 
 **Decision Makers**
 
-- AJ
-- ChatGPT (Architecture Partner)
+-   AJ
+-   ChatGPT (Architecture Partner)
 
----
+------------------------------------------------------------------------
 
 # Context
 
-During the initial development of AJ-OS, numerous ideas, experiments, and prototypes were created.
+During the initial development of AJ-OS, numerous ideas, experiments,
+and prototypes were created.
 
 These included:
 
-- Notion synchronization
-- Code-first schema generation
-- AI agents
-- n8n workflows
-- REST APIs
-- Knowledge management experiments
+-   Notion synchronization
+-   Code-first schema generation
+-   AI agents
+-   n8n workflows
+-   REST APIs
+-   Knowledge management experiments
 
-As the project evolved, a significantly more comprehensive architecture emerged.
+As the project evolved, a significantly more comprehensive architecture
+emerged.
 
 The project now includes:
 
-- Platform Architecture (ARCH)
-- Platform Standards (AJS)
-- Engineering Specifications (SPEC)
+-   Platform Architecture (ARCH)
+-   Platform Standards (AJS)
+-   Engineering Specifications (SPEC)
 
-At this point, continuing to redesign the architecture before implementation would likely introduce unnecessary complexity and delay.
+At this point, continuing to redesign the architecture before
+implementation would likely introduce unnecessary complexity and delay.
 
----
+------------------------------------------------------------------------
 
 # Decision
 
@@ -42,47 +45,51 @@ The current architecture is declared the implementation baseline.
 
 The following documents become the authoritative description of AJ-OS:
 
-- ARCH-001
-- AJS-001 through AJS-006
-- SPEC-000 through SPEC-005
+-   ARCH-001
+-   AJS-001 through AJS-006
+-   SPEC-000 through SPEC-005
 
-Future development should implement these documents rather than redesign them.
+Future development should implement these documents rather than redesign
+them.
 
 Architectural changes should originate from implementation experience.
 
----
+------------------------------------------------------------------------
 
 # Rationale
 
 This decision provides:
 
-- A stable implementation target.
-- Reduced architecture drift.
-- Better documentation consistency.
-- Easier onboarding.
-- More predictable development.
+-   A stable implementation target.
+-   Reduced architecture drift.
+-   Better documentation consistency.
+-   Easier onboarding.
+-   More predictable development.
 
-The architecture should now be validated through implementation rather than continued theoretical refinement.
+The architecture should now be validated through implementation rather
+than continued theoretical refinement.
 
----
+------------------------------------------------------------------------
 
 # Consequences
 
 Positive:
 
-- Stable project direction.
-- Clear implementation roadmap.
-- Consistent documentation.
-- Better long-term maintainability.
+-   Stable project direction.
+-   Clear implementation roadmap.
+-   Consistent documentation.
+-   Better long-term maintainability.
 
 Trade-offs:
 
-- Some legacy components will temporarily remain inconsistent with the architecture.
-- Migration work is deferred until the core platform has been implemented.
+-   Some legacy components will temporarily remain inconsistent with the
+    architecture.
+-   Migration work is deferred until the core platform has been
+    implemented.
 
 This trade-off is considered acceptable.
 
----
+------------------------------------------------------------------------
 
 # Migration Strategy
 
@@ -90,16 +97,43 @@ Legacy implementations will be evaluated individually.
 
 Each component will be classified as:
 
-- Migrate
-- Refactor
-- Replace
-- Archive
+-   Migrate
+-   Refactor
+-   Replace
+-   Archive
 
 The architecture remains the source of truth.
 
 Legacy implementations do not redefine the architecture.
 
----
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+# Implementation Strategy
+
+The implementation order has been intentionally revised.
+
+Although **SPEC-001 --- Project Kickoff Workflow** was originally
+planned as the first implementation, AJ-OS itself is already an active
+project. Implementing a project bootstrap workflow before the core
+platform exists would require placeholder functionality and later
+rework.
+
+The implementation sequence is now:
+
+1.  SPEC-002 --- Context Builder Agent
+2.  SPEC-003 --- End-of-Session Workflow
+3.  SPEC-004 --- Knowledge Review Workflow
+4.  SPEC-005 --- Wiki Generator Agent
+5.  SPEC-001 --- Project Kickoff Workflow
+
+This decision does **not** modify the architecture.
+
+It modifies only the implementation strategy.
+
+SPEC-001 becomes the first workflow that consumes the completed AJ-OS
+platform rather than participating in its bootstrap.
 
 # Future Changes
 
@@ -107,32 +141,34 @@ The architecture is not immutable.
 
 Future architectural changes should occur only when:
 
-- implementation reveals deficiencies,
-- new requirements emerge,
-- or significant improvements are identified.
+-   implementation reveals deficiencies,
+-   new requirements emerge,
+-   or significant improvements are identified.
 
 All significant architectural changes should be recorded as new ADRs.
 
----
+------------------------------------------------------------------------
 
 # Related Documents
 
-- ARCH-001 — AJ-OS Platform Architecture
-- AJS-001 — Developer Operating System
-- AJS-002 — Context Assembly Standard
-- AJS-003 — Knowledge Standard
-- AJS-004 — AJ-OS Agent Specification Standard
-- AJS-005 — Workflow Orchestration Standard
-- AJS-006 — Knowledge Governance
-- SPEC-000 — Specification Writing Standard
-- SPEC-001 through SPEC-005
+-   ARCH-001 --- AJ-OS Platform Architecture
+-   AJS-001 --- Developer Operating System
+-   AJS-002 --- Context Assembly Standard
+-   AJS-003 --- Knowledge Standard
+-   AJS-004 --- AJ-OS Agent Specification Standard
+-   AJS-005 --- Workflow Orchestration Standard
+-   AJS-006 --- Knowledge Governance
+-   SPEC-000 --- Specification Writing Standard
+-   SPEC-001 through SPEC-005
 
----
+------------------------------------------------------------------------
 
 # Summary
 
 AJ-OS now transitions from architectural design to implementation.
 
-The architecture defined by the current standards and specifications is considered complete enough to guide development.
+The architecture defined by the current standards and specifications is
+considered complete enough to guide development.
 
-Future evolution should be driven by implementation experience rather than speculative redesign.
+Future evolution should be driven by implementation experience rather
+than speculative redesign.
