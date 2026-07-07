@@ -76,12 +76,12 @@ No business logic is implemented.
 
 ## Related Tasks
 
-- CB-001
-- CB-002
-- CB-003
-- CB-004
-- CB-005
-- CB-006
+- [x] CB-001 — Establish Context Builder Module
+- [x] CB-002 — Public Configuration Contract & Factory
+- [ ] CB-003 — Context Package Schema
+- [ ] CB-004 — Knowledge Provider Interface
+- [ ] CB-005
+- [ ] CB-006
 
 ---
 
