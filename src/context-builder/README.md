@@ -61,12 +61,60 @@ Public exports: `createContextBuilder`, `contextBuilderConfigSchema`,
 `parseContextBuilderConfig`, `CONTEXT_PROFILES`, `OUTPUT_FORMATS`, and the types
 `ContextBuilder`, `ContextBuilderConfig`, `ContextProfile`, `OutputFormat`.
 
+## Context Package contract (CB-003)
+
+The **Context Package** is the canonical output of the Context Builder and the
+primary input to a coding agent. CB-003 defines the *contract only* — its
+structure, runtime validation and immutable types. No collection, ranking,
+assembly or rendering logic exists yet; future milestones populate the package
+without redesigning this contract.
+
+The contract follows AJS-002 Appendix B, modelled as a portable structure
+independent of output format:
+
+```text
+Context Package
+├── metadata        identity & provenance (contextVersion, generatedAt, project,
+│                   task, branch?, commit?, contextBuilderVersion)
+├── sections        ordered ContextSection[] — { kind, title, content, referenceIds }
+├── references      SourceReference[] — { id, type, title, locator? }
+├── explainability  { summary, entries: { referenceId, reason }[] }
+└── summary         at-a-glance synopsis
+```
+
+- `section.kind` is one of the 12 canonical Appendix B section identifiers
+  (`SECTION_KINDS`); `reference.type` is one of the AJS-002 knowledge-source
+  categories (`REFERENCE_TYPES`).
+- Packages are validated with `parseContextPackage(input)`, which returns a
+  **deeply-immutable** package (deep `Object.freeze`) or throws a `ZodError`.
+- The schema is **strict** and enforces structural invariants: unique reference
+  ids, unique section kinds, and referential integrity (every `referenceId`
+  resolves to a declared reference — the *Explainable* / *Self-Contained*
+  principles).
+- The contract is deliberately free of ranking scores, token calculations,
+  filesystem/provider internals and transport concerns. `locator` is an optional
+  *logical* pointer (e.g. `"AJS-002 §6"`), not an absolute path.
+
+```ts
+import { parseContextPackage } from "./context-builder/index.js";
+
+const pkg = parseContextPackage(input); // validated + deeply frozen
+pkg.metadata.task; // readonly
+```
+
+Public exports: `contextPackageSchema`, `parseContextPackage`, `SECTION_KINDS`,
+`REFERENCE_TYPES` (plus the component schemas), and the types `ContextPackage`,
+`ContextPackageMetadata`, `ContextSection`, `SourceReference`,
+`ContextExplainability`, `ExplainabilityEntry`, `ContextSectionKind`,
+`ReferenceType`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
-**CB-001**) and its public configuration contract and `createContextBuilder()`
-factory (task **CB-002**). No Context Builder *behaviour* (providers,
-collection, ranking, assembly, explainability) is implemented yet.
+**CB-001**), its public configuration contract and `createContextBuilder()`
+factory (task **CB-002**), and the public Context Package contract (task
+**CB-003**). No Context Builder *behaviour* (providers, collection, ranking,
+assembly, explainability) is implemented yet.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 

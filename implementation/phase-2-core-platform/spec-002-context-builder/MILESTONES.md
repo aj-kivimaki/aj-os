@@ -78,7 +78,7 @@ No business logic is implemented.
 
 - [x] CB-001 — Establish Context Builder Module
 - [x] CB-002 — Public Configuration Contract & Factory
-- [ ] CB-003 — Context Package Schema
+- [x] CB-003 — Context Package Schema
 - [ ] CB-004 — Knowledge Provider Interface
 - [ ] CB-005
 - [ ] CB-006

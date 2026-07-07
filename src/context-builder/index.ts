@@ -8,7 +8,8 @@
  * private and are re-exported here as they are implemented.
  *
  * Scope note: CB-001 established the module boundary; CB-002 adds the public
- * configuration contract and the `createContextBuilder()` factory. Knowledge
+ * configuration contract and the `createContextBuilder()` factory; CB-003 adds
+ * the public Context Package contract (the canonical output type). Knowledge
  * providers, collection, ranking, assembly, profiles and explainability
  * behaviour are delivered by later Milestone M1+ tasks.
  */
@@ -39,3 +40,26 @@ export type {
   ContextProfile,
   OutputFormat,
 } from "./config/index.js";
+
+// Public Context Package contract — the canonical Context Builder output (CB-003).
+export {
+  contextPackageSchema,
+  contextPackageMetadataSchema,
+  contextSectionSchema,
+  sourceReferenceSchema,
+  contextExplainabilitySchema,
+  explainabilityEntrySchema,
+  parseContextPackage,
+  SECTION_KINDS,
+  REFERENCE_TYPES,
+} from "./package/index.js";
+export type {
+  ContextPackage,
+  ContextPackageMetadata,
+  ContextSection,
+  SourceReference,
+  ContextExplainability,
+  ExplainabilityEntry,
+  ContextSectionKind,
+  ReferenceType,
+} from "./package/index.js";
