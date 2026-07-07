@@ -69,11 +69,13 @@ Describe the purpose of this milestone.
 
 ---
 
-## Related Tasks
+## Task Progress
 
-- [ ] {{TASK-ID}}
-- [ ] {{TASK-ID}}
-- [ ] {{TASK-ID}}
+| Task | Description | Status |
+|------|-------------|--------|
+| {{TASK-ID}} | | ⬜ |
+| {{TASK-ID}} | | ⬜ |
+| {{TASK-ID}} | | ⬜ |
 
 ---
 
@@ -168,4 +170,6 @@ The milestone plan is complete when:
 >
 > Every milestone must leave the implementation in a usable and testable state.
 >
-> Avoid creating milestones that only add scaffolding without delivering observable functionality.
+> Milestone progress should be updated after every completed task.
+>
+> A milestone must not be marked complete until every task assigned to that milestone has been completed and validated.

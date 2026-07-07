@@ -1,0 +1,250 @@
+# CB-001 — Establish Context Builder Module
+
+> **Status:** Planned
+>
+> **Related Specification:** SPEC-002 — Context Builder Agent
+>
+> **Implementation Package:** SPEC-002
+>
+> **Milestone:** M1 — Foundation
+
+---
+
+# Purpose
+
+Establish the Context Builder as the first independent platform service within AJ-OS.
+
+This task defines the module boundary and project structure that future Context Builder functionality will build upon.
+
+No business logic is implemented during this task.
+
+---
+
+# Objective
+
+Create the initial Context Builder module with a clean, extensible structure that aligns with the AJ-OS architecture.
+
+The implementation should establish a stable foundation for future milestones without implementing any Context Builder functionality.
+
+---
+
+# Scope
+
+## Included
+
+- Context Builder module
+- Folder structure
+- Public entry point
+- Internal module organization
+- Initial README
+- Test folder
+- Placeholder exports
+
+## Not Included
+
+- Configuration
+- Context Package schema
+- Knowledge Providers
+- Collection logic
+- Ranking
+- Context generation
+- Tests beyond confirming the module builds
+
+---
+
+# References
+
+## Architecture
+
+- ARCH-001
+
+## Standards
+
+- AJS-001 — Developer Operating System
+- AJS-004 — Agent Specification Standard
+
+## Specifications
+
+- SPEC-002 — Context Builder Agent
+
+---
+
+# Dependencies
+
+## Requires
+
+- Approved architecture
+- Approved standards
+- Approved specification
+
+## Enables
+
+- CB-002 — Configuration Schema
+- CB-003 — Context Package Schema
+- CB-004 — Knowledge Provider Interface
+
+---
+
+# Inputs
+
+- Current AJ-OS repository
+- Existing project structure
+- Implementation package
+
+---
+
+# Expected Outputs
+
+A new Context Builder module containing a consistent project structure ready for future implementation.
+
+Example:
+
+```text
+src/
+└── context-builder/
+    ├── index.ts
+    ├── README.md
+    ├── config/
+    ├── providers/
+    ├── collector/
+    ├── ranking/
+    ├── package/
+    ├── profiles/
+    ├── explainability/
+    ├── types/
+    └── utils/
+
+tests/
+└── context-builder/
+```
+
+Folder names may be refined during implementation if required by the architecture.
+
+---
+
+# Implementation Notes
+
+The module should:
+
+- follow existing AJ-OS coding conventions
+- expose a single public entry point (`index.ts`)
+- keep internal components private
+- favour composition over tight coupling
+- avoid premature abstractions
+
+Do not create placeholder classes or unnecessary files.
+
+Only create structure that has a clear architectural purpose.
+
+---
+
+# Validation
+
+Verify that:
+
+- Project builds successfully.
+- Module can be imported.
+- Public exports compile.
+- No circular dependencies exist.
+- Repository structure remains consistent.
+
+---
+
+# Acceptance Criteria
+
+- [x] Context Builder module created.
+- [x] Public entry point created.
+- [x] Folder structure established.
+- [x] Repository builds successfully.
+- [x] Documentation updated.
+- [x] Ready for CB-002.
+
+---
+
+# Definition of Done
+
+This task is complete when:
+
+- [x] Acceptance criteria satisfied.
+- [ ] Code reviewed.
+- [ ] Changes committed.
+- [x] Worklog updated.
+
+---
+
+# Coding Agent Instructions
+
+Read:
+
+- ARCH-001
+- AJS-001
+- AJS-004
+- SPEC-002
+- This task document
+
+Implement **CB-001 only**.
+
+Do not implement future tasks.
+
+Do not create configuration schemas, interfaces, providers, or business logic.
+
+If architectural concerns arise, stop and report them instead of making assumptions.
+
+Run the project's validation checks before considering the task complete.
+
+---
+
+# Worklog Summary
+
+**2026-07-07**
+
+Established the Context Builder as an independent platform module at
+`src/context-builder/`, mirroring the existing `src/agent/` module layout.
+
+- Added `src/context-builder/index.ts` — the single public entry point,
+  exporting a small `CONTEXT_BUILDER` identity constant (AJS-004 metadata seed).
+  No business logic.
+- Added `src/context-builder/README.md` documenting the module boundary,
+  entry-point contract, and milestone roadmap.
+- Added `tests/context-builder/README.md` as the test-folder placeholder; no
+  test code, since CB-001 validation is limited to a successful build.
+
+Validation: `npm run typecheck` and `npm run build` pass; the module imports
+successfully and emits to `dist/context-builder/`. No circular dependencies.
+
+**Decisions** (see `decisions/CB-001-scaffold-scope.md`):
+
+- Minimal scaffold rather than pre-creating the full 9-folder tree. Subfolders
+  are added by the tasks that introduce their code (CB-002+), honouring the
+  task's "avoid premature abstractions / no unnecessary files" guidance.
+- Test folder represented as a placeholder README only. A top-level `tests/`
+  tree with `.ts` files would break `npm run build` because `tsconfig.json`
+  sets `rootDir: ./src`, and no test runner is configured yet.
+
+---
+
+# Lessons Learned
+
+- `tsconfig.json` uses `rootDir: ./src`, so future test tooling cannot rely on
+  the default `tsc` build to compile a top-level `tests/` tree — the testing
+  framework task (M1) must configure its own compilation/run path.
+- The repository has no lint script and no test runner; "lint/tests" validation
+  currently reduces to `typecheck` + `build`. Worth establishing a runner in
+  the dedicated M1 foundation task before real tests are written.
+
+---
+
+# Change Log
+
+| Date | Version | Description |
+|------|---------|-------------|
+| 2026-07-07 | 1.0 | Initial task created |
+| 2026-07-07 | 1.1 | CB-001 implemented — module boundary + entry point established |
+
+---
+
+> **Engineering Rule**
+>
+> The purpose of CB-001 is to establish the module boundary—not to implement functionality.
+>
+> A clean and stable module structure is more valuable than prematurely adding code.
