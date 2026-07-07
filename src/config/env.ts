@@ -15,6 +15,25 @@ const rawEnvSchema = z.object({
   NOTION_PARENT_PAGE_ID: z
     .string()
     .min(1, "NOTION_PARENT_PAGE_ID must not be empty"),
+
+  // Agent + API configuration.
+  // Kept optional so the Notion sync CLI still boots without them; the API
+  // server asserts their presence via requireAgentEnv() (see agent-env.ts).
+  ANTHROPIC_API_KEY: z
+    .string()
+    .min(1, "ANTHROPIC_API_KEY must not be empty")
+    .optional(),
+  ANTHROPIC_MODEL: z.string().min(1).default("claude-sonnet-5"),
+  HANDBOOK_PATH: z
+    .string()
+    .min(1, "HANDBOOK_PATH must not be empty")
+    .optional(),
+  API_PORT: z.coerce.number().int().positive().default(3000),
+  API_HOST: z.string().min(1).default("0.0.0.0"),
+  API_AUTH_TOKEN: z
+    .string()
+    .min(16, "API_AUTH_TOKEN must be at least 16 characters")
+    .optional(),
 });
 
 const envSchema = rawEnvSchema
@@ -34,15 +53,14 @@ const envSchema = rawEnvSchema
       NODE_ENV: value.NODE_ENV,
       NOTION_API_KEY: notionApiKey,
       NOTION_PARENT_PAGE_ID: value.NOTION_PARENT_PAGE_ID,
+      ANTHROPIC_API_KEY: value.ANTHROPIC_API_KEY,
+      ANTHROPIC_MODEL: value.ANTHROPIC_MODEL,
+      HANDBOOK_PATH: value.HANDBOOK_PATH,
+      API_PORT: value.API_PORT,
+      API_HOST: value.API_HOST,
+      API_AUTH_TOKEN: value.API_AUTH_TOKEN,
     };
-  })
-  .pipe(
-    z.object({
-      NODE_ENV: z.enum(["development", "test", "production"]),
-      NOTION_API_KEY: z.string().min(1),
-      NOTION_PARENT_PAGE_ID: z.string().min(1),
-    }),
-  );
+  });
 
 const parsedEnv = envSchema.safeParse(process.env);
 

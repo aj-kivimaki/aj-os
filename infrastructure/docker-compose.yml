@@ -10,6 +10,9 @@ services:
 
     environment:
       - TZ=Europe/Helsinki
+      # Public HTTPS base URL of your tunnel to n8n (needed for Telegram/Slack/
+      # WhatsApp triggers to register their webhooks). Set in infrastructure/.env.
+      - WEBHOOK_URL=${WEBHOOK_URL:-}
 
     volumes:
       - ./n8n/data:/home/node/.n8n

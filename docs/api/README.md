@@ -70,6 +70,9 @@ This section documents the API architecture and its evolution.
 | ----------------- | --------------------------------------------------- |
 | `architecture.md` | Overall API architecture and layer responsibilities |
 | `roadmap.md`      | Planned evolution of the API platform               |
+| `agent.md`        | The handbook AI agent and inbox-capture endpoints   |
+
+See also `infrastructure/n8n/README.md` for driving the agent from n8n (chat window, Telegram).
 
 Additional documentation will be introduced as the API grows.
 
@@ -121,21 +124,27 @@ Implementation begins only after the architecture has been reviewed and document
 
 ---
 
-# Scope
+# Current Status
 
-The first milestone focuses only on establishing the API foundation.
+The API foundation is implemented and running (`npm run serve`). The first interface built on
+it is the **handbook AI agent** rather than the Notion-backed business endpoints — see
+`agent.md` for details.
 
-No business endpoints are implemented yet.
+Implemented endpoints:
 
-Future milestones will introduce:
+| Method | Path          | Auth   | Purpose                                              |
+| ------ | ------------- | ------ | --------------------------------------------------- |
+| GET    | `/health`     | none   | Liveness check                                      |
+| POST   | `/agent/ask`  | Bearer | Ask the handbook agent → grounded answer            |
+| POST   | `/inbox/note` | Bearer | Write a Markdown note to the handbook inbox          |
+| POST   | `/inbox/file` | Bearer | Save a file to the handbook inbox                    |
 
-- Fastify integration
-- Health endpoint
-- Repository integration
-- Business endpoints
-- Authentication
-- OpenAPI documentation
-- AI-powered services
+Also in place: Fastify integration, bearer authentication, request validation (Zod), error
+handling, and structured logging.
+
+Not yet implemented (planned): repository integration and Notion-backed **business endpoints**
+(Projects, Portfolio, CRM, Dashboard, Business Health), and OpenAPI documentation. See
+`roadmap.md`.
 
 Each milestone should leave the platform in a working and releasable state.
 

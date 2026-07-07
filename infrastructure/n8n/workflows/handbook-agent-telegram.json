@@ -1,0 +1,147 @@
+{
+  "name": "Handbook Agent — Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"],
+        "additionalFields": {}
+      },
+      "id": "b2c3d4e5-0001-4000-8000-000000000001",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "webhookId": "b2c3d4e5-0001-4000-8000-0000000000aa"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-authorized",
+              "leftValue": "={{ String($json.message.chat.id) }}",
+              "rightValue": "<YOUR_TELEGRAM_CHAT_ID>",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0002-4000-8000-000000000002",
+      "name": "Authorized?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-is-note",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "note:",
+              "operator": { "type": "string", "operation": "startsWith" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0003-4000-8000-000000000003",
+      "name": "Is note?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/inbox/note",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"title\": {{ JSON.stringify(($json.message.text.replace(/^note:\\s*/i, '').split('\\n')[0] || 'Telegram note').slice(0, 80)) }}, \"body\": {{ JSON.stringify($json.message.text.replace(/^note:\\s*/i, '')) }}, \"tags\": [\"telegram\"] }",
+        "options": { "timeout": 120000 }
+      },
+      "id": "b2c3d4e5-0004-4000-8000-000000000004",
+      "name": "Save to inbox",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, -120]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/agent/ask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"message\": {{ JSON.stringify($json.message.text) }} }",
+        "options": { "timeout": 120000 }
+      },
+      "id": "b2c3d4e5-0005-4000-8000-000000000005",
+      "name": "Ask agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 120]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.answer || ('Saved to ' + $json.path) }}",
+        "additionalFields": {}
+      },
+      "id": "b2c3d4e5-0006-4000-8000-000000000006",
+      "name": "Reply on Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [920, 0]
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [[{ "node": "Authorized?", "type": "main", "index": 0 }]]
+    },
+    "Authorized?": {
+      "main": [
+        [{ "node": "Is note?", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Is note?": {
+      "main": [
+        [{ "node": "Save to inbox", "type": "main", "index": 0 }],
+        [{ "node": "Ask agent", "type": "main", "index": 0 }]
+      ]
+    },
+    "Save to inbox": {
+      "main": [[{ "node": "Reply on Telegram", "type": "main", "index": 0 }]]
+    },
+    "Ask agent": {
+      "main": [[{ "node": "Reply on Telegram", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {}
+}

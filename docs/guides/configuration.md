@@ -92,6 +92,35 @@ Without this permission AJ-OS cannot access the page.
 
 ---
 
+# API & Handbook Agent Variables
+
+These variables are **only** required to run the REST API and handbook agent
+(`npm run serve`). The workspace sync CLI (`npm run sync`) does not use them, so you can leave
+them unset if you only sync to Notion.
+
+```env
+ANTHROPIC_API_KEY=your_anthropic_api_key
+ANTHROPIC_MODEL=claude-sonnet-5
+HANDBOOK_PATH=/absolute/path/to/your/handbook
+API_PORT=3000
+API_HOST=0.0.0.0
+API_AUTH_TOKEN=a_long_random_secret
+```
+
+| Variable            | Required | Purpose                                                                 |
+| ------------------- | -------- | ----------------------------------------------------------------------- |
+| `ANTHROPIC_API_KEY` | yes      | Anthropic API key that powers the agent                                 |
+| `ANTHROPIC_MODEL`   | no       | Model id (default `claude-sonnet-5`); change without editing code       |
+| `HANDBOOK_PATH`     | yes      | Absolute path to the handbook vault the agent reads/writes              |
+| `API_PORT`          | no       | HTTP port (default `3000`)                                              |
+| `API_HOST`          | no       | Bind address (default `0.0.0.0`; keep it so Docker n8n can reach the host) |
+| `API_AUTH_TOKEN`    | yes      | Bearer token clients must send; minimum 16 characters                   |
+
+The server fails fast with a clear message if a required variable is missing. See
+`docs/api/agent.md` for the agent architecture and endpoints.
+
+---
+
 # Synchronization
 
 Once configured, synchronize the workspace.

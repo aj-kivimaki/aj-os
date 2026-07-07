@@ -15,6 +15,7 @@ docs/
 
 ├── guides/
 ├── architecture/
+├── api/
 ├── modules/
 └── adr/
 ```
@@ -65,6 +66,21 @@ Recommended reading order:
 8. `architecture/ceo-dashboard.md`
 
 Together these documents describe the complete architecture of the system.
+
+---
+
+# API & Agent
+
+The API documents the REST interface and the AI services built on the platform.
+
+| Document            | Purpose                                             |
+| ------------------- | --------------------------------------------------- |
+| `api/README.md`     | API overview and current status                     |
+| `api/architecture.md` | API architecture and layer responsibilities       |
+| `api/agent.md`      | Handbook AI agent and inbox-capture endpoints        |
+| `api/roadmap.md`    | Planned evolution of the API platform               |
+
+n8n orchestration (chat, Telegram) is documented in `../infrastructure/n8n/README.md`.
 
 ---
 

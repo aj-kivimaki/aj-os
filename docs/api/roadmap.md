@@ -22,6 +22,23 @@ The API evolves incrementally alongside the rest of AJ-OS.
 
 ---
 
+# Status Snapshot
+
+Development has followed these phases with one deliberate deviation: the first interface built
+on the platform is a **handbook AI agent** (Phase 7) plus **n8n orchestration** (Phase 8),
+delivered ahead of the Notion-backed business endpoints (Phases 4–5).
+
+- Phase 1 — API Foundation ✅
+- Phase 2 — Fastify Integration ✅
+- Phase 3 — Health Endpoint ✅
+- Phase 4 — Repository Integration — planned
+- Phase 5 — Business Endpoints — planned
+- Phase 6 — Platform Services — partial (auth, validation, error handling, logging done; OpenAPI planned)
+- Phase 7 — AI Services — started (handbook agent + inbox capture; see `agent.md`)
+- Phase 8 — Automation — started (n8n runtime + chat/Telegram workflows)
+
+---
+
 # Phase 1 — API Foundation
 
 Establish the architectural foundation for the REST API.

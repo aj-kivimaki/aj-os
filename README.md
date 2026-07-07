@@ -80,6 +80,16 @@ Current modules include:
 
 Every module is independent, strongly typed and automatically synchronized.
 
+### REST API & Handbook Agent
+
+- Fastify REST API server (`npm run serve`)
+- Handbook AI agent (Claude) that answers questions grounded in the handbook wiki
+- Inbox capture endpoints for notes and files
+- Bearer-token authentication
+- n8n workflows to drive the agent from a chat window or a phone (Telegram)
+
+See `docs/api/agent.md`.
+
 ---
 
 # Screenshots
@@ -105,6 +115,7 @@ Recommended screenshots:
 - npm
 - Notion account
 - Notion Integration
+- Anthropic API key — optional, only for the REST API & handbook agent
 
 Clone the repository:
 
@@ -135,6 +146,35 @@ AJ-OS will automatically:
 - Create missing databases
 - Synchronize relations
 - Generate the CEO Dashboard
+
+## Running the API & Handbook Agent
+
+The REST API and handbook agent run as a separate interface (the sync CLI above is unaffected).
+
+Add the agent configuration to your `.env` (see `docs/guides/configuration.md`):
+
+```env
+ANTHROPIC_API_KEY=your_anthropic_api_key
+HANDBOOK_PATH=/absolute/path/to/your/handbook
+API_AUTH_TOKEN=a_long_random_secret
+```
+
+Start the server:
+
+```bash
+npm run serve
+```
+
+Then ask the agent a question:
+
+```bash
+curl -s localhost:3000/agent/ask \
+  -H "Authorization: Bearer $API_AUTH_TOKEN" \
+  -H "content-type: application/json" \
+  -d '{"message":"What am I working on?"}'
+```
+
+To message the agent from a chat window or your phone, see `infrastructure/n8n/README.md`.
 
 ---
 
@@ -171,14 +211,16 @@ Running the command multiple times never creates duplicate databases or relation
 
 The documentation is organized into focused sections.
 
-| Documentation        | Purpose                                            |
-| -------------------- | -------------------------------------------------- |
-| `docs/guides/`       | Installation, configuration and development guides |
-| `docs/architecture/` | System architecture and design decisions           |
-| `docs/modules/`      | Business module documentation                      |
-| `ROADMAP.md`         | Future direction                                   |
-| `CHANGELOG.md`       | Release history                                    |
-| `CONTRIBUTING.md`    | Contribution guidelines                            |
+| Documentation           | Purpose                                            |
+| ----------------------- | -------------------------------------------------- |
+| `docs/guides/`          | Installation, configuration and development guides |
+| `docs/architecture/`    | System architecture and design decisions           |
+| `docs/api/`             | REST API and handbook agent                        |
+| `docs/modules/`         | Business module documentation                      |
+| `infrastructure/n8n/`   | Driving the agent from n8n (chat, Telegram)        |
+| `ROADMAP.md`            | Future direction                                   |
+| `CHANGELOG.md`          | Release history                                    |
+| `CONTRIBUTING.md`       | Contribution guidelines                            |
 
 ---
 

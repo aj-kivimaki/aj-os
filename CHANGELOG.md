@@ -8,8 +8,20 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
 
 ## [Unreleased]
 
+### Added
+
+- REST API server built on Fastify (`npm run serve`), the first runtime interface alongside the sync CLI
+- `GET /health` liveness endpoint
+- Handbook AI agent (Claude, via `POST /agent/ask`) that answers questions grounded in the handbook wiki using a tool-use loop
+- Handbook capability layer (`src/handbook/`) with path-safe, wiki-scoped reads and inbox-scoped writes, reused by the agent and the API
+- Inbox capture endpoints `POST /inbox/note` and `POST /inbox/file` for writing to the handbook `workspace/inbox/`
+- Bearer-token authentication (`API_AUTH_TOKEN`) on all API routes except `/health`
+- n8n workflows for driving the agent from a chat window and from a phone via Telegram (`infrastructure/n8n/workflows/`)
+- Agent/API configuration (`ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `HANDBOOK_PATH`, `API_PORT`, `API_HOST`, `API_AUTH_TOKEN`) and `serve` / `serve:prod` scripts
+
 ### Planned
 
+- Repository integration and Notion-backed business endpoints (Projects, Portfolio, CRM, Dashboard, Business Health)
 - Additional Business Rules
 - Morning Brief
 - Automation
