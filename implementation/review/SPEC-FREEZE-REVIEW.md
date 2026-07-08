@@ -137,7 +137,7 @@ Result:
 Review:
 
 - README
-- ROADMAP
+- MILESTONES (the roadmap of record — there is no separate ROADMAP document)
 - implementation README
 - task status
 - milestone status
@@ -145,6 +145,16 @@ Review:
 Question:
 
 Does documentation accurately describe the implementation?
+
+Documentation synchronization (a milestone Definition-of-Done requirement — verify
+each before freezing, so status drift cannot recur):
+
+- [ ] Implementation package README updated (milestone status + progress table)
+- [ ] Module README updated (status line + milestone/focus table)
+- [ ] MILESTONES updated (task progress + Definition of Done + change log)
+- [ ] Milestone retrospective created (retrospectives accumulate — never overwrite a prior milestone's)
+- [ ] Decision records updated (every approved contract evolution recorded)
+- [ ] Status tables synchronized across all of the above
 
 Result:
 
@@ -203,9 +213,9 @@ The specification may be frozen when:
 - [ ] Standards verified
 - [ ] Specification complete
 - [ ] Public API approved
-- [ ] Documentation current
+- [ ] Documentation current (Step 6 synchronization checklist satisfied)
 - [ ] Technical debt reviewed
-- [ ] Retrospective completed
+- [ ] Retrospective completed (accumulated, not overwritten)
 
 ---
 

@@ -79,7 +79,8 @@ function toCollectionError(
  * Execute every registered provider and assemble a deterministic, immutable
  * `CollectionResult` under the partial-collection model.
  *
- * Providers run concurrently via `Promise.allSettled`, which preserves the input
+ * Providers run concurrently via `Promise.all` (each provider wrapped in its own
+ * try/catch so it can never reject the batch), which preserves the input
  * (registry) order in its results regardless of completion timing. Results are
  * then walked in registry index order so ordering is authoritative and completion
  * order is irrelevant. Fulfilled providers contribute their items in provider

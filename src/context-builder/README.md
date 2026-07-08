@@ -2,7 +2,7 @@
 
 > **Specification:** SPEC-002 — Context Builder Agent
 > **Standards:** AJS-001, AJS-002, AJS-003, AJS-004
-> **Status:** Knowledge Collection (Milestone M2, in progress)
+> **Status:** Milestone M2 — Knowledge Collection (complete)
 
 The Context Builder assembles the smallest, highest-value **Context Package**
 required for a coding agent to complete a single task. It is the primary bridge
@@ -518,13 +518,13 @@ Functionality arrives incrementally through the SPEC-002 milestones:
 | Milestone | Focus                                     |
 | --------- | ----------------------------------------- |
 | M1        | Foundation, schemas, provider interface   |
-| M2        | Knowledge providers                       |
-| M3        | Context collection                        |
-| M4        | Context assembly (AJS-002 Appendix B)      |
-| M5        | Explainability & profiles                 |
+| M2        | Knowledge Collection                      |
+| M3        | Knowledge Selection                       |
+| M4        | Context Assembly (AJS-002 Appendix B)     |
+| M5        | Explainability & Profiles                 |
 | M6        | Optimization                              |
 
-Subfolders (e.g. `config/`, `providers/`, `collector/`, `ranking/`,
+Subfolders (e.g. `config/`, `providers/`, `collection/`, `ranking/`,
 `package/`, `profiles/`, `explainability/`, `types/`, `utils/`) are created by
 the tasks that introduce their code, rather than pre-created as empty
 placeholders.
