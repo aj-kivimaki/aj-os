@@ -24,19 +24,30 @@ Internal components are private and are re-exported from `index.ts` only as
 they are implemented. Consumers should import from the module entry point, not
 from internal files.
 
-## Configuration & factory (CB-002)
+## Configuration & factory (CB-002, extended by CB-011)
 
 The Context Builder is created through a factory. Configuration is validated at
-runtime (Zod), frozen, and never mutated afterwards:
+runtime (Zod), frozen, and never mutated afterwards. CB-011 evolved this factory
+(an approved architectural evolution): it now also takes a required Provider
+Registry, from which it composes the Collection Engine it owns (see
+[Context Builder integration](#context-builder-integration-cb-011)):
 
 ```ts
-import { createContextBuilder } from "./context-builder/index.js";
+import {
+  createContextBuilder,
+  createProviderRegistry,
+} from "./context-builder/index.js";
 
-const builder = createContextBuilder({
-  profile: "implementation", // implementation | debugging | documentation | review | planning
-  explainability: true, // produce an explainability report
-  outputFormat: "markdown", // markdown | json
-});
+const registry = createProviderRegistry([handbookProvider, wikiProvider]);
+
+const builder = createContextBuilder(
+  {
+    profile: "implementation", // implementation | debugging | documentation | review | planning
+    explainability: true, // produce an explainability report
+    outputFormat: "markdown", // markdown | json
+  },
+  registry, // required — the catalogue the owned Collection Engine executes
+);
 
 builder.config.profile; // "implementation" (readonly)
 ```
@@ -410,6 +421,55 @@ generation remain out of scope (later tasks/milestones).
 Public exports: unchanged — `collect` is a method on the existing
 `CollectionEngine` handle returned by `createCollectionEngine`.
 
+## Context Builder integration (CB-011)
+
+CB-011 wires the first **end-to-end collection pipeline**. The Context Builder is
+the platform's single public orchestration service: it **composes** a Collection
+Engine from an injected Provider Registry at construction, **owns** that engine,
+and exposes a `collect(request)` entry point that delegates to it and returns the
+`CollectionResult` **unchanged**.
+
+```text
+KnowledgeRequest → ContextBuilder.collect → CollectionEngine → ProviderRegistry
+                → providers → KnowledgeItems + CollectionErrors → CollectionResult
+```
+
+```ts
+import {
+  createContextBuilder,
+  createProviderRegistry,
+} from "./context-builder/index.js";
+
+const builder = createContextBuilder(
+  { profile: "implementation", explainability: true, outputFormat: "markdown" },
+  createProviderRegistry([handbookProvider, wikiProvider]),
+);
+
+const result = await builder.collect({ project: "aj-os", task: "CB-011" });
+result.items;  // KnowledgeItems (registry order)
+result.errors; // one CollectionError per provider that rejected
+```
+
+- **Thin orchestration** — the Context Builder does **not** inspect, modify,
+  filter, rank, deduplicate or enrich the result. All collection business logic
+  stays inside the Collection Engine (CB-007/CB-010); `collect` is a direct
+  delegation.
+- **Owns the engine, not the registry** — the registry is injected only to compose
+  the engine. The builder holds the engine; the entry point takes a request only.
+- **Deterministic & immutable** — collection is partial (a single provider failure
+  never aborts collection) and registry order is authoritative; the returned
+  result is the engine's deeply-frozen `CollectionResult`. The same request and
+  registry always produce the same result.
+
+**Approved contract evolution.** CB-011 changed the frozen CB-002 factory from
+`createContextBuilder(config)` to `createContextBuilder(config, registry)` and
+added `collect(request)` to the `ContextBuilder` interface. This was reviewed
+under the Implementation Guardrail: a single immutable handle can only own the
+engine and expose an unconditional, request-only `collect` if the registry is
+injected at construction, so an additive-only design could not satisfy the
+architecture without a partial or duplicate public API. No other public contract
+changed.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -418,10 +478,11 @@ factory (task **CB-002**), the public Context Package contract (task
 **CB-003**), the public Knowledge Provider contracts (task **CB-004**), the
 immutable Provider Registry (task **CB-005**), the Collection Engine service
 boundary (task **CB-007**), the CollectionError contract (task **CB-008**), the
-CollectionResult contract (task **CB-009**), and deterministic partial provider
-execution — `CollectionEngine.collect` (task **CB-010**). The engine now executes
-its registry's providers and assembles a `CollectionResult`; the remaining
-Context Builder *behaviour* (Context Builder integration, ranking, selection,
+CollectionResult contract (task **CB-009**), deterministic partial provider
+execution — `CollectionEngine.collect` (task **CB-010**), and the integrated
+collection pipeline — `ContextBuilder.collect` (task **CB-011**). The Context
+Builder now composes and owns a Collection Engine and collects knowledge
+end-to-end; the remaining Context Builder *behaviour* (ranking, selection,
 assembly, explainability) is not implemented yet.
 
 Functionality arrives incrementally through the SPEC-002 milestones:

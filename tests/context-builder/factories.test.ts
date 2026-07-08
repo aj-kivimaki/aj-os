@@ -35,25 +35,30 @@ function makeProvider(id: string): KnowledgeProvider {
 }
 
 describe("createContextBuilder()", () => {
+  // CB-011: the Context Builder composes an owned Collection Engine from an
+  // injected Provider Registry at construction, so the factory now takes a
+  // required registry alongside the configuration.
+  const registry = createProviderRegistry([makeProvider("handbook")]);
+
   it("returns a handle exposing the validated configuration", () => {
-    const builder = createContextBuilder(validConfig);
+    const builder = createContextBuilder(validConfig, registry);
     expect(builder.config).toEqual(validConfig);
   });
 
   it("returns a plain object handle, not a class instance", () => {
-    const builder = createContextBuilder(validConfig);
+    const builder = createContextBuilder(validConfig, registry);
     expect(Object.getPrototypeOf(builder)).toBe(Object.prototype);
   });
 
   it("returns a frozen handle whose config is frozen", () => {
-    const builder = createContextBuilder(validConfig);
+    const builder = createContextBuilder(validConfig, registry);
     expect(Object.isFrozen(builder)).toBe(true);
     expect(Object.isFrozen(builder.config)).toBe(true);
   });
 
   it("validates its input — invalid configuration is rejected", () => {
     // @ts-expect-error — exercising the runtime validation boundary.
-    expect(() => createContextBuilder({ profile: "unknown" })).toThrow();
+    expect(() => createContextBuilder({ profile: "unknown" }, registry)).toThrow();
   });
 });
 

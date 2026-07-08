@@ -13,9 +13,11 @@
  * the public Knowledge Provider contracts (the platform's input types); CB-005
  * adds the immutable Provider Registry (the catalogue of KnowledgeProviders);
  * CB-007 adds the Collection Engine service boundary (constructed with the
- * registry, which it holds but does not execute). Provider implementations,
- * collection, ranking, assembly, profiles and explainability behaviour are
- * delivered by later Milestone M1+ tasks.
+ * registry, which it holds but does not execute); CB-011 integrates the pipeline:
+ * the Context Builder composes and owns a Collection Engine (built from an
+ * injected Provider Registry) and exposes `collect(request)`, the first
+ * end-to-end collection behaviour. Ranking, selection, assembly, profiles and
+ * explainability behaviour are delivered by later Milestone M2+ tasks.
  */
 
 /** Identity of the Context Builder agent (see AJS-004 required metadata). */
