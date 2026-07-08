@@ -108,12 +108,70 @@ Public exports: `contextPackageSchema`, `parseContextPackage`, `SECTION_KINDS`,
 `ContextExplainability`, `ExplainabilityEntry`, `ContextSectionKind`,
 `ReferenceType`.
 
+## Knowledge Provider contracts (CB-004)
+
+The provider contracts define **how knowledge enters the platform** — the input
+side of the Context Builder. CB-004 defines the *contracts only*: no provider
+implementations, registry, collection, ranking or Context Package generation.
+
+Knowledge flows through immutable platform contracts:
+
+```text
+KnowledgeRequest → KnowledgeProvider → KnowledgeItem[] → Context Builder → Context Package
+```
+
+- **`KnowledgeRequest`** — the immutable, provider-agnostic input handed to every
+  provider: `{ project, task, branch?, commit?, issue? }` (SPEC-002 §7). It
+  carries only stable locators. The Context Profile and workflow type are
+  **excluded** — they are Context Builder *configuration* and drive
+  ranking/assembly, which providers must not know about.
+- **`KnowledgeItem`** — the canonical unit of knowledge a provider returns:
+  `{ id, source, content }`. `source` **reuses the CB-003
+  `SourceReference` contract** (`{ id, type, title, locator? }`), so the same
+  citable-source shape flows unchanged from a provider into the package's
+  references. `content` is opaque body text — providers contribute knowledge,
+  not formatted context. There is deliberately **no freeform metadata bag**
+  (it would become a provider-specific dumping ground).
+- **`KnowledgeProvider`** — the interface every source implements. It extends
+  `ProviderMetadata` (`id`, `name`, `description`) and exposes a single method
+  `provide(request: KnowledgeRequest): Promise<readonly KnowledgeItem[]>`. One
+  immutable request object (never expanding primitive parameters); async so
+  future file/API providers fit without a signature change. Providers do **not**
+  build packages, rank, format, estimate tokens, or read configuration.
+
+```ts
+import {
+  parseKnowledgeRequest,
+  parseKnowledgeItem,
+  type KnowledgeProvider,
+} from "./context-builder/index.js";
+
+const request = parseKnowledgeRequest({ project: "aj-os", task: "CB-004" }); // frozen
+const item = parseKnowledgeItem({
+  id: "k1",
+  source: { id: "AJS-002", type: "standard", title: "Context Assembly Standard" },
+  content: "…",
+}); // validated + deeply frozen
+```
+
+- `parseKnowledgeRequest` / `parseKnowledgeItem` validate then freeze (deep), or
+  throw a `ZodError`. Every schema is **strict** (unknown keys rejected);
+  `content` must be non-empty.
+- `providerMetadataSchema` is exported so a future provider registry (CB-005)
+  can validate providers without CB-004 implementing any registry behaviour.
+
+Public exports: `knowledgeRequestSchema`, `knowledgeItemSchema`,
+`providerMetadataSchema`, `parseKnowledgeRequest`, `parseKnowledgeItem`, and the
+types `KnowledgeRequest`, `KnowledgeItem`, `ProviderMetadata`,
+`KnowledgeProvider`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
 **CB-001**), its public configuration contract and `createContextBuilder()`
-factory (task **CB-002**), and the public Context Package contract (task
-**CB-003**). No Context Builder *behaviour* (providers, collection, ranking,
+factory (task **CB-002**), the public Context Package contract (task
+**CB-003**), and the public Knowledge Provider contracts (task **CB-004**). No
+Context Builder *behaviour* (provider implementations, collection, ranking,
 assembly, explainability) is implemented yet.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
