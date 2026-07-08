@@ -122,7 +122,7 @@ Contract-first implementation order:
 
 - [x] CB-007 — Establish Collection Engine Service
 - [x] CB-008 — Define Collection Error Contract
-- [ ] CB-009 — Define CollectionResult Contract
+- [x] CB-009 — Define CollectionResult Contract
 - [ ] CB-010 — Implement Provider Execution
 - [ ] CB-011 — Integrate Context Builder Collection Pipeline
 - [ ] CB-012 — Implement Collection Behaviour Tests
@@ -135,7 +135,7 @@ The Context Builder deterministically collects knowledge from all registered pro
 
 - [ ] Collection engine operational
 - [x] Collection Error contract defined
-- [ ] CollectionResult contract defined (items + errors)
+- [x] CollectionResult contract defined (items + errors)
 - [ ] Provider execution implemented (partial collection)
 - [ ] Context Builder integration operational
 - [ ] Collection tests passing
@@ -282,6 +282,7 @@ The implementation roadmap is complete when:
 
 | Date | Version | Description |
 | ---------- | ------- | --------------------------------- |
+| 2026-07-08 | 2.2 | CB-009 completed: CollectionResult contract (items + errors + metadata) defined; M2 task progress updated. |
 | 2026-07-08 | 2.1 | Milestone 2 planning corrections: adopted partial-collection model; reordered tasks contract-first (Error contract → CollectionResult → Provider Execution); added M2 Related Tasks list. |
 | 2026-07-08 | 2.0 | Updated roadmap after freezing Milestone 1; aligned milestones with contract-first architecture. |
 | 2026-07-07 | 1.0 | Initial milestone roadmap created |

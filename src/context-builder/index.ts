@@ -101,3 +101,15 @@ export {
   FAILURE_CATEGORIES,
 } from "./collection/index.js";
 export type { CollectionError, FailureCategory } from "./collection/index.js";
+
+// CollectionResult contract — the complete, deterministic outcome of knowledge
+// collection: collected items and collected errors together (CB-009).
+export {
+  collectionResultSchema,
+  collectionResultMetadataSchema,
+  parseCollectionResult,
+} from "./collection/index.js";
+export type {
+  CollectionResult,
+  CollectionResultMetadata,
+} from "./collection/index.js";

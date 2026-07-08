@@ -297,6 +297,69 @@ const error = parseCollectionError({
 Public exports: `collectionErrorSchema`, `parseCollectionError`,
 `FAILURE_CATEGORIES`, and the types `CollectionError`, `FailureCategory`.
 
+## CollectionResult contract (CB-009)
+
+The **CollectionResult** is the canonical, complete, deterministic outcome of
+knowledge collection. Because the Context Builder uses **partial collection**, a
+result aggregates *both* what was collected and what failed — a single provider
+failure never aborts collection:
+
+```text
+metadata · items (KnowledgeItem[]) · errors (CollectionError[])
+```
+
+CB-009 defines the *contract only* — no provider execution, engine behaviour,
+ranking, selection, duplicate detection or Context Package generation. It
+**composes** the existing contracts rather than redefining them.
+
+- **`metadata`** — the collection's **provenance**: the `KnowledgeRequest`
+  (CB-004) the collection answered (`{ project, task, branch?, commit?, issue? }`).
+  The request schema is **reused wholesale**, mirroring the CB-003 package
+  metadata (`project`/`task`/`branch`/`commit`). It is provenance only — no
+  timestamps, durations, retry counts, token estimates or diagnostics (those
+  would break determinism and leak implementation detail).
+- **`items`** — the collected knowledge, composing the CB-004 `KnowledgeItem`
+  contract. May be empty.
+- **`errors`** — per-provider failures, composing the CB-008 `CollectionError`
+  contract. May be empty. An empty collection means no provider failed; a result
+  with both items and errors is a valid **partial** outcome; an empty result (no
+  items, no errors) is also valid.
+
+```ts
+import { parseCollectionResult } from "./context-builder/index.js";
+
+const result = parseCollectionResult({
+  metadata: { project: "aj-os", task: "CB-009" },
+  items: [
+    {
+      id: "k1",
+      source: { id: "AJS-002", type: "standard", title: "Context Assembly Standard" },
+      content: "…",
+    },
+  ],
+  errors: [
+    {
+      id: "err-1",
+      providerId: "handbook",
+      category: "provider-unavailable",
+      message: "The handbook source could not be read.",
+    },
+  ],
+}); // validated + deeply frozen
+```
+
+- `parseCollectionResult(input)` validates then **deep-freezes** (immutable at
+  every level — the result, its arrays, and every embedded item/error), or throws
+  a `ZodError`. The schema is **strict** — execution-, ranking- or
+  selection-specific fields (e.g. a leaked `durationMs`) are rejected.
+- `collectionResultSchema` is exported so CB-010 can **construct** a
+  `CollectionResult` during provider execution without CB-009 implementing any
+  collection behaviour.
+
+Public exports: `collectionResultSchema`, `collectionResultMetadataSchema`,
+`parseCollectionResult`, and the types `CollectionResult`,
+`CollectionResultMetadata`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -304,11 +367,12 @@ This module currently contains its boundary and public entry point (task
 factory (task **CB-002**), the public Context Package contract (task
 **CB-003**), the public Knowledge Provider contracts (task **CB-004**), the
 immutable Provider Registry (task **CB-005**), the Collection Engine service
-boundary (task **CB-007**), and the CollectionError contract (task **CB-008**).
-No Context Builder *behaviour* (provider implementations, provider execution,
-collection, ranking, assembly, explainability) is implemented yet — the Collection
-Engine holds its registry but does not execute it, and the CollectionError
-contract represents failures without producing or handling them.
+boundary (task **CB-007**), the CollectionError contract (task **CB-008**), and
+the CollectionResult contract (task **CB-009**). No Context Builder *behaviour*
+(provider implementations, provider execution, collection, ranking, assembly,
+explainability) is implemented yet — the Collection Engine holds its registry but
+does not execute it, and the CollectionError / CollectionResult contracts
+represent failures and outcomes without producing or handling them.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 
