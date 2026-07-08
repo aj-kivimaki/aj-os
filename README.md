@@ -5,7 +5,7 @@
 >
 > **Every project makes the next project better.**
 
-------------------------------------------------------------------------
+---
 
 ## Vision
 
@@ -23,7 +23,7 @@ The goal is not simply to generate code.
 The goal is to build a system that continuously improves how software is
 designed, implemented, documented, and maintained.
 
-------------------------------------------------------------------------
+---
 
 # Philosophy
 
@@ -41,20 +41,20 @@ AJ-OS is built around a simple idea:
 
 Every completed project should permanently improve the next one.
 
-------------------------------------------------------------------------
+---
 
 # Core Principles
 
--   Standards before implementation.
--   Specifications before coding.
--   Knowledge before prompts.
--   Human approval before canonical knowledge.
--   Handbook as the single source of truth.
--   Generated AI artifacts are disposable.
--   Model-agnostic architecture.
--   Small, composable services and workflows.
+- Standards before implementation.
+- Specifications before coding.
+- Knowledge before prompts.
+- Human approval before canonical knowledge.
+- Handbook as the single source of truth.
+- Generated AI artifacts are disposable.
+- Model-agnostic architecture.
+- Small, composable services and workflows.
 
-------------------------------------------------------------------------
+---
 
 # Platform Architecture
 
@@ -78,9 +78,26 @@ Every completed project should permanently improve the next one.
 
 For a complete architectural overview, see:
 
--   `docs/architecture/ARCH-001-AJ-OS-Platform-Architecture.md`
+- `docs/architecture/ARCH-001-AJ-OS-Platform-Architecture.md`
 
-------------------------------------------------------------------------
+---
+
+# Platform Contracts
+
+AJ-OS is built around immutable platform contracts.
+
+Current contracts include:
+
+- Context Builder Configuration
+- Context Package
+- Knowledge Request
+- Knowledge Provider
+- Knowledge Item
+- Provider Registry
+
+Future platform behavior is built on top of these contracts rather than redefining them.
+
+---
 
 # Documentation Structure
 
@@ -94,12 +111,12 @@ Platform rules and governance.
 
 Examples:
 
--   Developer Operating System
--   Context Assembly
--   Knowledge Standard
--   Agent Specification
--   Workflow Orchestration
--   Knowledge Governance
+- Developer Operating System
+- Context Assembly
+- Knowledge Standard
+- Agent Specification
+- Workflow Orchestration
+- Knowledge Governance
 
 ## Specifications (SPEC)
 
@@ -107,11 +124,11 @@ Implementation blueprints for platform services and workflows.
 
 Examples:
 
--   Project Kickoff Workflow
--   Context Builder Agent
--   End-of-Session Workflow
--   Knowledge Review Workflow
--   Wiki Generator Agent
+- Project Kickoff Workflow
+- Context Builder Agent
+- End-of-Session Workflow
+- Knowledge Review Workflow
+- Wiki Generator Agent
 
 ## Project Documentation
 
@@ -131,7 +148,7 @@ Optimized for AI retrieval.
 
 Never edited directly.
 
-------------------------------------------------------------------------
+---
 
 # Knowledge Pipeline
 
@@ -155,26 +172,44 @@ Never edited directly.
           ↓
     Coding Agent
 
-------------------------------------------------------------------------
+---
 
 # Current Status
 
-AJ-OS is currently undergoing a major architectural redesign.
+AJ-OS has completed its platform architecture, engineering standards, and implementation specifications.
 
-The project is transitioning from an experimental collection of tools
-into a structured platform based on:
+Implementation is now underway following the approved architecture.
 
--   Platform Standards (AJS)
--   Engineering Specifications (SPEC)
--   Platform Architecture (ARCH)
--   Knowledge Governance
--   Context Engineering
--   Workflow Orchestration
+Current implementation progress:
 
-The current priority is implementing the platform according to these
-specifications.
+## Phase 1 — Platform Foundation ✅
 
-------------------------------------------------------------------------
+Completed:
+
+- Platform Architecture (ARCH)
+- Engineering Standards (AJS)
+- Core Specifications (SPEC)
+
+## Phase 2 — Core Platform Services 🚧
+
+Current focus:
+
+### SPEC-002 — Context Builder
+
+Milestone 1 Progress:
+
+- ✅ CB-001 — Module Boundary
+- ✅ CB-002 — Configuration Contract
+- ✅ CB-003 — Context Package Contract
+- ✅ CB-004 — Knowledge Provider Contracts
+- ✅ CB-005 — Provider Registry
+- ⬜ CB-006 — Contract Testing Foundation
+
+The Context Builder now exposes immutable platform contracts and core services.
+
+The remaining work for Milestone 1 focuses on establishing permanent contract tests before implementation proceeds to the Context Collection Engine.
+
+---
 
 # Legacy Components (v1)
 
@@ -183,74 +218,77 @@ the current architecture.
 
 These include:
 
--   Code-first Notion database synchronization
--   Notion schema generation
--   REST API
--   Handbook Agent
--   n8n workflows
--   Experimental AI agents
+- Code-first Notion database synchronization
+- Notion schema generation
+- REST API
+- Handbook Agent
+- n8n workflows
+- Experimental AI agents
 
 These components remain valuable and will be reviewed individually.
 
 Where appropriate they will be:
 
--   Migrated into the new architecture
--   Refactored to comply with AJS and SPEC documents
--   Replaced by newer platform services
--   Archived if no longer relevant
+- Migrated into the new architecture
+- Refactored to comply with AJS and SPEC documents
+- Replaced by newer platform services
+- Archived if no longer relevant
 
 The Notion integration is now considered one possible knowledge provider
 rather than the center of the platform.
 
-------------------------------------------------------------------------
+---
 
 # Roadmap
 
 ## Phase 1 --- Platform Foundation ✅
 
--   Architecture
--   Standards
--   Specifications
+- Architecture
+- Standards
+- Specifications
 
-## Phase 2 --- Core Platform Services
+## Phase 2 — Core Platform Services 🚧
 
--   Project Kickoff Workflow
--   Context Builder Agent
--   End-of-Session Workflow
--   Knowledge Review Workflow
--   Wiki Generator Agent
+Current implementation order:
+
+1. Context Builder (SPEC-002) ← In Progress
+2. End-of-Session Workflow (SPEC-003)
+3. Knowledge Review Workflow (SPEC-004)
+4. Wiki Generator Agent (SPEC-005)
+
+Project Kickoff (SPEC-001) is intentionally postponed until the platform is operational and will become the first workflow built on the completed platform.
 
 ## Phase 3 --- Supporting Platform Services
 
--   Search
--   Configuration
--   Logging
--   Agent Registry
--   Workflow Registry
+- Search
+- Configuration
+- Logging
+- Agent Registry
+- Workflow Registry
 
 ## Phase 4 --- Productivity Services
 
--   Portfolio Builder
--   Job Finder
--   Daily Planner
--   Additional personal workflows
+- Portfolio Builder
+- Job Finder
+- Daily Planner
+- Additional personal workflows
 
-------------------------------------------------------------------------
+---
 
 # Design Goals
 
 AJ-OS aims to be:
 
--   Modular
--   Explainable
--   Observable
--   Extensible
--   Testable
--   Model-agnostic
--   Human-governed
--   Knowledge-driven
+- Modular
+- Explainable
+- Observable
+- Extensible
+- Testable
+- Model-agnostic
+- Human-governed
+- Knowledge-driven
 
-------------------------------------------------------------------------
+---
 
 # Contributing
 
@@ -264,7 +302,7 @@ Before implementing new functionality:
 4.  Validate the implementation.
 5.  Capture reusable knowledge through the End-of-Session workflow.
 
-------------------------------------------------------------------------
+---
 
 # License
 
@@ -272,6 +310,6 @@ Released under the MIT License.
 
 See the `LICENSE` file for details.
 
-------------------------------------------------------------------------
+---
 
 > **Capture knowledge. Govern it. Reuse it.**

@@ -22,7 +22,7 @@ The milestones prioritize working software over technical completeness.
 
 | Milestone | Name                      | Goal                                                           | Status |
 | --------- | ------------------------- | -------------------------------------------------------------- | ------ |
-| M1        | Foundation                | Create the Context Builder framework                           | ⬜     |
+| M1        | Foundation                | Create the Context Builder framework                           | ✅     |
 | M2        | Knowledge Providers       | Read knowledge from approved sources                           | ⬜     |
 | M3        | Context Collection        | Collect and organize relevant information                      | ⬜     |
 | M4        | Context Assembly          | Generate deterministic Context Packages                        | ⬜     |
@@ -81,7 +81,7 @@ No business logic is implemented.
 - [x] CB-003 — Context Package Schema
 - [x] CB-004 — Knowledge Provider Interface
 - [x] CB-005 — Provider Registry
-- [ ] CB-006
+- [x] CB-006 — Establish Contract Testing Foundation
 
 ---
 
@@ -96,9 +96,9 @@ No business logic is implemented.
 
 ## Definition of Done
 
-- [ ] Foundation complete
-- [ ] Tests passing
-- [ ] Documentation updated
+- [x] Foundation complete
+- [x] Tests passing
+- [x] Documentation updated
 
 ---
 

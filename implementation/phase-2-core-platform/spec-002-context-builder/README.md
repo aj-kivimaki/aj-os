@@ -143,7 +143,7 @@ The implementation prioritizes:
 
 | Milestone | Description               | Status |
 | --------- | ------------------------- | ------ |
-| M1        | Foundation                | ⬜     |
+| M1        | Foundation                | ✅     |
 | M2        | Knowledge Providers       | ⬜     |
 | M3        | Collection Engine         | ⬜     |
 | M4        | Ranking Engine            | ⬜     |

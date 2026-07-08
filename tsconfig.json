@@ -40,5 +40,11 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true
-  }
+  },
+
+  // The production build (`tsc`) and typecheck own `src` only. Test sources live
+  // under `tests/` (outside `rootDir`) and are transformed/run by Vitest, so
+  // scoping the compiler here keeps `npm run build` and `npm run typecheck`
+  // green while tests exercise the module's public surface.
+  "include": ["src"]
 }
