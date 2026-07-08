@@ -76,6 +76,19 @@ function delayedItemProvider(id: string, delayMs: number): KnowledgeProvider {
   };
 }
 
+/** A provider that rejects after `delayMs`, to prove failure completion order is ignored. */
+function delayedFailingProvider(id: string, delayMs: number): KnowledgeProvider {
+  return {
+    id,
+    name: `${id} provider`,
+    description: `Delayed failing fixture provider ${id}.`,
+    async provide(): Promise<readonly KnowledgeItem[]> {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      throw new Error(`${id} failed`);
+    },
+  };
+}
+
 function engineFor(providers: readonly KnowledgeProvider[]) {
   return createCollectionEngine(createProviderRegistry(providers));
 }
@@ -191,6 +204,36 @@ describe("collect — determinism (registry order is authoritative)", () => {
     const result = await engine.collect(REQUEST);
 
     expect(result.items.map((i) => i.id)).toEqual(["slow-item", "fast-item"]);
+  });
+
+  it("orders errors by registry index, not failure completion order", async () => {
+    // "slow" is registered first but rejects last; "fast" rejects first. The
+    // CollectionErrors must still appear in registry order — provider completion
+    // order never influences result ordering.
+    const engine = engineFor([
+      delayedFailingProvider("slow", 30),
+      delayedFailingProvider("fast", 0),
+    ]);
+    const result = await engine.collect(REQUEST);
+
+    expect(result.items).toEqual([]);
+    expect(result.errors.map((e) => e.providerId)).toEqual(["slow", "fast"]);
+  });
+
+  it("orders interleaved items and errors by registry index regardless of timing", async () => {
+    // Registry order: item(slow) · fail(fast) · item(fast) · fail(slow). Despite
+    // the fast providers settling first, items and errors each follow registry
+    // order deterministically.
+    const engine = engineFor([
+      delayedItemProvider("i-slow", 30),
+      delayedFailingProvider("e-fast", 0),
+      delayedItemProvider("i-fast", 0),
+      delayedFailingProvider("e-slow", 30),
+    ]);
+    const result = await engine.collect(REQUEST);
+
+    expect(result.items.map((i) => i.id)).toEqual(["i-slow-item", "i-fast-item"]);
+    expect(result.errors.map((e) => e.providerId)).toEqual(["e-fast", "e-slow"]);
   });
 
   it("produces the same result shape for repeated runs", async () => {

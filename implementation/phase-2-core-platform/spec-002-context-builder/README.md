@@ -173,7 +173,7 @@ Collection is **partial**: a single provider failure never aborts collection. A 
 | Milestone | Description | Status |
 | --------- | -------------------------- | ------ |
 | M1 | Foundation | ✅ |
-| M2 | Knowledge Collection | ⬜ |
+| M2 | Knowledge Collection | ✅ |
 | M3 | Knowledge Selection | ⬜ |
 | M4 | Context Assembly | ⬜ |
 | M5 | Explainability & Profiles | ⬜ |
@@ -193,7 +193,7 @@ Current status:
 - ✅ Engineering standards complete.
 - ✅ Specification complete.
 - ✅ Milestone 1 complete and frozen.
-- 🚧 Milestone 2 planning in progress.
+- ✅ Milestone 2 complete (pending freeze review).
 
 Completed foundation:
 
@@ -263,6 +263,7 @@ The implementation is complete when:
 
 | Date | Version | Description |
 | ---------- | ------- | -------------------------------------- |
+| 2026-07-08 | 2.2 | CB-012 completed and Milestone 2 marked complete: deterministic knowledge collection is now protected by permanent behaviour tests (105 → 119). No platform contract changed. |
 | 2026-07-08 | 2.1 | Milestone 2 planning corrections: partial-collection model; deliverables reordered contract-first (CB-007…CB-012). |
 | 2026-07-08 | 2.0 | Updated after freezing Milestone 1 and aligning the implementation roadmap with the contract-first architecture. |
 | 2026-07-07 | 1.0 | Initial implementation package created |

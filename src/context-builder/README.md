@@ -470,6 +470,33 @@ injected at construction, so an additive-only design could not satisfy the
 architecture without a partial or duplicate public API. No other public contract
 changed.
 
+## Collection behaviour tests (CB-012)
+
+Milestone M2's collection behaviour is protected by permanent, deterministic
+Vitest tests (built on the CB-006 foundation — no new framework). They validate
+only **public behaviour** through the module entry point, run in milliseconds,
+and use no filesystem, network, randomness or timing-based assertions:
+
+```text
+tests/context-builder/
+├── collection.test.ts                    Collection Engine service boundary (CB-007)
+├── collection-errors.test.ts             CollectionError contract (CB-008)
+├── collection-result.test.ts             CollectionResult contract (CB-009)
+├── collection-execution.test.ts          Provider execution & determinism (CB-010)
+└── context-builder-collection.test.ts    Context Builder integration (CB-011)
+```
+
+The determinism guarantee is asserted directly: registry order is authoritative,
+so provider **completion** order never influences item **or** error ordering
+(delayed-resolving and delayed-rejecting fixtures prove both), partial collection
+is deterministic, results and errors are deeply immutable, and repeated
+collection with identical inputs yields equivalent results. The Context Builder
+integration tests assert that `ContextBuilder.collect` delegates to the owned
+engine and returns the `CollectionResult` **unchanged** — equal to a standalone
+engine over the same registry, with no filtering, ranking, deduplication or
+enrichment. CB-012 introduced **no** platform behaviour; it only exercises the
+frozen CB-002…CB-011 contracts.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -480,10 +507,11 @@ immutable Provider Registry (task **CB-005**), the Collection Engine service
 boundary (task **CB-007**), the CollectionError contract (task **CB-008**), the
 CollectionResult contract (task **CB-009**), deterministic partial provider
 execution — `CollectionEngine.collect` (task **CB-010**), and the integrated
-collection pipeline — `ContextBuilder.collect` (task **CB-011**). The Context
-Builder now composes and owns a Collection Engine and collects knowledge
-end-to-end; the remaining Context Builder *behaviour* (ranking, selection,
-assembly, explainability) is not implemented yet.
+collection pipeline — `ContextBuilder.collect` (task **CB-011**), all protected
+by permanent collection behaviour tests (task **CB-012**). The Context Builder
+now composes and owns a Collection Engine and collects knowledge end-to-end, and
+Milestone M2 is complete; the remaining Context Builder *behaviour* (ranking,
+selection, assembly, explainability) is not implemented yet.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 

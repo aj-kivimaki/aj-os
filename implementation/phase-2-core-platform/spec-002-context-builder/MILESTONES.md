@@ -23,7 +23,7 @@ The milestones prioritize working software over technical completeness.
 | Milestone | Name | Goal | Status |
 | --------- | ---- | ---- | ------ |
 | M1 | Foundation | Establish immutable platform contracts, core services, and contract testing | ✅ |
-| M2 | Knowledge Collection | Collect knowledge deterministically from registered providers | ⬜ |
+| M2 | Knowledge Collection | Collect knowledge deterministically from registered providers | ✅ |
 | M3 | Knowledge Selection | Select, filter, and organize collected knowledge | ⬜ |
 | M4 | Context Assembly | Assemble deterministic Context Packages | ⬜ |
 | M5 | Explainability & Profiles | Explain selection decisions and support context profiles | ⬜ |
@@ -125,7 +125,7 @@ Contract-first implementation order:
 - [x] CB-009 — Define CollectionResult Contract
 - [x] CB-010 — Implement Provider Execution
 - [x] CB-011 — Integrate Context Builder Collection Pipeline
-- [ ] CB-012 — Implement Collection Behaviour Tests
+- [x] CB-012 — Implement Collection Behaviour Tests
 
 ## Validation
 
@@ -138,7 +138,7 @@ The Context Builder deterministically collects knowledge from all registered pro
 - [x] CollectionResult contract defined (items + errors)
 - [x] Provider execution implemented (partial collection)
 - [x] Context Builder integration operational
-- [ ] Collection tests passing
+- [x] Collection tests passing
 
 ---
 
@@ -282,6 +282,7 @@ The implementation roadmap is complete when:
 
 | Date | Version | Description |
 | ---------- | ------- | --------------------------------- |
+| 2026-07-08 | 2.5 | CB-012 completed: permanent collection behaviour tests (Context Builder integration + deterministic error ordering) added on the CB-006 foundation; suite 105 → 119. **Milestone M2 complete** — all M2 tasks and DoD satisfied. No platform contract changed. |
 | 2026-07-08 | 2.4 | CB-011 completed: Context Builder integrated with the Collection Engine (`ContextBuilder.collect`). Approved contract evolution — `createContextBuilder(config)` → `createContextBuilder(config, registry)`; no other public contract changed. M2 task progress updated. |
 | 2026-07-08 | 2.3 | CB-010 completed: deterministic partial provider execution implemented (`CollectionEngine.collect`); M2 task progress updated. |
 | 2026-07-08 | 2.2 | CB-009 completed: CollectionResult contract (items + errors + metadata) defined; M2 task progress updated. |
