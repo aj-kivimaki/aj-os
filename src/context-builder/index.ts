@@ -21,6 +21,7 @@ export const CONTEXT_BUILDER = {
   id: "context-builder",
   name: "Context Builder",
   version: "0.1.0",
+  owner: "AJ-OS",
   category: "context",
   description:
     "Assembles deterministic, explainable Context Packages from approved AJ-OS knowledge sources.",

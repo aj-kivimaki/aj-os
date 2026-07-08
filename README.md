@@ -196,18 +196,18 @@ Current focus:
 
 ### SPEC-002 — Context Builder
 
-Milestone 1 Progress:
+Milestone 1 — Foundation ✅ Complete
 
 - ✅ CB-001 — Module Boundary
 - ✅ CB-002 — Configuration Contract
 - ✅ CB-003 — Context Package Contract
 - ✅ CB-004 — Knowledge Provider Contracts
 - ✅ CB-005 — Provider Registry
-- ⬜ CB-006 — Contract Testing Foundation
+- ✅ CB-006 — Contract Testing Foundation
 
-The Context Builder now exposes immutable platform contracts and core services.
+The Context Builder now exposes immutable platform contracts, core services, and a permanent contract-testing foundation.
 
-The remaining work for Milestone 1 focuses on establishing permanent contract tests before implementation proceeds to the Context Collection Engine.
+Milestone 1 is complete. Implementation next proceeds to the Knowledge Providers and the Context Collection Engine.
 
 ---
 

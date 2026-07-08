@@ -10,6 +10,12 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
 
 ### Added
 
+- Context Builder foundation (SPEC-002, Milestone 1) — the first platform service module (`src/context-builder/`), exposing immutable platform contracts and core services through a single public entry point:
+  - Public configuration contract and `createContextBuilder()` factory (CB-002)
+  - Context Package contract implementing AJS-002 Appendix B (CB-003)
+  - Knowledge Provider contracts — `KnowledgeRequest`, `KnowledgeItem`, `KnowledgeProvider` (CB-004)
+  - Immutable Provider Registry via `createProviderRegistry()` (CB-005)
+  - Contract-testing foundation (Vitest, 63 tests, `npm test`) targeting the module's public surface (CB-006)
 - REST API server built on Fastify (`npm run serve`), the first runtime interface alongside the sync CLI
 - `GET /health` liveness endpoint
 - Handbook AI agent (Claude, via `POST /agent/ask`) that answers questions grounded in the handbook wiki using a tool-use loop
