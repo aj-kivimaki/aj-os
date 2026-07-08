@@ -11,9 +11,11 @@
  * configuration contract and the `createContextBuilder()` factory; CB-003 adds
  * the public Context Package contract (the canonical output type); CB-004 adds
  * the public Knowledge Provider contracts (the platform's input types); CB-005
- * adds the immutable Provider Registry (the catalogue of KnowledgeProviders).
- * Provider implementations, collection, ranking, assembly, profiles and
- * explainability behaviour are delivered by later Milestone M1+ tasks.
+ * adds the immutable Provider Registry (the catalogue of KnowledgeProviders);
+ * CB-007 adds the Collection Engine service boundary (constructed with the
+ * registry, which it holds but does not execute). Provider implementations,
+ * collection, ranking, assembly, profiles and explainability behaviour are
+ * delivered by later Milestone M1+ tasks.
  */
 
 /** Identity of the Context Builder agent (see AJS-004 required metadata). */
@@ -85,3 +87,8 @@ export type {
 // Provider Registry — the immutable catalogue of KnowledgeProviders (CB-005).
 export { createProviderRegistry } from "./registry/index.js";
 export type { ProviderRegistry } from "./registry/index.js";
+
+// Collection Engine — the service boundary that coordinates knowledge
+// collection; constructed with the Provider Registry, held not executed (CB-007).
+export { createCollectionEngine } from "./collection/index.js";
+export type { CollectionEngine } from "./collection/index.js";

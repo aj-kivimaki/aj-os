@@ -120,7 +120,7 @@ No ranking, filtering, or Context Package generation is performed.
 
 Contract-first implementation order:
 
-- [ ] CB-007 — Establish Collection Engine Service
+- [x] CB-007 — Establish Collection Engine Service
 - [ ] CB-008 — Define Collection Error Contract
 - [ ] CB-009 — Define CollectionResult Contract
 - [ ] CB-010 — Implement Provider Execution

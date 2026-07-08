@@ -205,15 +205,60 @@ mirroring `createContextBuilder.ts`.
 
 Public exports: `createProviderRegistry` and the type `ProviderRegistry`.
 
+## Collection Engine (CB-007)
+
+The **Collection Engine** is the platform service that coordinates deterministic
+knowledge collection. CB-007 establishes only its *service boundary* — the seam
+that later Milestone M2 tasks extend:
+
+```text
+ProviderRegistry → createCollectionEngine → immutable service handle
+```
+
+The engine is **constructed with** the Provider Registry (CB-005), which it
+**holds but does not execute**. It follows the same factory-based service pattern
+as `createContextBuilder()` and `createProviderRegistry()`:
+
+```ts
+import {
+  createProviderRegistry,
+  createCollectionEngine,
+} from "./context-builder/index.js";
+
+const registry = createProviderRegistry([handbookProvider, wikiProvider]);
+const engine = createCollectionEngine(registry);
+
+engine.registry; // the injected registry (held, not executed)
+```
+
+- **Composed** — the registry is injected at construction; the engine does not
+  own, discover, load, configure or rank providers.
+- **Minimal** — the handle exposes only the held `registry`. It carries **no**
+  `collect()` method yet: provider execution, `CollectionResult` and
+  `CollectionError` are introduced by CB-008…CB-010 through this same interface.
+- **Deterministic** — the same registry always yields the same public service.
+- **Stateless & immutable** — no mutable runtime state; the returned handle is
+  frozen. A missing registry throws an `Error` (fail-fast construction).
+- **Platform-oriented** — the engine *coordinates* collection; it is not itself a
+  provider.
+
+Like the registry, no `schema.ts` is introduced: the engine adds no new *data*
+contract (it composes the CB-005 `ProviderRegistry`), so its interface is
+co-located with its factory in `collection/createCollectionEngine.ts`.
+
+Public exports: `createCollectionEngine` and the type `CollectionEngine`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
 **CB-001**), its public configuration contract and `createContextBuilder()`
 factory (task **CB-002**), the public Context Package contract (task
-**CB-003**), the public Knowledge Provider contracts (task **CB-004**), and the
-immutable Provider Registry (task **CB-005**). No Context Builder *behaviour*
-(provider implementations, collection, ranking, assembly, explainability) is
-implemented yet.
+**CB-003**), the public Knowledge Provider contracts (task **CB-004**), the
+immutable Provider Registry (task **CB-005**), and the Collection Engine service
+boundary (task **CB-007**). No Context Builder *behaviour* (provider
+implementations, provider execution, collection, ranking, assembly,
+explainability) is implemented yet — the Collection Engine holds its registry but
+does not execute it.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 
