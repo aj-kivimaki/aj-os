@@ -1,8 +1,8 @@
 # SPEC-002 — Context Builder Agent
 
-> **Implementation Package**
+> **Implementation Package:** SPEC-002
 >
-> **Status:** Planned
+> **Status:** Active
 >
 > **Phase:** Phase 2 — Core Knowledge Platform
 >
@@ -139,17 +139,45 @@ The implementation prioritizes:
 
 ---
 
+# Current Milestone
+
+## Milestone 2 — Knowledge Collection
+
+**Objective**
+
+Implement deterministic knowledge collection using the platform contracts established during Milestone 1.
+
+Collection is **partial**: a single provider failure never aborts collection. A provider contributes either KnowledgeItems or a CollectionError, and the CollectionResult contains both.
+
+**Deliverables (implementation order)**
+
+- Collection Engine (CB-007)
+- Collection Error contract (CB-008)
+- CollectionResult contract — items + errors (CB-009)
+- Provider execution — partial collection (CB-010)
+- Context Builder integration (CB-011)
+- Collection tests (CB-012)
+
+**Intentionally excluded**
+
+- Knowledge selection
+- Ranking
+- Context Package generation
+- Explainability
+- Profiles
+
+---
+
 # Milestone Progress
 
-| Milestone | Description               | Status |
-| --------- | ------------------------- | ------ |
-| M1        | Foundation                | ✅     |
-| M2        | Knowledge Providers       | ⬜     |
-| M3        | Collection Engine         | ⬜     |
-| M4        | Ranking Engine            | ⬜     |
-| M5        | Context Package           | ⬜     |
-| M6        | Profiles & Explainability | ⬜     |
-| M7        | Optimization              | ⬜     |
+| Milestone | Description | Status |
+| --------- | -------------------------- | ------ |
+| M1 | Foundation | ✅ |
+| M2 | Knowledge Collection | ⬜ |
+| M3 | Knowledge Selection | ⬜ |
+| M4 | Context Assembly | ⬜ |
+| M5 | Explainability & Profiles | ⬜ |
+| M6 | Optimization | ⬜ |
 
 See:
 
@@ -161,12 +189,22 @@ See:
 
 Current status:
 
-- Architecture complete.
-- Standards complete.
-- Specification complete.
-- Implementation planning in progress.
+- ✅ Architecture complete.
+- ✅ Engineering standards complete.
+- ✅ Specification complete.
+- ✅ Milestone 1 complete and frozen.
+- 🚧 Milestone 2 planning in progress.
 
-No production code has been written.
+Completed foundation:
+
+- Context Builder module
+- Configuration contract
+- Context Package contract
+- Knowledge Provider contracts
+- Provider Registry
+- Contract Testing Foundation
+
+Milestone 2 introduces the first platform behaviour: deterministic knowledge collection.
 
 ---
 
@@ -223,9 +261,11 @@ The implementation is complete when:
 
 # Change Log
 
-| Date       | Version | Description                            |
+| Date | Version | Description |
 | ---------- | ------- | -------------------------------------- |
-| 2026-07-07 | 1.0     | Initial implementation package created |
+| 2026-07-08 | 2.1 | Milestone 2 planning corrections: partial-collection model; deliverables reordered contract-first (CB-007…CB-012). |
+| 2026-07-08 | 2.0 | Updated after freezing Milestone 1 and aligning the implementation roadmap with the contract-first architecture. |
+| 2026-07-07 | 1.0 | Initial implementation package created |
 
 ---
 

@@ -2,10 +2,15 @@
 
 > Purpose:
 >
-> Verify that an implementation is complete, internally consistent, and ready
-> to become the stable foundation for future platform work.
+> Verify that an implementation is complete, internally consistent, and ready to become the stable foundation for future platform work.
 >
 > A freeze review is an engineering review—not a feature development session.
+>
+> **This document is used after implementation has been completed.**
+>
+> The corresponding planning review is defined in:
+>
+> `implementation/review/MILESTONE-PLANNING.md`
 
 ---
 

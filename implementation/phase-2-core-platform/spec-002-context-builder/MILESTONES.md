@@ -4,7 +4,7 @@
 >
 > **Related Specification:** SPEC-002
 >
-> **Status:** Planned
+> **Status:** Active
 
 ---
 
@@ -20,14 +20,14 @@ The milestones prioritize working software over technical completeness.
 
 # Milestone Overview
 
-| Milestone | Name                      | Goal                                                           | Status |
-| --------- | ------------------------- | -------------------------------------------------------------- | ------ |
-| M1        | Foundation                | Create the Context Builder framework                           | ✅     |
-| M2        | Knowledge Providers       | Read knowledge from approved sources                           | ⬜     |
-| M3        | Context Collection        | Collect and organize relevant information                      | ⬜     |
-| M4        | Context Assembly          | Generate deterministic Context Packages                        | ⬜     |
-| M5        | Explainability & Profiles | Explain why context was selected and support multiple profiles | ⬜     |
-| M6        | Optimization              | Improve performance and prepare future extensions              | ⬜     |
+| Milestone | Name | Goal | Status |
+| --------- | ---- | ---- | ------ |
+| M1 | Foundation | Establish immutable platform contracts, core services, and contract testing | ✅ |
+| M2 | Knowledge Collection | Collect knowledge deterministically from registered providers | ⬜ |
+| M3 | Knowledge Selection | Select, filter, and organize collected knowledge | ⬜ |
+| M4 | Context Assembly | Assemble deterministic Context Packages | ⬜ |
+| M5 | Explainability & Profiles | Explain selection decisions and support context profiles | ⬜ |
+| M6 | Optimization | Improve performance and prepare future platform extensions | ⬜ |
 
 ---
 
@@ -36,9 +36,9 @@ The milestones prioritize working software over technical completeness.
 ```text
 Foundation
         ↓
-Knowledge Providers
+Knowledge Collection
         ↓
-Context Collection
+Knowledge Selection
         ↓
 Context Assembly
         ↓
@@ -51,39 +51,33 @@ Every completed milestone must produce a working and testable Context Builder.
 
 ---
 
-# Milestone M1 — Foundation
+# Milestone M1 — Foundation ✅
 
 ## Objective
 
 Create the foundation of the Context Builder.
 
-This milestone establishes the project structure, interfaces, configuration, schemas and testing infrastructure.
+This milestone establishes the project structure, immutable platform contracts, core services, and permanent contract testing.
 
 No business logic is implemented.
-
----
 
 ## Deliverables
 
 - Context Builder module
-- Configuration schema
-- Context Package schema
-- Knowledge Provider interface
-- Provider registry
-- Testing framework
-
----
+- Configuration contract
+- Context Package contract
+- Knowledge Provider contracts
+- Provider Registry
+- Contract Testing Foundation
 
 ## Related Tasks
 
 - [x] CB-001 — Establish Context Builder Module
 - [x] CB-002 — Public Configuration Contract & Factory
 - [x] CB-003 — Context Package Schema
-- [x] CB-004 — Knowledge Provider Interface
+- [x] CB-004 — Knowledge Provider Contracts
 - [x] CB-005 — Provider Registry
 - [x] CB-006 — Establish Contract Testing Foundation
-
----
 
 ## Validation
 
@@ -92,81 +86,85 @@ No business logic is implemented.
 - Interfaces compile.
 - Architecture follows SPEC-002.
 
----
-
 ## Definition of Done
 
 - [x] Foundation complete
 - [x] Tests passing
 - [x] Documentation updated
+- [x] Freeze review completed
 
 ---
 
-# Milestone M2 — Knowledge Providers
+# Milestone M2 — Knowledge Collection
 
 ## Objective
 
-Implement the provider architecture.
+Implement deterministic knowledge collection using the platform contracts established during Milestone 1.
 
-The Context Builder should be able to retrieve information from approved knowledge sources.
+The Context Builder should be able to execute registered providers and collect KnowledgeItems.
 
----
+Collection is **partial with deterministic error reporting**: a single provider failure never aborts collection. A provider contributes either KnowledgeItems or a CollectionError, and the CollectionResult contains both.
+
+No ranking, filtering, or Context Package generation is performed.
 
 ## Deliverables
 
-Initial providers:
+- Collection Engine
+- Collection Error contract
+- CollectionResult contract (items + errors)
+- Provider execution (partial collection)
+- Context Builder integration
+- Collection tests
 
-- Handbook Provider
-- Standards Provider
-- Specifications Provider
-- Project Documentation Provider
+## Related Tasks
 
----
+Contract-first implementation order:
+
+- [ ] CB-007 — Establish Collection Engine Service
+- [ ] CB-008 — Define Collection Error Contract
+- [ ] CB-009 — Define CollectionResult Contract
+- [ ] CB-010 — Implement Provider Execution
+- [ ] CB-011 — Integrate Context Builder Collection Pipeline
+- [ ] CB-012 — Implement Collection Behaviour Tests
 
 ## Validation
 
-The Context Builder successfully retrieves information from every provider.
-
----
+The Context Builder deterministically collects knowledge from all registered providers, surfacing per-provider failures as CollectionErrors without aborting collection.
 
 ## Definition of Done
 
-- [ ] Providers implemented
-- [ ] Providers tested
-- [ ] Registry operational
+- [ ] Collection engine operational
+- [ ] Collection Error contract defined
+- [ ] CollectionResult contract defined (items + errors)
+- [ ] Provider execution implemented (partial collection)
+- [ ] Context Builder integration operational
+- [ ] Collection tests passing
 
 ---
 
-# Milestone M3 — Context Collection
+# Milestone M3 — Knowledge Selection
 
 ## Objective
 
-Collect and organize information from multiple providers.
+Select the most relevant knowledge from collected results.
 
-No ranking is performed.
-
-The focus is deterministic collection.
-
----
+The focus is deterministic selection rather than package generation.
 
 ## Deliverables
 
-- Provider execution
-- Collection pipeline
-- Duplicate detection
-- Source tracking
-
----
+- Relevance scoring
+- Duplicate handling
+- Filtering
+- Ordering
+- Token budgeting
 
 ## Validation
 
-Collected information is complete and reproducible.
-
----
+The same collected knowledge always produces the same selected result.
 
 ## Definition of Done
 
-- [ ] Collection pipeline operational
+- [ ] Selection pipeline operational
 - [ ] Duplicate handling implemented
 - [ ] Tests passing
 
@@ -176,26 +174,20 @@ Collected information is complete and reproducible.
 
 ## Objective
 
-Transform collected information into a deterministic Context Package.
+Transform selected knowledge into a deterministic Context Package.
 
 Implement the Context Package defined by AJS-002 Appendix B.
-
----
 
 ## Deliverables
 
 - Context Package generator
 - Markdown output
-- Metadata
-- Context ordering
-
----
+- Metadata generation
+- Deterministic assembly
 
 ## Validation
 
 The same input always produces the same Context Package.
-
----
 
 ## Definition of Done
 
@@ -211,24 +203,18 @@ The same input always produces the same Context Package.
 
 Make Context Packages transparent and adaptable.
 
-Implement explainability reports and multiple context profiles.
-
----
+Profiles influence selection and assembly while explainability records why content was selected.
 
 ## Deliverables
 
 - Explainability report
-- Profile support
-- Token estimation
+- Context profiles
 - Ranking explanation
-
----
+- Token estimation
 
 ## Validation
 
 Generated reports explain exactly why content was selected.
-
----
 
 ## Definition of Done
 
@@ -244,8 +230,6 @@ Generated reports explain exactly why content was selected.
 
 Optimize performance and prepare the Context Builder for future platform services.
 
----
-
 ## Deliverables
 
 - Performance improvements
@@ -253,15 +237,11 @@ Optimize performance and prepare the Context Builder for future platform service
 - Configuration refinements
 - Extension points
 
----
-
 ## Validation
 
 Performance targets satisfied.
 
 Future provider integrations remain straightforward.
-
----
 
 ## Definition of Done
 
@@ -300,9 +280,11 @@ The implementation roadmap is complete when:
 
 # Change Log
 
-| Date       | Version | Description                       |
+| Date | Version | Description |
 | ---------- | ------- | --------------------------------- |
-| 2026-07-07 | 1.0     | Initial milestone roadmap created |
+| 2026-07-08 | 2.1 | Milestone 2 planning corrections: adopted partial-collection model; reordered tasks contract-first (Error contract → CollectionResult → Provider Execution); added M2 Related Tasks list. |
+| 2026-07-08 | 2.0 | Updated roadmap after freezing Milestone 1; aligned milestones with contract-first architecture. |
+| 2026-07-07 | 1.0 | Initial milestone roadmap created |
 
 ---
 
@@ -310,4 +292,4 @@ The implementation roadmap is complete when:
 >
 > Every completed milestone must leave the Context Builder in a working, testable state.
 >
-> The implementation should evolve through small, deterministic increments rather than large feature drops.
+> The implementation should evolve through small, deterministic increments, with each milestone having one primary responsibility.
