@@ -2,7 +2,7 @@
 
 > **Specification:** SPEC-002 — Context Builder Agent
 > **Standards:** AJS-001, AJS-002, AJS-003, AJS-004
-> **Status:** Foundation (Milestone M1)
+> **Status:** Knowledge Collection (Milestone M2, in progress)
 
 The Context Builder assembles the smallest, highest-value **Context Package**
 required for a coding agent to complete a single task. It is the primary bridge
@@ -360,6 +360,56 @@ Public exports: `collectionResultSchema`, `collectionResultMetadataSchema`,
 `parseCollectionResult`, and the types `CollectionResult`,
 `CollectionResultMetadata`.
 
+## Provider execution (CB-010)
+
+CB-010 adds the first *runtime behaviour* to the Collection Engine. The engine
+established in CB-007 gains a `collect(request)` method that executes the held
+registry's providers and assembles an immutable `CollectionResult`:
+
+```text
+ProviderRegistry + KnowledgeRequest → engine.collect → CollectionResult (items + errors)
+```
+
+```ts
+import {
+  createProviderRegistry,
+  createCollectionEngine,
+} from "./context-builder/index.js";
+
+const engine = createCollectionEngine(
+  createProviderRegistry([handbookProvider, wikiProvider]),
+);
+
+const result = await engine.collect({ project: "aj-os", task: "CB-010" });
+result.items;  // KnowledgeItems from providers that resolved (registry order)
+result.errors; // one CollectionError per provider that rejected
+```
+
+- **Partial** — a single provider failure never aborts collection. A provider
+  that resolves contributes its `KnowledgeItem`s; a provider that rejects
+  contributes exactly one `CollectionError`. Both travel together in the result.
+- **Deterministic** — providers run concurrently, but the **registry order is
+  authoritative**: `Promise.all` preserves input order, and outcomes are
+  aggregated in registry order, so provider *completion* order never influences
+  the result. The same registry and request always produce the same result shape.
+- **Failure representation only** — a rejection is mapped to a `CollectionError`
+  (CB-008): `id = "collection-error:<providerId>"`, `providerId`, a
+  provider-agnostic `category` of `provider-error` (the engine sees only an opaque
+  rejection and does not guess finer categories), and the rejection's message. The
+  engine never retries, recovers, logs, applies an error policy, or re-throws a
+  provider failure once collection has begun.
+- **Stateless & immutable** — `collect` is a pure function of the held registry
+  and the request; the engine keeps no runtime state. The result is built with
+  `parseCollectionResult` (CB-009), so it is validated and deeply frozen.
+
+This extends the CB-007 service boundary with the method it anticipated; it adds
+no new contract, composing CB-004, CB-005, CB-008 and CB-009 unchanged. Ranking,
+filtering, duplicate handling, Context Builder integration and Context Package
+generation remain out of scope (later tasks/milestones).
+
+Public exports: unchanged — `collect` is a method on the existing
+`CollectionEngine` handle returned by `createCollectionEngine`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -367,12 +417,12 @@ This module currently contains its boundary and public entry point (task
 factory (task **CB-002**), the public Context Package contract (task
 **CB-003**), the public Knowledge Provider contracts (task **CB-004**), the
 immutable Provider Registry (task **CB-005**), the Collection Engine service
-boundary (task **CB-007**), the CollectionError contract (task **CB-008**), and
-the CollectionResult contract (task **CB-009**). No Context Builder *behaviour*
-(provider implementations, provider execution, collection, ranking, assembly,
-explainability) is implemented yet — the Collection Engine holds its registry but
-does not execute it, and the CollectionError / CollectionResult contracts
-represent failures and outcomes without producing or handling them.
+boundary (task **CB-007**), the CollectionError contract (task **CB-008**), the
+CollectionResult contract (task **CB-009**), and deterministic partial provider
+execution — `CollectionEngine.collect` (task **CB-010**). The engine now executes
+its registry's providers and assembles a `CollectionResult`; the remaining
+Context Builder *behaviour* (Context Builder integration, ranking, selection,
+assembly, explainability) is not implemented yet.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 

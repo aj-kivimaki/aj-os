@@ -8,15 +8,21 @@
  *   ProviderRegistry → createCollectionEngine → immutable service handle
  *
  * The engine is **constructed with** the immutable Provider Registry (CB-005),
- * which it **holds** but does **not** execute. It does not run providers, collect
- * KnowledgeItems, produce a CollectionResult/CollectionError, rank, or assemble a
- * Context Package. Collection *behaviour* is introduced by later Milestone M2
- * tasks (provider execution in CB-010) and must extend this service without
- * changing its public contract. It follows the same factory-created service
- * pattern as `createContextBuilder()` and `createProviderRegistry()`.
+ * which it **holds**. CB-010 adds the first collection *behaviour* to this same
+ * service boundary: `collect(request)` executes the held registry's providers and
+ * assembles an immutable CollectionResult (items + errors) under the
+ * partial-collection model. This extends — but does not change — the boundary
+ * established by CB-007. The engine still does not rank, filter, deduplicate or
+ * assemble a Context Package (later milestones). It follows the same
+ * factory-created service pattern as `createContextBuilder()` and
+ * `createProviderRegistry()`.
  */
 
+import type { KnowledgeRequest } from "../providers/index.js";
 import type { ProviderRegistry } from "../registry/index.js";
+
+import { collectKnowledge } from "./collectKnowledge.js";
+import type { CollectionResult } from "./result/index.js";
 
 /**
  * Immutable platform service that coordinates deterministic knowledge collection.
@@ -29,11 +35,22 @@ import type { ProviderRegistry } from "../registry/index.js";
  */
 export interface CollectionEngine {
   /**
-   * The Provider Registry injected at construction. It is **held, not executed**
-   * by this task; provider execution against it is introduced in CB-010. The
-   * registry is the immutable catalogue returned by `createProviderRegistry()`.
+   * The Provider Registry injected at construction. It is the immutable catalogue
+   * returned by `createProviderRegistry()` and is the authoritative source of
+   * provider execution order for {@link CollectionEngine.collect}.
    */
   readonly registry: ProviderRegistry;
+  /**
+   * Execute the held registry's providers for a single {@link KnowledgeRequest}
+   * and return an immutable {@link CollectionResult} (CB-010).
+   *
+   * Collection is **partial**: successful providers contribute KnowledgeItems and
+   * a failing provider contributes a CollectionError — a single failure never
+   * aborts collection. Ordering is **deterministic**: registry order is
+   * authoritative and provider completion order is irrelevant. The engine holds
+   * no mutable state, so `collect` is a pure function of the registry and request.
+   */
+  collect(request: KnowledgeRequest): Promise<CollectionResult>;
 }
 
 /**
@@ -52,7 +69,8 @@ export interface CollectionEngine {
  * @example
  * const registry = createProviderRegistry([handbookProvider, wikiProvider]);
  * const engine = createCollectionEngine(registry);
- * engine.registry; // the injected registry (held, not executed)
+ * engine.registry;                 // the injected registry
+ * await engine.collect(request);   // deterministic partial CollectionResult
  */
 export function createCollectionEngine(
   registry: ProviderRegistry,
@@ -63,5 +81,10 @@ export function createCollectionEngine(
     );
   }
 
-  return Object.freeze({ registry });
+  return Object.freeze({
+    registry,
+    collect(request: KnowledgeRequest): Promise<CollectionResult> {
+      return collectKnowledge(registry, request);
+    },
+  });
 }

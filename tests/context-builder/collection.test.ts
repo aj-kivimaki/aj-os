@@ -68,9 +68,14 @@ describe("createCollectionEngine — holds, does not execute", () => {
     expect(() => createCollectionEngine(registry)).not.toThrow();
   });
 
-  it("exposes only the registry (no collection behaviour in CB-007)", () => {
+  it("exposes the held registry (collection behaviour lives in CB-010)", () => {
+    // CB-007 established the boundary with only `registry`; CB-010 extends the
+    // same service with `collect`. This test guards the CB-007 boundary contract:
+    // the registry is held and exposed. Execution behaviour is exercised by the
+    // CB-010 suite (collection-execution.test.ts), not here.
     const engine = createCollectionEngine(makeRegistry(["handbook"]));
-    expect(Object.keys(engine)).toEqual(["registry"]);
+    expect(engine.registry.providers.map((p) => p.id)).toEqual(["handbook"]);
+    expect(typeof engine.collect).toBe("function");
   });
 });
 
