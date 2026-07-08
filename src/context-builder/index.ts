@@ -10,10 +10,10 @@
  * Scope note: CB-001 established the module boundary; CB-002 adds the public
  * configuration contract and the `createContextBuilder()` factory; CB-003 adds
  * the public Context Package contract (the canonical output type); CB-004 adds
- * the public Knowledge Provider contracts (the platform's input types).
- * Provider implementations, the registry, collection, ranking, assembly,
- * profiles and explainability behaviour are delivered by later Milestone M1+
- * tasks.
+ * the public Knowledge Provider contracts (the platform's input types); CB-005
+ * adds the immutable Provider Registry (the catalogue of KnowledgeProviders).
+ * Provider implementations, collection, ranking, assembly, profiles and
+ * explainability behaviour are delivered by later Milestone M1+ tasks.
  */
 
 /** Identity of the Context Builder agent (see AJS-004 required metadata). */
@@ -80,3 +80,7 @@ export type {
   ProviderMetadata,
   KnowledgeProvider,
 } from "./providers/index.js";
+
+// Provider Registry — the immutable catalogue of KnowledgeProviders (CB-005).
+export { createProviderRegistry } from "./registry/index.js";
+export type { ProviderRegistry } from "./registry/index.js";

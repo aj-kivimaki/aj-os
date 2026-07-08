@@ -165,14 +165,55 @@ Public exports: `knowledgeRequestSchema`, `knowledgeItemSchema`,
 types `KnowledgeRequest`, `KnowledgeItem`, `ProviderMetadata`,
 `KnowledgeProvider`.
 
+## Provider Registry (CB-005)
+
+The **Provider Registry** is the immutable catalogue of the `KnowledgeProvider`s
+available to the Context Builder. Its responsibility is deliberately narrow:
+
+```text
+KnowledgeProviders → validation → immutable registry → lookup
+```
+
+It does **not** execute, discover, load, configure or rank providers, and it does
+not build Context Packages. It follows the same factory-based service pattern as
+`createContextBuilder()`:
+
+```ts
+import { createProviderRegistry } from "./context-builder/index.js";
+
+const registry = createProviderRegistry([handbookProvider, wikiProvider]);
+
+registry.get("handbook"); // handbookProvider | undefined
+registry.providers; // readonly [handbookProvider, wikiProvider]
+```
+
+- **Deterministic** — `providers` preserves the caller's insertion order; the
+  same input always produces the same registry.
+- **Immutable** — the returned handle and its `providers` array are frozen; there
+  is no way to add, remove or reorder providers after construction.
+- **Validated at construction** — every provider must carry a non-empty string
+  `id` (the identifier the registry keys on), and provider `id`s must be unique.
+  A missing/empty or duplicate `id` throws an `Error`; the broken catalogue is
+  rejected rather than silently built.
+- **Provider-agnostic** — the registry knows only a provider's `id`, never its
+  implementation details.
+
+The contract is minimal — `providers` (expose) and `get(id)` (retrieve). No
+`schema.ts` is introduced: the registry adds no new *data* contract (it composes
+the CB-004 `KnowledgeProvider`), so its interface is co-located with its factory,
+mirroring `createContextBuilder.ts`.
+
+Public exports: `createProviderRegistry` and the type `ProviderRegistry`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
 **CB-001**), its public configuration contract and `createContextBuilder()`
 factory (task **CB-002**), the public Context Package contract (task
-**CB-003**), and the public Knowledge Provider contracts (task **CB-004**). No
-Context Builder *behaviour* (provider implementations, collection, ranking,
-assembly, explainability) is implemented yet.
+**CB-003**), the public Knowledge Provider contracts (task **CB-004**), and the
+immutable Provider Registry (task **CB-005**). No Context Builder *behaviour*
+(provider implementations, collection, ranking, assembly, explainability) is
+implemented yet.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 

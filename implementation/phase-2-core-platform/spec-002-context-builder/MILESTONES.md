@@ -80,7 +80,7 @@ No business logic is implemented.
 - [x] CB-002 — Public Configuration Contract & Factory
 - [x] CB-003 — Context Package Schema
 - [x] CB-004 — Knowledge Provider Interface
-- [ ] CB-005
+- [x] CB-005 — Provider Registry
 - [ ] CB-006
 
 ---
