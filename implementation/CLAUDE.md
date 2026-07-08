@@ -184,16 +184,24 @@ Do not update unrelated documentation.
 
 # Worklog
 
-When a task is completed:
-
-Summarize:
+When a task is completed, be able to summarize:
 
 - what was implemented
 - important decisions
 - challenges
 - lessons learned
 
-This information should be suitable for the Worklog.
+This information feeds the durable capture points, which are, in practice:
+
+- the **task change log** (per-task record of what changed),
+- **decision records** under `decisions/` (significant implementation decisions), and
+- the **milestone retrospective** (consolidated lessons learned at freeze).
+
+A session **Worklog** (`templates/WORKLOG.template.md`) is an **optional**
+per-session artifact for engineers who want one; it is not a required per-task
+output. On this project, task knowledge has been captured through the task
+change logs, decision records, and milestone retrospectives rather than
+per-session worklogs, and the `worklog/` directory may therefore be empty.
 
 ---
 
@@ -206,7 +214,10 @@ Update:
 - the task status
 - the task change log
 - the milestone task progress
-- the implementation worklog
+- any decision records for significant decisions (see Decision Making)
+
+Optionally, record a session Worklog (see Worklog) — this is not required for
+every task.
 
 Do **not** mark the milestone complete unless every task assigned to that milestone has been completed and validated.
 

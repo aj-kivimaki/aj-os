@@ -63,7 +63,18 @@ Completed:
 - ✅ CB-005 — Provider Registry
 - ✅ CB-006 — Contract Testing Foundation
 
-With Milestone 1 complete, implementation continues with the Knowledge Providers, the Context Collection Engine, and the remaining Context Builder milestones.
+Milestone 2 — Knowledge Collection ✅ Complete
+
+Completed:
+
+- ✅ CB-007 — Collection Engine Service
+- ✅ CB-008 — Collection Error Contract
+- ✅ CB-009 — Collection Result Contract
+- ✅ CB-010 — Provider Execution (partial collection)
+- ✅ CB-011 — Context Builder Collection Pipeline
+- ✅ CB-012 — Collection Behaviour Tests
+
+With Milestones 1 and 2 complete and frozen, the Context Builder now collects knowledge deterministically end-to-end. Implementation continues with Milestone 3 — Knowledge Selection — and the remaining Context Builder milestones.
 
 Project Kickoff (SPEC-001) remains intentionally postponed until the core platform is operational, allowing it to become the first workflow built on top of the completed platform.
 

@@ -139,9 +139,9 @@ The implementation prioritizes:
 
 ---
 
-# Current Milestone
+# Latest Milestone
 
-## Milestone 2 — Knowledge Collection
+## Milestone 2 — Knowledge Collection ✅ Complete & Frozen
 
 **Objective**
 
@@ -165,6 +165,8 @@ Collection is **partial**: a single provider failure never aborts collection. A 
 - Context Package generation
 - Explainability
 - Profiles
+
+**Next:** Milestone 3 — Knowledge Selection (not started).
 
 ---
 
@@ -193,7 +195,7 @@ Current status:
 - ✅ Engineering standards complete.
 - ✅ Specification complete.
 - ✅ Milestone 1 complete and frozen.
-- ✅ Milestone 2 complete (pending freeze review).
+- ✅ Milestone 2 complete and frozen.
 
 Completed foundation:
 
@@ -263,6 +265,7 @@ The implementation is complete when:
 
 | Date | Version | Description |
 | ---------- | ------- | -------------------------------------- |
+| 2026-07-08 | 2.3 | Milestone 2 status corrected to complete **and frozen** (freeze recorded in RETROSPECTIVE-M2). "Latest Milestone" section marked complete; next milestone (M3 — Knowledge Selection) noted. Documentation only — no contract, code or milestone-plan change. |
 | 2026-07-08 | 2.2 | CB-012 completed and Milestone 2 marked complete: deterministic knowledge collection is now protected by permanent behaviour tests (105 → 119). No platform contract changed. |
 | 2026-07-08 | 2.1 | Milestone 2 planning corrections: partial-collection model; deliverables reordered contract-first (CB-007…CB-012). |
 | 2026-07-08 | 2.0 | Updated after freezing Milestone 1 and aligning the implementation roadmap with the contract-first architecture. |

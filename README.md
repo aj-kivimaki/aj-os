@@ -94,6 +94,8 @@ Current contracts include:
 - Knowledge Provider
 - Knowledge Item
 - Provider Registry
+- Collection Error
+- Collection Result
 
 Future platform behavior is built on top of these contracts rather than redefining them.
 
@@ -180,6 +182,13 @@ AJ-OS has completed its platform architecture, engineering standards, and implem
 
 Implementation is now underway following the approved architecture.
 
+> **On document status.** AJS standards and SPEC specifications carry a
+> `Status: Draft` header. In AJ-OS, **Draft means "approved for implementation,
+> not yet frozen"** — a document is stable enough to build against but may still
+> be refined until the work it governs is frozen. A completed Phase or Milestone
+> therefore builds on Draft documents by design; it does not imply those
+> documents are incomplete.
+
 Current implementation progress:
 
 ## Phase 1 — Platform Foundation ✅
@@ -205,9 +214,18 @@ Milestone 1 — Foundation ✅ Complete
 - ✅ CB-005 — Provider Registry
 - ✅ CB-006 — Contract Testing Foundation
 
-The Context Builder now exposes immutable platform contracts, core services, and a permanent contract-testing foundation.
+Milestone 2 — Knowledge Collection ✅ Complete
 
-Milestone 1 is complete. Implementation next proceeds to the Knowledge Providers and the Context Collection Engine.
+- ✅ CB-007 — Collection Engine Service
+- ✅ CB-008 — Collection Error Contract
+- ✅ CB-009 — Collection Result Contract
+- ✅ CB-010 — Provider Execution (partial collection)
+- ✅ CB-011 — Context Builder Collection Pipeline
+- ✅ CB-012 — Collection Behaviour Tests
+
+The Context Builder now exposes immutable platform contracts, core services, a permanent contract-testing foundation, and its first platform behaviour: deterministic, partial knowledge collection (`ContextBuilder.collect`).
+
+Milestones 1 and 2 are complete and frozen. Implementation next proceeds to Milestone 3 — Knowledge Selection.
 
 ---
 

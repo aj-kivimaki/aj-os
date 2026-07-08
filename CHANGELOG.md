@@ -15,7 +15,18 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
   - Context Package contract implementing AJS-002 Appendix B (CB-003)
   - Knowledge Provider contracts — `KnowledgeRequest`, `KnowledgeItem`, `KnowledgeProvider` (CB-004)
   - Immutable Provider Registry via `createProviderRegistry()` (CB-005)
-  - Contract-testing foundation (Vitest, 63 tests, `npm test`) targeting the module's public surface (CB-006)
+  - Contract-testing foundation (Vitest, `npm test`) targeting the module's public surface (CB-006)
+- Context Builder knowledge collection (SPEC-002, Milestone 2) — the module's first platform *behaviour*: deterministic, partial knowledge collection, built on the frozen Milestone 1 contracts:
+  - Collection Engine service via `createCollectionEngine()` (CB-007)
+  - Collection Error contract — `CollectionError`, `parseCollectionError()`, closed `FAILURE_CATEGORIES` (CB-008)
+  - Collection Result contract — `CollectionResult` aggregating items + errors, `parseCollectionResult()` (CB-009)
+  - Deterministic partial provider execution — `CollectionEngine.collect()`; a single provider failure never aborts collection and registry order is authoritative (CB-010)
+  - End-to-end Context Builder collection pipeline — `ContextBuilder.collect()` (CB-011)
+  - Permanent collection behaviour tests; the suite grew from 63 → 119 tests (CB-012)
+
+### Changed
+
+- `createContextBuilder(config)` → `createContextBuilder(config, registry)` — the factory now takes a required Provider Registry, from which it composes the Collection Engine it owns (SPEC-002, CB-011; a reviewed, approved contract evolution)
 - REST API server built on Fastify (`npm run serve`), the first runtime interface alongside the sync CLI
 - `GET /health` liveness endpoint
 - Handbook AI agent (Claude, via `POST /agent/ask`) that answers questions grounded in the handbook wiki using a tool-use loop
