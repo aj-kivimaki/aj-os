@@ -248,17 +248,67 @@ co-located with its factory in `collection/createCollectionEngine.ts`.
 
 Public exports: `createCollectionEngine` and the type `CollectionEngine`.
 
+## Collection Error contract (CB-008)
+
+The **CollectionError** is the deterministic, provider-agnostic representation of
+a single knowledge-collection failure. The Context Builder uses a
+**partial-collection** model: a single provider failing never aborts collection —
+a provider contributes *either* KnowledgeItems *or* a `CollectionError`, and both
+travel together in the future `CollectionResult` (CB-009).
+
+`CollectionError` is a **data contract, not a thrown exception**. It carries only
+stable platform concepts — never provider-specific exceptions, stack traces,
+timestamps or runtime objects. Error *representation* lives here; error *handling*
+(retry, recovery, logging) does not.
+
+```text
+provider fails → CollectionError { id, providerId, category, message } → CollectionResult (CB-009)
+```
+
+- **`id`** — a stable identifier for the failure.
+- **`providerId`** — the provider that failed to contribute (the platform knows
+  only a provider's `id`, never its implementation).
+- **`category`** — a deterministic, provider-agnostic failure category from the
+  closed `FAILURE_CATEGORIES` set: `invalid-request` (the request was not valid
+  for the provider), `provider-unavailable` (the source could not be reached or
+  read), `provider-error` (an unexpected provider failure). Grounded in
+  SPEC-002 §15 and AJS-004 "Failure Handling". A provider that simply finds
+  nothing is **not** an error — it contributes an empty set of items.
+- **`message`** — a human-readable description (never a stack trace).
+
+```ts
+import { parseCollectionError } from "./context-builder/index.js";
+
+const error = parseCollectionError({
+  id: "err-1",
+  providerId: "handbook",
+  category: "provider-unavailable",
+  message: "The handbook source could not be read.",
+}); // validated + deeply frozen
+```
+
+- `parseCollectionError(input)` validates then **deep-freezes** (immutable after
+  creation), or throws a `ZodError`. The schema is **strict** (unknown keys, e.g.
+  a leaked `stack`, are rejected) and `category` is a closed `z.enum`, so
+  providers cannot leak implementation-specific error codes into the contract.
+- `collectionErrorSchema` is exported so the CB-009 `CollectionResult` can embed
+  the contract without CB-008 implementing any collection behaviour.
+
+Public exports: `collectionErrorSchema`, `parseCollectionError`,
+`FAILURE_CATEGORIES`, and the types `CollectionError`, `FailureCategory`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
 **CB-001**), its public configuration contract and `createContextBuilder()`
 factory (task **CB-002**), the public Context Package contract (task
 **CB-003**), the public Knowledge Provider contracts (task **CB-004**), the
-immutable Provider Registry (task **CB-005**), and the Collection Engine service
-boundary (task **CB-007**). No Context Builder *behaviour* (provider
-implementations, provider execution, collection, ranking, assembly,
-explainability) is implemented yet — the Collection Engine holds its registry but
-does not execute it.
+immutable Provider Registry (task **CB-005**), the Collection Engine service
+boundary (task **CB-007**), and the CollectionError contract (task **CB-008**).
+No Context Builder *behaviour* (provider implementations, provider execution,
+collection, ranking, assembly, explainability) is implemented yet — the Collection
+Engine holds its registry but does not execute it, and the CollectionError
+contract represents failures without producing or handling them.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 

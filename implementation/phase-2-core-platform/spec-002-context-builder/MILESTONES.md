@@ -121,7 +121,7 @@ No ranking, filtering, or Context Package generation is performed.
 Contract-first implementation order:
 
 - [x] CB-007 — Establish Collection Engine Service
-- [ ] CB-008 — Define Collection Error Contract
+- [x] CB-008 — Define Collection Error Contract
 - [ ] CB-009 — Define CollectionResult Contract
 - [ ] CB-010 — Implement Provider Execution
 - [ ] CB-011 — Integrate Context Builder Collection Pipeline
@@ -134,7 +134,7 @@ The Context Builder deterministically collects knowledge from all registered pro
 ## Definition of Done
 
 - [ ] Collection engine operational
-- [ ] Collection Error contract defined
+- [x] Collection Error contract defined
 - [ ] CollectionResult contract defined (items + errors)
 - [ ] Provider execution implemented (partial collection)
 - [ ] Context Builder integration operational

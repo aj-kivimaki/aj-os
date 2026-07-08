@@ -92,3 +92,12 @@ export type { ProviderRegistry } from "./registry/index.js";
 // collection; constructed with the Provider Registry, held not executed (CB-007).
 export { createCollectionEngine } from "./collection/index.js";
 export type { CollectionEngine } from "./collection/index.js";
+
+// Collection Error contract — the deterministic, provider-agnostic representation
+// of a single collection failure under the partial-collection model (CB-008).
+export {
+  collectionErrorSchema,
+  parseCollectionError,
+  FAILURE_CATEGORIES,
+} from "./collection/index.js";
+export type { CollectionError, FailureCategory } from "./collection/index.js";
