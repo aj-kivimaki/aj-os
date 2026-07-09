@@ -2,7 +2,9 @@
 
 > **Specification:** SPEC-002 — Context Builder Agent
 > **Standards:** AJS-001, AJS-002, AJS-003, AJS-004
-> **Status:** Milestone M3 — Knowledge Selection (in progress; M2 complete)
+> **Status:** Milestone M3 — Knowledge Selection (in progress; M2 complete). The
+> Context Builder pipeline runs Collection → Selection through the single public
+> entry point `build(request)` (CB-017); permanent `build` pipeline tests land in CB-018.
 
 The Context Builder assembles the smallest, highest-value **Context Package**
 required for a coding agent to complete a single task. It is the primary bridge
@@ -24,13 +26,15 @@ Internal components are private and are re-exported from `index.ts` only as
 they are implemented. Consumers should import from the module entry point, not
 from internal files.
 
-## Configuration & factory (CB-002, extended by CB-011)
+## Configuration & factory (CB-002, extended by CB-011, evolved by CB-017)
 
 The Context Builder is created through a factory. Configuration is validated at
 runtime (Zod), frozen, and never mutated afterwards. CB-011 evolved this factory
 (an approved architectural evolution): it now also takes a required Provider
-Registry, from which it composes the Collection Engine it owns (see
-[Context Builder integration](#context-builder-integration-cb-011)):
+Registry, from which it composes the Collection Engine it owns. CB-017 extends the
+pipeline with the Selection stage and reconciles the public entry point to
+`build(request)` (see
+[Context Builder pipeline — `build(request)`](#context-builder-pipeline--buildrequest-cb-017)):
 
 ```ts
 import {
@@ -426,8 +430,15 @@ Public exports: unchanged — `collect` is a method on the existing
 CB-011 wires the first **end-to-end collection pipeline**. The Context Builder is
 the platform's single public orchestration service: it **composes** a Collection
 Engine from an injected Provider Registry at construction, **owns** that engine,
-and exposes a `collect(request)` entry point that delegates to it and returns the
-`CollectionResult` **unchanged**.
+and (at Milestone 2) exposed a `collect(request)` entry point that delegated to it
+and returned the `CollectionResult` **unchanged**.
+
+> **Superseded by CB-017.** The public `collect(request)` entry point described in
+> this section was superseded by `build(request)` when the Selection stage was added
+> (see [Context Builder pipeline — `build(request)`](#context-builder-pipeline--buildrequest-cb-017)).
+> The Milestone 2 collection behaviour is unchanged — it is preserved as the internal
+> `CollectionEngine.collect(request)` stage operation that `build` now invokes. The
+> snippet below is retained as the historical CB-011 record.
 
 ```text
 KnowledgeRequest → ContextBuilder.collect → CollectionEngine → ProviderRegistry
@@ -726,6 +737,65 @@ integration (CB-017), assembly, profiles and explainability remain out of scope.
 Public exports: unchanged — `select` is a method on the existing `SelectionEngine`
 handle returned by `createSelectionEngine`.
 
+## Context Builder pipeline — `build(request)` (CB-017)
+
+CB-017 extends the Context Builder pipeline with the Selection stage and reconciles
+the public entry point. The Context Builder is a **thin orchestrator**: it composes
+and owns **both** a Collection Engine (CB-007/CB-010) and a Selection Engine
+(CB-013/CB-016) at construction, and exposes a single public entry point,
+`build(request)`, that runs the highest-level implemented pipeline and returns the
+resulting `SelectionResult` **unchanged**:
+
+```text
+KnowledgeRequest → ContextBuilder.build → CollectionEngine.collect → CollectionResult
+                → SelectionEngine.select → SelectionResult (ordered selectedItems + excludedItems)
+```
+
+```ts
+import {
+  createContextBuilder,
+  createProviderRegistry,
+} from "./context-builder/index.js";
+
+const builder = createContextBuilder(
+  { profile: "implementation", explainability: true, outputFormat: "markdown" },
+  createProviderRegistry([handbookProvider, wikiProvider]),
+);
+
+const selection = await builder.build({ project: "aj-os", task: "CB-017" });
+selection.selectedItems; // KnowledgeItems in canonical deterministic order
+selection.excludedItems; // filtered-out items and eliminated exact duplicates
+selection.metadata;      // the request this pipeline answered (provenance)
+```
+
+- **Orchestration only.** `build` invokes `CollectionEngine.collect(request)` then
+  `SelectionEngine.select(collectionResult)` and returns the Selection Engine's
+  result verbatim. The Context Builder implements no selection policy and no
+  collection behaviour, and does **not** inspect, modify, filter, reorder,
+  deduplicate or enrich the `SelectionResult`. All decisions live in the stages.
+- **Composes once, owns the engines.** Both engines are composed a single time at
+  construction; the registry is injected only to build the owned Collection Engine.
+  The intermediate `CollectionResult` and the stage operations (`collect`, `select`)
+  remain internal to the pipeline — only `build` is public on the Context Builder.
+- **Deterministic & immutable.** Determinism and deep immutability are inherited from
+  the engines (CB-010/CB-016); the same request and registry always produce the same
+  deeply-frozen `SelectionResult`. The Context Builder holds no runtime state.
+
+**Approved public API evolution.** `build(request)` is the Context Builder's single
+public entry point; it **supersedes** the Milestone 2 era `ContextBuilder.collect`
+public method. This was the approved reconciliation recorded in MILESTONES.md and
+CB-017. No frozen Milestone 1 or Milestone 2 platform contract changed: the Milestone
+2 collection behaviour is preserved as the `CollectionEngine.collect(request)` stage
+operation, and CollectionResult, the Collection Engine, the Provider Registry and the
+configuration contract are unchanged. Because `collect` is no longer public, its
+obsolete builder-level regression suite was retired; collection stays permanently
+covered by the Collection Engine suite (CB-010), and the permanent `build(request)`
+pipeline regression suite is owned by CB-018.
+
+Public exports: unchanged — `build` is a method on the existing `ContextBuilder`
+handle returned by `createContextBuilder`; the `SelectionResult` it returns is the
+already-public CB-014 contract.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -747,9 +817,13 @@ CollectionResult and constructs an immutable SelectionResult (task **CB-016**). 
 Context Builder now composes and owns a Collection Engine and collects knowledge
 end-to-end, and Milestone M2 is complete; Milestone M3 is under way with the
 Selection Engine boundary, the SelectionResult contract, the complete Selection
-Policy, and selection execution in place. The remaining Context Builder *behaviour*
-(Context Builder integration via `build(request)`, assembly, explainability) is not
-implemented yet.
+Policy, selection execution, and the integrated pipeline — `ContextBuilder.build`
+(task **CB-017**) — in place. The Context Builder now composes and owns both a
+Collection Engine and a Selection Engine and runs Collection → Selection end-to-end
+through the single public entry point `build(request)`, which supersedes the
+Milestone 2 era `collect(request)`. The remaining Context Builder *behaviour*
+(assembly, explainability) is not implemented yet, and the permanent `build(request)`
+pipeline regression suite is owned by the next task (**CB-018**).
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 

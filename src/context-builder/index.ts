@@ -15,12 +15,17 @@
  * CB-007 adds the Collection Engine service boundary (constructed with the
  * registry, which it holds but does not execute); CB-011 integrates the pipeline:
  * the Context Builder composes and owns a Collection Engine (built from an
- * injected Provider Registry) and exposes `collect(request)`, the first
- * end-to-end collection behaviour; CB-013 opens Milestone M3 by adding the
- * Selection Engine service boundary (a pure boundary — it holds nothing and
- * exposes no members yet). Selection behaviour (the SelectionResult contract, the
- * Selection Policy and `select(collectionResult)`), assembly, profiles and
- * explainability behaviour are delivered by later Milestone M3+ tasks.
+ * injected Provider Registry) and exposes the first end-to-end collection
+ * behaviour; CB-013 opens Milestone M3 by adding the Selection Engine service
+ * boundary, extended in CB-014…CB-016 with the SelectionResult contract, the
+ * Selection Policy and `select(collectionResult)`; CB-017 extends the Context
+ * Builder pipeline with the Selection stage and reconciles the public entry point:
+ * the Context Builder now composes and owns both a Collection Engine and a
+ * Selection Engine and exposes a single public entry point, `build(request)`, which
+ * runs Collection → Selection and returns the resulting SelectionResult unchanged
+ * (this supersedes the Milestone 2 era `collect(request)` public method — an
+ * approved public API evolution). Assembly, profiles and explainability behaviour
+ * are delivered by later Milestone M4+ tasks.
  */
 
 /** Identity of the Context Builder agent (see AJS-004 required metadata). */
@@ -34,7 +39,7 @@ export const CONTEXT_BUILDER = {
     "Assembles deterministic, explainable Context Packages from approved AJ-OS knowledge sources.",
 } as const;
 
-// Public factory and handle (CB-002).
+// Public factory and handle (CB-002; pipeline entry point `build` added by CB-017).
 export { createContextBuilder } from "./createContextBuilder.js";
 export type { ContextBuilder } from "./createContextBuilder.js";
 
