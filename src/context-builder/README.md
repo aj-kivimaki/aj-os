@@ -613,6 +613,64 @@ const result = parseSelectionResult({
 Public exports: `selectionResultSchema`, `selectionResultMetadataSchema`,
 `parseSelectionResult`, and the types `SelectionResult`, `SelectionResultMetadata`.
 
+## Selection Policy (CB-015)
+
+The **Selection Policy** is the deterministic decision-making model of knowledge
+selection, implemented as **executable platform behaviour** — pure, stateless,
+identity-preserving functions. CB-015 defines the *policy only*; it does **not**
+execute the Selection Engine, construct a `SelectionResult`, integrate with the
+Context Builder, or add behaviour tests (those are CB-016+). The Selection Engine
+(CB-016) will *apply* this policy to a `CollectionResult`:
+
+```text
+evaluation  → filtering (retain / exclude) → ordering (ordered comparator chain)
+```
+
+- **Evaluation** — a per-item eligibility predicate `evaluateKnowledgeItem(item)`.
+  The M3 platform rule is deliberately narrow: an item is eligible iff it **carries
+  knowledge** (non-empty `content`), stated as executable policy rather than assumed
+  from the CB-004 contract. Selection is **profile-agnostic** at M3 and introduces
+  no scoring and no business heuristic, so every well-formed item is eligible;
+  future Context Profiles (M5) modulate eligibility through this same seam.
+- **Filtering** — the retention predicate `isRetainedKnowledgeItem(item)`: an item
+  is retained iff it is eligible under evaluation. The Selection Engine applies it
+  to partition collected knowledge; a non-retained item is carried into
+  `excludedItems` **unchanged** (never dropped, rewritten or merged).
+- **Ordering** — an **ordered comparator chain** (`selectionComparatorChain`)
+  composed into a single total-order comparator (`compareKnowledgeItems`).
+  Comparators are applied in order and the first non-zero result wins; the chain
+  **terminates with an immutable platform identifier** (`compareById`, over
+  `KnowledgeItem.id`, compared by UTF-16 code unit — **not** locale-aware
+  `localeCompare`, which would break determinism) to guarantee a **stable total
+  ordering**. The policy introduces **no scoring, no numeric priority and no
+  business-specific ranking heuristic**. At M3 the chain holds only its terminal
+  comparator; future profile-driven comparators (M5) are **prepended** ahead of it
+  without changing this structure or the SelectionResult contract.
+
+**Ordering is the public guarantee; the comparator implementation stays internal.**
+The policy functions are internal platform behaviour: they live in
+`selection/policy/` and are **not** re-exported from `selection/index.ts` or the
+top-level `context-builder/index.ts` (mirroring how the CB-010 `collectKnowledge`
+behaviour stays internal). The public guarantee is the *order* of
+`SelectionResult.selectedItems` (CB-014), never a priority/score/ranking value.
+
+- **Exact-duplicate elimination** — `partitionExactDuplicates(orderedItems)` splits
+  a canonically-ordered sequence into `retained` and `duplicates`, applying the
+  approved platform definition (`isExactDuplicate`): two items are exact duplicates
+  iff their `content` is identical **and** their entire `source` (`id`, `type`,
+  `title`, `locator`) is structurally identical. `KnowledgeItem.id` is **excluded**
+  (it is the ordering tie-breaker, never the duplicate identity); comparison is
+  literal structural equality with **no** normalization; the **first occurrence in
+  canonical order is retained** and every subsequent duplicate is destined for
+  `excludedItems`. Elimination removes a redundant copy — it never merges,
+  summarizes or rewrites a survivor.
+
+Internal (module-private) exports: `evaluateKnowledgeItem`,
+`isRetainedKnowledgeItem`, `compareById`, `selectionComparatorChain`,
+`compareKnowledgeItems`, `isExactDuplicate`, `partitionExactDuplicates`, and the
+types `KnowledgeItemPredicate`, `KnowledgeItemComparator`,
+`KnowledgeItemEquivalence`, `ExactDuplicatePartition`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -626,11 +684,15 @@ execution — `CollectionEngine.collect` (task **CB-010**), and the integrated
 collection pipeline — `ContextBuilder.collect` (task **CB-011**), all protected
 by permanent collection behaviour tests (task **CB-012**), the Selection Engine
 service boundary — `createSelectionEngine()` (task **CB-013**), and the
-SelectionResult contract (task **CB-014**). The Context Builder now composes and
-owns a Collection Engine and collects knowledge end-to-end, and Milestone M2 is
-complete; Milestone M3 is under way with the Selection Engine boundary and the
-SelectionResult contract in place. The remaining Context Builder *behaviour*
-(selection policy and execution, assembly, explainability) is not implemented yet.
+SelectionResult contract (task **CB-014**), and the deterministic Selection Policy
+— evaluation, filtering, an ordered comparator chain terminating in an immutable
+identifier, and exact-duplicate elimination (task **CB-015**). The Context Builder
+now composes and owns a Collection Engine and collects knowledge end-to-end, and
+Milestone M2 is complete; Milestone M3 is under way with the Selection Engine
+boundary, the SelectionResult contract and the complete Selection Policy in place.
+The remaining Context Builder *behaviour* (selection execution — applying the policy
+to construct a SelectionResult, Context Builder integration, assembly,
+explainability) is not implemented yet.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 
