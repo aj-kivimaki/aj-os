@@ -74,7 +74,18 @@ Completed:
 - ✅ CB-011 — Context Builder Collection Pipeline
 - ✅ CB-012 — Collection Behaviour Tests
 
-With Milestones 1 and 2 complete and frozen, the Context Builder now collects knowledge deterministically end-to-end. Implementation continues with Milestone 3 — Knowledge Selection — and the remaining Context Builder milestones.
+Milestone 3 — Knowledge Selection ✅ Complete
+
+Completed:
+
+- ✅ CB-013 — Selection Engine Service
+- ✅ CB-014 — SelectionResult Contract
+- ✅ CB-015 — Deterministic Selection Policy
+- ✅ CB-016 — Selection Execution
+- ✅ CB-017 — Context Builder Selection Pipeline (`build(request)`)
+- ✅ CB-018 — Selection Behaviour Tests
+
+With Milestones 1 and 2 complete and frozen and Milestone 3 complete (ready for its freeze review), the Context Builder now collects and selects knowledge deterministically end-to-end through a single public entry point, `build(request)`. Implementation continues with Milestone 4 — Context Assembly — and the remaining Context Builder milestones.
 
 Project Kickoff (SPEC-001) remains intentionally postponed until the core platform is operational, allowing it to become the first workflow built on top of the completed platform.
 

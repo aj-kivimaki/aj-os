@@ -23,10 +23,18 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
   - Deterministic partial provider execution — `CollectionEngine.collect()`; a single provider failure never aborts collection and registry order is authoritative (CB-010)
   - End-to-end Context Builder collection pipeline — `ContextBuilder.collect()` (CB-011)
   - Permanent collection behaviour tests; the suite grew from 63 → 119 tests (CB-012)
+- Context Builder knowledge selection (SPEC-002, Milestone 3) — the module's second platform *behaviour*: deterministic knowledge selection over the immutable `CollectionResult`, built on the frozen Milestone 1/2 contracts and introducing no new provider execution or collection:
+  - Selection Engine service via `createSelectionEngine()` (CB-013)
+  - SelectionResult contract — `SelectionResult` (ordered `selectedItems` + `excludedItems` + provenance metadata), `parseSelectionResult()`; the canonical ordering of `selectedItems` is the contract and there is no explicit priority field (CB-014)
+  - Deterministic Selection Policy — an executable comparator chain terminating in an immutable identifier (`KnowledgeItem.id`), with evaluation, filtering, and exact-duplicate elimination; no scoring algorithms or ranking heuristics (CB-015)
+  - Selection execution — `SelectionEngine.select()` applies the policy to a `CollectionResult` and returns an immutable `SelectionResult` (CB-016)
+  - End-to-end Context Builder selection pipeline — `ContextBuilder.build(request)` runs Collection → Selection and returns the `SelectionResult` unchanged (CB-017)
+  - Permanent selection behaviour and `build()` pipeline tests; the suite grew from 119 → 160 tests (CB-018)
 
 ### Changed
 
 - `createContextBuilder(config)` → `createContextBuilder(config, registry)` — the factory now takes a required Provider Registry, from which it composes the Collection Engine it owns (SPEC-002, CB-011; a reviewed, approved contract evolution)
+- `ContextBuilder.collect(request)` → `ContextBuilder.build(request)` — the Context Builder now exposes a single public pipeline entry point, `build(request)`, which runs Collection → Selection and returns the `SelectionResult` unchanged; the Milestone 2 collection behaviour is preserved unchanged as the internal `CollectionEngine.collect(request)` stage operation (SPEC-002, CB-017; a reviewed, approved public API evolution)
 - REST API server built on Fastify (`npm run serve`), the first runtime interface alongside the sync CLI
 - `GET /health` liveness endpoint
 - Handbook AI agent (Claude, via `POST /agent/ask`) that answers questions grounded in the handbook wiki using a tool-use loop

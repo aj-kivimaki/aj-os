@@ -495,15 +495,22 @@ tests/context-builder/
 ├── collection-errors.test.ts             CollectionError contract (CB-008)
 ├── collection-result.test.ts             CollectionResult contract (CB-009)
 ├── collection-execution.test.ts          Provider execution & determinism (CB-010)
-└── context-builder-collection.test.ts    Context Builder integration (CB-011)
+└── context-builder-collection.test.ts    Context Builder integration (CB-011) — retired in CB-017
 ```
+
+> **`context-builder-collection.test.ts` retired in CB-017.** When `ContextBuilder.collect`
+> was superseded by `build(request)`, its builder-level regression suite was retired.
+> Collection behaviour stays permanently covered at the engine level by
+> `collection-execution.test.ts` (CB-010); the `build(request)` pipeline is covered by
+> CB-018's `context-builder-pipeline.test.ts`. The tree above is the historical CB-012
+> record.
 
 The determinism guarantee is asserted directly: registry order is authoritative,
 so provider **completion** order never influences item **or** error ordering
 (delayed-resolving and delayed-rejecting fixtures prove both), partial collection
 is deterministic, results and errors are deeply immutable, and repeated
 collection with identical inputs yields equivalent results. The Context Builder
-integration tests assert that `ContextBuilder.collect` delegates to the owned
+integration tests asserted that `ContextBuilder.collect` delegated to the owned
 engine and returns the `CollectionResult` **unchanged** — equal to a standalone
 engine over the same registry, with no filtering, ranking, deduplication or
 enrichment. CB-012 introduced **no** platform behaviour; it only exercises the
@@ -851,7 +858,7 @@ identifier, and exact-duplicate elimination (task **CB-015**), and selection
 execution — `SelectionEngine.select`, which applies the Selection Policy to a
 CollectionResult and constructs an immutable SelectionResult (task **CB-016**). The
 Context Builder now composes and owns a Collection Engine and collects knowledge
-end-to-end, and Milestone M2 is complete; Milestone M3 is under way with the
+end-to-end, and Milestone M2 is complete; Milestone M3 is complete, with the
 Selection Engine boundary, the SelectionResult contract, the complete Selection
 Policy, selection execution, and the integrated pipeline — `ContextBuilder.build`
 (task **CB-017**) — in place. The Context Builder now composes and owns both a

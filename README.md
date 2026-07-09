@@ -223,9 +223,18 @@ Milestone 2 — Knowledge Collection ✅ Complete
 - ✅ CB-011 — Context Builder Collection Pipeline
 - ✅ CB-012 — Collection Behaviour Tests
 
-The Context Builder now exposes immutable platform contracts, core services, a permanent contract-testing foundation, and its first platform behaviour: deterministic, partial knowledge collection (`ContextBuilder.collect`).
+Milestone 3 — Knowledge Selection ✅ Complete
 
-Milestones 1 and 2 are complete and frozen. Implementation next proceeds to Milestone 3 — Knowledge Selection.
+- ✅ CB-013 — Selection Engine Service
+- ✅ CB-014 — SelectionResult Contract
+- ✅ CB-015 — Deterministic Selection Policy
+- ✅ CB-016 — Selection Execution
+- ✅ CB-017 — Context Builder Selection Pipeline (`build(request)`)
+- ✅ CB-018 — Selection Behaviour Tests
+
+The Context Builder now exposes immutable platform contracts, core services, a permanent contract-testing foundation, and two platform behaviours: deterministic partial knowledge collection and deterministic knowledge selection. It runs Collection → Selection end-to-end through a single public entry point, `ContextBuilder.build(request)`, which returns an immutable `SelectionResult`.
+
+Milestones 1 and 2 are complete and frozen; Milestone 3 is complete and ready for its freeze review. Implementation next proceeds to Milestone 4 — Context Assembly.
 
 ---
 
