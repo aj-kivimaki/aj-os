@@ -2,9 +2,10 @@
 
 > **Specification:** SPEC-002 — Context Builder Agent
 > **Standards:** AJS-001, AJS-002, AJS-003, AJS-004
-> **Status:** Milestone M3 — Knowledge Selection (in progress; M2 complete). The
-> Context Builder pipeline runs Collection → Selection through the single public
-> entry point `build(request)` (CB-017); permanent `build` pipeline tests land in CB-018.
+> **Status:** Milestone M3 — Knowledge Selection **complete** (M1, M2 also
+> complete). The Context Builder pipeline runs Collection → Selection through the
+> single public entry point `build(request)` (CB-017), protected by permanent
+> Selection behaviour and `build` pipeline regression tests (CB-018).
 
 The Context Builder assembles the smallest, highest-value **Context Package**
 required for a coding agent to complete a single task. It is the primary bridge
@@ -796,6 +797,41 @@ Public exports: unchanged — `build` is a method on the existing `ContextBuilde
 handle returned by `createContextBuilder`; the `SelectionResult` it returns is the
 already-public CB-014 contract.
 
+## Selection behaviour tests (CB-018)
+
+Milestone M3's Selection stage is protected by permanent, deterministic Vitest
+tests (built on the CB-006 foundation — no new framework). CB-018 is the permanent
+owner of the `ContextBuilder.build(request)` pipeline regression suite. Because
+CB-013 (engine boundary), CB-015 (policy) and CB-016 (execution) deferred their
+behaviour tests to CB-018, this task **authors** the Selection Engine and pipeline
+behaviour suites (the CB-014 `SelectionResult` *contract* suite already shipped in
+`selection-result.test.ts` and is not re-authored):
+
+```text
+tests/context-builder/
+├── selection-result.test.ts            SelectionResult contract (CB-014, pre-existing)
+├── selection.test.ts                    Selection Engine service boundary (CB-013)
+├── selection-execution.test.ts          select() behaviour + Selection Policy (CB-015/CB-016)
+└── context-builder-pipeline.test.ts     build(request) pipeline & end-to-end (CB-017)
+```
+
+Every guarantee is asserted **only through the public API** — `createSelectionEngine().select(collectionResult)`
+and `createContextBuilder(config, registry).build(request)`. No policy comparator,
+predicate, duplicate helper or private function is imported, so the internal
+Selection Policy stays free to evolve. The suite validates canonical deterministic
+ordering (stable total order via the terminal `KnowledgeItem.id` tie-breaker), M3
+filtering (every well-formed item is eligible), exact-duplicate elimination with
+routing to `excludedItems`, metadata preservation, knowledge-identity preservation,
+input immutability (the frozen `CollectionResult` is ordered over a copy), deep
+immutability of the result, determinism across repeated runs, and conformance to the
+public SelectionResult contract. The pipeline suite proves `build(request)` equals a
+manual two-engine composition (`select(collect(request))`) over the same registry —
+the Context Builder is a thin orchestrator that adds no behaviour and exposes only
+`build`. Engine-level collection behaviour remains owned by the CB-010 suite
+(`collection-execution.test.ts`) and is **not** re-tested here. CB-018 introduced
+**no** platform behaviour and **no** contract change; it only exercises the frozen
+CB-013…CB-017 surfaces. **Milestone M3 is complete.**
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -821,9 +857,11 @@ Policy, selection execution, and the integrated pipeline — `ContextBuilder.bui
 (task **CB-017**) — in place. The Context Builder now composes and owns both a
 Collection Engine and a Selection Engine and runs Collection → Selection end-to-end
 through the single public entry point `build(request)`, which supersedes the
-Milestone 2 era `collect(request)`. The remaining Context Builder *behaviour*
-(assembly, explainability) is not implemented yet, and the permanent `build(request)`
-pipeline regression suite is owned by the next task (**CB-018**).
+Milestone 2 era `collect(request)`. This selection pipeline is now protected by the
+permanent Selection Engine, execution and `build(request)` behaviour tests (task
+**CB-018**), which completes **Milestone M3**. The remaining Context Builder
+*behaviour* (assembly, explainability) is not implemented yet and arrives through the
+same `build` entry point in later milestones (M4+).
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 

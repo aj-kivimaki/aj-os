@@ -24,7 +24,7 @@ The milestones prioritize working software over technical completeness.
 | --------- | ------------------------- | --------------------------------------------------------------------------- | ------ |
 | M1        | Foundation                | Establish immutable platform contracts, core services, and contract testing | ✅     |
 | M2        | Knowledge Collection      | Collect knowledge deterministically from registered providers               | ✅     |
-| M3        | Knowledge Selection       | Select, filter, and organize collected knowledge                            | ⬜     |
+| M3        | Knowledge Selection       | Select, filter, and organize collected knowledge                            | ✅     |
 | M4        | Context Assembly          | Assemble deterministic Context Packages                                     | ⬜     |
 | M5        | Explainability & Profiles | Explain selection decisions and support context profiles                    | ⬜     |
 | M6        | Optimization              | Improve performance and prepare future platform extensions                  | ⬜     |
@@ -186,13 +186,13 @@ The same CollectionResult and configuration always produce the same SelectionRes
 
 ## Definition of Done
 
-- [ ] Selection Engine operational
-- [ ] Selection contracts implemented
-- [ ] Deterministic selection implemented
-- [ ] Context Builder integration complete
-- [ ] Behaviour tests passing
-- [ ] Planning review completed
-- [ ] Planning frozen
+- [x] Selection Engine operational
+- [x] Selection contracts implemented
+- [x] Deterministic selection implemented
+- [x] Context Builder integration complete
+- [x] Behaviour tests passing
+- [x] Planning review completed
+- [x] Planning frozen
 
 ## Architecture
 
@@ -314,6 +314,7 @@ The implementation roadmap is complete when:
 
 | Date       | Version | Description                                                                                                                                                                                                                                                              |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-07-09 | 2.8     | CB-018 completed: permanent Selection behaviour tests authored on the CB-006 foundation — Selection Engine boundary (`selection.test.ts`), execution + policy via the public API (`selection-execution.test.ts`), and the `build(request)` pipeline (`context-builder-pipeline.test.ts`); CB-014 contract suite consolidated. Suite 123 → 160. **Milestone M3 complete** — all M3 tasks and DoD satisfied. No platform contract changed.                        |
 | 2026-07-09 | 2.7     | CB-017 completed: `ContextBuilder.build(request)` composes the Collection Engine and the Selection Engine and returns the SelectionResult unchanged; `ContextBuilder.collect` superseded (approved public API evolution). Regression-strategy migration recorded: the obsolete builder-level `collect` suite is retired (collection stays covered by the CB-010 engine suite; no coverage lost) and CB-018 becomes the permanent owner of the `build(request)` pipeline regression suite. No frozen M1/M2 platform contract changed beyond the approved entry-point evolution. |
 | 2026-07-09 | 2.6     | Milestone 3 planning corrections applied (R1/R2/R3): approved `build(request)` single public entry point (supersedes M2-era `ContextBuilder.collect`, preserved as `CollectionEngine.collect`); SelectionResult exposes no priority field (canonical ordering is the contract); Selection Policy is an executable deterministic comparator chain terminating in an immutable identifier. Tasks CB-013…CB-018 and PIPELINE-ARCHITECTURE updated. Planning documentation only — no frozen M1/M2 platform contract changed.        |
 | 2026-07-08 | 2.5     | CB-012 completed: permanent collection behaviour tests (Context Builder integration + deterministic error ordering) added on the CB-006 foundation; suite 105 → 119. **Milestone M2 complete** — all M2 tasks and DoD satisfied. No platform contract changed.           |

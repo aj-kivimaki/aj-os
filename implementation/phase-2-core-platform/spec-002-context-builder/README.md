@@ -179,9 +179,13 @@ Selection determines which collected knowledge becomes part of a future Context 
 - Knowledge collection
 - Optimisation
 
+**Status**
+
+Complete. Deterministic knowledge selection is implemented (Selection Engine, SelectionResult contract, executable Selection Policy, `build(request)` pipeline) and protected by permanent behaviour tests (CB-018). Ready for the Milestone 3 Freeze Review.
+
 **Next**
 
-Milestone 3 planning.
+Milestone 4 — Context Assembly.
 
 ---
 
@@ -191,7 +195,7 @@ Milestone 3 planning.
 | --------- | ------------------------- | ------ |
 | M1        | Foundation                | ✅     |
 | M2        | Knowledge Collection      | ✅     |
-| M3        | Knowledge Selection       | ⬜     |
+| M3        | Knowledge Selection       | ✅     |
 | M4        | Context Assembly          | ⬜     |
 | M5        | Explainability & Profiles | ⬜     |
 | M6        | Optimization              | ⬜     |
@@ -211,6 +215,7 @@ Current status:
 - ✅ Specification complete.
 - ✅ Milestone 1 complete and frozen.
 - ✅ Milestone 2 complete and frozen.
+- ✅ Milestone 3 complete (ready for Freeze Review).
 
 Completed implementation:
 
@@ -225,10 +230,17 @@ Completed implementation:
 - CollectionResult contract
 - Deterministic provider execution
 - Context Builder collection pipeline
+- Selection Engine
+- SelectionResult contract
+- Deterministic Selection Policy
+- Selection execution (`SelectionEngine.select`)
+- Context Builder selection pipeline (`build(request)`)
+- Selection behaviour regression tests
 
-The platform foundation is complete through deterministic knowledge collection.
+The platform foundation is complete through deterministic knowledge collection and
+knowledge selection.
 
-The next implementation milestone introduces deterministic knowledge selection.
+The next implementation milestone introduces deterministic Context Assembly (M4).
 
 ---
 
@@ -289,6 +301,7 @@ The implementation is complete when:
 
 | Date       | Version | Description                                                                                                                                                                                                                                                  |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-07-09 | 2.5     | CB-018 completed: permanent Selection behaviour tests (Selection Engine boundary, execution + policy through the public API, and the `build(request)` pipeline) added on the CB-006 foundation; suite 123 → 160. **Milestone M3 complete** — deterministic knowledge selection is protected by permanent regression tests. No platform contract changed.                                                                                                        |
 | 2026-07-09 | 2.4     | Milestone 3 planning corrections applied (R1/R2/R3): resolved Open Questions — `build(request)` single public entry point, SelectionResult exposes no priority field (ordering is the contract), Selection Policy is an executable deterministic comparator chain terminating in an immutable identifier. Planning documentation only — no code, no frozen M1/M2 platform contract changed.        |
 | 2026-07-08 | 2.3     | Milestone 2 status corrected to complete **and frozen** (freeze recorded in RETROSPECTIVE-M2). "Latest Milestone" section marked complete; next milestone (M3 — Knowledge Selection) noted. Documentation only — no contract, code or milestone-plan change. |
 | 2026-07-08 | 2.2     | CB-012 completed and Milestone 2 marked complete: deterministic knowledge collection is now protected by permanent behaviour tests (105 → 119). No platform contract changed.                                                                                |
