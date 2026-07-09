@@ -2,7 +2,7 @@
 
 > **Specification:** SPEC-002 — Context Builder Agent
 > **Standards:** AJS-001, AJS-002, AJS-003, AJS-004
-> **Status:** Milestone M2 — Knowledge Collection (complete)
+> **Status:** Milestone M3 — Knowledge Selection (in progress; M2 complete)
 
 The Context Builder assembles the smallest, highest-value **Context Package**
 required for a coding agent to complete a single task. It is the primary bridge
@@ -497,6 +497,51 @@ engine over the same registry, with no filtering, ranking, deduplication or
 enrichment. CB-012 introduced **no** platform behaviour; it only exercises the
 frozen CB-002…CB-011 contracts.
 
+## Selection Engine (CB-013)
+
+The **Selection Engine** is the platform service that performs deterministic
+knowledge selection — determining which collected knowledge continues through the
+pipeline. CB-013 opens Milestone M3 by establishing only its *service boundary* —
+the seam that later Milestone M3 tasks extend:
+
+```text
+createSelectionEngine → immutable service handle
+```
+
+It follows the same factory-based service pattern as `createContextBuilder()`,
+`createProviderRegistry()` and `createCollectionEngine()`:
+
+```ts
+import { createSelectionEngine } from "./context-builder/index.js";
+
+const engine = createSelectionEngine();
+// In CB-016 the engine gains: await engine.select(collectionResult);
+```
+
+- **Pure boundary** — unlike the Collection Engine, which is constructed with the
+  Provider Registry it **holds**, the Selection Engine holds **nothing** at
+  construction and exposes **no members** yet. Its only input, the
+  `CollectionResult` (CB-009), arrives as the future `select(collectionResult)`
+  argument; its Selection Policy arrives in CB-015. `createSelectionEngine()`
+  therefore takes **no arguments**.
+- **Minimal** — the handle carries **no** `select()` method: the SelectionResult
+  contract (CB-014), the deterministic Selection Policy (CB-015) and the
+  `select(collectionResult)` stage operation (CB-016) are introduced through this
+  same interface by later Milestone M3 tasks. Adding a member now would be a
+  placeholder for behaviour owned by a later task.
+- **Deterministic** — every call yields the same public service.
+- **Stateless & immutable** — no mutable runtime state; the returned handle is
+  frozen (`Object.freeze`).
+- **Pipeline-independent** — the engine does not own the Collection Engine, the
+  Provider Registry or any Knowledge Provider; it communicates only through
+  immutable platform contracts.
+
+Like the registry and the Collection Engine, no `schema.ts` is introduced: the
+engine adds no new *data* contract, so its interface is co-located with its
+factory in `selection/createSelectionEngine.ts`.
+
+Public exports: `createSelectionEngine` and the type `SelectionEngine`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -508,10 +553,12 @@ boundary (task **CB-007**), the CollectionError contract (task **CB-008**), the
 CollectionResult contract (task **CB-009**), deterministic partial provider
 execution — `CollectionEngine.collect` (task **CB-010**), and the integrated
 collection pipeline — `ContextBuilder.collect` (task **CB-011**), all protected
-by permanent collection behaviour tests (task **CB-012**). The Context Builder
-now composes and owns a Collection Engine and collects knowledge end-to-end, and
-Milestone M2 is complete; the remaining Context Builder *behaviour* (ranking,
-selection, assembly, explainability) is not implemented yet.
+by permanent collection behaviour tests (task **CB-012**), and the Selection
+Engine service boundary — `createSelectionEngine()` (task **CB-013**). The Context
+Builder now composes and owns a Collection Engine and collects knowledge
+end-to-end, and Milestone M2 is complete; Milestone M3 has begun with the
+Selection Engine boundary. The remaining Context Builder *behaviour* (selection
+execution, assembly, explainability) is not implemented yet.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 
@@ -524,8 +571,8 @@ Functionality arrives incrementally through the SPEC-002 milestones:
 | M5        | Explainability & Profiles                 |
 | M6        | Optimization                              |
 
-Subfolders (e.g. `config/`, `providers/`, `collection/`, `ranking/`,
-`package/`, `profiles/`, `explainability/`, `types/`, `utils/`) are created by
+Subfolders (e.g. `config/`, `providers/`, `collection/`, `selection/`,
+`ranking/`, `package/`, `profiles/`, `explainability/`, `types/`, `utils/`) are created by
 the tasks that introduce their code, rather than pre-created as empty
 placeholders.
 

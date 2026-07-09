@@ -16,8 +16,11 @@
  * registry, which it holds but does not execute); CB-011 integrates the pipeline:
  * the Context Builder composes and owns a Collection Engine (built from an
  * injected Provider Registry) and exposes `collect(request)`, the first
- * end-to-end collection behaviour. Ranking, selection, assembly, profiles and
- * explainability behaviour are delivered by later Milestone M2+ tasks.
+ * end-to-end collection behaviour; CB-013 opens Milestone M3 by adding the
+ * Selection Engine service boundary (a pure boundary — it holds nothing and
+ * exposes no members yet). Selection behaviour (the SelectionResult contract, the
+ * Selection Policy and `select(collectionResult)`), assembly, profiles and
+ * explainability behaviour are delivered by later Milestone M3+ tasks.
  */
 
 /** Identity of the Context Builder agent (see AJS-004 required metadata). */
@@ -115,3 +118,9 @@ export type {
   CollectionResult,
   CollectionResultMetadata,
 } from "./collection/index.js";
+
+// Selection Engine — the service boundary that performs deterministic knowledge
+// selection; a pure boundary at CB-013 (holds nothing, exposes no members), later
+// extended with the `select(collectionResult)` stage operation (CB-016).
+export { createSelectionEngine } from "./selection/index.js";
+export type { SelectionEngine } from "./selection/index.js";
