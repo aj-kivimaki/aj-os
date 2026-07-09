@@ -124,3 +124,17 @@ export type {
 // extended with the `select(collectionResult)` stage operation (CB-016).
 export { createSelectionEngine } from "./selection/index.js";
 export type { SelectionEngine } from "./selection/index.js";
+
+// SelectionResult contract — the complete, deterministic outcome of knowledge
+// selection: the ordered selected items and the excluded items together, plus the
+// answered-request provenance. Ordering of `selectedItems` is the contract; there
+// is no priority field (CB-014).
+export {
+  selectionResultSchema,
+  selectionResultMetadataSchema,
+  parseSelectionResult,
+} from "./selection/index.js";
+export type {
+  SelectionResult,
+  SelectionResultMetadata,
+} from "./selection/index.js";

@@ -542,6 +542,77 @@ factory in `selection/createSelectionEngine.ts`.
 
 Public exports: `createSelectionEngine` and the type `SelectionEngine`.
 
+## SelectionResult contract (CB-014)
+
+The **SelectionResult** is the canonical, complete, deterministic outcome of
+knowledge selection — the immutable boundary between the Selection Engine and
+Context Assembly (M4). Selection consumes a `CollectionResult` (CB-009) and
+partitions its knowledge, preserving *both* what continues through the pipeline
+and what does not:
+
+```text
+metadata · selectedItems (KnowledgeItem[], ordered) · excludedItems (KnowledgeItem[])
+```
+
+CB-014 defines the *contract only* — no Selection Engine execution, Selection
+Policy, evaluation, prioritization, ordering logic, filtering or duplicate
+elimination. It **composes** the existing contracts rather than redefining them,
+and **preserves knowledge identity**: KnowledgeItems are never modified,
+rewritten, merged or summarized.
+
+- **`metadata`** — the selection's **provenance**: the `KnowledgeRequest` (CB-004)
+  the selection answered, carried forward from the CollectionResult it consumed.
+  The metadata schema is **reused** from CB-009
+  (`selectionResultMetadataSchema = collectionResultMetadataSchema`), so the
+  provenance can never drift from the request that flowed through collection. It
+  is provenance only — no timestamps, durations, counters, diagnostics or runtime
+  detail (those would break determinism and leak implementation detail).
+- **`selectedItems`** — the knowledge selected to continue through the pipeline,
+  composing the CB-004 `KnowledgeItem` contract. **Ordered** — the order is the
+  canonical deterministic contract Assembly consumes exactly as provided. May be
+  empty.
+- **`excludedItems`** — the knowledge selection did not carry forward, composing
+  the same `KnowledgeItem` contract, preserved unchanged to support future
+  deterministic explainability without re-running selection. May be empty.
+
+**Ordering is the contract.** `selectedItems` exposes the deterministic ordering
+directly; the contract carries **no** explicit priority, score or ranking field.
+Any priority used to derive the ordering is an implementation detail of the
+Selection Policy (CB-015).
+
+```ts
+import { parseSelectionResult } from "./context-builder/index.js";
+
+const result = parseSelectionResult({
+  metadata: { project: "aj-os", task: "CB-014" },
+  selectedItems: [
+    {
+      id: "k1",
+      source: { id: "AJS-002", type: "standard", title: "Context Assembly Standard" },
+      content: "…",
+    },
+  ],
+  excludedItems: [
+    {
+      id: "k2",
+      source: { id: "AJS-001", type: "standard", title: "Engineering Standard" },
+      content: "…",
+    },
+  ],
+}); // validated + deeply frozen
+```
+
+- `parseSelectionResult(input)` validates then **deep-freezes** (immutable at
+  every level — the result, its arrays, and every embedded item), or throws a
+  `ZodError`. The schema is **strict** — priority-, score-, ranking- or
+  execution-specific fields are rejected.
+- `selectionResultSchema` is exported so CB-015/CB-016 can **construct** a
+  `SelectionResult` during selection without CB-014 implementing any selection
+  behaviour.
+
+Public exports: `selectionResultSchema`, `selectionResultMetadataSchema`,
+`parseSelectionResult`, and the types `SelectionResult`, `SelectionResultMetadata`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -553,12 +624,13 @@ boundary (task **CB-007**), the CollectionError contract (task **CB-008**), the
 CollectionResult contract (task **CB-009**), deterministic partial provider
 execution — `CollectionEngine.collect` (task **CB-010**), and the integrated
 collection pipeline — `ContextBuilder.collect` (task **CB-011**), all protected
-by permanent collection behaviour tests (task **CB-012**), and the Selection
-Engine service boundary — `createSelectionEngine()` (task **CB-013**). The Context
-Builder now composes and owns a Collection Engine and collects knowledge
-end-to-end, and Milestone M2 is complete; Milestone M3 has begun with the
-Selection Engine boundary. The remaining Context Builder *behaviour* (selection
-execution, assembly, explainability) is not implemented yet.
+by permanent collection behaviour tests (task **CB-012**), the Selection Engine
+service boundary — `createSelectionEngine()` (task **CB-013**), and the
+SelectionResult contract (task **CB-014**). The Context Builder now composes and
+owns a Collection Engine and collects knowledge end-to-end, and Milestone M2 is
+complete; Milestone M3 is under way with the Selection Engine boundary and the
+SelectionResult contract in place. The remaining Context Builder *behaviour*
+(selection policy and execution, assembly, explainability) is not implemented yet.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 
