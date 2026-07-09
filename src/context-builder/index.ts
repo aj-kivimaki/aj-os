@@ -24,8 +24,10 @@
  * Selection Engine and exposes a single public entry point, `build(request)`, which
  * runs Collection → Selection and returns the resulting SelectionResult unchanged
  * (this supersedes the Milestone 2 era `collect(request)` public method — an
- * approved public API evolution). Assembly, profiles and explainability behaviour
- * are delivered by later Milestone M4+ tasks.
+ * approved public API evolution); CB-019 opens Milestone M4 by adding the Assembly
+ * Engine service boundary (a pure boundary that holds nothing and exposes no
+ * members yet). Assembly, profiles and explainability behaviour are delivered by
+ * later Milestone M4+ tasks.
  */
 
 /** Identity of the Context Builder agent (see AJS-004 required metadata). */
@@ -144,3 +146,13 @@ export type {
   SelectionResult,
   SelectionResultMetadata,
 } from "./selection/index.js";
+
+// Assembly Engine — the service boundary that constructs an immutable
+// ContextPackage (CB-003) from an ordered SelectionResult (CB-014). A pure
+// boundary at CB-019 (holds nothing); CB-022 adds the deterministic
+// `assemble(selectionResult, generatedAt)` stage operation to the same interface,
+// realizing the frozen CB-020 section-composition strategy and CB-021 metadata
+// composition. The `assemble` behaviour stays internal; only the factory and
+// interface are public (assemble is a method on the returned handle).
+export { createAssemblyEngine } from "./assembly/index.js";
+export type { AssemblyEngine } from "./assembly/index.js";

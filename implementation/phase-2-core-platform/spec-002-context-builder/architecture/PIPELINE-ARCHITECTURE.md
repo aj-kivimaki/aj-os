@@ -117,6 +117,33 @@ Assembly does not reorder knowledge.
 
 Assembly does not filter knowledge.
 
+> **Stage operation implemented (CB-022).** The Assembly Engine service boundary
+> (`createAssemblyEngine()`, CB-019) now exposes its stage operation:
+> `assemble(selectionResult, generatedAt)` deterministically constructs an
+> immutable `ContextPackage` (CB-003) **through** `parseContextPackage()`,
+> realizing the frozen CB-020 section-composition strategy and the frozen CB-021
+> inputs & metadata composition. The engine still holds nothing at construction
+> (both inputs arrive at `assemble`-time; no ambient clock — `generatedAt` is
+> injected, RC-3) and communicates only through immutable platform contracts.
+> `assemble` is pure and identity-preserving: identical inputs yield a deep-equal
+> package, and KnowledgeItems are consumed unchanged. Wiring `assemble` into the
+> public `build(request)` pipeline is CB-023; permanent Assembly behaviour tests
+> are CB-024.
+
+> **Section-composition strategy (CB-020).** The deterministic structural rule the
+> Assembly stage applies (recorded in `decisions/CB-020-section-composition-strategy.md`,
+> executed by CB-022): a **total, purely structural** mapping from `KnowledgeItem.source.type`
+> (CB-004 `REFERENCE_TYPES`) to a knowledge-derived section `kind` (CB-003
+> `SECTION_KINDS`), keyed only on `source.type` — no semantic evaluation (RC-4). The
+> partition is **stable and order-preserving** (RC-6): item order within a section is
+> the canonical `selectedItems` order (CB-014), and the `sections` array follows the
+> canonical Appendix B / `SECTION_KINDS` order (AD-004). The four non-knowledge-derived
+> sections — `objective`, `success-criteria`, `constraints`, `open-questions` — are
+> always present and empty (Reviewer Decision A); `files-likely-to-change` and
+> `risks-and-edge-cases` are not populated by a purely structural rule and do not
+> appear in M4. Section `referenceIds` are drawn from the composing items' sources, so
+> referential integrity holds by construction (CB-003).
+
 ---
 
 ## Explainability

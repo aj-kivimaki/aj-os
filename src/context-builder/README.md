@@ -5,7 +5,13 @@
 > **Status:** Milestone M3 — Knowledge Selection **complete** (M1, M2 also
 > complete). The Context Builder pipeline runs Collection → Selection through the
 > single public entry point `build(request)` (CB-017), protected by permanent
-> Selection behaviour and `build` pipeline regression tests (CB-018).
+> Selection behaviour and `build` pipeline regression tests (CB-018). Milestone M4
+> — Context Assembly — is **in progress**: CB-019 establishes the Assembly Engine
+> service boundary (`createAssemblyEngine()`); CB-020/CB-021 fix the frozen
+> section-composition and metadata-composition strategies; CB-022 implements the
+> deterministic `assemble(selectionResult, generatedAt)` stage operation that
+> realizes them. Pipeline integration into `build(request)` (CB-023) and permanent
+> Assembly behaviour tests (CB-024) are the remaining M4 tasks.
 
 The Context Builder assembles the smallest, highest-value **Context Package**
 required for a coding agent to complete a single task. It is the primary bridge
@@ -839,6 +845,126 @@ the Context Builder is a thin orchestrator that adds no behaviour and exposes on
 **no** platform behaviour and **no** contract change; it only exercises the frozen
 CB-013…CB-017 surfaces. **Milestone M3 is complete.**
 
+## Assembly Engine (CB-019)
+
+The **Assembly Engine** is the platform service that constructs an immutable
+`ContextPackage` (CB-003) from an ordered `SelectionResult` (CB-014) —
+determining how selected knowledge becomes the canonical Context Builder output.
+CB-019 opens Milestone M4 by establishing only its *service boundary* — the seam
+that later Milestone M4 tasks extend:
+
+```text
+createAssemblyEngine → immutable service handle
+```
+
+It follows the same factory-based service pattern as `createContextBuilder()`,
+`createProviderRegistry()`, `createCollectionEngine()` and
+`createSelectionEngine()`:
+
+```ts
+import { createAssemblyEngine } from "./context-builder/index.js";
+
+const engine = createAssemblyEngine();
+// In CB-022 the engine gains: await engine.assemble(selectionResult, …);
+```
+
+- **Pure boundary** — like the Selection Engine (and unlike the Collection Engine,
+  which is constructed with the Provider Registry it **holds**), the Assembly
+  Engine holds **nothing** at construction and exposes **no members** yet. Its only
+  input, the `SelectionResult` (CB-014), arrives as the future
+  `assemble(selectionResult, …)` argument; its section-composition strategy arrives
+  in CB-020 and its metadata composition in CB-021. `createAssemblyEngine()`
+  therefore takes **no arguments**.
+- **Minimal** — the handle carries **no** `assemble()` method: the
+  section-composition strategy (CB-020), assembly inputs & metadata composition
+  (CB-021) and the deterministic `assemble` stage operation (CB-022) are introduced
+  through this same interface by later Milestone M4 tasks. Adding a member now would
+  be a placeholder for behaviour owned by a later task.
+- **Deterministic** — every call yields the same public service.
+- **Stateless & immutable** — no mutable runtime state; the returned handle is
+  frozen (`Object.freeze`).
+- **Pipeline-independent** — the engine does not own the Collection Engine, the
+  Selection Engine, the Provider Registry or any Knowledge Provider; it communicates
+  only through immutable platform contracts (AD-002, Stage Independence).
+
+Like the Selection Engine, no `schema.ts` is introduced: the Assembly Engine adds
+no new *data* contract — its future output is the frozen CB-003 `ContextPackage` —
+so its interface is co-located with its factory in
+`assembly/createAssemblyEngine.ts`.
+
+Public exports: `createAssemblyEngine` and the type `AssemblyEngine`.
+
+## Assembly — `assemble` (CB-022)
+
+CB-022 adds the first *runtime behaviour* to the Assembly Engine. The engine
+established in CB-019 gains an `assemble(selectionResult, generatedAt)` stage
+operation that deterministically constructs an immutable `ContextPackage`
+(CB-003) from an ordered `SelectionResult` (CB-014) and an injected `generatedAt`
+timestamp, realizing the frozen CB-020 section-composition strategy and the frozen
+CB-021 metadata composition:
+
+```text
+SelectionResult + generatedAt → engine.assemble → ContextPackage
+```
+
+```ts
+import { createAssemblyEngine } from "./context-builder/index.js";
+
+const engine = createAssemblyEngine();
+
+const pkg = await engine.assemble(selectionResult, "2026-07-10T00:00:00.000Z");
+pkg.sections;   // ContextSections in canonical Appendix B / SECTION_KINDS order
+pkg.references; // de-duplicated selected sources (first-appearance order)
+pkg.metadata;   // provenance + injected generatedAt + single-sourced versions
+```
+
+- **Construct-through-contract.** The package is built **through**
+  `parseContextPackage()` (CB-003) — the sole constructor. Structural invariants
+  (unique reference ids, unique section kinds, referential integrity) and the deep
+  freeze therefore hold **by construction**; this is intrinsic construction, not
+  the deferred semantic validation (AD-008).
+- **References** are the de-duplicated union of `selectedItems[].source`, keyed by
+  `source.id` (first occurrence wins), in first-appearance order. Only
+  `selectedItems` participate — `excludedItems` never enter assembly.
+- **Sections** follow the CB-020 partition: a **total, purely structural**
+  `source.type → kind` mapping (keyed only on `source.type` — no semantic
+  evaluation) populates the knowledge-derived sections, preserving the canonical
+  `selectedItems` order within each; the `sections` array itself follows the
+  canonical Appendix B / `SECTION_KINDS` order (AD-004). The four Reviewer
+  Decision A sections (`objective`, `success-criteria`, `constraints`,
+  `open-questions`) are always present and empty. `files-likely-to-change` and
+  `risks-and-edge-cases` are not populated by a purely structural rule and do not
+  appear in M4. Section titles are the canonical Appendix B display names, keyed by
+  `kind`. Section `referenceIds` are the composing items' `source.id`s (canonical
+  order, de-duplicated), so referential integrity holds by construction.
+- **Metadata** follows the CB-021 composition: provenance (`project`, `task`,
+  optional `branch`/`commit`) is **reused** unchanged from `SelectionResult.metadata`
+  (`issue` has no home in the frozen `.strict()` contract and is intentionally
+  dropped); `generatedAt` is the injected input; the two version fields are
+  single-sourced separately — `contextBuilderVersion ← CONTEXT_BUILDER.version` and
+  `contextVersion ← CONTEXT_VERSION` (the single canonical Context Package contract
+  version, `"1.0"`, introduced here per CB-021 §3).
+- **Explainability & summary** are minimal, structurally valid, present-but-not-
+  computed values (`explainability = { summary: "", entries: [] }`, `summary = ""`):
+  Assembly does not render (AD-003) or compute explainability (AD-009).
+- **Deterministic, pure, identity-preserving.** `assemble` is a pure function of
+  its two explicit inputs — no ambient clock, randomness or external state — so
+  identical inputs always yield a deep-equal package (AD-007, RC-3). The input
+  `SelectionResult` is never mutated and KnowledgeItems are consumed unchanged
+  (AD-002, Knowledge Identity). Like `collect` and `select`, `assemble` is `async`
+  to compose uniformly in the future `build(request)` pipeline (CB-023); it performs
+  no I/O and resolves synchronously.
+
+This extends the CB-019 service boundary with the method it anticipated; it adds no
+new contract, composing CB-003, CB-004 and CB-014 unchanged, and realizes the
+CB-020/CB-021 decisions. Pipeline integration (CB-023) and permanent Assembly
+behaviour tests (CB-024) remain out of scope. The `assemble` behaviour
+(`assembleContext`) and its composition helpers stay internal to the module; only
+the factory and interface are public.
+
+Public exports: unchanged — `assemble` is a method on the existing `AssemblyEngine`
+handle returned by `createAssemblyEngine`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -866,9 +992,17 @@ Collection Engine and a Selection Engine and runs Collection → Selection end-t
 through the single public entry point `build(request)`, which supersedes the
 Milestone 2 era `collect(request)`. This selection pipeline is now protected by the
 permanent Selection Engine, execution and `build(request)` behaviour tests (task
-**CB-018**), which completes **Milestone M3**. The remaining Context Builder
-*behaviour* (assembly, explainability) is not implemented yet and arrives through the
-same `build` entry point in later milestones (M4+).
+**CB-018**), which completes **Milestone M3**. **Milestone M4** (Context Assembly)
+is in progress: the Assembly Engine service boundary — `createAssemblyEngine()`
+(task **CB-019**) — was followed by the frozen section-composition strategy (task
+**CB-020**) and the frozen assembly inputs & metadata composition (task
+**CB-021**), and CB-022 implements deterministic assembly — the
+`assemble(selectionResult, generatedAt)` stage operation that constructs an
+immutable Context Package through `parseContextPackage()`, realizing the
+CB-020/CB-021 decisions (task **CB-022**). Pipeline integration into `build(request)`
+(CB-023) and permanent Assembly behaviour tests (CB-024) are the remaining M4 tasks;
+the assembled package is not yet returned by the public `build` entry point (that is
+CB-023). Explainability and profiles arrive in M5.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 
