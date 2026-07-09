@@ -671,6 +671,61 @@ Internal (module-private) exports: `evaluateKnowledgeItem`,
 types `KnowledgeItemPredicate`, `KnowledgeItemComparator`,
 `KnowledgeItemEquivalence`, `ExactDuplicatePartition`.
 
+## Selection execution (CB-016)
+
+CB-016 adds the first *runtime behaviour* to the Selection Engine. The engine
+established in CB-013 gains a `select(collectionResult)` stage operation that
+**applies** the deterministic Selection Policy (CB-015) to an immutable
+`CollectionResult` (CB-009) and assembles an immutable `SelectionResult` (CB-014):
+
+```text
+CollectionResult → engine.select → SelectionResult (ordered selectedItems + excludedItems)
+```
+
+```ts
+import { createSelectionEngine } from "./context-builder/index.js";
+
+const engine = createSelectionEngine();
+
+const selection = await engine.select(collectionResult);
+selection.selectedItems; // KnowledgeItems in canonical deterministic order
+selection.excludedItems; // filtered-out items and eliminated exact duplicates
+selection.metadata;      // the request this selection answered (provenance)
+```
+
+- **Applies policy, decides nothing.** Execution *sequences* the CB-015 policy in
+  four steps — **filter** (`isRetainedKnowledgeItem`) → **order** the retained items
+  into canonical order (`compareKnowledgeItems`) → **eliminate exact duplicates** in
+  that order (`partitionExactDuplicates`, first occurrence retained) → **construct**
+  the result (`parseSelectionResult`). It embeds no evaluation, filtering, ordering
+  or duplicate rule of its own, introduces no new comparator, and exposes no
+  priority/score/ranking value. The Selection Policy and this behaviour stay internal
+  to the module; only `select` is public.
+- **`selectedItems` is the canonical ordered sequence** the policy produces — the
+  public guarantee Assembly (M4) consumes exactly as given. **`excludedItems`**
+  carries everything selection did not forward (items removed by filtering and exact
+  duplicates removed), each **unchanged**; it has no contractual ordering guarantee,
+  so the engine orders it with the same policy comparator purely to keep the output
+  fully deterministic.
+- **Deterministic** — identical CollectionResults always produce identical
+  SelectionResults. The comparator chain terminates in an immutable identifier, so
+  ordering never depends on collection order, timing or randomness.
+- **Stateless, identity-preserving, immutable** — `select` is a pure function of its
+  input; the engine holds no runtime state, never mutates the frozen input (retained
+  items are sorted over a copy), communicates with no provider or external service,
+  and returns the deeply-frozen `SelectionResult` built by `parseSelectionResult`.
+- **`async` to mirror `collect`** — like the Collection Engine's stage operation,
+  `select` returns a promise so both stage operations compose uniformly in the future
+  `build(request)` pipeline (CB-017). Selection performs no I/O; the promise resolves
+  synchronously.
+
+This extends the CB-013 service boundary with the method it anticipated; it adds no
+new contract, composing CB-009, CB-014 and CB-015 unchanged. Context Builder
+integration (CB-017), assembly, profiles and explainability remain out of scope.
+
+Public exports: unchanged — `select` is a method on the existing `SelectionEngine`
+handle returned by `createSelectionEngine`.
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -686,13 +741,15 @@ by permanent collection behaviour tests (task **CB-012**), the Selection Engine
 service boundary — `createSelectionEngine()` (task **CB-013**), and the
 SelectionResult contract (task **CB-014**), and the deterministic Selection Policy
 — evaluation, filtering, an ordered comparator chain terminating in an immutable
-identifier, and exact-duplicate elimination (task **CB-015**). The Context Builder
-now composes and owns a Collection Engine and collects knowledge end-to-end, and
-Milestone M2 is complete; Milestone M3 is under way with the Selection Engine
-boundary, the SelectionResult contract and the complete Selection Policy in place.
-The remaining Context Builder *behaviour* (selection execution — applying the policy
-to construct a SelectionResult, Context Builder integration, assembly,
-explainability) is not implemented yet.
+identifier, and exact-duplicate elimination (task **CB-015**), and selection
+execution — `SelectionEngine.select`, which applies the Selection Policy to a
+CollectionResult and constructs an immutable SelectionResult (task **CB-016**). The
+Context Builder now composes and owns a Collection Engine and collects knowledge
+end-to-end, and Milestone M2 is complete; Milestone M3 is under way with the
+Selection Engine boundary, the SelectionResult contract, the complete Selection
+Policy, and selection execution in place. The remaining Context Builder *behaviour*
+(Context Builder integration via `build(request)`, assembly, explainability) is not
+implemented yet.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 

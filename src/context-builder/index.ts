@@ -120,8 +120,9 @@ export type {
 } from "./collection/index.js";
 
 // Selection Engine — the service boundary that performs deterministic knowledge
-// selection; a pure boundary at CB-013 (holds nothing, exposes no members), later
-// extended with the `select(collectionResult)` stage operation (CB-016).
+// selection; a pure boundary at CB-013 (holds nothing), extended in CB-016 with the
+// `select(collectionResult)` stage operation that applies the Selection Policy
+// (CB-015) to a CollectionResult and returns an immutable SelectionResult (CB-014).
 export { createSelectionEngine } from "./selection/index.js";
 export type { SelectionEngine } from "./selection/index.js";
 
