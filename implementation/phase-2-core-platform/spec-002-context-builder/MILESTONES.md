@@ -20,14 +20,14 @@ The milestones prioritize working software over technical completeness.
 
 # Milestone Overview
 
-| Milestone | Name | Goal | Status |
-| --------- | ---- | ---- | ------ |
-| M1 | Foundation | Establish immutable platform contracts, core services, and contract testing | ✅ |
-| M2 | Knowledge Collection | Collect knowledge deterministically from registered providers | ✅ |
-| M3 | Knowledge Selection | Select, filter, and organize collected knowledge | ⬜ |
-| M4 | Context Assembly | Assemble deterministic Context Packages | ⬜ |
-| M5 | Explainability & Profiles | Explain selection decisions and support context profiles | ⬜ |
-| M6 | Optimization | Improve performance and prepare future platform extensions | ⬜ |
+| Milestone | Name                      | Goal                                                                        | Status |
+| --------- | ------------------------- | --------------------------------------------------------------------------- | ------ |
+| M1        | Foundation                | Establish immutable platform contracts, core services, and contract testing | ✅     |
+| M2        | Knowledge Collection      | Collect knowledge deterministically from registered providers               | ✅     |
+| M3        | Knowledge Selection       | Select, filter, and organize collected knowledge                            | ⬜     |
+| M4        | Context Assembly          | Assemble deterministic Context Packages                                     | ⬜     |
+| M5        | Explainability & Profiles | Explain selection decisions and support context profiles                    | ⬜     |
+| M6        | Optimization              | Improve performance and prepare future platform extensions                  | ⬜     |
 
 ---
 
@@ -146,27 +146,59 @@ The Context Builder deterministically collects knowledge from all registered pro
 
 ## Objective
 
-Select the most relevant knowledge from collected results.
+Implement deterministic knowledge selection using the immutable CollectionResult produced by Milestone 2.
 
-The focus is deterministic selection rather than package generation.
+Selection determines which collected knowledge should become part of a future Context Package. It operates entirely on the existing CollectionResult and introduces no new provider execution or collection behaviour.
 
 ## Deliverables
 
-- Relevance scoring
-- Duplicate handling
-- Filtering
-- Ordering
-- Token budgeting
+- Selection Engine (`select(collectionResult)` stage operation)
+- Selection contracts (SelectionResult)
+- Deterministic Selection Policy (executable comparator chain)
+- Selection integration via the `build(request)` pipeline entry point
+- Behaviour tests
+
+## Explicitly Excluded
+
+- Context Package generation
+- Prompt formatting
+- Explainability
+- Context profiles
+- Provider execution
+- Knowledge collection
+- Optimisation
+
+## Approved Architecture Decisions
+
+The following decisions were reviewed and approved during Milestone 3 planning and are the documented architecture (see PIPELINE-ARCHITECTURE.md):
+
+- **Public entry point.** The Context Builder exposes a single public entry point, `build(request)`, which always executes the highest-level implemented pipeline (Collection → Selection → SelectionResult at Milestone 3). Stage operations (`collect`, `select`, future `assemble`) live on their engines; intermediate results remain internal. This supersedes the Milestone 2 era `ContextBuilder.collect` public entry point — an approved public API evolution, reconciled in CB-017.
+- **Priority representation.** SelectionResult exposes no explicit priority field. The canonical deterministic ordering of `selectedItems` is the public contract; priority (if used) is an internal implementation detail. Assembly consumes `selectedItems` exactly in the order provided.
+- **Deterministic ordering.** The Selection Policy is executable platform behaviour defining an ordered comparator chain. Every comparator is deterministic and the chain terminates with an immutable platform identifier (for example `KnowledgeItem.id`) to guarantee a stable total ordering. No scoring algorithms, numeric priority values, or business-specific ranking heuristics are introduced.
+
+## Integration Check
+
+The public entry-point evolution to `build(request)` has been reviewed and approved (recorded above and in CB-017). No frozen Milestone 1 or Milestone 2 platform contract is modified: CollectionResult, the Collection Engine, and the Provider Registry are unchanged, and the Milestone 2 `collect` behaviour is preserved as the `CollectionEngine.collect(request)` stage operation.
 
 ## Validation
 
-The same collected knowledge always produces the same selected result.
+The same CollectionResult and configuration always produce the same SelectionResult, including the same canonical deterministic ordering of `selectedItems`.
 
 ## Definition of Done
 
-- [ ] Selection pipeline operational
-- [ ] Duplicate handling implemented
-- [ ] Tests passing
+- [ ] Selection Engine operational
+- [ ] Selection contracts implemented
+- [ ] Deterministic selection implemented
+- [ ] Context Builder integration complete
+- [ ] Behaviour tests passing
+- [ ] Planning review completed
+- [ ] Planning frozen
+
+## Architecture
+
+Milestone 3 implements the Selection stage described in:
+
+- architecture/PIPELINE-ARCHITECTURE.md
 
 ---
 
@@ -280,15 +312,16 @@ The implementation roadmap is complete when:
 
 # Change Log
 
-| Date | Version | Description |
-| ---------- | ------- | --------------------------------- |
-| 2026-07-08 | 2.5 | CB-012 completed: permanent collection behaviour tests (Context Builder integration + deterministic error ordering) added on the CB-006 foundation; suite 105 → 119. **Milestone M2 complete** — all M2 tasks and DoD satisfied. No platform contract changed. |
-| 2026-07-08 | 2.4 | CB-011 completed: Context Builder integrated with the Collection Engine (`ContextBuilder.collect`). Approved contract evolution — `createContextBuilder(config)` → `createContextBuilder(config, registry)`; no other public contract changed. M2 task progress updated. |
-| 2026-07-08 | 2.3 | CB-010 completed: deterministic partial provider execution implemented (`CollectionEngine.collect`); M2 task progress updated. |
-| 2026-07-08 | 2.2 | CB-009 completed: CollectionResult contract (items + errors + metadata) defined; M2 task progress updated. |
-| 2026-07-08 | 2.1 | Milestone 2 planning corrections: adopted partial-collection model; reordered tasks contract-first (Error contract → CollectionResult → Provider Execution); added M2 Related Tasks list. |
-| 2026-07-08 | 2.0 | Updated roadmap after freezing Milestone 1; aligned milestones with contract-first architecture. |
-| 2026-07-07 | 1.0 | Initial milestone roadmap created |
+| Date       | Version | Description                                                                                                                                                                                                                                                              |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-07-09 | 2.6     | Milestone 3 planning corrections applied (R1/R2/R3): approved `build(request)` single public entry point (supersedes M2-era `ContextBuilder.collect`, preserved as `CollectionEngine.collect`); SelectionResult exposes no priority field (canonical ordering is the contract); Selection Policy is an executable deterministic comparator chain terminating in an immutable identifier. Tasks CB-013…CB-018 and PIPELINE-ARCHITECTURE updated. Planning documentation only — no frozen M1/M2 platform contract changed.        |
+| 2026-07-08 | 2.5     | CB-012 completed: permanent collection behaviour tests (Context Builder integration + deterministic error ordering) added on the CB-006 foundation; suite 105 → 119. **Milestone M2 complete** — all M2 tasks and DoD satisfied. No platform contract changed.           |
+| 2026-07-08 | 2.4     | CB-011 completed: Context Builder integrated with the Collection Engine (`ContextBuilder.collect`). Approved contract evolution — `createContextBuilder(config)` → `createContextBuilder(config, registry)`; no other public contract changed. M2 task progress updated. |
+| 2026-07-08 | 2.3     | CB-010 completed: deterministic partial provider execution implemented (`CollectionEngine.collect`); M2 task progress updated.                                                                                                                                           |
+| 2026-07-08 | 2.2     | CB-009 completed: CollectionResult contract (items + errors + metadata) defined; M2 task progress updated.                                                                                                                                                               |
+| 2026-07-08 | 2.1     | Milestone 2 planning corrections: adopted partial-collection model; reordered tasks contract-first (Error contract → CollectionResult → Provider Execution); added M2 Related Tasks list.                                                                                |
+| 2026-07-08 | 2.0     | Updated roadmap after freezing Milestone 1; aligned milestones with contract-first architecture.                                                                                                                                                                         |
+| 2026-07-07 | 1.0     | Initial milestone roadmap created                                                                                                                                                                                                                                        |
 
 ---
 

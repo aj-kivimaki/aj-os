@@ -50,6 +50,18 @@ Advanced retrieval techniques such as embeddings and semantic search are intenti
 
 ---
 
+## Architecture
+
+The Context Builder is implemented as a deterministic processing pipeline.
+
+Each stage has a single responsibility and communicates exclusively through immutable platform contracts.
+
+See:
+
+- architecture/PIPELINE-ARCHITECTURE.md
+
+---
+
 # Scope
 
 ## Included
@@ -141,45 +153,48 @@ The implementation prioritizes:
 
 # Latest Milestone
 
-## Milestone 2 — Knowledge Collection ✅ Complete & Frozen
+## Milestone 3 — Knowledge Selection
 
 **Objective**
 
-Implement deterministic knowledge collection using the platform contracts established during Milestone 1.
+Implement deterministic knowledge selection using the immutable CollectionResult produced by Milestone 2.
 
-Collection is **partial**: a single provider failure never aborts collection. A provider contributes either KnowledgeItems or a CollectionError, and the CollectionResult contains both.
+Selection determines which collected knowledge becomes part of a future Context Package. It operates entirely on the existing CollectionResult and introduces no new provider execution or collection behaviour.
 
-**Deliverables (implementation order)**
+**Expected Deliverables**
 
-- Collection Engine (CB-007)
-- Collection Error contract (CB-008)
-- CollectionResult contract — items + errors (CB-009)
-- Provider execution — partial collection (CB-010)
-- Context Builder integration (CB-011)
-- Collection tests (CB-012)
+- Selection Engine
+- Selection contracts
+- Deterministic selection rules
+- Selection integration
+- Behaviour tests
 
 **Intentionally excluded**
 
-- Knowledge selection
-- Ranking
 - Context Package generation
+- Prompt formatting
 - Explainability
-- Profiles
+- Context profiles
+- Provider execution
+- Knowledge collection
+- Optimisation
 
-**Next:** Milestone 3 — Knowledge Selection (not started).
+**Next**
+
+Milestone 3 planning.
 
 ---
 
 # Milestone Progress
 
-| Milestone | Description | Status |
-| --------- | -------------------------- | ------ |
-| M1 | Foundation | ✅ |
-| M2 | Knowledge Collection | ✅ |
-| M3 | Knowledge Selection | ⬜ |
-| M4 | Context Assembly | ⬜ |
-| M5 | Explainability & Profiles | ⬜ |
-| M6 | Optimization | ⬜ |
+| Milestone | Description               | Status |
+| --------- | ------------------------- | ------ |
+| M1        | Foundation                | ✅     |
+| M2        | Knowledge Collection      | ✅     |
+| M3        | Knowledge Selection       | ⬜     |
+| M4        | Context Assembly          | ⬜     |
+| M5        | Explainability & Profiles | ⬜     |
+| M6        | Optimization              | ⬜     |
 
 See:
 
@@ -197,7 +212,7 @@ Current status:
 - ✅ Milestone 1 complete and frozen.
 - ✅ Milestone 2 complete and frozen.
 
-Completed foundation:
+Completed implementation:
 
 - Context Builder module
 - Configuration contract
@@ -205,8 +220,15 @@ Completed foundation:
 - Knowledge Provider contracts
 - Provider Registry
 - Contract Testing Foundation
+- Collection Engine
+- Collection Error contract
+- CollectionResult contract
+- Deterministic provider execution
+- Context Builder collection pipeline
 
-Milestone 2 introduces the first platform behaviour: deterministic knowledge collection.
+The platform foundation is complete through deterministic knowledge collection.
+
+The next implementation milestone introduces deterministic knowledge selection.
 
 ---
 
@@ -224,14 +246,16 @@ Implementation should prioritize simplicity over completeness.
 
 # Open Questions
 
-Questions identified during implementation planning:
+Milestone 3 planning resolved the following (recorded in the Milestone 3 planning review):
 
-- How should providers register themselves?
-- What is the optimal Context Package structure?
-- How should token estimation be implemented?
-- Which information belongs in explainability reports?
+- **What deterministic selection model should be used?** — Resolved. The Selection Policy is executable platform behaviour expressed as an ordered comparator chain. Every comparator is deterministic and the chain terminates with an immutable platform identifier (for example `KnowledgeItem.id`) to guarantee a stable total ordering. No scoring algorithms, numeric priority values, or business-specific ranking heuristics are introduced.
+- **How should selection priorities be represented?** — Resolved. SelectionResult exposes no explicit priority field. The canonical deterministic ordering of `selectedItems` is the public contract; any priority used within the policy is an implementation detail. Assembly consumes `selectedItems` exactly in the order provided.
+- **What should the SelectionResult contract contain?** — Resolved. SelectionResult contains `metadata`, `selectedItems`, and `excludedItems`, composed from existing immutable platform contracts (CB-014).
+- **What is the Context Builder public entry point?** — Resolved. The Context Builder exposes a single public entry point, `build(request)`, which always executes the highest-level implemented pipeline. Stage-specific operations (`collect`, `select`, future `assemble`) remain on their engines; intermediate results stay internal to the pipeline.
 
-These questions should be answered during implementation.
+Remaining open question (deferred beyond Milestone 3):
+
+- **Where should Context Profiles influence selection?** — Deferred to Milestone 5 (Explainability & Profiles). Selection in Milestone 3 is profile-agnostic; the comparator chain is designed so a future profile can modulate it without changing the SelectionResult contract or the `build(request)` entry point.
 
 ---
 
@@ -240,10 +264,10 @@ These questions should be answered during implementation.
 This implementation succeeds when:
 
 - SPEC-002 acceptance criteria are satisfied.
-- The Context Builder assembles deterministic Context Packages.
+- The Context Builder deterministically collects and selects knowledge.
 - Providers are extensible.
 - Tests pass.
-- The Context Builder can be used by SPEC-003.
+- The Context Builder foundation is ready for Context Assembly.
 
 ---
 
@@ -263,13 +287,14 @@ The implementation is complete when:
 
 # Change Log
 
-| Date | Version | Description |
-| ---------- | ------- | -------------------------------------- |
-| 2026-07-08 | 2.3 | Milestone 2 status corrected to complete **and frozen** (freeze recorded in RETROSPECTIVE-M2). "Latest Milestone" section marked complete; next milestone (M3 — Knowledge Selection) noted. Documentation only — no contract, code or milestone-plan change. |
-| 2026-07-08 | 2.2 | CB-012 completed and Milestone 2 marked complete: deterministic knowledge collection is now protected by permanent behaviour tests (105 → 119). No platform contract changed. |
-| 2026-07-08 | 2.1 | Milestone 2 planning corrections: partial-collection model; deliverables reordered contract-first (CB-007…CB-012). |
-| 2026-07-08 | 2.0 | Updated after freezing Milestone 1 and aligning the implementation roadmap with the contract-first architecture. |
-| 2026-07-07 | 1.0 | Initial implementation package created |
+| Date       | Version | Description                                                                                                                                                                                                                                                  |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-07-09 | 2.4     | Milestone 3 planning corrections applied (R1/R2/R3): resolved Open Questions — `build(request)` single public entry point, SelectionResult exposes no priority field (ordering is the contract), Selection Policy is an executable deterministic comparator chain terminating in an immutable identifier. Planning documentation only — no code, no frozen M1/M2 platform contract changed.        |
+| 2026-07-08 | 2.3     | Milestone 2 status corrected to complete **and frozen** (freeze recorded in RETROSPECTIVE-M2). "Latest Milestone" section marked complete; next milestone (M3 — Knowledge Selection) noted. Documentation only — no contract, code or milestone-plan change. |
+| 2026-07-08 | 2.2     | CB-012 completed and Milestone 2 marked complete: deterministic knowledge collection is now protected by permanent behaviour tests (105 → 119). No platform contract changed.                                                                                |
+| 2026-07-08 | 2.1     | Milestone 2 planning corrections: partial-collection model; deliverables reordered contract-first (CB-007…CB-012).                                                                                                                                           |
+| 2026-07-08 | 2.0     | Updated after freezing Milestone 1 and aligning the implementation roadmap with the contract-first architecture.                                                                                                                                             |
+| 2026-07-07 | 1.0     | Initial implementation package created                                                                                                                                                                                                                       |
 
 ---
 
