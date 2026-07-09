@@ -119,6 +119,7 @@ Examples:
 - Agent Specification
 - Workflow Orchestration
 - Knowledge Governance
+- Engineering Lifecycle
 
 ## Specifications (SPEC)
 

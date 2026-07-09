@@ -11,6 +11,8 @@
 > The corresponding planning review is defined in:
 >
 > `implementation/review/MILESTONE-PLANNING.md`
+>
+> The Freeze Review is defined as an engineering mechanism in **AJS-007 — Engineering Lifecycle Standard** (§7); this document is the implementation-level procedure for conducting it.
 
 ---
 

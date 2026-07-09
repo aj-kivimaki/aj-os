@@ -6,18 +6,9 @@ These items are intentionally deferred until the Context Builder specification i
 
 ## Engineering Standards
 
-- Create an **Engineering Lifecycle Standard** documenting the complete AJ-OS engineering workflow:
-  - Planning
-  - Planning Review
-  - Planning Freeze
-  - Implementation
-  - Implementation Review
-  - Milestone Freeze Review
-  - Milestone Freeze
-  - Retrospective
-  - Specification Freeze
+- ✅ **Done — delivered as AJS-007 — Engineering Lifecycle Standard** (Draft; `docs/standards/AJS-007-Engineering-Lifecycle-Standard.md`). The standard documents milestone delivery as seven lifecycle stages — Planning, Planning Review, Planning Freeze, Implementation, Freeze Review, Milestone Freeze, Retrospective. During design, "Implementation Review" was folded into per-task Task Review plus the Freeze Review, and "Specification Freeze" was reconciled as the per-milestone Milestone Freeze; architecture sits outside the lifecycle by design.
 
-- Review the reusable engineering principles discovered during SPEC-002 and determine which should be promoted into AJS standards.
+- ✅ **Addressed in AJS-007 §6.** The reusable engineering principles discovered during SPEC-002 were reviewed: the repeatedly validated principles are promoted in §6.1, and single-milestone observations are retained as provisional candidates in §6.2. Further promotion follows the governance defined in AJS-007 §10.
 
 ---
 

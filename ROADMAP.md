@@ -36,7 +36,7 @@ The architectural foundation has been established.
 Completed:
 
 - ARCH-001 Platform Architecture
-- AJS-001 -- AJS-006 Platform Standards
+- AJS-001 -- AJS-007 Platform Standards
 - SPEC-000 Specification Writing Standard
 - SPEC-001 -- SPEC-005 Core Platform Specifications
 

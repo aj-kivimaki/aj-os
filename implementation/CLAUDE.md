@@ -28,6 +28,8 @@ Code
 
 Do not bypass this process.
 
+> The engineering lifecycle that governs this process is defined canonically in **AJS-007 — Engineering Lifecycle Standard**. This playbook applies AJS-007 at the implementation level.
+
 ---
 
 # Source of Truth

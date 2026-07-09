@@ -30,6 +30,7 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
   - Selection execution — `SelectionEngine.select()` applies the policy to a `CollectionResult` and returns an immutable `SelectionResult` (CB-016)
   - End-to-end Context Builder selection pipeline — `ContextBuilder.build(request)` runs Collection → Selection and returns the `SelectionResult` unchanged (CB-017)
   - Permanent selection behaviour and `build()` pipeline tests; the suite grew from 119 → 160 tests (CB-018)
+- **AJS-007 — Engineering Lifecycle Standard** (Draft) — a new AJ-OS platform standard that consolidates the validated milestone-delivery engineering practice (planning → planning freeze → implementation → freeze review → milestone freeze → retrospective) into a single canonical reference, derived from SPEC-002 implementation experience (`docs/standards/AJS-007-Engineering-Lifecycle-Standard.md`)
 
 ### Changed
 

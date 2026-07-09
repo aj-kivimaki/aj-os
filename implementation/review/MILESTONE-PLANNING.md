@@ -265,6 +265,8 @@ Every milestone should:
 
 # AJ-OS Engineering Lifecycle
 
+> **Canonical source.** The engineering lifecycle is now defined canonically by **AJS-007 — Engineering Lifecycle Standard** (`docs/standards/AJS-007-Engineering-Lifecycle-Standard.md`). This section is retained as implementation-level guidance and defers to AJS-007.
+
 ```text
 Architecture
         ↓
