@@ -11,20 +11,23 @@
  *   SelectionResult + generatedAt → assembleContext → ContextPackage
  *
  * Assembly is **structural composition only** (AD-002, AD-010, RC-4). It performs
- * no evaluation, no reordering, no filtering, and no semantic classification. It
- * reads only frozen structural fields (`source.type`, `source.id`, the provenance
- * `metadata`) and never inspects `content`.
+ * no evaluation, no reordering, no filtering, and no semantic classification. The
+ * partition, ordering and metadata are decided purely from frozen structural
+ * fields (`source.type`, `source.id`, the provenance `metadata`); each item's
+ * `content` is read but only copied **verbatim** into its section body — never
+ * inspected to make a decision, rewritten, or summarized.
  *
  *   1. references — the de-duplicated union of `selectedItems[].source`
  *                   (de-duplicated by `source.id`, first occurrence wins,
  *                   first-appearance order preserved) — CB-020 §5.
  *   2. sections   — the CB-020 partition: knowledge-derived sections populated by
  *                   the total, purely structural `source.type → kind` mapping
- *                   (order-preserving), plus the four Reviewer Decision A sections
- *                   (`objective`, `success-criteria`, `constraints`,
- *                   `open-questions`) always present and empty; the `sections`
- *                   array follows the canonical Appendix B / `SECTION_KINDS` order
- *                   (AD-004).
+ *                   (order-preserving), each carrying the verbatim bodies of the
+ *                   items routed to it (canonical order, blank-line separated),
+ *                   plus the four Reviewer Decision A sections (`objective`,
+ *                   `success-criteria`, `constraints`, `open-questions`) always
+ *                   present and empty; the `sections` array follows the canonical
+ *                   Appendix B / `SECTION_KINDS` order (AD-004).
  *   3. metadata   — the CB-021 composition: provenance reused from
  *                   `SelectionResult.metadata`, the injected `generatedAt`, and the
  *                   two single-sourced versions.
@@ -142,9 +145,19 @@ const ALWAYS_PRESENT_EMPTY_KINDS: ReadonlySet<ContextSectionKind> = new Set([
   "open-questions",
 ]);
 
+/**
+ * Separator placed between the verbatim bodies of the items routed to the same
+ * section. A blank line keeps concatenated Markdown articles readable without
+ * imposing any formatting of Assembly's own (rendering is the PromptRenderer's
+ * job, AD-003).
+ */
+const SECTION_BODY_SEPARATOR = "\n\n";
+
 /** A knowledge-derived section under construction — plain, mutable, pre-parse. */
 interface DraftSection {
   kind: ContextSectionKind;
+  /** Verbatim item bodies routed to this section, in canonical order. */
+  contents: string[];
   referenceIds: string[];
   seenReferenceIds: Set<string>;
 }
@@ -160,9 +173,9 @@ interface DraftSection {
  * come for free and the output cannot drift from the contract.
  *
  * The input `SelectionResult` is never mutated: only its `selectedItems` are read
- * (in canonical order) and only their `source` and the provenance `metadata` are
- * consumed. `excludedItems` are ignored. Identical inputs always yield a deep-equal
- * package.
+ * (in canonical order) — their `source`, their verbatim `content`, and the
+ * provenance `metadata`. `excludedItems` are ignored. Identical inputs always
+ * yield a deep-equal package.
  *
  * @param selectionResult - the immutable upstream SelectionResult (never modified)
  * @param generatedAt - the injected ISO-8601 timestamp (CB-021 / Decision B)
@@ -227,10 +240,11 @@ function composeReferences(
  * populated by the total, purely structural `source.type → kind` mapping while
  * preserving the canonical `selectedItems` order within each section (RC-6); their
  * `referenceIds` are the composing items' `source.id`s in that order, de-duplicated
- * (first occurrence wins). The four Reviewer Decision A sections are always present
- * and empty. The returned `sections` array follows the canonical Appendix B /
- * `SECTION_KINDS` order (AD-004): Assembly never re-ranks knowledge to order
- * sections.
+ * (first occurrence wins), and their `content` is the verbatim concatenation of the
+ * routed items' bodies in that same canonical order (blank-line separated). The four
+ * Reviewer Decision A sections are always present and empty. The returned `sections`
+ * array follows the canonical Appendix B / `SECTION_KINDS` order (AD-004): Assembly
+ * never re-ranks knowledge to order sections.
  */
 function composeSections(selectedItems: readonly KnowledgeItem[]): Array<{
   kind: ContextSectionKind;
@@ -245,9 +259,17 @@ function composeSections(selectedItems: readonly KnowledgeItem[]): Array<{
     const kind = SOURCE_TYPE_TO_SECTION_KIND[item.source.type];
     let draft = drafts.get(kind);
     if (draft === undefined) {
-      draft = { kind, referenceIds: [], seenReferenceIds: new Set() };
+      draft = {
+        kind,
+        contents: [],
+        referenceIds: [],
+        seenReferenceIds: new Set(),
+      };
       drafts.set(kind, draft);
     }
+    // Every routed item contributes its body verbatim (knowledge is never dropped),
+    // even when several items share one citable source.
+    draft.contents.push(item.content);
     if (!draft.seenReferenceIds.has(item.source.id)) {
       draft.seenReferenceIds.add(item.source.id);
       draft.referenceIds.push(item.source.id);
@@ -280,7 +302,7 @@ function composeSections(selectedItems: readonly KnowledgeItem[]): Array<{
     sections.push({
       kind,
       title: SECTION_TITLES[kind],
-      content: "",
+      content: draft.contents.join(SECTION_BODY_SEPARATOR),
       referenceIds: draft.referenceIds,
     });
   }

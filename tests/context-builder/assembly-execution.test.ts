@@ -541,18 +541,42 @@ describe("assemble — conforms to the public ContextPackage contract", () => {
   });
 });
 
-describe("assemble — scope-negative (excluded capabilities stay absent)", () => {
-  it("renders nothing — every section content is empty", async () => {
+describe("assemble — section content is the verbatim item bodies", () => {
+  it("populates each knowledge-derived section with its item's body, verbatim", async () => {
     const pkg = await engine.assemble(
       selectionOf([
-        item("k1", "architecture"),
-        item("k2", "handbook"),
-        item("k3", "wiki"),
+        item("k1", "architecture", { content: "arch body" }),
+        item("k2", "handbook", { content: "handbook body" }),
+        item("k3", "wiki", { content: "wiki body" }),
       ]),
       GENERATED_AT,
     );
-    for (const s of pkg.sections) {
-      expect(s.content).toBe("");
+    expect(section(pkg, "relevant-architecture")?.content).toBe("arch body");
+    expect(section(pkg, "handbook-references")?.content).toBe("handbook body");
+    expect(section(pkg, "wiki-references")?.content).toBe("wiki body");
+  });
+
+  it("concatenates multiple items routed to one section in canonical order, blank-line separated", async () => {
+    const pkg = await engine.assemble(
+      selectionOf([
+        item("k1", "wiki", { sourceId: "w1", content: "first" }),
+        item("k2", "wiki", { sourceId: "w2", content: "second" }),
+      ]),
+      GENERATED_AT,
+    );
+    const wiki = section(pkg, "wiki-references");
+    expect(wiki?.content).toBe("first\n\nsecond");
+    // Both distinct sources are still cited by the section.
+    expect(wiki?.referenceIds).toEqual(["w1", "w2"]);
+  });
+
+  it("keeps the four Decision A sections empty even when knowledge carries bodies", async () => {
+    const pkg = await engine.assemble(
+      selectionOf([item("k1", "wiki", { content: "wiki body" })]),
+      GENERATED_AT,
+    );
+    for (const kind of ALWAYS_PRESENT_EMPTY_KINDS) {
+      expect(section(pkg, kind)?.content).toBe("");
     }
   });
 
