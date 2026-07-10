@@ -1,0 +1,121 @@
+import { readFile, stat } from "node:fs/promises";
+import { resolve } from "node:path";
+
+import type { AjConfig } from "./types.js";
+
+/** The configuration file name, expected at the project root. */
+const CONFIG_FILE_NAME = "aj.config.json";
+
+/**
+ * A configuration problem with a message safe to show the user.
+ *
+ * The product catches this to print a friendly explanation, while letting
+ * unexpected errors surface loudly.
+ */
+export class ConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ConfigError";
+  }
+}
+
+/**
+ * Reads and validates `aj.config.json`.
+ *
+ * This is a platform capability: it knows nothing about the Knowledge
+ * Assistant or any other product that consumes it. Its only job is to turn a
+ * configuration file into a validated, typed {@link AjConfig} — or a clear
+ * {@link ConfigError} explaining what is wrong.
+ */
+export class ConfigService {
+  /**
+   * @param projectRoot Directory that contains `aj.config.json`. Defaults to
+   * the current working directory, which is the project root under
+   * `npm run dev`. An explicit root keeps the service testable without
+   * changing the process working directory.
+   */
+  constructor(private readonly projectRoot: string = process.cwd()) {}
+
+  /** Load, parse, and validate the configuration. */
+  async load(): Promise<AjConfig> {
+    const configPath = resolve(this.projectRoot, CONFIG_FILE_NAME);
+
+    const raw = await this.readConfigFile(configPath);
+    const parsed = this.parseJson(raw);
+    const handbookPath = this.validateShape(parsed);
+
+    await this.validateHandbookPath(handbookPath);
+
+    return { handbook: { path: handbookPath } };
+  }
+
+  private async readConfigFile(configPath: string): Promise<string> {
+    try {
+      return await readFile(configPath, "utf8");
+    } catch (error) {
+      if (isErrnoException(error) && error.code === "ENOENT") {
+        throw new ConfigError(
+          `Configuration file not found.\n\nExpected ${CONFIG_FILE_NAME} at:\n\n  ${configPath}`,
+        );
+      }
+      throw error;
+    }
+  }
+
+  private parseJson(raw: string): unknown {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      throw new ConfigError(`Invalid JSON in ${CONFIG_FILE_NAME}.`);
+    }
+  }
+
+  /** Confirm the object has a non-empty `handbook.path` string. */
+  private validateShape(parsed: unknown): string {
+    if (!isObject(parsed) || !isObject(parsed.handbook)) {
+      throw new ConfigError(
+        `${CONFIG_FILE_NAME} must contain a "handbook" object with a "path".`,
+      );
+    }
+
+    const path = parsed.handbook.path;
+    if (typeof path !== "string" || path.trim() === "") {
+      throw new ConfigError(
+        `${CONFIG_FILE_NAME} must set "handbook.path" to a non-empty string.`,
+      );
+    }
+
+    return path;
+  }
+
+  /** Confirm the configured handbook path exists and is a directory. */
+  private async validateHandbookPath(handbookPath: string): Promise<void> {
+    const resolved = resolve(this.projectRoot, handbookPath);
+
+    let stats;
+    try {
+      stats = await stat(resolved);
+    } catch (error) {
+      if (isErrnoException(error) && error.code === "ENOENT") {
+        throw new ConfigError(
+          `Configured handbook path does not exist:\n\n  ${handbookPath}`,
+        );
+      }
+      throw error;
+    }
+
+    if (!stats.isDirectory()) {
+      throw new ConfigError(
+        `Configured handbook path is not a directory:\n\n  ${handbookPath}`,
+      );
+    }
+  }
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error;
+}
