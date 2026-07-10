@@ -153,39 +153,39 @@ The implementation prioritizes:
 
 # Latest Milestone
 
-## Milestone 3 — Knowledge Selection
+## Milestone 4 — Context Assembly
 
 **Objective**
 
-Implement deterministic knowledge selection using the immutable CollectionResult produced by Milestone 2.
+Transform the ordered SelectionResult produced by Milestone 3 into a deterministic, immutable Context Package (AJS-002 Appendix B), assembled through the frozen CB-003 contract.
 
-Selection determines which collected knowledge becomes part of a future Context Package. It operates entirely on the existing CollectionResult and introduces no new provider execution or collection behaviour.
+Assembly performs structural composition only — it partitions selected knowledge into Appendix B sections, composes package metadata, and preserves canonical ordering. It performs no evaluation, no reordering, no filtering, and no rendering.
 
 **Expected Deliverables**
 
-- Selection Engine
-- Selection contracts
-- Deterministic selection rules
-- Selection integration
-- Behaviour tests
+- Assembly Engine service boundary (`createAssemblyEngine()`)
+- Deterministic section-composition strategy (structural `source.type → kind` mapping)
+- Assembly inputs & metadata composition (injected `generatedAt`, single-sourced versions)
+- Deterministic `assemble(selectionResult, generatedAt)` — construct-through-`parseContextPackage()`
+- Full pipeline integration — `build(request)` returns a `ContextPackage`
+- Permanent Assembly behaviour tests
 
 **Intentionally excluded**
 
-- Context Package generation
-- Prompt formatting
-- Explainability
+- Rendering (Markdown/JSON) — deferred (AD-003, AD-009)
+- Explainability computation
 - Context profiles
-- Provider execution
-- Knowledge collection
+- Semantic validation
+- Provider execution / knowledge collection / selection
 - Optimisation
 
 **Status**
 
-Complete. Deterministic knowledge selection is implemented (Selection Engine, SelectionResult contract, executable Selection Policy, `build(request)` pipeline) and protected by permanent behaviour tests (CB-018). Ready for the Milestone 3 Freeze Review.
+Complete. Deterministic Context Assembly is implemented (Assembly Engine, the CB-020 section-composition strategy and CB-021 metadata composition, `assemble()` built through the frozen `parseContextPackage()` contract, and the full Collection → Selection → Assembly `build(request)` pipeline returning an immutable `ContextPackage`) and protected by permanent behaviour tests (CB-024). All M4 tasks (CB-019–CB-024) and the M4 Definition of Done are satisfied; `typecheck`, `build`, and `test` (205) are green. **Milestone 4 complete and frozen** — the Freeze Review concluded successfully and the reviewer declared the Milestone Freeze.
 
 **Next**
 
-Milestone 4 — Context Assembly.
+Milestone 5 — Explainability & Profiles.
 
 ---
 
@@ -196,7 +196,7 @@ Milestone 4 — Context Assembly.
 | M1        | Foundation                | ✅     |
 | M2        | Knowledge Collection      | ✅     |
 | M3        | Knowledge Selection       | ✅     |
-| M4        | Context Assembly          | ⬜     |
+| M4        | Context Assembly          | ✅     |
 | M5        | Explainability & Profiles | ⬜     |
 | M6        | Optimization              | ⬜     |
 
@@ -215,7 +215,8 @@ Current status:
 - ✅ Specification complete.
 - ✅ Milestone 1 complete and frozen.
 - ✅ Milestone 2 complete and frozen.
-- ✅ Milestone 3 complete (ready for Freeze Review).
+- ✅ Milestone 3 complete and frozen.
+- ✅ Milestone 4 complete and frozen.
 
 Completed implementation:
 
@@ -236,11 +237,18 @@ Completed implementation:
 - Selection execution (`SelectionEngine.select`)
 - Context Builder selection pipeline (`build(request)`)
 - Selection behaviour regression tests
+- Assembly Engine (`createAssemblyEngine`)
+- Section-composition strategy (structural `source.type → kind` mapping)
+- Assembly inputs & metadata composition (injected `generatedAt`, single-sourced versions)
+- Deterministic assembly (`AssemblyEngine.assemble`, construct-through-`parseContextPackage()`)
+- Full Context Builder pipeline (`build(request)` → `ContextPackage`)
+- Assembly behaviour regression tests
 
-The platform foundation is complete through deterministic knowledge collection and
-knowledge selection.
+The platform foundation is complete through deterministic knowledge collection,
+knowledge selection, and Context Assembly: `build(request)` now runs Collection →
+Selection → Assembly and returns an immutable Context Package.
 
-The next implementation milestone introduces deterministic Context Assembly (M4).
+The next implementation milestone introduces Explainability & Profiles (M5).
 
 ---
 
@@ -301,6 +309,7 @@ The implementation is complete when:
 
 | Date       | Version | Description                                                                                                                                                                                                                                                  |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-07-10 | 2.6     | **Milestone M4 (Context Assembly) complete** — recorded at the M4 Freeze Review. Deterministic Context Assembly is implemented across CB-019–CB-024: the Assembly Engine service boundary (CB-019), the structural section-composition strategy (CB-020) and inputs/metadata composition (CB-021), the deterministic `assemble()` built through the frozen `parseContextPackage()` contract (CB-022), the full Collection → Selection → Assembly `build(request)` pipeline returning an immutable `ContextPackage` (CB-023), and permanent Assembly behaviour tests (CB-024); suite 160 → 205. Assembly is structural only — rendering, explainability computation and profiles remain deferred (AD-003, AD-009). "Latest Milestone", Milestone Progress and Implementation Status synchronized to M4. No frozen contract or Planning Package changed beyond the pre-approved CB-017 `build` return-type advance (`SelectionResult` → `ContextPackage`).                                                                             |
 | 2026-07-09 | 2.5     | CB-018 completed: permanent Selection behaviour tests (Selection Engine boundary, execution + policy through the public API, and the `build(request)` pipeline) added on the CB-006 foundation; suite 123 → 160. **Milestone M3 complete** — deterministic knowledge selection is protected by permanent regression tests. No platform contract changed.                                                                                                        |
 | 2026-07-09 | 2.4     | Milestone 3 planning corrections applied (R1/R2/R3): resolved Open Questions — `build(request)` single public entry point, SelectionResult exposes no priority field (ordering is the contract), Selection Policy is an executable deterministic comparator chain terminating in an immutable identifier. Planning documentation only — no code, no frozen M1/M2 platform contract changed.        |
 | 2026-07-08 | 2.3     | Milestone 2 status corrected to complete **and frozen** (freeze recorded in RETROSPECTIVE-M2). "Latest Milestone" section marked complete; next milestone (M3 — Knowledge Selection) noted. Documentation only — no contract, code or milestone-plan change. |

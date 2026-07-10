@@ -126,9 +126,19 @@ Assembly does not filter knowledge.
 > (both inputs arrive at `assemble`-time; no ambient clock — `generatedAt` is
 > injected, RC-3) and communicates only through immutable platform contracts.
 > `assemble` is pure and identity-preserving: identical inputs yield a deep-equal
-> package, and KnowledgeItems are consumed unchanged. Wiring `assemble` into the
-> public `build(request)` pipeline is CB-023; permanent Assembly behaviour tests
-> are CB-024.
+> package, and KnowledgeItems are consumed unchanged.
+
+> **Stage integrated into `build(request)` (CB-023).** The Assembly stage is now
+> wired into the public pipeline: the Context Builder composes and owns the Assembly
+> Engine alongside the Collection and Selection engines, and `build(request)` runs
+> Collection → Selection → **Assembly**, returning the resulting `ContextPackage`.
+> The `generatedAt` input is supplied by a **construction-time injected timestamp
+> source** (the optional `now` factory argument, defaulting to the real wall clock),
+> invoked exactly once per `build` and passed unchanged to `assemble` — no stage
+> reads an ambient clock (Reviewer Decision B, RC-3). The Context Builder remains a
+> thin orchestrator (proven by `build(request)` deep-equaling
+> `assemble(select(collect(request)))`); permanent Assembly behaviour tests are
+> CB-024.
 
 > **Section-composition strategy (CB-020).** The deterministic structural rule the
 > Assembly stage applies (recorded in `decisions/CB-020-section-composition-strategy.md`,
@@ -167,7 +177,7 @@ The Context Builder owns every pipeline stage.
 ContextBuilder
     ├── CollectionEngine
     ├── SelectionEngine
-    └── (future AssemblyEngine)
+    └── AssemblyEngine
 
 Each engine owns exactly one stage.
 
@@ -213,10 +223,10 @@ CollectionEngine
 SelectionEngine
     select(collectionResult)
 
-AssemblyEngine (future)
-    assemble(selectionResult)
+AssemblyEngine
+    assemble(selectionResult, generatedAt)
 
-Intermediate pipeline stages and their results remain internal to the Context Builder pipeline. Only `build(request)` is public on the Context Builder.
+Intermediate pipeline stages and their results remain internal to the Context Builder pipeline. Only `build(request)` is public on the Context Builder. At Milestone 4 `build(request)` runs Collection → Selection → Assembly and returns a `ContextPackage`; the `generatedAt` supplied to `assemble` is produced by a construction-time injected timestamp source (Reviewer Decision B), not read from an ambient clock.
 
 ---
 

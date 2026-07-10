@@ -85,7 +85,18 @@ Completed:
 - ✅ CB-017 — Context Builder Selection Pipeline (`build(request)`)
 - ✅ CB-018 — Selection Behaviour Tests
 
-With Milestones 1 and 2 complete and frozen and Milestone 3 complete (ready for its freeze review), the Context Builder now collects and selects knowledge deterministically end-to-end through a single public entry point, `build(request)`. Implementation continues with Milestone 4 — Context Assembly — and the remaining Context Builder milestones.
+Milestone 4 — Context Assembly ✅ Complete
+
+Completed:
+
+- ✅ CB-019 — Assembly Engine Service Boundary
+- ✅ CB-020 — Section Composition Strategy
+- ✅ CB-021 — Assembly Inputs & Metadata Composition
+- ✅ CB-022 — Deterministic Assembly
+- ✅ CB-023 — Context Builder Assembly Pipeline (`build(request)` → `ContextPackage`)
+- ✅ CB-024 — Assembly Behaviour Tests
+
+With Milestones 1, 2, and 3 complete and frozen and Milestone 4 complete (ready for its freeze review), the Context Builder now collects, selects, and assembles knowledge deterministically end-to-end through a single public entry point, `build(request)`, which returns an immutable `ContextPackage` (AJS-002 Appendix B). Assembly is structural only; rendering, explainability computation and context profiles are deferred. Implementation continues with Milestone 5 — Explainability & Profiles — and the remaining Context Builder milestones.
 
 Project Kickoff (SPEC-001) remains intentionally postponed until the core platform is operational, allowing it to become the first workflow built on top of the completed platform.
 

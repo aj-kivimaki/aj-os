@@ -26,8 +26,14 @@
  * (this supersedes the Milestone 2 era `collect(request)` public method — an
  * approved public API evolution); CB-019 opens Milestone M4 by adding the Assembly
  * Engine service boundary (a pure boundary that holds nothing and exposes no
- * members yet). Assembly, profiles and explainability behaviour are delivered by
- * later Milestone M4+ tasks.
+ * members yet), extended in CB-022 with the deterministic
+ * `assemble(selectionResult, generatedAt)` stage operation; CB-023 completes the
+ * Milestone M4 pipeline: the Context Builder now composes and owns the Collection,
+ * Selection and Assembly Engines, and `build(request)` runs Collection → Selection →
+ * Assembly and returns the resulting ContextPackage (CB-003) unchanged — the `build`
+ * input signature is unchanged and only its return type advances SelectionResult →
+ * ContextPackage (the pre-approved CB-017 evolution). Profiles and explainability
+ * behaviour are delivered by later Milestone M5+ tasks.
  */
 
 /** Identity of the Context Builder agent (see AJS-004 required metadata). */

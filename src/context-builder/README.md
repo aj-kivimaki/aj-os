@@ -3,15 +3,19 @@
 > **Specification:** SPEC-002 — Context Builder Agent
 > **Standards:** AJS-001, AJS-002, AJS-003, AJS-004
 > **Status:** Milestone M3 — Knowledge Selection **complete** (M1, M2 also
-> complete). The Context Builder pipeline runs Collection → Selection through the
-> single public entry point `build(request)` (CB-017), protected by permanent
-> Selection behaviour and `build` pipeline regression tests (CB-018). Milestone M4
-> — Context Assembly — is **in progress**: CB-019 establishes the Assembly Engine
-> service boundary (`createAssemblyEngine()`); CB-020/CB-021 fix the frozen
-> section-composition and metadata-composition strategies; CB-022 implements the
-> deterministic `assemble(selectionResult, generatedAt)` stage operation that
-> realizes them. Pipeline integration into `build(request)` (CB-023) and permanent
-> Assembly behaviour tests (CB-024) are the remaining M4 tasks.
+> complete). Milestone M4 — Context Assembly — **implementation complete, pending
+> Freeze Review**: CB-019
+> establishes the Assembly Engine service boundary (`createAssemblyEngine()`);
+> CB-020/CB-021 fix the frozen section-composition and metadata-composition
+> strategies; CB-022 implements the deterministic
+> `assemble(selectionResult, generatedAt)` stage operation that realizes them; and
+> **CB-023 integrates the full pipeline** — the single public entry point
+> `build(request)` now runs Collection → Selection → Assembly and returns a
+> **`ContextPackage`** (the `build` input signature is unchanged; only its return
+> type advances `SelectionResult` → `ContextPackage`, the pre-approved CB-017
+> evolution). Assembly's `generatedAt` is supplied by a construction-time injected
+> timestamp source, never an ambient clock inside a stage. CB-024 authors the
+> permanent Assembly behaviour tests; the Milestone Freeze follows the Freeze Review.
 
 The Context Builder assembles the smallest, highest-value **Context Package**
 required for a coding agent to complete a single task. It is the primary bridge
@@ -965,6 +969,110 @@ the factory and interface are public.
 Public exports: unchanged — `assemble` is a method on the existing `AssemblyEngine`
 handle returned by `createAssemblyEngine`.
 
+## Context Builder pipeline — `build(request)` completed (CB-023)
+
+CB-023 completes the Milestone 4 pipeline. The Context Builder is a **thin
+orchestrator**: it composes and owns **all three** engines — a Collection Engine
+(CB-007/CB-010), a Selection Engine (CB-013/CB-016) and an Assembly Engine
+(CB-019/CB-022) — at construction, and its single public entry point,
+`build(request)`, now runs the full pipeline and returns the resulting
+`ContextPackage` **unchanged**:
+
+```text
+KnowledgeRequest → ContextBuilder.build → CollectionEngine.collect → CollectionResult
+                → SelectionEngine.select → SelectionResult
+                → AssemblyEngine.assemble(selectionResult, generatedAt) → ContextPackage
+```
+
+```ts
+import {
+  createContextBuilder,
+  createProviderRegistry,
+} from "./context-builder/index.js";
+
+const builder = createContextBuilder(
+  { profile: "implementation", explainability: true, outputFormat: "markdown" },
+  createProviderRegistry([handbookProvider, wikiProvider]),
+  // optional third argument — the injected timestamp source (defaults to the real
+  // wall clock: () => new Date().toISOString()); inject a fixed source for
+  // deterministic tests.
+);
+
+const pkg = await builder.build({ project: "aj-os", task: "CB-023" });
+pkg.sections;   // ContextSections in canonical Appendix B / SECTION_KINDS order
+pkg.references; // de-duplicated selected sources (first-appearance order)
+pkg.metadata;   // provenance + injected generatedAt + single-sourced versions
+```
+
+- **Orchestration only.** `build` invokes `collect(request)`, then
+  `select(collectionResult)`, then `assemble(selectionResult, generatedAt)`, and
+  returns the Assembly Engine's result verbatim. The Context Builder implements no
+  collection, selection or assembly behaviour, and does **not** inspect, modify,
+  filter, reorder, deduplicate, enrich or re-timestamp the `ContextPackage`. All
+  decisions live in the stages. Proven by **thin-orchestration equality**:
+  `build(request)` deep-equals `assemble(select(collect(request)))` over the same
+  registry and injected timestamp.
+- **Construction-time timestamp injection (CB-021 / Reviewer Decision B).**
+  Assembly's `generatedAt` is produced by an **injected timestamp source** — the
+  optional third factory argument `now: () => string`, defaulting to
+  `() => new Date().toISOString()`. `build` invokes `now()` **exactly once per
+  call** and passes the ISO-8601 string unchanged to `assemble`; no stage reads an
+  ambient clock. Injecting a fixed source makes `build` fully deterministic (RC-3).
+  This optional parameter is a backward-compatible extension — existing
+  two-argument call sites are unchanged.
+- **Composes once, owns the engines.** All three engines are composed a single time
+  at construction; the registry is injected only to build the owned Collection
+  Engine. The stage operations (`collect`, `select`, `assemble`) and the
+  intermediate `CollectionResult` / `SelectionResult` remain internal to the
+  pipeline — only `build` is public on the Context Builder.
+- **Return type advances, input unchanged.** `build`'s **input** signature is
+  unchanged; only its **return type** advances `SelectionResult` → `ContextPackage`
+  — the pre-anticipated CB-017 evolution, not a redesign. No other public contract
+  changed, and the frozen `assemble(selectionResult, generatedAt)` signature is
+  consumed unchanged.
+
+CB-023 introduced **no** platform behaviour of its own and **no** contract change
+beyond the pre-approved return-type advance; it composes CB-010, CB-016 and CB-022
+unchanged. Permanent Assembly behaviour tests (CB-024) remain out of scope.
+
+Public exports: unchanged — `build` is a method on the existing `ContextBuilder`
+handle returned by `createContextBuilder`; the `ContextPackage` it returns is the
+already-public CB-003 contract.
+
+## Assembly behaviour tests (CB-024)
+
+CB-024 is the final Milestone 4 task and the permanent owner of the Assembly
+stage's behaviour regression suites. Because CB-019 (engine boundary) and CB-022
+(execution) deferred their behaviour tests to CB-024, this task **authors** the
+Assembly Engine boundary and `assemble()` behaviour suites (the CB-003
+`ContextPackage` *contract* suite already shipped in `package.test.ts` and is not
+re-authored):
+
+```text
+tests/context-builder/
+├── assembly.test.ts             Assembly Engine service boundary (CB-019)
+└── assembly-execution.test.ts   assemble() behaviour — section & metadata composition (CB-020/CB-021/CB-022)
+```
+
+Every guarantee is asserted **only through the public API** —
+`createAssemblyEngine().assemble(selectionResult, generatedAt)` — with
+`SelectionResult` fixtures built directly through the public `parseSelectionResult()`
+contract, so Assembly is exercised in isolation from Collection and Selection and
+the internal `source.type → section-kind` mapping and section-title table stay free
+to evolve. The suite locks canonical section ordering, the four always-present empty
+Reviewer Decision A sections, the complete `source.type → section-kind` mapping and
+the merging of types into shared kinds, reference de-duplication and ordering,
+referential integrity, metadata composition, the `contextVersion` vs
+`contextBuilderVersion` distinction, the omission of `issue`, minimal
+explainability/summary, determinism, immutability of the returned package,
+immutability of the input `SelectionResult` (order preserved by divergence),
+positive conformance to the public `ContextPackage` contract, and the scope-negative
+guarantees (no rendering, no computed explainability, no phantom sections). The
+end-to-end pipeline remains owned by `context-builder-pipeline.test.ts` (CB-018/
+CB-023) and is not re-tested here. CB-024 introduced **no** platform behaviour and
+**no** contract change; it only exercises the frozen CB-019…CB-023 surfaces.
+**Milestone 4 implementation complete — pending Freeze Review.**
+
 ## Status
 
 This module currently contains its boundary and public entry point (task
@@ -993,16 +1101,21 @@ through the single public entry point `build(request)`, which supersedes the
 Milestone 2 era `collect(request)`. This selection pipeline is now protected by the
 permanent Selection Engine, execution and `build(request)` behaviour tests (task
 **CB-018**), which completes **Milestone M3**. **Milestone M4** (Context Assembly)
-is in progress: the Assembly Engine service boundary — `createAssemblyEngine()`
+implementation is complete (pending Freeze Review): the Assembly Engine service
+boundary — `createAssemblyEngine()`
 (task **CB-019**) — was followed by the frozen section-composition strategy (task
 **CB-020**) and the frozen assembly inputs & metadata composition (task
 **CB-021**), and CB-022 implements deterministic assembly — the
 `assemble(selectionResult, generatedAt)` stage operation that constructs an
 immutable Context Package through `parseContextPackage()`, realizing the
-CB-020/CB-021 decisions (task **CB-022**). Pipeline integration into `build(request)`
-(CB-023) and permanent Assembly behaviour tests (CB-024) are the remaining M4 tasks;
-the assembled package is not yet returned by the public `build` entry point (that is
-CB-023). Explainability and profiles arrive in M5.
+CB-020/CB-021 decisions (task **CB-022**), and CB-023 integrates that stage into the
+pipeline — the Context Builder now composes and owns all three engines and
+`build(request)` runs Collection → Selection → Assembly, returning the assembled
+`ContextPackage` (with the `generatedAt` supplied by a construction-time injected
+timestamp source) through the single public entry point (task **CB-023**). This
+assembly pipeline is now protected by the permanent Assembly Engine boundary and
+`assemble()` behaviour tests (task **CB-024**), completing **Milestone 4**
+implementation — pending Freeze Review. Explainability and profiles arrive in M5.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 

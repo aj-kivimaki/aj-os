@@ -30,12 +30,21 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
   - Selection execution — `SelectionEngine.select()` applies the policy to a `CollectionResult` and returns an immutable `SelectionResult` (CB-016)
   - End-to-end Context Builder selection pipeline — `ContextBuilder.build(request)` runs Collection → Selection and returns the `SelectionResult` unchanged (CB-017)
   - Permanent selection behaviour and `build()` pipeline tests; the suite grew from 119 → 160 tests (CB-018)
+- Context Builder context assembly (SPEC-002, Milestone 4) — the module's third platform *behaviour*: deterministic, structural assembly of an immutable `ContextPackage` (AJS-002 Appendix B) over the ordered `SelectionResult`, built on the frozen Milestone 1/2/3 contracts and introducing no new provider execution, collection, or selection:
+  - Assembly Engine service via `createAssemblyEngine()` — a stateless, construction-dependency-free boundary (CB-019)
+  - Deterministic section-composition strategy — a total, purely structural `source.type → section-kind` mapping with an order-preserving partition and the four always-present empty Appendix B sections (CB-020)
+  - Assembly inputs & metadata composition — a closed two-input `assemble` set (`SelectionResult` + injected `generatedAt`, no ambient clock) with single-sourced `contextVersion` and `contextBuilderVersion` (CB-021)
+  - Deterministic assembly — `AssemblyEngine.assemble(selectionResult, generatedAt)` constructs the package **through** the frozen `parseContextPackage()` contract; identical inputs yield a deep-equal, deeply-frozen package (CB-022)
+  - Full Context Builder pipeline — `ContextBuilder.build(request)` now runs Collection → Selection → Assembly and returns an immutable `ContextPackage`; the timestamp source is injected at construction and the builder remains a thin orchestrator (CB-023)
+  - Permanent assembly behaviour tests, validated only through the public API; the suite grew from 160 → 205 tests (CB-024)
+  - Assembly is *structural only* — rendering (Markdown/JSON), explainability computation, and context profiles remain deferred to later milestones (AD-003, AD-009)
 - **AJS-007 — Engineering Lifecycle Standard** (Draft) — a new AJ-OS platform standard that consolidates the validated milestone-delivery engineering practice (planning → planning freeze → implementation → freeze review → milestone freeze → retrospective) into a single canonical reference, derived from SPEC-002 implementation experience (`docs/standards/AJS-007-Engineering-Lifecycle-Standard.md`)
 
 ### Changed
 
 - `createContextBuilder(config)` → `createContextBuilder(config, registry)` — the factory now takes a required Provider Registry, from which it composes the Collection Engine it owns (SPEC-002, CB-011; a reviewed, approved contract evolution)
 - `ContextBuilder.collect(request)` → `ContextBuilder.build(request)` — the Context Builder now exposes a single public pipeline entry point, `build(request)`, which runs Collection → Selection and returns the `SelectionResult` unchanged; the Milestone 2 collection behaviour is preserved unchanged as the internal `CollectionEngine.collect(request)` stage operation (SPEC-002, CB-017; a reviewed, approved public API evolution)
+- `ContextBuilder.build(request)` return type advanced `SelectionResult` → `ContextPackage` — with Milestone 4, `build(request)` runs the full Collection → Selection → Assembly pipeline and returns an immutable `ContextPackage`; the `build` **input** signature is unchanged (the timestamp source is injected at construction as an optional, backward-compatible third `createContextBuilder` argument) (SPEC-002, CB-023; the pre-approved CB-017 return-type evolution)
 - REST API server built on Fastify (`npm run serve`), the first runtime interface alongside the sync CLI
 - `GET /health` liveness endpoint
 - Handbook AI agent (Claude, via `POST /agent/ask`) that answers questions grounded in the handbook wiki using a tool-use loop

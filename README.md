@@ -233,9 +233,18 @@ Milestone 3 — Knowledge Selection ✅ Complete
 - ✅ CB-017 — Context Builder Selection Pipeline (`build(request)`)
 - ✅ CB-018 — Selection Behaviour Tests
 
-The Context Builder now exposes immutable platform contracts, core services, a permanent contract-testing foundation, and two platform behaviours: deterministic partial knowledge collection and deterministic knowledge selection. It runs Collection → Selection end-to-end through a single public entry point, `ContextBuilder.build(request)`, which returns an immutable `SelectionResult`.
+Milestone 4 — Context Assembly ✅ Complete
 
-Milestones 1 and 2 are complete and frozen; Milestone 3 is complete and ready for its freeze review. Implementation next proceeds to Milestone 4 — Context Assembly.
+- ✅ CB-019 — Assembly Engine Service Boundary
+- ✅ CB-020 — Section Composition Strategy
+- ✅ CB-021 — Assembly Inputs & Metadata Composition
+- ✅ CB-022 — Deterministic Assembly
+- ✅ CB-023 — Context Builder Assembly Pipeline (`build(request)` → `ContextPackage`)
+- ✅ CB-024 — Assembly Behaviour Tests
+
+The Context Builder now exposes immutable platform contracts, core services, a permanent contract-testing foundation, and three platform behaviours: deterministic partial knowledge collection, deterministic knowledge selection, and deterministic Context Assembly. It runs Collection → Selection → Assembly end-to-end through a single public entry point, `ContextBuilder.build(request)`, which returns an immutable `ContextPackage` (AJS-002 Appendix B). Assembly is structural only — rendering, explainability computation and context profiles are deferred to later milestones.
+
+Milestones 1, 2, and 3 are complete and frozen; Milestone 4 is complete and ready for its freeze review. Implementation next proceeds to Milestone 5 — Explainability & Profiles.
 
 ---
 
