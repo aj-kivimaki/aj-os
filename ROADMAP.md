@@ -10,13 +10,15 @@
 AJ-OS is evolving into a knowledge-driven developer operating system
 that continuously converts project work into reusable knowledge.
 
-The roadmap prioritizes building the platform itself before expanding
-into productivity features or integrations.
+The platform evolves **through building real products**. Products validate and
+drive the platform's capabilities: the platform stays reusable, but it grows because
+a product needs it — not as an isolated engineering exercise.
 
 ---
 
 # Guiding Principles
 
+- Products drive platform growth — the platform evolves to serve real products.
 - Architecture before implementation.
 - Standards before features.
 - Specifications before coding.
@@ -29,90 +31,52 @@ into productivity features or integrations.
 
 # Current Status
 
-## ✅ Phase 1 --- Platform Foundation (Complete)
+## ✅ Phase 1 — Platform Foundation (Complete)
 
 The architectural foundation has been established.
 
 Completed:
 
 - ARCH-001 Platform Architecture
-- AJS-001 -- AJS-007 Platform Standards
+- AJS-001 – AJS-007 Platform Standards
 - SPEC-000 Specification Writing Standard
-- SPEC-001 -- SPEC-005 Core Platform Specifications
+- SPEC-001 – SPEC-005 Core Platform Specifications
 
 This phase defines **how AJ-OS is built**, not just what it does.
 
 ---
 
-# Phase 2 —-- Core Knowledge Platform (Current Focus)
+# Phase 2 — Core Knowledge Platform (In Progress)
 
-Implement the platform according to the approved architecture and specifications.
+Build the reusable platform according to the approved architecture and specifications.
 
-Current implementation progress:
+**Shipped in Platform v2.0.0:**
 
-## SPEC-002 — Context Builder
+- **Context Builder** (SPEC-002) — collects, selects, and assembles knowledge deterministically end-to-end through `ContextBuilder.build(request)`, returning an immutable `ContextPackage`.
+- **Supporting platform capabilities** — Configuration, Handbook, Retrieval, Prompt Renderer, and AI Client — established by building the first product on the platform.
 
-Milestone 1 — Platform Contracts & Core Services ✅ Complete
+Detailed implementation history lives in the [CHANGELOG](CHANGELOG.md) and the [specifications](docs/specifications/); it is intentionally not duplicated here.
 
-Completed:
+**Remaining platform work (upcoming):**
 
-- ✅ CB-001 — Module Boundary
-- ✅ CB-002 — Configuration Contract
-- ✅ CB-003 — Context Package Contract
-- ✅ CB-004 — Knowledge Provider Contracts
-- ✅ CB-005 — Provider Registry
-- ✅ CB-006 — Contract Testing Foundation
+- Further Context Builder capabilities — explainability, context profiles, rendering
+- End-of-Session Workflow (SPEC-003)
+- Knowledge Review Workflow (SPEC-004)
+- Wiki Generator Agent (SPEC-005)
 
-Milestone 2 — Knowledge Collection ✅ Complete
+Project Kickoff (SPEC-001) remains intentionally postponed until more of the core platform is operational, so it can become an early workflow built on top of it.
 
-Completed:
+---
 
-- ✅ CB-007 — Collection Engine Service
-- ✅ CB-008 — Collection Error Contract
-- ✅ CB-009 — Collection Result Contract
-- ✅ CB-010 — Provider Execution (partial collection)
-- ✅ CB-011 — Context Builder Collection Pipeline
-- ✅ CB-012 — Collection Behaviour Tests
+# Products (Active Track)
 
-Milestone 3 — Knowledge Selection ✅ Complete
+Products are now a live development track, not a distant future phase. AJ-OS grows **product-first**: each product validates and drives the platform capabilities it needs.
 
-Completed:
+- **Knowledge Assistant v1.0.0** — the first complete product, shipped with Platform v2.0.0: a CLI (`aj ask`) that answers handbook questions with grounded, cited responses.
 
-- ✅ CB-013 — Selection Engine Service
-- ✅ CB-014 — SelectionResult Contract
-- ✅ CB-015 — Deterministic Selection Policy
-- ✅ CB-016 — Selection Execution
-- ✅ CB-017 — Context Builder Selection Pipeline (`build(request)`)
-- ✅ CB-018 — Selection Behaviour Tests
+Future products (see Phase 5 — Productivity Services) build on the same pattern.
 
-Milestone 4 — Context Assembly ✅ Complete
-
-Completed:
-
-- ✅ CB-019 — Assembly Engine Service Boundary
-- ✅ CB-020 — Section Composition Strategy
-- ✅ CB-021 — Assembly Inputs & Metadata Composition
-- ✅ CB-022 — Deterministic Assembly
-- ✅ CB-023 — Context Builder Assembly Pipeline (`build(request)` → `ContextPackage`)
-- ✅ CB-024 — Assembly Behaviour Tests
-
-With Milestones 1, 2, and 3 complete and frozen and Milestone 4 complete (ready for its freeze review), the Context Builder now collects, selects, and assembles knowledge deterministically end-to-end through a single public entry point, `build(request)`, which returns an immutable `ContextPackage` (AJS-002 Appendix B). Assembly is structural only; rendering, explainability computation and context profiles are deferred. Implementation continues with Milestone 5 — Explainability & Profiles — and the remaining Context Builder milestones.
-
-Project Kickoff (SPEC-001) remains intentionally postponed until the core platform is operational, allowing it to become the first workflow built on top of the completed platform.
-
-Current implementation order:
-
-1. Context Builder (SPEC-002)
-2. End-of-Session Workflow (SPEC-003)
-3. Knowledge Review Workflow (SPEC-004)
-4. Wiki Generator Agent (SPEC-005)
-
-Success criteria:
-
-- Context Builder foundation completed.
-- All specifications implemented.
-- Standards validated against implementation.
-- End-to-end knowledge pipeline operational.
+> **Versioning.** The AJ-OS Platform and each product are versioned independently — see [docs/project/versioning-and-releases.md](docs/project/versioning-and-releases.md).
 
 ---
 

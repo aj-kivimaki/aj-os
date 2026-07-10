@@ -179,72 +179,90 @@ Never edited directly.
 
 # Current Status
 
-AJ-OS has completed its platform architecture, engineering standards, and implementation specifications.
+**AJ-OS Platform v2.0.0 has shipped** — the first stable release of the reusable
+platform architecture, delivered together with its first complete product,
+**Knowledge Assistant v1.0.0**.
 
-Implementation is now underway following the approved architecture.
+> **Platform vs. product versions.** AJ-OS versions the *platform* (this repository)
+> and each *product* independently. `v2.0.0` is the platform version; the Knowledge
+> Assistant carries its own `v1.0.0`. See
+> [docs/project/versioning-and-releases.md](docs/project/versioning-and-releases.md).
+
+## What has shipped
+
+- **The reusable platform** — a three-layer architecture (CLI → Product → Platform)
+  with a strict one-way dependency direction, plus its core services:
+  - **Context Builder** (SPEC-002) — deterministic Collection → Selection → Assembly,
+    returning an immutable `ContextPackage` via `ContextBuilder.build(request)`.
+  - **Platform capabilities** consumed by the first product — Configuration,
+    Handbook, Retrieval, Prompt Renderer, and AI Client.
+- **Knowledge Assistant v1.0.0** — the first end-user product; see
+  [Products](#products).
+- **A REST API and Handbook AI Agent** for integrations and automation.
+
+## Learn more
+
+- [CHANGELOG.md](CHANGELOG.md) — the full, itemized release history (including the
+  Context Builder milestone breakdown).
+- [docs/project/versioning-and-releases.md](docs/project/versioning-and-releases.md)
+  — versioning & release governance.
+- [docs/specifications/](docs/specifications/) — platform and product specifications
+  (including SPEC-002 — Context Builder).
+- [implementation/products/knowledge-assistant/](implementation/products/knowledge-assistant/)
+  — the Knowledge Assistant engineering documentation.
 
 > **On document status.** AJS standards and SPEC specifications carry a
-> `Status: Draft` header. In AJ-OS, **Draft means "approved for implementation,
-> not yet frozen"** — a document is stable enough to build against but may still
-> be refined until the work it governs is frozen. A completed Phase or Milestone
-> therefore builds on Draft documents by design; it does not imply those
-> documents are incomplete.
+> `Status: Draft` header. In AJ-OS, **Draft means "approved for implementation, not
+> yet frozen"** — stable enough to build against, but still refinable until the work
+> it governs is frozen. A shipped release building on Draft documents is by design;
+> it does not imply those documents are incomplete.
 
-Current implementation progress:
+---
 
-## Phase 1 — Platform Foundation ✅
+# Products
 
-Completed:
+Products are user-facing tools built on the AJ-OS platform. Each product is
+versioned independently of the platform.
 
-- Platform Architecture (ARCH)
-- Engineering Standards (AJS)
-- Core Specifications (SPEC)
+## Knowledge Assistant v1.0.0
 
-## Phase 2 — Core Platform Services 🚧
+Ask questions about a configured handbook and get grounded, cited answers from the
+command line.
 
-Current focus:
+**Get started:**
 
-### SPEC-002 — Context Builder
+1. Install dependencies: `npm install`
+2. Configure your handbook — copy the template and set your path:
+   `cp aj.config.example.json aj.config.json`, then edit `handbook.path`.
+3. Add your API key — copy the template and set `ANTHROPIC_API_KEY`:
+   `cp .env.example .env`
+4. Ask a question:
 
-Milestone 1 — Foundation ✅ Complete
+```bash
+aj ask "How does the Context Builder work?"
+```
 
-- ✅ CB-001 — Module Boundary
-- ✅ CB-002 — Configuration Contract
-- ✅ CB-003 — Context Package Contract
-- ✅ CB-004 — Knowledge Provider Contracts
-- ✅ CB-005 — Provider Registry
-- ✅ CB-006 — Contract Testing Foundation
+> Run `npm run build && npm link` once to make the `aj` command available, or use
+> `npm run dev -- ask "…"` to run straight from source without building.
 
-Milestone 2 — Knowledge Collection ✅ Complete
+> **Prerequisite — a pre-generated wiki (an intentional v2.0.0 limitation).**
+> The Knowledge Assistant searches a handbook's **generated `wiki/`**, not its raw
+> notes — reading a curated, AI-optimized wiki is what keeps answers grounded and
+> citable. Producing that wiki is the job of the **Wiki Generator (SPEC-005)**, which
+> is planned but **not yet part of Platform v2.0.0** (see the [roadmap](ROADMAP.md)).
+> So at this stage a **pre-generated wiki is required** — if you see "no generated
+> wiki," that is a known platform limitation, not a missed setup step. The
+> [usage guide](implementation/products/knowledge-assistant/usage.md) has the
+> details.
 
-- ✅ CB-007 — Collection Engine Service
-- ✅ CB-008 — Collection Error Contract
-- ✅ CB-009 — Collection Result Contract
-- ✅ CB-010 — Provider Execution (partial collection)
-- ✅ CB-011 — Context Builder Collection Pipeline
-- ✅ CB-012 — Collection Behaviour Tests
-
-Milestone 3 — Knowledge Selection ✅ Complete
-
-- ✅ CB-013 — Selection Engine Service
-- ✅ CB-014 — SelectionResult Contract
-- ✅ CB-015 — Deterministic Selection Policy
-- ✅ CB-016 — Selection Execution
-- ✅ CB-017 — Context Builder Selection Pipeline (`build(request)`)
-- ✅ CB-018 — Selection Behaviour Tests
-
-Milestone 4 — Context Assembly ✅ Complete
-
-- ✅ CB-019 — Assembly Engine Service Boundary
-- ✅ CB-020 — Section Composition Strategy
-- ✅ CB-021 — Assembly Inputs & Metadata Composition
-- ✅ CB-022 — Deterministic Assembly
-- ✅ CB-023 — Context Builder Assembly Pipeline (`build(request)` → `ContextPackage`)
-- ✅ CB-024 — Assembly Behaviour Tests
-
-The Context Builder now exposes immutable platform contracts, core services, a permanent contract-testing foundation, and three platform behaviours: deterministic partial knowledge collection, deterministic knowledge selection, and deterministic Context Assembly. It runs Collection → Selection → Assembly end-to-end through a single public entry point, `ContextBuilder.build(request)`, which returns an immutable `ContextPackage` (AJS-002 Appendix B). Assembly is structural only — rendering, explainability computation and context profiles are deferred to later milestones.
-
-Milestones 1, 2, and 3 are complete and frozen; Milestone 4 is complete and ready for its freeze review. Implementation next proceeds to Milestone 5 — Explainability & Profiles.
+- One-shot (`aj ask "…"`) and interactive (`aj ask`) modes, with `--debug`
+  diagnostics.
+- Answers only from the handbook's generated wiki, always with citations.
+- Documentation:
+  [implementation/products/knowledge-assistant/](implementation/products/knowledge-assistant/)
+  — start with the
+  [README](implementation/products/knowledge-assistant/README.md) and the
+  [usage guide](implementation/products/knowledge-assistant/usage.md).
 
 ---
 
@@ -278,37 +296,30 @@ rather than the center of the platform.
 
 # Roadmap
 
-## Phase 1 --- Platform Foundation ✅
+> AJ-OS is developed **product-first** — the platform grows to serve real products.
+> **Platform v2.0.0** shipped with the first product, **Knowledge Assistant v1.0.0**.
+> The detailed roadmap lives in [ROADMAP.md](ROADMAP.md).
 
-- Architecture
-- Standards
-- Specifications
+## Phase 1 — Platform Foundation ✅
 
-## Phase 2 — Core Platform Services 🚧
+- Architecture, Standards, Specifications
 
-Current implementation order:
+## Phase 2 — Core Platform Services
 
-1. Context Builder (SPEC-002) ← In Progress
-2. End-of-Session Workflow (SPEC-003)
-3. Knowledge Review Workflow (SPEC-004)
-4. Wiki Generator Agent (SPEC-005)
+- ✅ Context Builder (SPEC-002) — delivered in Platform v2.0.0
+- End-of-Session Workflow (SPEC-003)
+- Knowledge Review Workflow (SPEC-004)
+- Wiki Generator Agent (SPEC-005)
 
-Project Kickoff (SPEC-001) is intentionally postponed until the platform is operational and will become the first workflow built on the completed platform.
+Project Kickoff (SPEC-001) is intentionally postponed until more of the platform is operational.
 
-## Phase 3 --- Supporting Platform Services
+## Phase 3 — Supporting Platform Services
 
-- Search
-- Configuration
-- Logging
-- Agent Registry
-- Workflow Registry
+- Search, Configuration, Logging, Agent Registry, Workflow Registry
 
-## Phase 4 --- Productivity Services
+## Phase 4 — Productivity Services
 
-- Portfolio Builder
-- Job Finder
-- Daily Planner
-- Additional personal workflows
+- Portfolio Builder, Job Finder, Daily Planner, additional personal workflows
 
 ---
 

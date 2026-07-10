@@ -4,7 +4,9 @@ Thank you for your interest in AJ-OS.
 
 Contributions of all sizes are welcome, including bug reports, documentation improvements, architectural discussions and code contributions.
 
-The goal of AJ-OS is to remain a clean, maintainable and well-documented code-first business operating system.
+The goal of AJ-OS is to remain a clean, maintainable, and well-documented
+knowledge-driven developer operating system — a reusable platform, with products
+built on top of it.
 
 ---
 
@@ -14,12 +16,36 @@ Before contributing, please familiarize yourself with the project documentation.
 
 Recommended reading order:
 
-1. `README.md`
-2. `docs/guides/development.md`
-3. `docs/architecture/`
-4. `docs/modules/`
+1. `README.md` — what AJ-OS is, what has shipped, and how to run it.
+2. `docs/project/versioning-and-releases.md` — how the platform and products are versioned and released.
+3. `docs/architecture/` — the platform architecture (ARCH).
+4. `docs/standards/` — the engineering standards (AJS).
+5. `docs/specifications/` — platform and product specifications (SPEC); product specs live under `docs/specifications/products/`.
+6. `implementation/products/knowledge-assistant/` — the first product's engineering documentation, a worked example of building on the platform.
 
-Understanding the architecture before making changes helps keep the project consistent.
+Understanding the architecture and the platform/product distinction (below) before making changes helps keep the project consistent.
+
+---
+
+# Platform and Products
+
+AJ-OS is a **reusable platform** with **products** built on top of it. Keeping these
+separate is the core architectural rule of the repository.
+
+- **Platform capabilities** live in `src/platform/` (and `src/context-builder/`).
+  Each is independent, single-purpose, and **knows nothing about any product**.
+- **Products** live in `src/products/` and are the only place platform capabilities
+  are composed together. Product-specific glue belongs here, never in the platform.
+- The dependency direction is one-way: **CLI → Product → Platform**. Nothing in the
+  platform may import a product.
+
+When a product needs something new, **build it as a reusable platform capability**,
+not a product-specific shortcut — assume a future product will reuse it. If a piece
+of logic would only ever serve one product, it is probably product composition and
+belongs in the product layer.
+
+The platform and each product are **versioned independently** — see
+[`docs/project/versioning-and-releases.md`](docs/project/versioning-and-releases.md).
 
 ---
 
@@ -60,13 +86,26 @@ Build:
 npm run build
 ```
 
-Synchronize the workspace:
+Run the test suite:
+
+```bash
+npm test
+```
+
+Run the Knowledge Assistant from source:
+
+```bash
+npm run dev -- ask "…"
+```
+
+Synchronize the Notion workspace (legacy sync CLI):
 
 ```bash
 npm run sync
 ```
 
-Before opening a pull request, ensure all commands complete successfully.
+Before opening a pull request, ensure `npm run typecheck`, `npm run build`, and
+`npm test` all pass.
 
 ---
 
@@ -106,13 +145,13 @@ AJ-OS follows the Conventional Commits specification where practical.
 Examples:
 
 ```text
-feat: add finance module
+feat(context-builder): add explainability to assembled sections
 
-fix: resolve relation synchronization
+feat(product-001): support follow-up questions in the Knowledge Assistant
 
-docs: update architecture guide
+docs: update the versioning & releases governance
 
-refactor: simplify schema validation
+refactor(retrieval): simplify index parsing
 ```
 
 Clear commit history makes the project easier to understand and maintain.

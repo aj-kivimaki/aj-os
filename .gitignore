@@ -8,6 +8,14 @@
 infrastructure/.env
 
 # -----------------------------------------------------------------------------
+# Local configuration
+# -----------------------------------------------------------------------------
+
+# Personal Knowledge Assistant config. Copy aj.config.example.json to
+# aj.config.json and set your own handbook path; the copy stays local.
+aj.config.json
+
+# -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
 

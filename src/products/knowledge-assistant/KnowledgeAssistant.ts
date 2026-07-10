@@ -61,6 +61,15 @@ export class KnowledgeAssistant {
   private static readonly PROJECT = "aj-os";
 
   /**
+   * Product version.
+   *
+   * This is intentionally separate from package.json because package.json
+   * represents the AJ-OS Platform version. When products eventually gain
+   * their own manifests, this constant should be replaced by that source.
+   */
+  private static readonly PRODUCT_VERSION = "1.0.0";
+
+  /**
    * Configuration is a platform capability the product consumes. The
    * dependency points product → platform; the Config Service knows nothing
    * about this product.
@@ -354,7 +363,7 @@ export class KnowledgeAssistant {
   private printWelcome(): void {
     console.log("────────────────────────────────────────");
     console.log("AJ-OS Knowledge Assistant");
-    console.log("Version 0.1");
+    console.log(`Version ${KnowledgeAssistant.PRODUCT_VERSION}`);
     console.log("────────────────────────────────────────");
     console.log();
     console.log("Ask me anything about your handbook.");

@@ -8,8 +8,41 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
 
 ## [Unreleased]
 
+### Planned
+
+- Repository integration and Notion-backed business endpoints (Projects, Portfolio, CRM, Dashboard, Business Health)
+- Additional Business Rules
+- Morning Brief
+- Automation
+- Analytics
+- Additional business modules
+
+---
+
+## [2.0.0] - 2026-07-11
+
+This release marks the first stable version of the AJ-OS Version 2 platform. It introduces the reusable platform architecture together with the first complete product built upon it: **Knowledge Assistant v1.0.0**.
+
+Version 1.0.0 was the final release of the *original* AJ-OS architecture (the code-first Notion business operating system). Version 2.0.0 begins the AJ-OS Platform architecture introduced by the Version 2 redesign: a reusable, product/platform knowledge platform. Platform and product versions are independent — see `docs/project/versioning-and-releases.md`.
+
+### Included products
+
+- **Knowledge Assistant v1.0.0** — the first AJ-OS product: a command-line assistant (`aj ask`) that answers questions about a configured handbook with grounded, cited responses. One-shot and interactive modes, `--debug` diagnostics, and honest handling of missing knowledge and configuration. Detailed release notes: `implementation/products/knowledge-assistant/release/v1.0.0.md`.
+
+> **Two handbook assistants, one release.** The Handbook AI Agent (`POST /agent/ask`, listed below) is an API/service endpoint intended for integrations and automation; the Knowledge Assistant (`aj ask`) is the first end-user product built on the AJ-OS platform.
+>
+> As of this release, the repository contains **243 automated tests** across the platform and the product.
+
 ### Added
 
+- **Product / Platform architecture** — a three-layer structure (CLI → Product → Platform) with a strict one-way dependency direction, established by building the first product on the platform.
+- **Reusable platform capabilities** (introduced with, and consumed by, Knowledge Assistant v1.0.0), each an independent single-purpose service under `src/platform/`:
+  - Configuration service — reads and validates `aj.config.json` into a typed config (`src/platform/config/`)
+  - Handbook service — locates and validates a handbook's generated `wiki/` (`src/platform/handbook/`)
+  - Retrieval service — index-driven keyword retrieval scoped to `wiki/index.md` (`src/platform/retrieval/`)
+  - Prompt Renderer — pure, deterministic rendering of a Context Package into a grounded, citable prompt (`src/platform/prompt/`)
+  - AI Client — provider-isolated answer generation via Anthropic (`src/platform/ai/`)
+- **`aj` command-line interface** — `aj ask` (one-shot and interactive, with `--debug`); `commander`-based entry point and `aj` bin (`src/cli/`)
 - Context Builder foundation (SPEC-002, Milestone 1) — the first platform service module (`src/context-builder/`), exposing immutable platform contracts and core services through a single public entry point:
   - Public configuration contract and `createContextBuilder()` factory (CB-002)
   - Context Package contract implementing AJS-002 Appendix B (CB-003)
@@ -39,12 +72,6 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
   - Permanent assembly behaviour tests, validated only through the public API; the suite grew from 160 → 205 tests (CB-024)
   - Assembly is *structural only* — rendering (Markdown/JSON), explainability computation, and context profiles remain deferred to later milestones (AD-003, AD-009)
 - **AJS-007 — Engineering Lifecycle Standard** (Draft) — a new AJ-OS platform standard that consolidates the validated milestone-delivery engineering practice (planning → planning freeze → implementation → freeze review → milestone freeze → retrospective) into a single canonical reference, derived from SPEC-002 implementation experience (`docs/standards/AJS-007-Engineering-Lifecycle-Standard.md`)
-
-### Changed
-
-- `createContextBuilder(config)` → `createContextBuilder(config, registry)` — the factory now takes a required Provider Registry, from which it composes the Collection Engine it owns (SPEC-002, CB-011; a reviewed, approved contract evolution)
-- `ContextBuilder.collect(request)` → `ContextBuilder.build(request)` — the Context Builder now exposes a single public pipeline entry point, `build(request)`, which runs Collection → Selection and returns the `SelectionResult` unchanged; the Milestone 2 collection behaviour is preserved unchanged as the internal `CollectionEngine.collect(request)` stage operation (SPEC-002, CB-017; a reviewed, approved public API evolution)
-- `ContextBuilder.build(request)` return type advanced `SelectionResult` → `ContextPackage` — with Milestone 4, `build(request)` runs the full Collection → Selection → Assembly pipeline and returns an immutable `ContextPackage`; the `build` **input** signature is unchanged (the timestamp source is injected at construction as an optional, backward-compatible third `createContextBuilder` argument) (SPEC-002, CB-023; the pre-approved CB-017 return-type evolution)
 - REST API server built on Fastify (`npm run serve`), the first runtime interface alongside the sync CLI
 - `GET /health` liveness endpoint
 - Handbook AI agent (Claude, via `POST /agent/ask`) that answers questions grounded in the handbook wiki using a tool-use loop
@@ -53,15 +80,15 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
 - Bearer-token authentication (`API_AUTH_TOKEN`) on all API routes except `/health`
 - n8n workflows for driving the agent from a chat window and from a phone via Telegram (`infrastructure/n8n/workflows/`)
 - Agent/API configuration (`ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `HANDBOOK_PATH`, `API_PORT`, `API_HOST`, `API_AUTH_TOKEN`) and `serve` / `serve:prod` scripts
+- Engineering documentation set for PRODUCT-001 (`implementation/products/knowledge-assistant/`) — architecture, system walkthrough, decisions, engineering journal, timeline, testing strategy, lessons learned, usage guide, and release notes
+- Project governance: **Versioning & Releases** (`docs/project/versioning-and-releases.md`) — the two-axis (platform vs. product) versioning and release policy adopted for AJ-OS
 
-### Planned
+### Changed
 
-- Repository integration and Notion-backed business endpoints (Projects, Portfolio, CRM, Dashboard, Business Health)
-- Additional Business Rules
-- Morning Brief
-- Automation
-- Analytics
-- Additional business modules
+- Context Builder Assembly now carries each selected item's content into the assembled section body (previously structural-only), completing a deferred Milestone 4 behaviour behind the existing Context Builder public contract
+- `createContextBuilder(config)` → `createContextBuilder(config, registry)` — the factory now takes a required Provider Registry, from which it composes the Collection Engine it owns (SPEC-002, CB-011; a reviewed, approved contract evolution)
+- `ContextBuilder.collect(request)` → `ContextBuilder.build(request)` — the Context Builder now exposes a single public pipeline entry point, `build(request)`, which runs Collection → Selection and returns the `SelectionResult` unchanged; the Milestone 2 collection behaviour is preserved unchanged as the internal `CollectionEngine.collect(request)` stage operation (SPEC-002, CB-017; a reviewed, approved public API evolution)
+- `ContextBuilder.build(request)` return type advanced `SelectionResult` → `ContextPackage` — with Milestone 4, `build(request)` runs the full Collection → Selection → Assembly pipeline and returns an immutable `ContextPackage`; the `build` **input** signature is unchanged (the timestamp source is injected at construction as an optional, backward-compatible third `createContextBuilder` argument) (SPEC-002, CB-023; the pre-approved CB-017 return-type evolution)
 
 ---
 
