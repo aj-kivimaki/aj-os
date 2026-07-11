@@ -69,13 +69,30 @@ export class AIClient {
    * @throws AIError when the API key is missing or the request fails.
    */
   async answer(prompt: RenderedPrompt): Promise<AIResponse> {
+    return this.complete(prompt);
+  }
+
+  /**
+   * Generate text for `prompt` with a caller-chosen token budget.
+   *
+   * Same provider-neutral contract as {@link answer} — `{ system, user }` in,
+   * `{ text, model }` out — but the max-token budget is configurable. Callers
+   * that produce more than a concise answer (e.g. the Knowledge Compiler, which
+   * compiles a source into several pages) raise it above the answer default.
+   *
+   * @throws AIError when the API key is missing or the request fails.
+   */
+  async complete(
+    prompt: RenderedPrompt,
+    options: { maxTokens?: number } = {},
+  ): Promise<AIResponse> {
     const client = this.anthropic();
 
     let message: Anthropic.Message;
     try {
       message = await client.messages.create({
         model: this.model,
-        max_tokens: MAX_TOKENS,
+        max_tokens: options.maxTokens ?? MAX_TOKENS,
         system: prompt.system,
         messages: [{ role: "user", content: prompt.user }],
       });
