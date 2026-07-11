@@ -8,14 +8,12 @@ import { z } from "zod";
 
 import { CompilerError } from "./KnowledgeCompiler.js";
 
-export const entityTypeSchema = z.enum([
-  "person",
-  "organization",
-  "place",
-  "product",
-  "tool",
-  "other",
-]);
+// Lenient: the model occasionally invents a type (e.g. "framework",
+// "methodology"). Type is a soft hint, so an unknown value falls back to
+// "other" rather than failing the whole extraction.
+export const entityTypeSchema = z
+  .enum(["person", "organization", "place", "product", "tool", "other"])
+  .catch("other");
 
 export const sourceExtractionSchema = z.object({
   summary: z.object({

@@ -43,16 +43,15 @@ describe("parseExtraction", () => {
     ).toThrow(CompilerError);
   });
 
-  it("throws CompilerError on an invalid entity type", () => {
-    expect(() =>
-      parseExtraction(
-        JSON.stringify({
-          summary: { title: "T", keyPoints: ["p"] },
-          entities: [{ name: "X", type: "spaceship", description: "d" }],
-          concepts: [],
-        }),
-      ),
-    ).toThrow(CompilerError);
+  it("coerces an unknown entity type to 'other' rather than failing", () => {
+    const result = parseExtraction(
+      JSON.stringify({
+        summary: { title: "T", keyPoints: ["p"] },
+        entities: [{ name: "X", type: "spaceship", description: "d" }],
+        concepts: [],
+      }),
+    );
+    expect(result.entities[0]!.type).toBe("other");
   });
 
   it("throws CompilerError when the summary has no key points", () => {

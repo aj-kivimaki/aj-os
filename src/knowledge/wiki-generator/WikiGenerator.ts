@@ -89,6 +89,8 @@ export interface GenerationReport {
   readonly mode: GenerationMode;
   /** Source ids compiled (added/modified) during INGEST. */
   readonly ingested: readonly string[];
+  /** Source ids whose compilation failed this run (skipped; batch continued). */
+  readonly failed: readonly string[];
   /** Source ids re-evaluated (removed/moved) during RECONCILE. */
   readonly reconciled: readonly string[];
   /** Wiki-relative paths written this run. */

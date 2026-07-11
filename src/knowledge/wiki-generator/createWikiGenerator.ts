@@ -76,6 +76,7 @@ interface RunContext {
   readonly nextSources: Record<string, SourceState>;
   readonly nextPages: Record<string, PageState>;
   readonly ingested: string[];
+  readonly failed: string[];
   readonly reconciled: string[];
   readonly updated: Set<string>;
   readonly stale: Set<string>;
@@ -288,6 +289,7 @@ export function createWikiGenerator(
       nextSources: { ...previous.sources },
       nextPages: { ...previous.pages },
       ingested: [],
+      failed: [],
       reconciled: [],
       updated: new Set<string>(),
       stale: new Set<string>(),
@@ -299,7 +301,16 @@ export function createWikiGenerator(
       if (previous.sources[record.id]?.hash === record.hash) {
         continue; // unchanged
       }
-      await ingestRecord(ctx, record);
+      try {
+        await ingestRecord(ctx, record);
+      } catch (error) {
+        // A single source's failure must not abort the batch (SPEC-005 §14).
+        ctx.failed.push(record.id);
+        const message = error instanceof Error ? error.message : String(error);
+        await store.appendLog(
+          `${ctx.generatedAt} INGEST-FAILED ${record.id}: ${message}`,
+        );
+      }
     }
 
     for (const id of sorted(
@@ -320,14 +331,16 @@ export function createWikiGenerator(
     const stalePages = sorted(ctx.stale);
     const logEntry =
       `${ctx.generatedAt} generator=v${STATE_VERSION} mode=${mode} ` +
-      `ingested=${ctx.ingested.length} pages=${updatedPages.length} ` +
-      `merged=${ctx.merged.size} reconciled=${ctx.reconciled.length} ` +
-      `stale=${stalePages.length} proposals=${ctx.removalProposals.length}`;
+      `ingested=${ctx.ingested.length} failed=${ctx.failed.length} ` +
+      `pages=${updatedPages.length} merged=${ctx.merged.size} ` +
+      `reconciled=${ctx.reconciled.length} stale=${stalePages.length} ` +
+      `proposals=${ctx.removalProposals.length}`;
     await store.appendLog(logEntry);
 
     return {
       mode,
       ingested: ctx.ingested,
+      failed: ctx.failed,
       reconciled: ctx.reconciled,
       updatedPages,
       stalePages,

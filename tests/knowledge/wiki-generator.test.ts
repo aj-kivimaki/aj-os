@@ -217,6 +217,31 @@ describe("WikiGenerator errors", () => {
     await expect(gen.run()).rejects.toThrow(/Duplicate source id/);
   });
 
+  it("skips a source whose compilation fails and continues the batch", async () => {
+    const flaky: KnowledgeCompiler = {
+      compile: async (s) => {
+        if (s.id === "bad") {
+          throw new Error("boom");
+        }
+        return compiler.compile(s);
+      },
+    };
+    const connector: SourceConnector = {
+      kind: "handbook",
+      list: async () => [record("a"), record("bad")],
+    };
+    const gen = createWikiGenerator(
+      { connectors: [connector], store, compiler: flaky, mergeEngine },
+      CLOCK,
+    );
+
+    const report = await gen.run();
+
+    expect(report.ingested).toEqual(["a"]);
+    expect(report.failed).toEqual(["bad"]);
+    expect(await store.read("sources/a.md")).not.toBeNull();
+  });
+
   it("throws on incompatible generator state", async () => {
     await store.write(".generator/state.json", JSON.stringify({ version: 1 }));
     await expect(generator([record("a")]).run()).rejects.toBeInstanceOf(
