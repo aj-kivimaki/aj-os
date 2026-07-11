@@ -1,291 +1,226 @@
 /**
- * End-to-end tests for the minimal Wiki Generator (SPEC-005, Step 3).
+ * Orchestration tests for the integrated Wiki Generator (SPEC-005 §22).
  *
- * These compose the real Filesystem SourceConnector and Filesystem Wiki
- * Store against temp directories, proving the vertical slice: detect
- * added/changed sources via `.generator/state.json`, INGEST them into
- * pages, persist state, and return a GenerationReport. No RECONCILE /
- * reverse index / LINT yet.
+ * The generator composes a KnowledgeCompiler, a MergeEngine, and a WikiStore.
+ * Here the compiler and merge engine are deterministic stubs (the real LLM
+ * behavior is proven in the compiler/merge tests and end-to-end), so these
+ * tests exercise the *orchestration*: CREATE / MERGE / RE-DERIVE / STALE on
+ * INGEST, and partial/full orphan on RECONCILE.
  */
-import { createHash } from "node:crypto";
-import { mkdtemp, mkdir, rm, rm as removeFile, writeFile } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { realpath } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import {
-  createFilesystemSourceConnector,
-  type SourceConnector,
-} from "../../src/ingestion/index.js";
+import type { SourceConnector, SourceRecord } from "../../src/ingestion/index.js";
 import {
   createFilesystemWikiStore,
   type WikiStore,
 } from "../../src/knowledge/wiki-store/index.js";
 import {
+  parsePage,
+  readFrontmatter,
+  serializePage,
+  type CompiledKnowledge,
+  type CompiledPage,
+  type KnowledgeCompiler,
+  type MergeEngine,
+} from "../../src/knowledge/compiler/index.js";
+import {
   createWikiGenerator,
   WikiGeneratorError,
 } from "../../src/knowledge/wiki-generator/index.js";
 
-const CLOCK = () => new Date("2026-01-02T03:04:05.000Z");
+const CLOCK = () => new Date("2026-07-12T12:00:00.000Z");
 
-let sourceRoot: string;
 let wikiRoot: string;
 let store: WikiStore;
-let connector: SourceConnector;
 
-async function writeSource(relative: string, content: string): Promise<void> {
-  const abs = join(sourceRoot, relative);
-  await mkdir(join(abs, ".."), { recursive: true });
-  await writeFile(abs, content, "utf8");
+function record(id: string, hash = id): SourceRecord {
+  return { id, uri: `file:///${id}`, content: id, hash, metadata: {} };
 }
 
-function generator(connectors: SourceConnector[] = [connector]) {
-  return createWikiGenerator({ connectors, store }, CLOCK);
+function makePage(
+  path: string,
+  kind: CompiledPage["kind"],
+  sources: string[],
+  body: string,
+): CompiledPage {
+  const fm = ["type: " + kind, 'title: "T"', "sources:", ...sources.map((s) => `  - ${s}`)].join(
+    "\n",
+  );
+  return { path, kind, title: "T", sources, content: serializePage(fm, body) };
+}
+
+/** Each source compiles to its own summary page plus a shared entity page. */
+const compiler: KnowledgeCompiler = {
+  compile: async (source): Promise<CompiledKnowledge> => ({
+    sourceId: source.id,
+    pages: [
+      makePage(`sources/${source.id}.md`, "source", [source.id], `summary ${source.id}`),
+      makePage("entities/shared.md", "entity", [source.id], `${source.id} says something`),
+    ],
+  }),
+};
+
+/** A merge engine that unions provenance and rewrites the page. */
+const mergeEngine: MergeEngine = {
+  merge: async (existing, incoming) => {
+    const existingSources = readFrontmatter(parsePage(existing).frontmatter).sources;
+    const union = [...new Set([...existingSources, ...incoming.sources])].sort();
+    return {
+      path: incoming.path,
+      mode: "resynthesized",
+      provenance: union,
+      guardFailures: [],
+      content: makePage(incoming.path, incoming.kind, union, "MERGED").content,
+    };
+  },
+};
+
+/** A merge engine that always defers (cannot merge safely). */
+const deferringMergeEngine: MergeEngine = {
+  merge: async (_existing, incoming) => ({
+    path: incoming.path,
+    mode: "deferred",
+    provenance: [...incoming.sources],
+    guardFailures: ["no-generated-region"],
+    proposal: { path: incoming.path, reason: "needs manual merge" },
+  }),
+};
+
+function generator(records: SourceRecord[], merge: MergeEngine = mergeEngine) {
+  const connector: SourceConnector = {
+    kind: "handbook",
+    list: async () => records,
+  };
+  return createWikiGenerator(
+    { connectors: [connector], store, compiler, mergeEngine: merge },
+    CLOCK,
+  );
+}
+
+async function provenance(path: string): Promise<string[]> {
+  const content = (await store.read(path))!;
+  return [...readFrontmatter(parsePage(content).frontmatter).sources];
 }
 
 beforeEach(async () => {
-  sourceRoot = await realpath(await mkdtemp(join(tmpdir(), "aj-gen-src-")));
-  wikiRoot = await realpath(await mkdtemp(join(tmpdir(), "aj-gen-wiki-")));
-  // Both configured source dirs always exist (as in the real vault); the
-  // connector treats a missing source directory as a fatal misconfig.
-  await mkdir(join(sourceRoot, "foundation"), { recursive: true });
-  await mkdir(join(sourceRoot, "library"), { recursive: true });
+  wikiRoot = await realpath(await mkdtemp(join(tmpdir(), "aj-gen-")));
   store = createFilesystemWikiStore({ destination: wikiRoot });
-  connector = createFilesystemSourceConnector({
-    kind: "handbook",
-    baseDir: sourceRoot,
-    sources: ["foundation", "library"],
-  });
 });
 
 afterEach(async () => {
-  await rm(sourceRoot, { recursive: true, force: true });
   await rm(wikiRoot, { recursive: true, force: true });
 });
 
-describe("WikiGenerator.run (minimal slice)", () => {
-  it("ingests all sources on first run and writes provenance-stamped pages", async () => {
-    await writeSource("foundation/about.md", "# About");
-    await writeSource("library/note.md", "a note");
+describe("WikiGenerator INGEST (integrated compiler)", () => {
+  it("creates a source's summary and entity pages on first ingest", async () => {
+    const report = await generator([record("a")]).run();
 
-    const report = await generator().run();
-
-    expect(report.mode).toBe("incremental");
-    expect(report.ingested).toEqual([
-      "handbook:foundation/about.md",
-      "handbook:library/note.md",
-    ]);
-    expect(report.updatedPages).toEqual([
-      "sources/foundation/about.md",
-      "sources/library/note.md",
-    ]);
-    expect(report.reconciled).toEqual([]);
-    expect(report.stalePages).toEqual([]);
-    expect(report.removalProposals).toEqual([]);
-    expect(report.lint.findings).toEqual([]);
-
-    const hash = createHash("sha256").update("# About", "utf8").digest("hex");
-    expect(await store.read("sources/foundation/about.md")).toBe(
-      [
-        "---",
-        "type: source",
-        "sources:",
-        "  - handbook:foundation/about.md",
-        `hash: ${hash}`,
-        "generated_at: 2026-01-02T03:04:05.000Z",
-        "---",
-        "",
-        "# About",
-      ].join("\n"),
-    );
+    expect(report.ingested).toEqual(["a"]);
+    expect(report.updatedPages).toEqual(["entities/shared.md", "sources/a.md"]);
+    expect(await store.read("sources/a.md")).toContain("summary a");
+    expect(await provenance("entities/shared.md")).toEqual(["a"]);
   });
 
-  it("keeps generator state under a hidden dir, invisible to list()", async () => {
-    await writeSource("library/note.md", "x");
-    await generator().run();
+  it("merges a second source into a shared page, unioning provenance", async () => {
+    const report = await generator([record("a"), record("b")]).run();
 
-    // state exists...
-    expect(await store.read(".generator/state.json")).not.toBeNull();
-    // ...but it is hidden from user-facing listings (dot-dir skipped),
-    // while wiki pages appear.
-    const listed = await store.list();
-    expect(listed).toContain("sources/library/note.md");
-    expect(listed.some((p) => p.startsWith(".generator"))).toBe(false);
+    // entities/shared.md is created by a, then merged with b.
+    expect(await provenance("entities/shared.md")).toEqual(["a", "b"]);
+    expect(await store.read("entities/shared.md")).toContain("MERGED");
+    expect(report.updatedPages).toContain("entities/shared.md");
   });
 
-  it("writes a log entry per run", async () => {
-    await writeSource("library/note.md", "x");
-    await generator().run();
-
-    expect(await store.read("log.md")).toBe(
-      "2026-01-02T03:04:05.000Z generator=v1 mode=incremental " +
-        "ingested=1 pages=1 reconciled=0 stale=0 proposals=0\n",
-    );
-  });
-
-  it("is idempotent: a second run with no changes ingests nothing", async () => {
-    await writeSource("library/note.md", "x");
-    await generator().run();
-
-    const second = await generator().run();
+  it("is idempotent: a second run with no changes writes nothing", async () => {
+    await generator([record("a")]).run();
+    const second = await generator([record("a")]).run();
 
     expect(second.ingested).toEqual([]);
     expect(second.updatedPages).toEqual([]);
   });
 
-  it("re-ingests only a changed source", async () => {
-    await writeSource("library/a.md", "one");
-    await writeSource("library/b.md", "stable");
-    await generator().run();
+  it("re-derives a source's own page but marks a shared page stale on modify", async () => {
+    await generator([record("a"), record("b")]).run();
 
-    await writeSource("library/a.md", "one edited");
-    const report = await generator().run();
+    // a changes; b unchanged.
+    const report = await generator([record("a", "a-v2"), record("b")]).run();
 
-    expect(report.ingested).toEqual(["handbook:library/a.md"]);
-    expect(await store.read("sources/library/a.md")).toContain("one edited");
-  });
-
-  it("ingests only a newly added source", async () => {
-    await writeSource("library/a.md", "a");
-    await generator().run();
-
-    await writeSource("library/c.md", "c");
-    const report = await generator().run();
-
-    expect(report.ingested).toEqual(["handbook:library/c.md"]);
-  });
-
-  it("rebuild mode re-ingests everything regardless of state", async () => {
-    await writeSource("library/a.md", "a");
-    await writeSource("library/b.md", "b");
-    await generator().run();
-
-    const report = await generator().run({ mode: "rebuild" });
-
-    expect(report.mode).toBe("rebuild");
-    expect(report.ingested).toEqual([
-      "handbook:library/a.md",
-      "handbook:library/b.md",
-    ]);
-  });
-
-  it("throws on duplicate source ids across connectors", async () => {
-    await writeSource("library/a.md", "a");
-    const twin = createFilesystemSourceConnector({
-      kind: "handbook",
-      baseDir: sourceRoot,
-      sources: ["library"],
-    });
-
-    await expect(generator([connector, twin]).run()).rejects.toThrow(
-      /Duplicate source id across connectors/,
+    expect(report.ingested).toEqual(["a"]);
+    // a's own summary re-derived...
+    expect(report.updatedPages).toContain("sources/a.md");
+    // ...but the shared page (a + b) is marked stale, not re-merged.
+    expect(report.stalePages).toContain("entities/shared.md");
+    expect(await store.read("entities/shared.md")).toContain(
+      "stale_reason: source-modified",
     );
   });
 
-  it("throws on corrupt generator state", async () => {
-    await writeSource("library/a.md", "a");
-    await store.write(".generator/state.json", "{ not json");
+  it("leaves a page untouched when the merge engine defers", async () => {
+    await generator([record("a")]).run();
+    const before = await store.read("entities/shared.md");
 
-    await expect(generator().run()).rejects.toBeInstanceOf(WikiGeneratorError);
+    // b would merge, but the engine defers → page unchanged.
+    const report = await generator([record("a"), record("b")], deferringMergeEngine).run();
+
+    expect(await store.read("entities/shared.md")).toBe(before);
+    expect(report.updatedPages).not.toContain("entities/shared.md");
   });
 });
 
-describe("WikiGenerator RECONCILE (1:1 source pages)", () => {
-  it("marks an orphaned page stale with sticky provenance and preserved body", async () => {
-    await writeSource("library/keep.md", "keep");
-    await writeSource("library/gone.md", "important knowledge");
-    await generator().run();
+describe("WikiGenerator RECONCILE (multi-source)", () => {
+  it("marks a fully-orphaned page stale with a removal proposal", async () => {
+    await generator([record("a")]).run();
 
-    await removeFile(join(sourceRoot, "library/gone.md"));
-    const report = await generator().run();
+    const report = await generator([]).run(); // a removed
 
-    expect(report.reconciled).toEqual(["handbook:library/gone.md"]);
-    expect(report.stalePages).toEqual(["sources/library/gone.md"]);
-    expect(report.ingested).toEqual([]);
-
-    const page = (await store.read("sources/library/gone.md"))!;
-    expect(page).toContain("status: stale");
-    expect(page).toContain("stale_reason: orphaned");
-    expect(page).toContain("stale_since: 2026-01-02T03:04:05.000Z");
-    // Sticky provenance: the removed source id is retained.
-    expect(page).toContain("  - handbook:library/gone.md");
-    // Body preserved.
-    expect(page).toContain("important knowledge");
-    // The page is NOT deleted.
-    expect(await store.list()).toContain("sources/library/gone.md");
+    expect(report.reconciled).toEqual(["a"]);
+    expect(report.stalePages).toContain("sources/a.md");
+    expect(report.removalProposals).toContainEqual({
+      path: "sources/a.md",
+      reason: "All contributing sources were removed.",
+      orphanedSources: ["a"],
+    });
   });
 
-  it("emits a removal proposal for a fully-orphaned page", async () => {
-    await writeSource("library/gone.md", "bye");
-    await generator().run();
+  it("keeps a partially-orphaned shared page (stale, no proposal)", async () => {
+    await generator([record("a"), record("b")]).run();
 
-    await removeFile(join(sourceRoot, "library/gone.md"));
-    const report = await generator().run();
+    const report = await generator([record("a")]).run(); // b removed
 
-    expect(report.removalProposals).toEqual([
-      {
-        path: "sources/library/gone.md",
-        reason: "All contributing sources were removed.",
-        orphanedSources: ["handbook:library/gone.md"],
-      },
-    ]);
+    // shared has a live source (a) → partial orphan, kept.
+    expect(report.stalePages).toContain("entities/shared.md");
+    expect(await store.read("entities/shared.md")).toContain(
+      "stale_reason: partial-orphan",
+    );
+    expect(report.removalProposals.map((p) => p.path)).not.toContain(
+      "entities/shared.md",
+    );
+    // provenance stays sticky.
+    expect(await provenance("entities/shared.md")).toEqual(["a", "b"]);
+    // b's own summary is fully orphaned → proposal.
+    expect(report.removalProposals.map((p) => p.path)).toContain("sources/b.md");
+  });
+});
+
+describe("WikiGenerator errors", () => {
+  it("throws on duplicate source ids across connectors", async () => {
+    const c1: SourceConnector = { kind: "handbook", list: async () => [record("a")] };
+    const c2: SourceConnector = { kind: "handbook", list: async () => [record("a")] };
+    const gen = createWikiGenerator(
+      { connectors: [c1, c2], store, compiler, mergeEngine },
+      CLOCK,
+    );
+    await expect(gen.run()).rejects.toThrow(/Duplicate source id/);
   });
 
-  it("only affects the removed source's page, leaving others untouched", async () => {
-    await writeSource("library/a.md", "a");
-    await writeSource("library/b.md", "b");
-    await generator().run();
-
-    await removeFile(join(sourceRoot, "library/a.md"));
-    const report = await generator().run();
-
-    expect(report.stalePages).toEqual(["sources/library/a.md"]);
-    // b is unchanged and stays active (no status field).
-    expect(await store.read("sources/library/b.md")).not.toContain("status:");
-  });
-
-  it("drops the removed source from state and does not re-propose on reruns", async () => {
-    await writeSource("library/gone.md", "bye");
-    await generator().run();
-    await removeFile(join(sourceRoot, "library/gone.md"));
-    await generator().run(); // first reconcile
-
-    const second = await generator().run(); // rerun, same source state
-
-    expect(second.reconciled).toEqual([]);
-    expect(second.stalePages).toEqual([]);
-    expect(second.removalProposals).toEqual([]);
-
-    const state = JSON.parse(
-      (await store.read(".generator/state.json"))!,
-    ) as { sources: Record<string, unknown> };
-    expect("handbook:library/gone.md" in state.sources).toBe(false);
-  });
-
-  it("reactivates a page when its source returns (stale → active)", async () => {
-    await writeSource("library/x.md", "v1");
-    await generator().run();
-    await removeFile(join(sourceRoot, "library/x.md"));
-    await generator().run();
-    expect(await store.read("sources/library/x.md")).toContain("status: stale");
-
-    // Source returns.
-    await writeSource("library/x.md", "v2");
-    const report = await generator().run();
-
-    expect(report.ingested).toEqual(["handbook:library/x.md"]);
-    const page = (await store.read("sources/library/x.md"))!;
-    expect(page).not.toContain("status: stale");
-    expect(page).toContain("v2");
-  });
-
-  it("reports nothing to reconcile when no sources were removed", async () => {
-    await writeSource("library/a.md", "a");
-    const report = await generator().run();
-
-    expect(report.reconciled).toEqual([]);
-    expect(report.removalProposals).toEqual([]);
+  it("throws on incompatible generator state", async () => {
+    await store.write(".generator/state.json", JSON.stringify({ version: 1 }));
+    await expect(generator([record("a")]).run()).rejects.toBeInstanceOf(
+      WikiGeneratorError,
+    );
   });
 });

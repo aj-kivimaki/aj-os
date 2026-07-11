@@ -1,32 +1,31 @@
 /**
- * Wiki Generator — SPEC-005, minimal vertical slice (Step 3).
+ * Wiki Generator — the single INGEST pipeline (SPEC-005 §22).
  *
- * This milestone proves the architecture end-to-end with the smallest
- * working pipeline: compose connectors + store, detect added/changed
- * sources via generator state, INGEST them into wiki pages, persist state,
- * and return a {@link GenerationReport}.
+ * The generator orchestrates; it owns no knowledge and no persistence
+ * mechanics of its own. It composes:
+ *   - KnowledgeCompiler — compiles a source into pages (extraction + render);
+ *   - MergeEngine       — folds a new contribution into an existing page;
+ *   - WikiStore         — persists pages.
  *
- * Implemented so far: INGEST of added/modified sources, and RECONCILE of
- * removed sources for **1:1 source pages** (ADR-003) — mark orphaned pages
- * stale (sticky provenance) and emit removal proposals; never delete.
- * `state.sources` doubles as the reverse index (source id → its page).
+ * Per changed source it compiles the source and, for each produced page,
+ * decides by identity (slug = page path) and provenance:
+ *   - page absent            → CREATE it;
+ *   - source not yet on page → MERGE the new contribution (ADR-004);
+ *   - page is this source's alone → RE-DERIVE it (a plain refresh);
+ *   - shared page, this source modified → mark STALE (source-modified),
+ *     never re-merge (no double-counting; ADR-003).
+ * Removed sources are RECONCILEd via the reverse index: fully-orphaned pages
+ * become stale + a removal proposal; partial orphans stay stale-but-kept.
  *
- * Intentionally NOT yet implemented (dormant until those page types exist):
- * synthesized entity/concept pages, partial-orphan handling, cross-
- * references, and LINT.
- *
- * Generator-owned state lives under a hidden metadata directory
- * (`.generator/`) inside the destination — separated from the user-facing
- * wiki, invisible to `WikiStore.list()` (which skips dot-dirs), yet still
- * inside the Wiki Store abstraction. `state.json` starts by holding source
- * hashes for change detection and has room to grow (generator/schema
- * versioning, migrations, caches).
- *
- * Boundaries kept (SPEC-005 / ADR-002): the generator never performs git
- * and never deletes pages; it only reads/writes through the store.
+ * Generator-owned state lives under `.generator/` and is pure bookkeeping —
+ * a reverse index (`source → [pages]`) and a per-page generated-region hash
+ * (for future in-region drift detection) — never knowledge (ADR-004).
  */
+import { createHash } from "node:crypto";
+
 import type { SourceRecord } from "../../ingestion/index.js";
-import type { WikiStore } from "../wiki-store/index.js";
+import { parsePage, readFrontmatter } from "../compiler/index.js";
+import type { CompiledPage } from "../compiler/index.js";
 import type {
   GenerationMode,
   GenerationReport,
@@ -39,8 +38,7 @@ import type {
 
 const METADATA_DIR = ".generator";
 const STATE_PATH = `${METADATA_DIR}/state.json`;
-const STATE_VERSION = 1;
-const SOURCES_PREFIX = "sources";
+const STATE_VERSION = 2;
 const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---\n?/;
 const STALE_KEY_RE = /^(status|stale_reason|stale_since):/;
 
@@ -54,55 +52,57 @@ export class WikiGeneratorError extends Error {
 
 interface SourceState {
   readonly hash: string;
-  readonly page: string;
+  /** Reverse index: every page this source contributed to. */
+  readonly pages: string[];
+}
+
+interface PageState {
+  /** Hash of the page's generator-owned region (drift detection). */
+  readonly hash: string;
 }
 
 interface GeneratorState {
   version: number;
   sources: Record<string, SourceState>;
+  pages: Record<string, PageState>;
   updatedAt?: string;
 }
 
+/** Mutable accumulators threaded through one run. */
+interface RunContext {
+  readonly generatedAt: string;
+  readonly currentIds: ReadonlySet<string>;
+  readonly previous: GeneratorState;
+  readonly nextSources: Record<string, SourceState>;
+  readonly nextPages: Record<string, PageState>;
+  readonly ingested: string[];
+  readonly reconciled: string[];
+  readonly updated: Set<string>;
+  readonly stale: Set<string>;
+  readonly merged: Set<string>;
+  readonly removalProposals: RemovalProposal[];
+}
+
 function emptyState(): GeneratorState {
-  return { version: STATE_VERSION, sources: {} };
+  return { version: STATE_VERSION, sources: {}, pages: {} };
 }
 
-/** Strip the `<kind>:` namespace to recover the source-relative path. */
-function relativePathFromId(id: string): string {
-  const idx = id.indexOf(":");
-  return idx === -1 ? id : id.slice(idx + 1);
+function sorted(values: Iterable<string>): string[] {
+  return [...values].sort((a, b) => a.localeCompare(b));
 }
 
-/** Deterministic page location: mirror the source path under `sources/`. */
-function pagePathFor(record: SourceRecord): string {
-  return `${SOURCES_PREFIX}/${relativePathFromId(record.id)}`;
+/** Hash of the generator-owned region — the drift-detection signal. */
+function generatedHash(content: string): string {
+  const generated = parsePage(content).generated ?? content;
+  return createHash("sha256").update(generated, "utf8").digest("hex");
 }
 
-/**
- * Minimal deterministic INGEST transform: one source → one page carrying
- * provenance frontmatter plus the source content. The LLM compilation that
- * will replace this transform slots in behind the same step.
- */
-function renderSourcePage(record: SourceRecord, generatedAt: string): string {
-  return [
-    "---",
-    "type: source",
-    "sources:",
-    `  - ${record.id}`,
-    `hash: ${record.hash}`,
-    `generated_at: ${generatedAt}`,
-    "---",
-    "",
-    record.content,
-  ].join("\n");
+/** A page's contributing source ids, read from its frontmatter. */
+function provenanceOf(content: string): string[] {
+  return [...readFrontmatter(parsePage(content).frontmatter).sources];
 }
 
-/**
- * Mark an existing page stale in place: inject `status`/`stale_reason`/
- * `stale_since` into its frontmatter while preserving provenance (`sources`)
- * and body. Idempotent (existing stale keys are replaced). The generator
- * owns the page format, so a targeted frontmatter edit is safe here.
- */
+/** Inject stale lifecycle fields into a page's frontmatter (ADR-003). */
 function markPageStale(content: string, reason: string, since: string): string {
   const match = FRONTMATTER_RE.exec(content);
   if (match === null) {
@@ -122,11 +122,15 @@ function markPageStale(content: string, reason: string, since: string): string {
   return `---\n${frontmatter}\n---\n${body}`;
 }
 
+async function noLint(): Promise<LintReport> {
+  return { findings: [] };
+}
+
 export function createWikiGenerator(
   config: WikiGeneratorConfig,
   now: () => Date = () => new Date(),
 ): WikiGenerator {
-  const { connectors, store } = config;
+  const { connectors, store, compiler, mergeEngine } = config;
 
   async function loadState(): Promise<GeneratorState> {
     const raw = await store.read(STATE_PATH);
@@ -142,15 +146,20 @@ export function createWikiGenerator(
     if (
       typeof parsed !== "object" ||
       parsed === null ||
-      typeof (parsed as GeneratorState).sources !== "object"
+      (parsed as GeneratorState).version !== STATE_VERSION
     ) {
-      throw new WikiGeneratorError(`Corrupt generator state at ${STATE_PATH}.`);
+      throw new WikiGeneratorError(
+        `Incompatible generator state at ${STATE_PATH} (expected v${STATE_VERSION}); run a rebuild.`,
+      );
     }
     const state = parsed as GeneratorState;
-    return { version: state.version ?? STATE_VERSION, sources: state.sources };
+    return {
+      version: STATE_VERSION,
+      sources: state.sources ?? {},
+      pages: state.pages ?? {},
+    };
   }
 
-  /** Pull and merge records from every connector; ids must be unique. */
   async function collectRecords(): Promise<SourceRecord[]> {
     const byId = new Map<string, SourceRecord>();
     for (const connector of connectors) {
@@ -166,95 +175,167 @@ export function createWikiGenerator(
     return [...byId.values()].sort((a, b) => a.id.localeCompare(b.id));
   }
 
+  async function writePage(
+    ctx: RunContext,
+    path: string,
+    content: string,
+  ): Promise<void> {
+    ctx.nextPages[path] = { hash: generatedHash(content) };
+    await store.write(path, content);
+  }
+
+  /** Apply one compiled page for `record` (CREATE / MERGE / RE-DERIVE / STALE). */
+  async function ingestPage(
+    ctx: RunContext,
+    record: SourceRecord,
+    page: CompiledPage,
+  ): Promise<void> {
+    const existing = await store.read(page.path);
+    if (existing === null) {
+      await writePage(ctx, page.path, page.content); // CREATE
+      ctx.updated.add(page.path);
+      return;
+    }
+    const prov = provenanceOf(existing);
+    if (!prov.includes(record.id)) {
+      const outcome = await mergeEngine.merge(existing, page); // MERGE
+      if (outcome.mode === "deferred" || outcome.content === undefined) {
+        return; // cannot merge safely; leave existing untouched
+      }
+      await writePage(ctx, page.path, outcome.content);
+      ctx.updated.add(page.path);
+      ctx.merged.add(page.path);
+    } else if (prov.length === 1) {
+      await writePage(ctx, page.path, page.content); // RE-DERIVE own page
+      ctx.updated.add(page.path);
+    } else {
+      // Shared page this source already backs, now modified → stale, never
+      // re-merge (avoids double-counting; ADR-003).
+      await writePage(
+        ctx,
+        page.path,
+        markPageStale(existing, "source-modified", ctx.generatedAt),
+      );
+      ctx.stale.add(page.path);
+    }
+  }
+
+  async function ingestRecord(
+    ctx: RunContext,
+    record: SourceRecord,
+  ): Promise<void> {
+    const compiled = await compiler.compile(record);
+    const pages = [...compiled.pages].sort((a, b) =>
+      a.path.localeCompare(b.path),
+    );
+    for (const page of pages) {
+      await ingestPage(ctx, record, page);
+    }
+    ctx.ingested.push(record.id);
+    ctx.nextSources[record.id] = {
+      hash: record.hash,
+      pages: sorted(new Set(pages.map((p) => p.path))),
+    };
+  }
+
+  /** RECONCILE the pages a removed source contributed to (ADR-003). */
+  async function reconcileRemoved(ctx: RunContext, id: string): Promise<void> {
+    ctx.reconciled.push(id);
+    const entry = ctx.previous.sources[id];
+    if (entry === undefined) {
+      return;
+    }
+    for (const path of entry.pages) {
+      const existing = await store.read(path);
+      if (existing === null) {
+        continue;
+      }
+      const prov = provenanceOf(existing);
+      const live = prov.filter((s) => ctx.currentIds.has(s));
+      if (live.length === 0) {
+        await writePage(
+          ctx,
+          path,
+          markPageStale(existing, "orphaned", ctx.generatedAt),
+        );
+        ctx.stale.add(path);
+        ctx.removalProposals.push({
+          path,
+          reason: "All contributing sources were removed.",
+          orphanedSources: prov.filter((s) => !ctx.currentIds.has(s)),
+        });
+      } else {
+        await writePage(
+          ctx,
+          path,
+          markPageStale(existing, "partial-orphan", ctx.generatedAt),
+        );
+        ctx.stale.add(path);
+      }
+    }
+    delete ctx.nextSources[id];
+  }
+
   async function run(options?: RunOptions): Promise<GenerationReport> {
     const mode: GenerationMode = options?.mode ?? "incremental";
-    const generatedAt = now().toISOString();
-
     const previous = mode === "rebuild" ? emptyState() : await loadState();
     const records = await collectRecords();
-    const currentIds = new Set(records.map((record) => record.id));
 
-    const ingested: string[] = [];
-    const updatedPages: string[] = [];
-    const nextSources: Record<string, SourceState> = { ...previous.sources };
+    const ctx: RunContext = {
+      generatedAt: now().toISOString(),
+      currentIds: new Set(records.map((r) => r.id)),
+      previous,
+      nextSources: { ...previous.sources },
+      nextPages: { ...previous.pages },
+      ingested: [],
+      reconciled: [],
+      updated: new Set<string>(),
+      stale: new Set<string>(),
+      merged: new Set<string>(),
+      removalProposals: [],
+    };
 
-    // INGEST added/modified sources → (re)derive their 1:1 pages (active).
     for (const record of records) {
       if (previous.sources[record.id]?.hash === record.hash) {
         continue; // unchanged
       }
-      const page = pagePathFor(record);
-      await store.write(page, renderSourcePage(record, generatedAt));
-      ingested.push(record.id);
-      updatedPages.push(page);
-      nextSources[record.id] = { hash: record.hash, page };
+      await ingestRecord(ctx, record);
     }
 
-    // RECONCILE removed sources (ADR-003). Every page today is 1:1, so a
-    // removed source fully orphans its page: mark it stale (provenance kept
-    // sticky) and emit a removal proposal — never delete. Partial-orphan and
-    // synthesized-page handling arrive when those page types exist.
-    const reconciled: string[] = [];
-    const stalePages: string[] = [];
-    const removalProposals: RemovalProposal[] = [];
-    const removedIds = Object.keys(previous.sources)
-      .filter((id) => !currentIds.has(id))
-      .sort((a, b) => a.localeCompare(b));
-
-    for (const id of removedIds) {
-      const entry = previous.sources[id];
-      if (entry === undefined) {
-        continue;
-      }
-      reconciled.push(id);
-      const existing = await store.read(entry.page);
-      if (existing !== null) {
-        await store.write(
-          entry.page,
-          markPageStale(existing, "orphaned", generatedAt),
-        );
-        stalePages.push(entry.page);
-        removalProposals.push({
-          path: entry.page,
-          reason: "All contributing sources were removed.",
-          orphanedSources: [id],
-        });
-      }
-      // Drop the removed source from the live reverse index; the stale page
-      // persists on disk with its (sticky) provenance until pruned.
-      delete nextSources[id];
+    for (const id of sorted(
+      Object.keys(previous.sources).filter((id) => !ctx.currentIds.has(id)),
+    )) {
+      await reconcileRemoved(ctx, id);
     }
 
     const nextState: GeneratorState = {
       version: STATE_VERSION,
-      sources: nextSources,
-      updatedAt: generatedAt,
+      sources: ctx.nextSources,
+      pages: ctx.nextPages,
+      updatedAt: ctx.generatedAt,
     };
     await store.write(STATE_PATH, `${JSON.stringify(nextState, null, 2)}\n`);
 
+    const updatedPages = sorted(ctx.updated);
+    const stalePages = sorted(ctx.stale);
     const logEntry =
-      `${generatedAt} generator=v${STATE_VERSION} mode=${mode} ` +
-      `ingested=${ingested.length} pages=${updatedPages.length} ` +
-      `reconciled=${reconciled.length} stale=${stalePages.length} ` +
-      `proposals=${removalProposals.length}`;
+      `${ctx.generatedAt} generator=v${STATE_VERSION} mode=${mode} ` +
+      `ingested=${ctx.ingested.length} pages=${updatedPages.length} ` +
+      `merged=${ctx.merged.size} reconciled=${ctx.reconciled.length} ` +
+      `stale=${stalePages.length} proposals=${ctx.removalProposals.length}`;
     await store.appendLog(logEntry);
 
     return {
       mode,
-      ingested,
-      reconciled,
+      ingested: ctx.ingested,
+      reconciled: ctx.reconciled,
       updatedPages,
       stalePages,
-      removalProposals,
+      removalProposals: ctx.removalProposals,
       lint: { findings: [] },
       logEntry,
     };
   }
 
-  async function lint(): Promise<LintReport> {
-    // LINT is deferred to a later slice; no findings yet.
-    return { findings: [] };
-  }
-
-  return { run, lint };
+  return { run, lint: noLint };
 }

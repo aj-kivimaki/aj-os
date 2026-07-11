@@ -18,17 +18,26 @@
  */
 
 import type { SourceConnector } from "../../ingestion/index.js";
+import type {
+  KnowledgeCompiler,
+  MergeEngine,
+} from "../compiler/index.js";
 import type { WikiStore } from "../wiki-store/index.js";
 
 /**
- * Composition of a Wiki Generator: the sources it pulls and the store it
- * persists through.
+ * Composition of a Wiki Generator. Responsibilities stay separated: the
+ * generator orchestrates, the compiler extracts/compiles, the merge engine
+ * owns merge policy, and the store owns persistence.
  */
 export interface WikiGeneratorConfig {
   /** One or more source backends. Their records are merged by id. */
   readonly connectors: readonly SourceConnector[];
   /** The persistence destination for the wiki. */
   readonly store: WikiStore;
+  /** Compiles a source into pages (INGEST). */
+  readonly compiler: KnowledgeCompiler;
+  /** Merges a new contribution into an existing page (MERGE). */
+  readonly mergeEngine: MergeEngine;
 }
 
 /** Incremental maintenance (default) or a lossy recovery/bootstrap rebuild. */
