@@ -71,8 +71,10 @@ The agent SHALL:
    changed or removed source re-evaluates only affected pages, not the
    whole wiki. The index is generator-owned state persisted via the Store.
 6. **RECONCILE** removed (or moved) sources: use the reverse index to
-   locate affected pages and re-evaluate each — update, mark **stale**,
-   merge, or *propose* removal. Pages are never deleted headless.
+   locate affected pages and re-evaluate each per ADR-003 — mark **stale**
+   (partial orphan, or synthesized page whose source changed), and emit a
+   removal **proposal** for **fully-orphaned** pages. Never auto-rewrite
+   synthesized pages; never delete headless; keep provenance sticky.
 7. Surface conflicts with prior wiki content as warnings; never silently
    overwrite accumulated knowledge.
 8. **LINT**: detect contradictions, orphans, stale claims, and wiki pages
@@ -233,12 +235,15 @@ Received → Validating → DetectingChanges → Ingesting → Reconciling
         → CrossReferencing → Linting → Persisting → Reported
 ```
 
-Wiki page lifecycle:
+Wiki page lifecycle (ADR-003):
 
 ```text
-active ⇄ stale        (stale = all/again-uncertain sources; set by RECONCILE/LINT)
+active ⇄ stale          (RECONCILE sets/clears stale; reasons below)
 active/stale → removed  (explicit orchestration/human action only — never headless)
 ```
+
+Full lifecycle, staleness reasons, and the page frontmatter schema are
+specified in §21 (Reconciliation & Page Lifecycle).
 
 ---
 
@@ -351,3 +356,95 @@ The Handbook remains the single source of truth. The wiki is a
 this agent and hosted in the Handbook vault (ADR-002). Full regeneration
 exists as a recovery/bootstrap path only; routine maintenance is
 incremental.
+
+---
+
+# 21. Reconciliation & Page Lifecycle (ADR-003)
+
+RECONCILE defines the lifecycle of generated knowledge. Its behavior is
+governed by ADR-003; this section is the operational specification.
+
+## 21.1 Page statuses
+
+Stored statuses are `active` and `stale`. `removed` is absence (no
+tombstone). Absence of a `status` field means `active`.
+
+```text
+active ──(source removed / synthesized-dependent source changed)──▶ stale
+stale  ──(condition resolves: source returns / page re-derived)───▶ active
+stale  ──(human/orchestration acts on a removal proposal)─────────▶ removed
+active ──(human/orchestration prunes directly)────────────────────▶ removed
+```
+
+RECONCILE performs only `active ⇄ stale` and emits removal proposals; it
+never deletes.
+
+## 21.2 Staleness reasons
+
+- `source-modified` — a synthesized page's contributing source changed and
+  the page was not auto-re-derived.
+- `partial-orphan` — some (not all) contributing sources were removed.
+- `orphaned` — all contributing sources were removed (also emits a removal
+  proposal).
+
+## 21.3 Reconciliation rules
+
+| Page kind | Event | Action |
+|---|---|---|
+| 1:1 source page | source modified | INGEST re-derives → `active` |
+| 1:1 source page | source removed | `stale (orphaned)` + removal proposal |
+| synthesized (N:1) | a source modified | `stale (source-modified)`; **not** rewritten |
+| synthesized (N:1) | some sources removed | `stale (partial-orphan)`; kept |
+| synthesized (N:1) | all sources removed | `stale (orphaned)` + removal proposal |
+| any | condition resolves | clear stale → `active` |
+
+Synthesized pages are **never auto-rewritten headless**. Removal proposals
+are emitted **only for fully-orphaned** pages. A rename is treated as
+remove + add.
+
+## 21.4 Provenance & the reverse index
+
+- Page frontmatter records **all** contributing source ids (§21.5). Ids are
+  **sticky**: a removed source's id is retained; liveness is computed
+  against the current source set.
+- The generator maintains a **reverse index** (`source id → page paths`) as
+  state under `.generator/`, used to locate affected pages in O(affected).
+  It is rebuildable by scanning page frontmatter (recovery).
+
+## 21.5 Page frontmatter schema
+
+```yaml
+---
+type: source | entity | concept
+sources:            # all contributing source ids (sticky/historical)
+  - handbook:library/foo.md
+hash: <source-hash>            # for 1:1 source pages
+status: active | stale         # absent ⇒ active
+stale_reason: source-modified | partial-orphan | orphaned   # when stale
+stale_since: <iso-timestamp>                                # when stale
+generated_at: <iso-timestamp>
+---
+```
+
+## 21.6 Report semantics
+
+Per run, RECONCILE contributes to the `GenerationReport`:
+
+- `stalePages` — pages transitioned to (or still) `stale` this run.
+- `removalProposals` — `{ path, reason, orphanedSources }` for
+  fully-orphaned pages. Orchestration/humans decide; the generator never
+  acts on them.
+
+## 21.7 Retrieval neutrality
+
+`stale` is a flag and does **not** gate retrieval by itself. Down-ranking or
+excluding stale pages is a retrieval-policy concern (AJS-002), decided
+separately.
+
+## 21.8 Invariants
+
+No knowledge deleted headless; no silent overwrite of synthesized
+knowledge; provenance preserved (sticky); targeted & complete via the
+reverse index; deterministic & idempotent (no oscillation); reversible
+staleness; never a mirror; index/provenance rebuildable; every action
+reported and logged. (Full list: ADR-003.)

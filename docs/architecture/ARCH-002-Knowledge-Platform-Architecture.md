@@ -7,7 +7,7 @@
 **Related Architecture:** ARCH-001\
 **Related Standards:** AJS-002, AJS-003, AJS-005, AJS-006\
 **Related Specifications:** SPEC-002, SPEC-005, SPEC-006, SPEC-007\
-**Related Decisions:** ADR-002
+**Related Decisions:** ADR-002, ADR-003
 
 ---
 
@@ -105,9 +105,10 @@ These MUST hold across all implementations:
    Connector interface; the wiki is read and written through one Wiki Store
    interface. No component reads raw paths directly.
 8. **The wiki is not a mirror of the sources.** Removing a source does not
-   remove derived knowledge; removal triggers RECONCILE, and pages are
-   never deleted headless — they are marked `stale` or a removal is
-   *proposed* to orchestration/humans.
+   remove derived knowledge; removal triggers RECONCILE (ADR-003), and
+   pages are never deleted headless — they are marked `stale`, and a removal
+   is *proposed* only for fully-orphaned pages. Synthesized pages are never
+   auto-rewritten headless.
 9. **Provenance is mandatory.** Every generated page records all
    contributing source IDs, and the generator maintains a reverse index
    (source ID → pages) so changed/removed sources re-evaluate only the

@@ -45,11 +45,14 @@ The **LLM Wiki** is non-authoritative but **persistent but recoverable**
 (ADR-002): it is incrementally maintained and committed, and full
 regeneration is a lossy recovery/bootstrap path, not a routine operation.
 
-Wiki page lifecycle is governed: a page is `active` or `stale`. Source
-removal never deletes derived knowledge automatically — the headless
-generator marks pages `stale` or *proposes* removal (SPEC-005 RECONCILE);
-**actual deletion is an explicit orchestration or human action**, never
-performed headless.
+Wiki page lifecycle is governed by ADR-003: a page is `active` or `stale`.
+Source removal never deletes derived knowledge automatically — the headless
+generator marks pages `stale` (with reason: `source-modified`,
+`partial-orphan`, or `orphaned`) or *proposes* removal for **fully-orphaned**
+pages (SPEC-005 §21 RECONCILE). Synthesized pages are never auto-rewritten
+headless, and provenance is sticky (a removed source's id is retained for
+audit; liveness is computed). **Actual deletion is an explicit orchestration
+or human action**, never performed headless.
 
 ------------------------------------------------------------------------
 
