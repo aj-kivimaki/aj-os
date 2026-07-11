@@ -12,6 +12,7 @@ import type { SourceRecord } from "../../ingestion/index.js";
 
 import type { CompiledPage } from "./KnowledgeCompiler.js";
 import type { SourceExtraction } from "./extraction.js";
+import { serializePage } from "./regions.js";
 
 /** Kebab-case slug for a page filename / wiki-link. */
 export function slugify(name: string): string {
@@ -33,8 +34,8 @@ function yamlString(value: string): string {
   return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
-function frontmatter(lines: readonly string[]): string {
-  return ["---", ...lines, "---"].join("\n");
+function frontmatterText(lines: readonly string[]): string {
+  return lines.join("\n");
 }
 
 function sourcesBlock(sources: readonly string[]): string[] {
@@ -83,8 +84,8 @@ export function renderPages(
       kind: "entity",
       title,
       sources: provenance,
-      content: [
-        frontmatter([
+      content: serializePage(
+        frontmatterText([
           "type: entity",
           `title: ${yamlString(title)}`,
           `entity_type: ${item.type}`,
@@ -93,12 +94,12 @@ export function renderPages(
           `updated: ${date}`,
           `generated_at: ${generatedAt}`,
         ]),
-        "",
-        item.description,
-        "",
-        `Source: [[${summaryLink}|${extraction.summary.title}]]`,
-        "",
-      ].join("\n"),
+        [
+          item.description,
+          "",
+          `Source: [[${summaryLink}|${extraction.summary.title}]]`,
+        ].join("\n"),
+      ),
     });
   }
 
@@ -110,8 +111,8 @@ export function renderPages(
       kind: "concept",
       title,
       sources: provenance,
-      content: [
-        frontmatter([
+      content: serializePage(
+        frontmatterText([
           "type: concept",
           `title: ${yamlString(title)}`,
           ...sourcesBlock(provenance),
@@ -119,28 +120,27 @@ export function renderPages(
           `updated: ${date}`,
           `generated_at: ${generatedAt}`,
         ]),
-        "",
-        item.description,
-        "",
-        `Source: [[${summaryLink}|${extraction.summary.title}]]`,
-        "",
-      ].join("\n"),
+        [
+          item.description,
+          "",
+          `Source: [[${summaryLink}|${extraction.summary.title}]]`,
+        ].join("\n"),
+      ),
     });
   }
 
   // Source summary page — links out to every entity and concept, and to the
   // origin document (full-path form) for provenance.
+  const summaryFrontmatter = frontmatterText([
+    "type: source",
+    `title: ${yamlString(extraction.summary.title)}`,
+    ...sourcesBlock(provenance),
+    `hash: ${source.hash}`,
+    `created: ${date}`,
+    `updated: ${date}`,
+    `generated_at: ${generatedAt}`,
+  ]);
   const body: string[] = [
-    frontmatter([
-      "type: source",
-      `title: ${yamlString(extraction.summary.title)}`,
-      ...sourcesBlock(provenance),
-      `hash: ${source.hash}`,
-      `created: ${date}`,
-      `updated: ${date}`,
-      `generated_at: ${generatedAt}`,
-    ]),
-    "",
     ...extraction.summary.keyPoints.map((point) => `- ${point}`),
   ];
   if (entities.length > 0) {
@@ -161,19 +161,14 @@ export function renderPages(
       ),
     );
   }
-  body.push(
-    "",
-    "## Source",
-    `[[${relativeNoExt}|${extraction.summary.title}]]`,
-    "",
-  );
+  body.push("", "## Source", `[[${relativeNoExt}|${extraction.summary.title}]]`);
 
   pages.push({
     path: summaryPath,
     kind: "source",
     title: extraction.summary.title,
     sources: provenance,
-    content: body.join("\n"),
+    content: serializePage(summaryFrontmatter, body.join("\n")),
   });
 
   return pages;

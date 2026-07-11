@@ -21,3 +21,21 @@ export {
 } from "./extraction.js";
 export { renderPages, slugify } from "./render.js";
 export { buildCompilePrompt } from "./prompt.js";
+export {
+  createLlmMergeEngine,
+  type MergeEngine,
+  type MergeOutcome,
+  type MergeMode,
+  type MergeProposal,
+} from "./merge.js";
+export {
+  parsePage,
+  serializePage,
+  readFrontmatter,
+  extractLinks,
+  extractCallouts,
+  GENERATED_BEGIN,
+  GENERATED_END,
+  type ParsedPage,
+  type Frontmatter,
+} from "./regions.js";
