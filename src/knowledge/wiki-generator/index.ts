@@ -1,6 +1,10 @@
 /**
- * Wiki Generator contracts — SPEC-005.
+ * Wiki Generator contract and implementation — SPEC-005.
  */
+export {
+  createWikiGenerator,
+  WikiGeneratorError,
+} from "./createWikiGenerator.js";
 export type {
   WikiGenerator,
   WikiGeneratorConfig,
