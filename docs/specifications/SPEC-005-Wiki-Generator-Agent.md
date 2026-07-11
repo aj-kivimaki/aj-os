@@ -1,321 +1,353 @@
-# SPEC-005 --- Wiki Generator Agent
+# SPEC-005 — Wiki Generator Agent
 
-**Specification ID:** SPEC-005 **Version:** 1.0 **Status:** Draft
-**Owner:** AJ-OS **Related Standards:** AJS-001, AJS-002, AJS-003,
-AJS-004, AJS-005, AJS-006 **Related Specifications:** SPEC-000,
-SPEC-002, SPEC-004
+**Specification ID:** SPEC-005 **Version:** 2.0 **Status:** Draft
+**Owner:** AJ-OS **Related Standards:** AJS-002, AJS-003, AJS-004,
+AJS-005, AJS-006 **Related Specifications:** SPEC-002, SPEC-003, SPEC-006,
+SPEC-007 **Related Architecture:** ARCH-002 **Related Decisions:** ADR-002
+**Last Updated:** 2026-07-11
 
-------------------------------------------------------------------------
+> **v2.0 note:** This specification was rewritten under ADR-002. The wiki
+> is now a **persistent but recoverable** artifact (not disposable), the
+> generator is **source- and destination-agnostic**, and **version control
+> is an orchestration concern** — the generator never commits.
+
+---
 
 # 1. Overview
 
 ## Purpose
 
-Generate the AI-optimized LLM Wiki from approved handbook knowledge.
-
-The Wiki Generator Agent transforms canonical handbook content into a
-structured representation optimized for retrieval by the Context
-Builder.
+Maintain the LLM Wiki: an incrementally-compiled, interlinked knowledge
+layer derived from curated sources and optimized for retrieval by the
+Context Builder.
 
 ## Scope
 
-Begins with approved handbook content and ends with a regenerated LLM
-Wiki and retrieval artifacts.
+Begins with normalized `SourceRecord`s (produced by Source Connectors,
+SPEC-006) and ends with an updated wiki persisted through the Wiki Store
+(SPEC-007). Covers the **INGEST**, **RECONCILE**, and **LINT** operations.
+
+The wiki is an incrementally-maintained knowledge artifact, **not a mirror
+of the current source set**: removing a source does not remove the
+knowledge derived from it (ADR-002).
 
 ## Goals
 
--   Publish approved knowledge.
--   Generate deterministic wiki output.
--   Keep the wiki synchronized with the handbook.
--   Produce AI-friendly knowledge units.
--   Regenerate the wiki at any time.
+- Keep the wiki current with its sources through **incremental** updates.
+- Produce AI-friendly, interlinked knowledge pages with provenance.
+- Detect and surface contradictions rather than silently overwriting.
+- Operate headless and idempotently.
+- Remain independent of any specific source backend or destination store.
 
 ## Non-Goals
 
--   Edit handbook content.
--   Create new canonical knowledge.
--   Review handbook updates.
+- Edit source (Handbook) content or create new canonical knowledge.
+- Review what enters the Handbook (that is SPEC-004).
+- Perform version control / git operations (that is orchestration,
+  AJS-005).
+- **Autonomously delete wiki pages.** Removal is *proposed*, never
+  performed headless; page deletion is an orchestration/human action
+  (§9, §10).
+- Know about "Handbook" specifically — sources and destination are
+  configuration.
 
-------------------------------------------------------------------------
+---
 
 # 2. Functional Requirements
 
 The agent SHALL:
 
-1.  Read approved handbook content.
-2.  Detect changed handbook entries.
-3.  Transform handbook entries into wiki pages.
-4.  Generate atomic knowledge units.
-5.  Build cross-references.
-6.  Generate retrieval metadata.
-7.  Validate the generated wiki.
-8.  Publish the updated wiki.
+1. Accept a set of normalized `SourceRecord`s from one or more Source
+   Connectors.
+2. Detect changed/new/removed sources by **content hash**; skip unchanged
+   sources (idempotency).
+3. **INGEST** added/modified sources: compile their knowledge into wiki
+   pages (`sources/`, `entities/`, `concepts/`) and update `index.md`,
+   `overview.md`.
+4. Build and maintain cross-references (`[[wikilinks]]`) and provenance:
+   every generated page records **all** contributing source IDs in its
+   frontmatter.
+5. Maintain a **reverse index** (source ID → contributing pages) so a
+   changed or removed source re-evaluates only affected pages, not the
+   whole wiki. The index is generator-owned state persisted via the Store.
+6. **RECONCILE** removed (or moved) sources: use the reverse index to
+   locate affected pages and re-evaluate each — update, mark **stale**,
+   merge, or *propose* removal. Pages are never deleted headless.
+7. Surface conflicts with prior wiki content as warnings; never silently
+   overwrite accumulated knowledge.
+8. **LINT**: detect contradictions, orphans, stale claims, and wiki pages
+   whose hash drifted from the last generated state (accidental
+   hand-edits).
+9. Write all output exclusively through the Wiki Store (SPEC-007).
+10. Append a provenance-stamped entry to the generation log per run.
 
-------------------------------------------------------------------------
+---
 
 # 3. Non-Functional Requirements
 
--   Deterministic
--   Regenerable
--   Idempotent
--   Explainable
--   Observable
--   Model-agnostic
+- **Incremental** — normal operation updates only changed knowledge.
+- **Idempotent** — re-running with unchanged sources is a no-op.
+- **Recoverable** — supports a full rebuild as a bootstrap/recovery path;
+  this is lossy and non-deterministic and is not the routine mode
+  (ADR-002).
+- **Persistent** — the wiki is durable accumulated state, not a disposable
+  build artifact.
+- **Explainable / Observable** — every run is logged and diff-reviewable.
+- **Source-agnostic / Destination-agnostic** — no coupling to a specific
+  backend or store.
+- **Model-agnostic** — no dependency on a specific LLM provider.
 
-------------------------------------------------------------------------
+---
 
 # 4. User Stories
 
--   As AJ, I want my handbook automatically published for AI use.
--   As the Context Builder, I want a searchable, AI-optimized wiki.
--   As AJ-OS, I want handbook changes reflected in the wiki without
-    manual effort.
+- As AJ, I want my curated knowledge continuously compiled into a wiki I
+  can browse in Obsidian, without maintaining it by hand.
+- As the Context Builder, I want an interlinked, retrieval-optimized wiki
+  with stable provenance.
+- As AJ-OS, I want source changes reflected in the wiki automatically,
+  incrementally, and idempotently.
 
-------------------------------------------------------------------------
+---
 
 # 5. Architecture Overview
 
-``` text
-Approved Handbook
+```text
+SourceRecord[]  (from Source Connectors, SPEC-006)
         │
         ▼
 Wiki Generator
-        │
-        ├── Parser
-        ├── Knowledge Unit Builder
+        ├── Change Detector      (hash diff → added/modified/removed)
+        ├── Ingestor             (INGEST: compile added/modified → pages)
+        ├── Reconciler           (RECONCILE: removed/moved → re-evaluate affected pages)
         ├── Cross-reference Builder
-        ├── Metadata Generator
-        ├── Validation
-        └── Publisher
+        ├── Provenance Stamper    (frontmatter sources[] + reverse index + log entry)
+        └── Linter               (LINT: contradictions, orphans, stale, drift)
+                │  writes via
+                ▼
+        Wiki Store (SPEC-007)  →  handbook/wiki/  (persistent)
                 │
                 ▼
-Generated LLM Wiki
-        │
-        ▼
-Retrieval / Context Builder
+        Retrieval / Context Builder (SPEC-002)
 ```
 
-------------------------------------------------------------------------
+The generator holds no filesystem-location or git knowledge. Location is
+owned by the Wiki Store; committing is owned by orchestration.
+
+---
 
 # 6. Triggers
 
--   Handbook update approved
--   Manual regeneration
--   Scheduled rebuild
--   Release workflow
+- Source change detected (headless, e.g. via n8n file-change trigger).
+- Scheduled LINT / refresh.
+- Manual regeneration (recovery/bootstrap).
+- End-of-Session or release workflow (SPEC-003).
 
-------------------------------------------------------------------------
+Triggering and post-run commit policy are owned by orchestration (AJS-005),
+not by this agent.
+
+---
 
 # 7. Inputs
 
 Required:
 
--   Approved handbook
--   Configuration
+- `SourceRecord[]` (normalized; each carries id, uri, content, hash,
+  metadata).
+- Configuration (destination handle, prompt/schema assets, run mode).
 
 Optional:
 
--   Changed files only
--   Full rebuild flag
--   Publication profile
+- Full-rebuild flag (recovery/bootstrap).
+- Subset filter (changed sources only).
 
-------------------------------------------------------------------------
+Validation:
+
+- Configuration MUST satisfy `destination ∉ sources`.
+
+---
 
 # 8. Outputs
 
 Primary:
 
--   Generated LLM Wiki
+- Updated wiki pages, persisted via the Wiki Store.
 
 Secondary:
 
--   Knowledge units
--   Search metadata
--   Cross-reference index
--   Build report
--   Validation report
--   Generation log
+- Updated `index.md`, `overview.md`.
+- Provenance-stamped `log.md` entry (generator version + schema/prompt
+  hash + run id).
+- LINT report (contradictions, orphans, stale claims, hash-drift).
 
-------------------------------------------------------------------------
+The generator does **not** produce commits.
+
+---
 
 # 9. Workflow
 
-1.  Detect handbook changes.
-2.  Load canonical entries.
-3.  Parse handbook.
-4.  Generate knowledge units.
-5.  Build relationships.
-6.  Generate metadata.
-7.  Validate output.
-8.  Publish wiki.
-9.  Notify completion.
+1. Receive `SourceRecord[]` and configuration.
+2. Validate configuration (`destination ∉ sources`).
+3. Detect changes by content hash → classify as added / modified /
+   removed.
+4. INGEST added/modified sources → compile knowledge into pages.
+5. RECONCILE removed/moved sources → via the reverse index, re-evaluate
+   affected pages (update / mark stale / merge / propose removal).
+6. Build/refresh cross-references, page provenance, and the reverse index.
+7. Emit warnings on conflict (no silent overwrite).
+8. Run LINT.
+9. Persist changes through the Wiki Store; append the log entry.
+10. Return a run report — including any removal proposals — to the caller
+    (orchestration decides on deletion and commit).
 
-------------------------------------------------------------------------
+---
 
-# 10. AJ-OS Agent Responsibilities
+# 10. Agent Responsibilities
 
--   Read handbook
--   Parse content
--   Build wiki pages
--   Generate metadata
--   Validate output
--   Publish generated artifacts
+- Read normalized sources (never raw backends directly).
+- Compile knowledge into interlinked wiki pages.
+- Maintain provenance and cross-references.
+- Detect contradictions and drift.
+- Write only through the Wiki Store.
 
-------------------------------------------------------------------------
+Explicitly **not** responsible for: reading specific backends, choosing
+where the wiki lives, or committing to version control.
+
+---
 
 # 11. Data Flow
 
-``` text
-Handbook
-    ↓
-Parser
-    ↓
-Knowledge Units
-    ↓
-Cross References
-    ↓
-Metadata
-    ↓
-Generated Wiki
-    ↓
-Context Builder
+```text
+Sources → Source Connector → SourceRecord → Wiki Generator
+       → wiki pages → Wiki Store → handbook/wiki/ → Retrieval → Context Builder
 ```
 
-------------------------------------------------------------------------
+---
 
 # 12. State Model
 
-Requested ↓ Loading ↓ Parsing ↓ Generating ↓ Validating ↓ Publishing ↓
-Completed
+Run state:
 
-------------------------------------------------------------------------
+```text
+Received → Validating → DetectingChanges → Ingesting → Reconciling
+        → CrossReferencing → Linting → Persisting → Reported
+```
 
-# 13. Interfaces
+Wiki page lifecycle:
 
-Consumes:
+```text
+active ⇄ stale        (stale = all/again-uncertain sources; set by RECONCILE/LINT)
+active/stale → removed  (explicit orchestration/human action only — never headless)
+```
 
--   Handbook
--   Standards
--   Configuration
+---
 
-Produces:
-
--   Generated Wiki
--   Retrieval metadata
--   Build reports
--   Validation reports
-
-------------------------------------------------------------------------
-
-# 14. Configuration
+# 13. Configuration
 
 Configurable:
 
--   Output format
--   Chunk size
--   Metadata schema
--   Cross-reference rules
--   Publication profile
--   Full vs incremental rebuild
+- Destination store handle (SPEC-007).
+- Source set (SPEC-006).
+- Run mode: incremental (default) | full-rebuild (recovery).
+- Prompt/schema profile.
+- LINT rule set / thresholds.
 
-------------------------------------------------------------------------
+---
 
-# 15. Error Handling
+# 14. Error Handling
 
 Recoverable:
 
--   Invalid handbook entry
--   Missing metadata
--   Partial generation failure
+- Invalid or unparseable source record → skip + report.
+- Conflict with existing page → warning callout, keep prior knowledge.
+- Partial ingest failure → persist succeeded pages, report failures.
 
 Fatal:
 
--   Handbook unavailable
--   Corrupted configuration
--   Publication failure
+- Destination store unavailable.
+- Configuration invalid (`destination ∩ sources ≠ ∅`, missing assets).
 
-------------------------------------------------------------------------
+---
 
-# 16. Logging & Observability
+# 15. Logging & Observability
 
-Record:
+Record per run:
 
--   Entries processed
--   Knowledge units generated
--   Build duration
--   Validation results
--   Publication status
--   Errors
+- Sources processed / skipped (by hash).
+- Pages created / updated.
+- Cross-references built.
+- LINT results (including hash-drift/hand-edit findings).
+- Generator provenance (version + schema/prompt hash + run id).
+- Duration and errors.
 
-------------------------------------------------------------------------
+---
 
-# 17. Security & Permissions
+# 16. Security & Permissions
 
 Read:
 
--   Handbook
--   Standards
--   Configuration
+- Normalized sources (via connectors).
+- Configuration and prompt assets.
 
 Write:
 
--   Generated wiki
--   Retrieval artifacts
--   Build logs
+- Wiki destination (via the Wiki Store), path-guarded to the configured
+  destination only.
 
-Must never modify handbook content.
+MUST NOT: modify source content, write outside the destination, or perform
+git operations.
 
-------------------------------------------------------------------------
+---
 
-# 18. Testing Strategy
+# 17. Testing Strategy
 
 Unit:
 
--   Parsing
--   Knowledge unit generation
--   Metadata generation
+- Change detection (hash diff).
+- INGEST page compilation.
+- Cross-reference and provenance generation.
+- LINT rules (including hash-drift detection).
 
 Integration:
 
--   Full handbook-to-wiki generation
+- Full source-set → wiki generation against a **fixture vault** (never the
+  real one).
+- Idempotency: second run over unchanged sources produces no writes.
 
 Acceptance:
 
--   Wiki generated successfully
--   Output validates
--   Handbook unchanged
--   Retrieval artifacts generated
+- Wiki updated incrementally from changed sources.
+- Contradictions surfaced, not silently overwritten.
+- Sources remain unchanged.
+- No git operations performed by the agent.
 
-------------------------------------------------------------------------
+---
 
-# 19. Acceptance Criteria
+# 18. Acceptance Criteria
 
--   [ ] Generated wiki created.
--   [ ] Knowledge units generated.
--   [ ] Cross-references built.
--   [ ] Retrieval metadata generated.
--   [ ] Validation completed.
--   [ ] Handbook remains unchanged.
+- [ ] Incremental INGEST updates only changed knowledge.
+- [ ] Unchanged sources are skipped (idempotent).
+- [ ] Cross-references and provenance are maintained.
+- [ ] Contradictions and hash-drift are reported by LINT.
+- [ ] All writes go through the Wiki Store; none bypass it.
+- [ ] The agent performs no git operations.
+- [ ] Sources remain unmodified.
 
-------------------------------------------------------------------------
+---
 
-# 20. Future Enhancements
+# 19. Future Enhancements
 
--   Incremental regeneration
--   Multi-language wiki generation
--   Embedding generation
--   Semantic graph generation
--   Search quality metrics
--   Multiple publication targets
+- Embedding / semantic-graph generation over the compiled wiki.
+- Multiple destination profiles / multiple knowledge outputs.
+- Multi-language wiki generation.
+- Retrieval-quality metrics feeding LINT.
 
-------------------------------------------------------------------------
+---
 
-# 21. Notes
+# 20. Notes
 
-The Wiki Generator Agent publishes canonical handbook knowledge for AI
-consumption.
-
-The handbook remains the single source of truth.
-
-The generated LLM Wiki is a disposable artifact that can always be
-regenerated from approved handbook content.
+The Handbook remains the single source of truth. The wiki is a
+**persistent but recoverable** derived artifact, maintained exclusively by
+this agent and hosted in the Handbook vault (ADR-002). Full regeneration
+exists as a recovery/bootstrap path only; routine maintenance is
+incremental.

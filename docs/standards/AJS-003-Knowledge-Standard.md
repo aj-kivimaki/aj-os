@@ -1,6 +1,10 @@
 # AJS-003 --- Knowledge Standard
 
-**Status:** Draft v1.0
+**Status:** Draft v1.1
+
+> **Amended by ADR-002 (2026-07-11).** The LLM Wiki is **persistent but
+> recoverable**, not disposable. It is hosted in the Handbook vault but
+> produced solely by AJ-OS. See §3 and Domain 3 below.
 
 ## Purpose
 
@@ -39,20 +43,24 @@ Everything else is either:
 
 ------------------------------------------------------------------------
 
-## 3. Generated Artifacts Are Disposable
+## 3. Generated Artifacts Are Derived
 
-Generated artifacts are outputs, not sources of truth.
+Generated artifacts are outputs, not sources of truth. Most are
+**disposable** and can be regenerated freely:
 
-Examples:
-
--   LLM Wiki
 -   Embeddings
 -   Search indexes
 -   Context Packages
 -   Session summaries
 -   AI suggestions
 
-If they become outdated or corrupted, regenerate them from the handbook.
+The **LLM Wiki is the exception**: it is **persistent but recoverable**
+(ADR-002). It is incrementally maintained and committed, because LLM
+compilation accumulates integration decisions that a from-scratch rebuild
+would not reproduce identically. The Handbook remains the single source of
+truth — no *canonical* knowledge lives only in the wiki — so full
+regeneration is retained as a **recovery/bootstrap** path, but it is lossy
+and not routine.
 
 ------------------------------------------------------------------------
 
@@ -137,13 +145,16 @@ Provide an AI-optimized representation of handbook knowledge.
 
 Characteristics:
 
--   Generated automatically
--   Read-only
--   Disposable
--   Regenerable
+-   Generated automatically by AJ-OS (sole producer; SPEC-005)
+-   Hosted in the Handbook vault, browsable in Obsidian (location ≠
+    ownership; ADR-002)
+-   Read-only to humans — generator-owned; never hand-edited
+-   Incrementally maintained
+-   Persistent but recoverable (committed; full rebuild is recovery only)
 -   Optimized for retrieval
 
-The wiki is never edited directly.
+The wiki is never edited directly. Accidental hand-edits are surfaced by
+LINT (hash drift), not silently preserved.
 
 ------------------------------------------------------------------------
 

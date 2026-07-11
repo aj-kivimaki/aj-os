@@ -1,6 +1,10 @@
 # AJS-006 --- Knowledge Governance Standard
 
-**Status:** Draft v1.0
+**Status:** Draft v1.1
+
+> **Amended by ADR-002 (2026-07-11).** Generated outputs are non-authoritative,
+> but the LLM Wiki is **persistent but recoverable**, not freely disposable.
+> See Principle 2.
 
 ## Purpose
 
@@ -26,19 +30,26 @@ Changes require review before becoming permanent.
 
 ------------------------------------------------------------------------
 
-## 2. Generated Artifacts Are Disposable
+## 2. Generated Artifacts Are Non-Authoritative
 
-Generated outputs are never authoritative.
+Generated outputs are never the source of truth; the Handbook is.
 
-Examples:
+Freely disposable outputs (regenerated at any time):
 
--   LLM Wiki
 -   Context Packages
 -   Embeddings
 -   Search indexes
 -   AI summaries
 
-They may be regenerated at any time.
+The **LLM Wiki** is non-authoritative but **persistent but recoverable**
+(ADR-002): it is incrementally maintained and committed, and full
+regeneration is a lossy recovery/bootstrap path, not a routine operation.
+
+Wiki page lifecycle is governed: a page is `active` or `stale`. Source
+removal never deletes derived knowledge automatically — the headless
+generator marks pages `stale` or *proposes* removal (SPEC-005 RECONCILE);
+**actual deletion is an explicit orchestration or human action**, never
+performed headless.
 
 ------------------------------------------------------------------------
 

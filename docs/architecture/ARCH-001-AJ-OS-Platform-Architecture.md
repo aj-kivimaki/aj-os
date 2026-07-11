@@ -1,9 +1,16 @@
 # ARCH-001 --- AJ-OS Platform Architecture
 
 **Architecture ID:** ARCH-001\
-**Version:** 1.0\
+**Version:** 1.1\
 **Status:** Draft\
 **Owner:** AJ-OS
+
+> **Amended by ADR-002 (2026-07-11).** The Knowledge Layer is detailed in
+> **ARCH-002 — Knowledge Platform Architecture**. Per ADR-002, the LLM
+> Wiki is **persistent but recoverable** (not disposable), AJ-OS is its
+> sole producer while it is hosted in the Handbook vault, the generator is
+> source/destination-agnostic, and version control belongs to
+> orchestration. Sections below are updated accordingly.
 
 ------------------------------------------------------------------------
 
@@ -29,7 +36,12 @@ human review, and AI-assisted automation.
 # 3. Architectural Principles
 
 -   Handbook is the single source of truth.
--   Generated artifacts are disposable.
+-   Generated artifacts are derived; most are disposable, but the LLM Wiki
+    is **persistent but recoverable** (ADR-002).
+-   Location and production ownership are separable: the wiki is hosted in
+    the Handbook vault but produced solely by AJ-OS.
+-   The knowledge engine is source- and destination-agnostic.
+-   Version control belongs to orchestration, not to knowledge components.
 -   Standards govern the platform.
 -   Specifications define implementations.
 -   Services are composed from small agents.
@@ -102,16 +114,23 @@ Candidate Knowledge
       ↓
 Knowledge Review
       ↓
-Handbook
+Handbook (sources: foundation/ + library/)
       ↓
-Wiki Generator
+Source Connector  (SPEC-006)
       ↓
-Generated Wiki
+Wiki Generator    (SPEC-005)
+      ↓
+Wiki Store        (SPEC-007)
+      ↓
+Generated Wiki (persistent; hosted in Handbook)
       ↓
 Context Builder
       ↓
 Coding Agent
 ```
+
+The detailed knowledge-engine architecture (Source Connector → Wiki
+Generator → Wiki Store → Retrieval → Context) is specified in **ARCH-002**.
 
 ------------------------------------------------------------------------
 
@@ -152,6 +171,8 @@ Coding Agent
 -   SPEC-003 --- End-of-Session Workflow
 -   SPEC-004 --- Knowledge Review Workflow
 -   SPEC-005 --- Wiki Generator Agent
+-   SPEC-006 --- Source Connector
+-   SPEC-007 --- Wiki Store
 
 ------------------------------------------------------------------------
 
@@ -239,6 +260,11 @@ Potential future additions include:
 # 14. Relationship to Other Documents
 
 ARCH-001 is the architectural overview.
+
+ARCH-002 details the Knowledge Layer (ingestion → wiki → retrieval →
+context).
+
+ADR-002 records the wiki ownership, location, and persistence decisions.
 
 AJS documents define platform rules.
 

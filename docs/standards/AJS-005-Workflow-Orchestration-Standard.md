@@ -1,6 +1,11 @@
 # AJS-005 --- Workflow Orchestration Standard
 
-**Status:** Draft v1.0
+**Status:** Draft v1.1
+
+> **Amended by ADR-002 (2026-07-11).** Version control (git commit/push) is
+> an **orchestration responsibility**. Knowledge components — the Wiki
+> Generator (SPEC-005) and Wiki Store (SPEC-007) — never perform git
+> operations. See Principle 7.
 
 ## Purpose
 
@@ -78,6 +83,27 @@ Whenever possible:
 
 Human approval should be required whenever permanent knowledge is
 created or modified, unless explicitly configured otherwise.
+
+Applied to the wiki: human approval governs what enters the **Handbook**
+(the canonical sources). Wiki *generation* from approved sources is the
+"explicitly configured otherwise" case and runs **headless**, protected by
+generator guardrails (no silent overwrite, LINT, hash-drift detection,
+provenance) rather than per-change approval.
+
+------------------------------------------------------------------------
+
+## 7. Version Control Is an Orchestration Concern
+
+Committing generated changes is decided by workflows, never by knowledge
+components.
+
+- The Wiki Generator (SPEC-005) and Wiki Store (SPEC-007) **write files but
+  never call git**.
+- Orchestration (this standard, SPEC-003 End-of-Session, n8n, or a CLI
+  command) decides **whether and when** to commit.
+- This enables experimenting without dozens of commits, batching multiple
+  wiki updates into one commit, and reviewing diffs before committing —
+  without changing the compiler.
 
 ------------------------------------------------------------------------
 
