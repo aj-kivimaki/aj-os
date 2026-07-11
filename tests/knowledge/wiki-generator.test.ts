@@ -120,7 +120,8 @@ describe("WikiGenerator.run (minimal slice)", () => {
     await generator().run();
 
     expect(await store.read("log.md")).toBe(
-      "2026-01-02T03:04:05.000Z generator=v1 mode=incremental ingested=1 pages=1\n",
+      "2026-01-02T03:04:05.000Z generator=v1 mode=incremental " +
+        "ingested=1 pages=1 reconciled=0 stale=0 proposals=0\n",
     );
   });
 
@@ -170,20 +171,6 @@ describe("WikiGenerator.run (minimal slice)", () => {
     ]);
   });
 
-  it("does not touch pages for a removed source (no RECONCILE yet)", async () => {
-    await writeSource("library/a.md", "a");
-    await writeSource("library/gone.md", "bye");
-    await generator().run();
-
-    await removeFile(join(sourceRoot, "library/gone.md"));
-    const report = await generator().run();
-
-    expect(report.ingested).toEqual([]);
-    // The page survives — removal is deferred to a later RECONCILE slice.
-    expect(await store.read("sources/library/gone.md")).toContain("bye");
-    expect(await store.list()).toContain("sources/library/gone.md");
-  });
-
   it("throws on duplicate source ids across connectors", async () => {
     await writeSource("library/a.md", "a");
     const twin = createFilesystemSourceConnector({
@@ -202,5 +189,103 @@ describe("WikiGenerator.run (minimal slice)", () => {
     await store.write(".generator/state.json", "{ not json");
 
     await expect(generator().run()).rejects.toBeInstanceOf(WikiGeneratorError);
+  });
+});
+
+describe("WikiGenerator RECONCILE (1:1 source pages)", () => {
+  it("marks an orphaned page stale with sticky provenance and preserved body", async () => {
+    await writeSource("library/keep.md", "keep");
+    await writeSource("library/gone.md", "important knowledge");
+    await generator().run();
+
+    await removeFile(join(sourceRoot, "library/gone.md"));
+    const report = await generator().run();
+
+    expect(report.reconciled).toEqual(["handbook:library/gone.md"]);
+    expect(report.stalePages).toEqual(["sources/library/gone.md"]);
+    expect(report.ingested).toEqual([]);
+
+    const page = (await store.read("sources/library/gone.md"))!;
+    expect(page).toContain("status: stale");
+    expect(page).toContain("stale_reason: orphaned");
+    expect(page).toContain("stale_since: 2026-01-02T03:04:05.000Z");
+    // Sticky provenance: the removed source id is retained.
+    expect(page).toContain("  - handbook:library/gone.md");
+    // Body preserved.
+    expect(page).toContain("important knowledge");
+    // The page is NOT deleted.
+    expect(await store.list()).toContain("sources/library/gone.md");
+  });
+
+  it("emits a removal proposal for a fully-orphaned page", async () => {
+    await writeSource("library/gone.md", "bye");
+    await generator().run();
+
+    await removeFile(join(sourceRoot, "library/gone.md"));
+    const report = await generator().run();
+
+    expect(report.removalProposals).toEqual([
+      {
+        path: "sources/library/gone.md",
+        reason: "All contributing sources were removed.",
+        orphanedSources: ["handbook:library/gone.md"],
+      },
+    ]);
+  });
+
+  it("only affects the removed source's page, leaving others untouched", async () => {
+    await writeSource("library/a.md", "a");
+    await writeSource("library/b.md", "b");
+    await generator().run();
+
+    await removeFile(join(sourceRoot, "library/a.md"));
+    const report = await generator().run();
+
+    expect(report.stalePages).toEqual(["sources/library/a.md"]);
+    // b is unchanged and stays active (no status field).
+    expect(await store.read("sources/library/b.md")).not.toContain("status:");
+  });
+
+  it("drops the removed source from state and does not re-propose on reruns", async () => {
+    await writeSource("library/gone.md", "bye");
+    await generator().run();
+    await removeFile(join(sourceRoot, "library/gone.md"));
+    await generator().run(); // first reconcile
+
+    const second = await generator().run(); // rerun, same source state
+
+    expect(second.reconciled).toEqual([]);
+    expect(second.stalePages).toEqual([]);
+    expect(second.removalProposals).toEqual([]);
+
+    const state = JSON.parse(
+      (await store.read(".generator/state.json"))!,
+    ) as { sources: Record<string, unknown> };
+    expect("handbook:library/gone.md" in state.sources).toBe(false);
+  });
+
+  it("reactivates a page when its source returns (stale → active)", async () => {
+    await writeSource("library/x.md", "v1");
+    await generator().run();
+    await removeFile(join(sourceRoot, "library/x.md"));
+    await generator().run();
+    expect(await store.read("sources/library/x.md")).toContain("status: stale");
+
+    // Source returns.
+    await writeSource("library/x.md", "v2");
+    const report = await generator().run();
+
+    expect(report.ingested).toEqual(["handbook:library/x.md"]);
+    const page = (await store.read("sources/library/x.md"))!;
+    expect(page).not.toContain("status: stale");
+    expect(page).toContain("v2");
+  });
+
+  it("reports nothing to reconcile when no sources were removed", async () => {
+    await writeSource("library/a.md", "a");
+    const report = await generator().run();
+
+    expect(report.reconciled).toEqual([]);
+    expect(report.removalProposals).toEqual([]);
   });
 });
