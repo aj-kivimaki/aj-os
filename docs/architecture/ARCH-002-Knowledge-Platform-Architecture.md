@@ -7,7 +7,7 @@
 **Related Architecture:** ARCH-001\
 **Related Standards:** AJS-002, AJS-003, AJS-005, AJS-006\
 **Related Specifications:** SPEC-002, SPEC-005, SPEC-006, SPEC-007\
-**Related Decisions:** ADR-002, ADR-003
+**Related Decisions:** ADR-002, ADR-003, ADR-004
 
 ---
 
@@ -112,10 +112,15 @@ These MUST hold across all implementations:
 9. **Provenance is mandatory.** Every generated page records all
    contributing source IDs, and the generator maintains a reverse index
    (source ID → pages) so changed/removed sources re-evaluate only the
-   affected pages.
+   affected pages. MERGE only widens provenance (monotonic); RECONCILE keeps
+   removed ids sticky (ADR-004, ADR-003).
 10. **Source identity is stable and namespaced.** A `SourceRecord.id` is
     stable across content edits and globally namespaced by connector;
     `hash` is a separate change signal.
+11. **Merge enriches, never replaces.** When a new source touches an
+    existing entity/concept page, the merged page is richer than before;
+    human-owned regions are never rewritten; the Wiki is the sole knowledge
+    artifact — no separate claim store (ADR-004).
 
 ---
 

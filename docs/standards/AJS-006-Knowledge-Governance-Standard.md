@@ -45,6 +45,13 @@ The **LLM Wiki** is non-authoritative but **persistent but recoverable**
 (ADR-002): it is incrementally maintained and committed, and full
 regeneration is a lossy recovery/bootstrap path, not a routine operation.
 
+Knowledge accumulates by **enrichment**, not replacement (ADR-004): when a
+new source touches an existing entity/concept page, MERGE leaves it **richer
+than before** — provenance widens (monotonic + sticky), contradictions are
+surfaced and retained as callouts (never auto-resolved), and the
+**human-owned region is never rewritten**. The Wiki itself is the sole
+knowledge artifact; there is no separate claim store.
+
 Wiki page lifecycle is governed by ADR-003: a page is `active` or `stale`.
 Source removal never deletes derived knowledge automatically — the headless
 generator marks pages `stale` (with reason: `source-modified`,

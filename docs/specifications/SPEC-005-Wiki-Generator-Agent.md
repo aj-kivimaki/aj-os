@@ -537,23 +537,52 @@ generated_at: <iso-timestamp>
 ---
 ```
 
-## 22.7 MERGE — accumulation across sources (requirement)
+## 22.7 MERGE — accumulation across sources (ADR-004)
 
 When a new source introduces an entity/concept that **already has a page**,
-INGEST MUST **enrich** that page, never replace it:
+INGEST **enriches** that page rather than replacing or duplicating it.
+Governing rule: **every successful merge leaves the page richer than
+before.** The Wiki is the sole knowledge artifact — MERGE reads the existing
+*page* + the new extraction; there is **no separate claim store** (ADR-004).
 
-- add the new claims/links; extend `sources` with the new id; bump
-  `updated`.
-- **Never silently discard accumulated knowledge** (the core invariant that
-  separates an LLM Wiki from a summarizer).
-- Surface any contradiction with existing content as a
-  `> [!warning] Contradiction` callout naming both claims, their sources,
-  and the date — never silently choose one.
+Scope: `entities/` and `concepts/` pages. `sources/` pages stay 1:1;
+`overview.md`/`index.md` evolve by their own rules (§22.8).
 
-> MERGE is the **defining accumulation behavior**. Its detailed policy and
-> implementation are designed next, **before** the compiler is wired into
-> `WikiGenerator.run()`. Until then INGEST compiles single sources; this
-> subsection states the required behavior the MERGE design must satisfy.
+**Default mode — guarded LLM re-synthesis.** The existing page and the new
+extraction are merged (via the Knowledge Compiler port) into one richer
+page. Enrichment is **validated, not proven**, against guards; a result that
+fails any guard is **never persisted**:
+
+- provenance superset (`sources[]` after ⊇ before);
+- link retention (every prior `[[wiki-link]]` retained, unless converted to
+  a contradiction);
+- contradiction retention (every existing `> [!warning]` callout retained);
+- no silent loss of supported knowledge;
+- no implausible collapse in size.
+
+**Human-owned vs generator-owned regions.** MERGE only rewrites the
+**generator-owned region**; a **human-owned region** is never touched
+(structural protection, long-term). Interim, a page that has **drifted from
+its last generated hash** is treated as human-owned and protected.
+
+**Fallback.** When re-synthesis is unsafe (human-owned/drifted page, or
+guards fail), MERGE never writes a lossy page and never touches human
+content: it **appends** the new knowledge losslessly into the generated
+region, or **defers** with a needs-merge proposal if even that isn't safe.
+
+**Contradictions** are surfaced as retained `> [!warning] Contradiction`
+callouts (both claims, both sources, date); never auto-resolved.
+
+**Identity** (which page receives the merge) is resolved behind the compiler
+port: **v1 = deterministic slug matching**; semantic matching is a future
+extension. When uncertain, MERGE prefers a **new page** over a wrong merge.
+
+Structural consequence: the reverse index generalizes to
+`source → [pages]`; the generator persists a per-page generated-content hash
+(bookkeeping in `.generator/`) for drift detection.
+
+> Status: policy settled (ADR-004); implementation is the next slice,
+> **before** the compiler is wired into `WikiGenerator.run()`.
 
 ## 22.8 overview.md & index.md
 
@@ -585,6 +614,7 @@ Append-only; one entry per operation:
   Anthropic compiler (extraction → deterministic render), single-source
   compilation, schema/rendering unit tests. `AIClient` gained a
   larger-budget `complete()`.
-- **Pending:** MERGE (§22.7), `overview.md`/`index.md`, contradiction
-  callouts, and integration into `WikiGenerator.run()` (the compiler is
-  proven standalone, not yet invoked by the generator).
+- **Pending:** MERGE (§22.7 — policy settled in ADR-004, implementation
+  next), `overview.md`/`index.md`, contradiction callouts, and integration
+  into `WikiGenerator.run()` (the compiler is proven standalone, not yet
+  invoked by the generator).

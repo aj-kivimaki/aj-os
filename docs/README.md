@@ -81,6 +81,7 @@ Architecture Decision Records:
 | `architecture/adr/ADR-001-Architecture-Freeze.md`   | Freeze the architecture before implementation |
 | `architecture/adr/ADR-002-Wiki-Ownership-and-Persistence.md` | Wiki ownership, location, and persistence |
 | `architecture/adr/ADR-003-Knowledge-Reconciliation-and-Page-Lifecycle.md` | Page lifecycle, staleness, and RECONCILE policy |
+| `architecture/adr/ADR-004-Knowledge-Merge-Policy.md` | Merge = enrichment; guards, human-owned regions, identity |
 
 Recommended reading order: ARCH-001 → ARCH-002 → the relevant SPECs.
 
