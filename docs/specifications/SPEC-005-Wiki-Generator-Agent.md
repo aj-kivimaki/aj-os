@@ -1,15 +1,21 @@
 # SPEC-005 — Wiki Generator Agent
 
-**Specification ID:** SPEC-005 **Version:** 2.0 **Status:** Draft
+**Specification ID:** SPEC-005 **Version:** 2.1 **Status:** Draft
 **Owner:** AJ-OS **Related Standards:** AJS-002, AJS-003, AJS-004,
 AJS-005, AJS-006 **Related Specifications:** SPEC-002, SPEC-003, SPEC-006,
-SPEC-007 **Related Architecture:** ARCH-002 **Related Decisions:** ADR-002
-**Last Updated:** 2026-07-11
+SPEC-007 **Related Architecture:** ARCH-002 **Related Decisions:** ADR-002,
+ADR-003 **Last Updated:** 2026-07-12
 
-> **v2.0 note:** This specification was rewritten under ADR-002. The wiki
-> is now a **persistent but recoverable** artifact (not disposable), the
-> generator is **source- and destination-agnostic**, and **version control
-> is an orchestration concern** — the generator never commits.
+> **v2.1 note:** SPEC-005 is now the **authoritative functional
+> specification for INGEST** (§22), folding in the historical
+> `handbook/wiki/CLAUDE.md` schema and the first real compilation slice.
+> Per ADR-002, `CLAUDE.md` remains in the vault only as a generator-owned
+> notice; this document leads the implementation.
+>
+> **v2.0 note:** Rewritten under ADR-002 — the wiki is **persistent but
+> recoverable** (not disposable), the generator is **source- and
+> destination-agnostic**, and **version control is an orchestration
+> concern** (the generator never commits).
 
 ---
 
@@ -63,7 +69,9 @@ The agent SHALL:
    sources (idempotency).
 3. **INGEST** added/modified sources: compile their knowledge into wiki
    pages (`sources/`, `entities/`, `concepts/`) and update `index.md`,
-   `overview.md`.
+   `overview.md`. Full compilation semantics — the LLM Wiki philosophy, the
+   Knowledge Compiler pipeline, the graph shape, and MERGE — are specified
+   in **§22 (authoritative)**.
 4. Build and maintain cross-references (`[[wikilinks]]`) and provenance:
    every generated page records **all** contributing source IDs in its
    frontmatter.
@@ -120,7 +128,8 @@ SourceRecord[]  (from Source Connectors, SPEC-006)
         ▼
 Wiki Generator
         ├── Change Detector      (hash diff → added/modified/removed)
-        ├── Ingestor             (INGEST: compile added/modified → pages)
+        ├── Ingestor             (INGEST: via Knowledge Compiler → pages; §22)
+        │      └── Knowledge Compiler  (LLM extraction → deterministic render)
         ├── Reconciler           (RECONCILE: removed/moved → re-evaluate affected pages)
         ├── Cross-reference Builder
         ├── Provenance Stamper    (frontmatter sources[] + reverse index + log entry)
@@ -413,17 +422,13 @@ remove + add.
 
 ## 21.5 Page frontmatter schema
 
+The canonical page frontmatter is defined in **§22.6**. RECONCILE adds the
+lifecycle fields on top of it:
+
 ```yaml
----
-type: source | entity | concept
-sources:            # all contributing source ids (sticky/historical)
-  - handbook:library/foo.md
-hash: <source-hash>            # for 1:1 source pages
 status: active | stale         # absent ⇒ active
 stale_reason: source-modified | partial-orphan | orphaned   # when stale
 stale_since: <iso-timestamp>                                # when stale
-generated_at: <iso-timestamp>
----
 ```
 
 ## 21.6 Report semantics
@@ -448,3 +453,138 @@ knowledge; provenance preserved (sticky); targeted & complete via the
 reverse index; deterministic & idempotent (no oscillation); reversible
 staleness; never a mirror; index/provenance rebuildable; every action
 reported and logged. (Full list: ADR-003.)
+
+---
+
+# 22. INGEST — Compilation Semantics (authoritative)
+
+> This section supersedes the historical `handbook/wiki/CLAUDE.md` as the
+> functional specification for INGEST. `CLAUDE.md` remains in the vault as a
+> generator-owned notice (ADR-002); SPEC-005 leads the implementation.
+
+## 22.1 Philosophy — an LLM Wiki, not a summarizer
+
+- INGEST **compiles** a source into knowledge; it does not mirror it. The
+  unit of knowledge is the **entity/concept**, not the document.
+- Compile once, then **queries read compiled pages and never reread the
+  sources** (unlike RAG).
+- **Grow the graph, not the file count**: prefer enriching an existing page
+  over creating a near-duplicate; cross-link liberally. A link to a
+  not-yet-created page is a valid TODO marker, not an error.
+
+## 22.2 Source layers (read-only)
+
+`foundation/` + `library/` are the authoritative, read-only sources
+(reached via Source Connectors, SPEC-006). The generator never edits them.
+Where a hierarchy applies, **Foundation overrides Library**; genuine
+conflicts are **surfaced** (§22.7), never silently resolved.
+
+## 22.3 Page types
+
+| Folder / file | Holds |
+|---|---|
+| `sources/<path>.md` | one summary page per ingested source (an entry point into the graph) |
+| `entities/<slug>.md` | proper nouns — people, organizations, places, products, tools |
+| `concepts/<slug>.md` | abstractions — ideas, topics, themes, methods |
+| `overview.md` | evolving top-level synthesis (the front door) |
+| `index.md` | content catalog of the whole wiki |
+| `log.md` | append-only run log |
+
+Entity vs. concept: **proper noun → entity; abstraction → concept.**
+
+## 22.4 The compilation pipeline
+
+`SourceRecord` → **Knowledge Compiler** → pages, in two stages:
+
+1. **LLM extraction (behind a port).** The model returns structured JSON —
+   `{ summary { title, keyPoints }, entities[{ name, type, description }],
+   concepts[{ name, description }] }` — validated against a schema. The
+   model **extracts knowledge; it does not format pages.**
+2. **Deterministic rendering.** The validated extraction is rendered to
+   pages — frontmatter (§22.6), kebab-case slugs, and `[[wiki-links]]`.
+
+Non-determinism is confined to stage 1; rendering and the page schema are
+deterministic and unit-tested. **Provider isolation:** the LLM is reached
+only through the platform AI client; the compiler and generator hold no
+provider detail (model-agnostic per §3).
+
+## 22.5 Graph shape
+
+- The **source summary** links out to every entity/concept it introduced,
+  and to the origin document in **full-path form** for provenance
+  (`[[foundation/04-aj-os/vision|Title]]`) — basenames can collide, so
+  provenance links use the path.
+- Each **entity/concept** page links back to its source summary.
+- Once MERGE exists (§22.7), entity/concept pages accumulate links and
+  provenance across the multiple sources that touch them.
+
+## 22.6 Canonical page frontmatter
+
+```yaml
+---
+type: source | entity | concept | overview
+title: Human Readable Title
+sources:                      # ALL contributing source ids (sticky, §21.4)
+  - handbook:foundation/04-aj-os/vision.md
+entity_type: person | organization | place | product | tool | other  # entity pages only
+hash: <source-hash>           # source pages only (1:1 change signal)
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+generated_at: <iso-timestamp>
+# lifecycle fields (§21) — added by RECONCILE, absent ⇒ active:
+# status / stale_reason / stale_since
+# tags: [kebab, topical]      # optional; reserved for future tooling
+---
+```
+
+## 22.7 MERGE — accumulation across sources (requirement)
+
+When a new source introduces an entity/concept that **already has a page**,
+INGEST MUST **enrich** that page, never replace it:
+
+- add the new claims/links; extend `sources` with the new id; bump
+  `updated`.
+- **Never silently discard accumulated knowledge** (the core invariant that
+  separates an LLM Wiki from a summarizer).
+- Surface any contradiction with existing content as a
+  `> [!warning] Contradiction` callout naming both claims, their sources,
+  and the date — never silently choose one.
+
+> MERGE is the **defining accumulation behavior**. Its detailed policy and
+> implementation are designed next, **before** the compiler is wired into
+> `WikiGenerator.run()`. Until then INGEST compiles single sources; this
+> subsection states the required behavior the MERGE design must satisfy.
+
+## 22.8 overview.md & index.md
+
+- Update `overview.md` when a source shifts the overall picture.
+- Maintain `index.md` as a catalog: one `- [[slug]] — one-line summary` per
+  page, grouped by category.
+
+## 22.9 log.md
+
+Append-only; one entry per operation:
+
+```
+## [YYYY-MM-DD] ingest | Source Title
+- pages created/updated, decisions, contradictions surfaced
+```
+
+## 22.10 Determinism & headless operation
+
+- INGEST runs **headless** (AJS-005): no per-source human step. Guardrails —
+  no silent overwrite, contradiction callouts, provenance, LINT — substitute
+  for live review.
+- **Idempotency:** unchanged sources (by hash) are skipped — no LLM call, no
+  writes. Re-compiling a changed source is non-deterministic in *content*
+  but deterministic in *structure and schema*.
+
+## 22.11 Implementation status (spec ↔ code)
+
+- **Implemented** (`src/knowledge/compiler/`): Knowledge Compiler port +
+  Anthropic compiler (extraction → deterministic render), single-source
+  compilation, schema/rendering unit tests. `AIClient` gained a
+  larger-budget `complete()`.
+- **Pending:** MERGE (§22.7), `overview.md`/`index.md`, contradiction
+  callouts, and integration into `WikiGenerator.run()` (the compiler is
+  proven standalone, not yet invoked by the generator).

@@ -202,8 +202,11 @@ Embeddings, when added, are an additive index behind the same interface.
 
 - The wiki artifact does **not** live in AJ-OS; it stays at
   `handbook/wiki/` (configured destination).
-- Compiler prompts/schemas live under `.ai/prompts/`, ported from the
-  Handbook's historical `wiki/CLAUDE.md`.
+- The Knowledge Compiler lives in `src/knowledge/compiler/` (LLM extraction
+  behind a port + deterministic rendering). Its compilation semantics are
+  specified authoritatively in SPEC-005 §22, folding in the Handbook's
+  historical `wiki/CLAUDE.md`. Prompts may be externalized to `.ai/prompts/`
+  later.
 - The two current consumption paths (`aj.config.json → handbook.path` and
   env `HANDBOOK_PATH`) collapse into a single Source Connector + Wiki
   Store configuration.
