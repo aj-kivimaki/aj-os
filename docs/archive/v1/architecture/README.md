@@ -1,5 +1,9 @@
 # Architecture
 
+> **Archived (AJ-OS v1).** Superseded technical documentation — it describes an
+> earlier generation, not AJ-OS today. See [`docs/archive/v1/`](../README.md)
+> and [`docs/VISION.md`](../../../VISION.md).
+
 AJ-OS is built around a layered, code-first architecture.
 
 Rather than treating Notion as the source of truth, AJ-OS models the business in TypeScript and synchronizes that model into a Notion workspace.

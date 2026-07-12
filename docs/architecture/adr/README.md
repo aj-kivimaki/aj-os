@@ -33,6 +33,11 @@ Those belong in the relevant SPEC documents.
 
 ## Current ADRs
 
-| ID      | Title                                     |
-| ------- | ----------------------------------------- |
-| ADR-001 | Architecture Freeze Before Implementation |
+| ID      | Title                                          |
+| ------- | ---------------------------------------------- |
+| ADR-001 | Architecture Freeze Before Implementation      |
+| ADR-002 | Wiki Ownership and Persistence                 |
+| ADR-003 | Knowledge Reconciliation and Page Lifecycle    |
+| ADR-004 | Knowledge Merge Policy                         |
+| ADR-005 | Identity Resolution                            |
+| ADR-006 | Identity Learning                              |

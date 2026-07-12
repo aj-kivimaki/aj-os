@@ -1,104 +1,14 @@
 # Guides
 
-The Guides section explains how to install, configure, develop, and contribute to AJ-OS.
+Practical, how-to documentation for **using, configuring, and developing** AJ-OS.
 
-Unlike the Architecture documentation, these guides focus on using and extending the project rather than explaining its internal design.
+Guides explain *how to do things*. They do not define what AJ-OS is, how it is
+structured, or how the engineering lifecycle works — those are owned by
+[VISION](../VISION.md), the [architecture](../architecture/), and
+[AJS-007](../standards/AJS-007-Engineering-Lifecycle-Standard.md) respectively.
 
----
-
-# Available Guides
-
-## Installation
-
-Set up AJ-OS from scratch.
-
-Topics include:
-
-- Requirements
-- Installation
-- Environment variables
-- First synchronization
-
----
-
-## Configuration
-
-Configure AJ-OS for your own Notion workspace.
-
-Topics include:
-
-- Notion Integration
-- API Key
-- Parent Page
-- Permissions
-- Environment variables
-
----
-
-## Development
-
-The development guide explains how to contribute to AJ-OS.
-
-Topics include:
-
-- Project structure
-- Development workflow
-- Build commands
-- Testing
-- Release process
-
----
-
-## AI Workflow
-
-AJ-OS is intentionally developed using an AI-assisted engineering workflow.
-
-Rather than generating an entire application automatically, AI is used as an implementation partner while architectural decisions remain human-driven.
-
-The workflow follows a structured lifecycle:
-
-```
-
-Architecture
-
-↓
-
-Documentation
-
-↓
-
-Implementation Prompt
-
-↓
-
-Implementation
-
-↓
-
-Review
-
-↓
-
-Testing
-
-↓
-
-Commit
-
-↓
-
-Release
-
-```
-
-This process keeps development incremental, reviewable and reproducible.
-
----
-
-# Philosophy
-
-AJ-OS is documentation-driven.
-
-Documentation is treated as part of the software rather than an afterthought.
-
-Architecture, implementation and documentation evolve together throughout the project.
+| Guide | Use it to |
+| --- | --- |
+| [installation.md](installation.md) | Install AJ-OS and run the Knowledge Assistant for the first time |
+| [configuration.md](configuration.md) | Configure the Assistant and the Handbook Agent/API |
+| [development.md](development.md) | Build, test, and run from source |

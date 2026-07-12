@@ -1,5 +1,10 @@
 # API Roadmap
 
+> **Archived (AJ-OS v1).** The v1 API's phase plan (Notion-backed business
+> endpoints). Superseded; forward direction now lives in the root
+> [ROADMAP](../../../../ROADMAP.md). See [`docs/archive/v1/api/`](README.md) and
+> [`docs/VISION.md`](../../../VISION.md).
+
 The AJ-OS API is developed through small, architecture-driven milestones.
 
 Each milestone introduces one new capability while preserving a stable and maintainable platform.

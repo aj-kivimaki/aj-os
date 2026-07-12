@@ -1,5 +1,9 @@
 # Business Modules
 
+> **Archived (AJ-OS v1).** Superseded technical documentation — it describes an
+> earlier generation, not AJ-OS today. See [`docs/archive/v1/`](../README.md)
+> and [`docs/VISION.md`](../../../VISION.md).
+
 Business Modules represent the core capabilities of a business.
 
 Each module models a specific business domain independently from the underlying infrastructure.

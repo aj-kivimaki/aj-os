@@ -1,6 +1,10 @@
 # AJS-006 --- Knowledge Governance Standard
 
-**Status:** Draft v1.0
+**Status:** Draft v1.1
+
+> **Amended by ADR-002 (2026-07-11).** Generated outputs are non-authoritative,
+> but the LLM Wiki is **persistent but recoverable**, not freely disposable.
+> See Principle 2.
 
 ## Purpose
 
@@ -26,19 +30,36 @@ Changes require review before becoming permanent.
 
 ------------------------------------------------------------------------
 
-## 2. Generated Artifacts Are Disposable
+## 2. Generated Artifacts Are Non-Authoritative
 
-Generated outputs are never authoritative.
+Generated outputs are never the source of truth; the Handbook is.
 
-Examples:
+Freely disposable outputs (regenerated at any time):
 
--   LLM Wiki
 -   Context Packages
 -   Embeddings
 -   Search indexes
 -   AI summaries
 
-They may be regenerated at any time.
+The **LLM Wiki** is non-authoritative but **persistent but recoverable**
+(ADR-002): it is incrementally maintained and committed, and full
+regeneration is a lossy recovery/bootstrap path, not a routine operation.
+
+Knowledge accumulates by **enrichment**, not replacement (ADR-004): when a
+new source touches an existing entity/concept page, MERGE leaves it **richer
+than before** — provenance widens (monotonic + sticky), contradictions are
+surfaced and retained as callouts (never auto-resolved), and the
+**human-owned region is never rewritten**. The Wiki itself is the sole
+knowledge artifact; there is no separate claim store.
+
+Wiki page lifecycle is governed by ADR-003: a page is `active` or `stale`.
+Source removal never deletes derived knowledge automatically — the headless
+generator marks pages `stale` (with reason: `source-modified`,
+`partial-orphan`, or `orphaned`) or *proposes* removal for **fully-orphaned**
+pages (SPEC-005 §21 RECONCILE). Synthesized pages are never auto-rewritten
+headless, and provenance is sticky (a removed source's id is retained for
+audit; liveness is computed). **Actual deletion is an explicit orchestration
+or human action**, never performed headless.
 
 ------------------------------------------------------------------------
 
@@ -277,7 +298,7 @@ A governed knowledge system should:
 
 # Relationship to Other Standards
 
--   **AJS-001** --- Developer Operating System
+-   **AJS-001** --- Daily Workflow Standard: the daily operating cadence of a work session.
 -   **AJS-002** --- Context Assembly
 -   **AJS-003** --- Knowledge Standard
 -   **AJS-004** --- AJ-OS Agent Specification

@@ -213,11 +213,12 @@ The Knowledge Assistant provides the foundation for future AJ-OS products, inclu
 
 The Knowledge Assistant depends on the following AJ-OS platform capabilities:
 
-- CORE-PLATFORM-002 — Context Builder
-- Wiki Generator (future)
-- Retrieval Engine (future)
-- Prompt Renderer (future)
-- AI Client (future)
+- Context Builder — shipped (v2.0.0)
+- Retrieval Engine — shipped (v2.0.0)
+- Prompt Renderer — shipped (v2.0.0)
+- AI Client — shipped (v2.0.0)
+- Wiki Generator — implemented at library level; not yet wired to an entry point
+  (produces the generated wiki this product reads)
 
 ---
 

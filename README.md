@@ -1,363 +1,141 @@
 # AJ-OS
 
-> **A knowledge-driven developer operating system for building software
-> with AI.**
->
-> **Every project makes the next project better.**
+> **AJ-OS is a personal operating system whose purpose is to maintain an
+> accurate, evolving working context for its user's work.**
+
+It continuously collects, organizes, maintains, and exposes the **working
+context** needed to do the work — so that every project makes the next one
+easier.
+
+AJ-OS is not any single tool. It is a platform of subsystems that together turn
+one loop:
+
+```text
+Work → durable, reviewed knowledge → maintained working context → better work → (repeat)
+```
+
+**No subsystem is the point. The point is the loop they form.**
+
+For the full identity — what AJ-OS is, why it exists, and what belongs inside
+it — read **[docs/VISION.md](docs/VISION.md)**, the project's source of truth.
+
+> **Built first for its author** (focused on software-development and
+> game-audio work), and **developed in the open** so others can adapt it to
+> their own work.
 
 ---
 
-## Vision
+## How it works
 
-AJ-OS is an opinionated platform for developing software with AI through
-structured knowledge, engineering standards, reusable workflows, and
-continuous learning.
+AJ-OS sits underneath the tools where work already happens (GitHub, Jira,
+Notion, Obsidian, a calendar) and **connects them through shared context** — it
+does not replace them. Each subsystem serves one part of the loop:
 
-Instead of treating AI as a coding assistant that starts from scratch
-every session, AJ-OS continuously transforms project work into reusable
-knowledge. That knowledge is reviewed, governed, and reused to improve
-every future project.
+| Subsystem | Role | Documented in |
+| --- | --- | --- |
+| **Context Builder** | Assembles context deterministically (Collection → Selection → Assembly) | [SPEC-002](docs/specifications/SPEC-002-Context-Builder-Agent.md) |
+| **Knowledge Platform** | Compiles durable knowledge into a generated wiki | [ARCH-002](docs/architecture/ARCH-002-Knowledge-Platform-Architecture.md), SPEC-005/006/007 |
+| **Knowledge Assistant** | Consumes the wiki to answer questions with citations | [PRODUCT-001](implementation/products/knowledge-assistant/README.md) |
+| **End-of-Session** | Keeps the context current as work happens | [SPEC-003](docs/specifications/SPEC-003-End-of-Session-Workflow.md) |
+| **Knowledge Review** | Governs what becomes durable knowledge | [SPEC-004](docs/specifications/SPEC-004-Knowledge-Review-Workflow.md) |
+| **Project Kickoff** | Starts new projects from a consistent baseline | [SPEC-001](docs/specifications/SPEC-001-Project-Kickoff-Workflow.md) |
 
-The goal is not simply to generate code.
-
-The goal is to build a system that continuously improves how software is
-designed, implemented, documented, and maintained.
-
----
-
-# Philosophy
-
-AJ-OS is built around a simple idea:
-
-    Project Work
-          ↓
-    Reusable Knowledge
-          ↓
-    Structured Context
-          ↓
-    Better AI Assistance
-          ↓
-    Better Project Work
-
-Every completed project should permanently improve the next one.
+The architecture, its principles, and its platform contracts are described once,
+canonically, in **[ARCH-001 — Platform Architecture](docs/architecture/ARCH-001-AJ-OS-Platform-Architecture.md)**.
 
 ---
 
-# Core Principles
+## Try it today
 
-- Standards before implementation.
-- Specifications before coding.
-- Knowledge before prompts.
-- Human approval before canonical knowledge.
-- Handbook as the single source of truth.
-- Generated AI artifacts are disposable.
-- Model-agnostic architecture.
-- Small, composable services and workflows.
-
----
-
-# Platform Architecture
-
-    Architecture
-          ↓
-    Standards (AJS)
-          ↓
-    Specifications (SPEC)
-          ↓
-    Implementation
-          ↓
-    Project Documentation
-          ↓
-    Handbook (Canonical)
-          ↓
-    Generated LLM Wiki
-          ↓
-    Context Builder
-          ↓
-    Coding Agent
-
-For a complete architectural overview, see:
-
-- `docs/architecture/ARCH-001-AJ-OS-Platform-Architecture.md`
-
----
-
-# Platform Contracts
-
-AJ-OS is built around immutable platform contracts.
-
-Current contracts include:
-
-- Context Builder Configuration
-- Context Package
-- Knowledge Request
-- Knowledge Provider
-- Knowledge Item
-- Provider Registry
-- Collection Error
-- Collection Result
-
-Future platform behavior is built on top of these contracts rather than redefining them.
-
----
-
-# Documentation Structure
-
-## Architecture
-
-High-level platform design.
-
-## Standards (AJS)
-
-Platform rules and governance.
-
-Examples:
-
-- Developer Operating System
-- Context Assembly
-- Knowledge Standard
-- Agent Specification
-- Workflow Orchestration
-- Knowledge Governance
-- Engineering Lifecycle
-
-## Specifications (SPEC)
-
-Implementation blueprints for platform services and workflows.
-
-Examples:
-
-- Project Kickoff Workflow
-- Context Builder Agent
-- End-of-Session Workflow
-- Knowledge Review Workflow
-- Wiki Generator Agent
-
-## Project Documentation
-
-Working documentation for individual projects.
-
-## Handbook
-
-The canonical knowledge base.
-
-Everything reusable is promoted here after review.
-
-## Generated LLM Wiki
-
-Automatically generated from the handbook.
-
-Optimized for AI retrieval.
-
-Never edited directly.
-
----
-
-# Knowledge Pipeline
-
-    Development
-          ↓
-    Project Documentation
-          ↓
-    End-of-Session Workflow
-          ↓
-    Candidate Knowledge
-          ↓
-    Knowledge Review
-          ↓
-    Handbook
-          ↓
-    Wiki Generator
-          ↓
-    Generated LLM Wiki
-          ↓
-    Context Builder
-          ↓
-    Coding Agent
-
----
-
-# Current Status
-
-**AJ-OS Platform v2.0.0 has shipped** — the first stable release of the reusable
-platform architecture, delivered together with its first complete product,
-**Knowledge Assistant v1.0.0**.
-
-> **Platform vs. product versions.** AJ-OS versions the *platform* (this repository)
-> and each *product* independently. `v2.0.0` is the platform version; the Knowledge
-> Assistant carries its own `v1.0.0`. See
-> [docs/project/versioning-and-releases.md](docs/project/versioning-and-releases.md).
-
-## What has shipped
-
-- **The reusable platform** — a three-layer architecture (CLI → Product → Platform)
-  with a strict one-way dependency direction, plus its core services:
-  - **Context Builder** (SPEC-002) — deterministic Collection → Selection → Assembly,
-    returning an immutable `ContextPackage` via `ContextBuilder.build(request)`.
-  - **Platform capabilities** consumed by the first product — Configuration,
-    Handbook, Retrieval, Prompt Renderer, and AI Client.
-- **Knowledge Assistant v1.0.0** — the first end-user product; see
-  [Products](#products).
-- **A REST API and Handbook AI Agent** for integrations and automation.
-
-## Learn more
-
-- [CHANGELOG.md](CHANGELOG.md) — the full, itemized release history (including the
-  Context Builder milestone breakdown).
-- [docs/project/versioning-and-releases.md](docs/project/versioning-and-releases.md)
-  — versioning & release governance.
-- [docs/specifications/](docs/specifications/) — platform and product specifications
-  (including SPEC-002 — Context Builder).
-- [implementation/products/knowledge-assistant/](implementation/products/knowledge-assistant/)
-  — the Knowledge Assistant engineering documentation.
-
-> **On document status.** AJS standards and SPEC specifications carry a
-> `Status: Draft` header. In AJ-OS, **Draft means "approved for implementation, not
-> yet frozen"** — stable enough to build against, but still refinable until the work
-> it governs is frozen. A shipped release building on Draft documents is by design;
-> it does not imply those documents are incomplete.
-
----
-
-# Products
-
-Products are user-facing tools built on the AJ-OS platform. Each product is
-versioned independently of the platform.
-
-## Knowledge Assistant v1.0.0
-
-Ask questions about a configured handbook and get grounded, cited answers from the
-command line.
-
-**Get started:**
-
-1. Install dependencies: `npm install`
-2. Configure your handbook — copy the template and set your path:
-   `cp aj.config.example.json aj.config.json`, then edit `handbook.path`.
-3. Add your API key — copy the template and set `ANTHROPIC_API_KEY`:
-   `cp .env.example .env`
-4. Ask a question:
+The **Knowledge Assistant** is the first subsystem you can run — a CLI that
+answers questions about a configured handbook, grounded in its generated wiki,
+always with citations.
 
 ```bash
+npm install
+cp aj.config.example.json aj.config.json   # then set handbook.path
+cp .env.example .env                        # then set ANTHROPIC_API_KEY
 aj ask "How does the Context Builder work?"
 ```
 
-> Run `npm run build && npm link` once to make the `aj` command available, or use
-> `npm run dev -- ask "…"` to run straight from source without building.
+> Run `npm run build && npm link` once to install the `aj` command, or use
+> `npm run dev -- ask "…"` to run from source.
 
-> **Prerequisite — a pre-generated wiki (an intentional v2.0.0 limitation).**
-> The Knowledge Assistant searches a handbook's **generated `wiki/`**, not its raw
-> notes — reading a curated, AI-optimized wiki is what keeps answers grounded and
-> citable. Producing that wiki is the job of the **Wiki Generator (SPEC-005)**, which
-> is planned but **not yet part of Platform v2.0.0** (see the [roadmap](ROADMAP.md)).
-> So at this stage a **pre-generated wiki is required** — if you see "no generated
-> wiki," that is a known platform limitation, not a missed setup step. The
-> [usage guide](implementation/products/knowledge-assistant/usage.md) has the
-> details.
+> **Prerequisite — a pre-generated wiki.** The assistant reads a handbook's
+> generated `wiki/`, not raw notes. Producing that wiki is the Knowledge
+> Platform's job, which is implemented but **not yet wired to a runnable
+> command** (see [status](#current-status)). Until it is, a pre-generated wiki
+> is required — "no generated wiki" is a known limitation, not a setup mistake.
 
-- One-shot (`aj ask "…"`) and interactive (`aj ask`) modes, with `--debug`
-  diagnostics.
-- Answers only from the handbook's generated wiki, always with citations.
-- Documentation:
-  [implementation/products/knowledge-assistant/](implementation/products/knowledge-assistant/)
-  — start with the
-  [README](implementation/products/knowledge-assistant/README.md) and the
-  [usage guide](implementation/products/knowledge-assistant/usage.md).
+Full instructions: the
+[Knowledge Assistant docs](implementation/products/knowledge-assistant/README.md)
+and its [usage guide](implementation/products/knowledge-assistant/usage.md).
 
 ---
 
-# Legacy Components (v1)
+## Current status
 
-The repository currently contains earlier implementations that predate
-the current architecture.
+**AJ-OS Platform v2.0.0 has shipped** — the first stable release of the reusable
+platform, delivered with its first product, **Knowledge Assistant v1.0.0**.
 
-These include:
+- **Shipped:** the Context Builder (SPEC-002) and the supporting platform
+  capabilities (configuration, handbook, retrieval, prompt rendering, AI
+  client), plus the Knowledge Assistant that composes them.
+- **In progress:** the Knowledge Platform pipeline (ARCH-002) — the sources → wiki
+  engine — is implemented at the library level and tested, but **not yet wired to
+  a runnable command**. Wiring it is the top of the roadmap.
 
-- Code-first Notion database synchronization
-- Notion schema generation
-- REST API
-- Handbook Agent
-- n8n workflows
-- Experimental AI agents
+The full itemized history is in the [CHANGELOG](CHANGELOG.md); what to do next is
+in the [ROADMAP](ROADMAP.md) under **Resume Here**. Platform and products are
+versioned independently — see
+[versioning & releases](docs/project/versioning-and-releases.md).
 
-These components remain valuable and will be reviewed individually.
-
-Where appropriate they will be:
-
-- Migrated into the new architecture
-- Refactored to comply with AJS and SPEC documents
-- Replaced by newer platform services
-- Archived if no longer relevant
-
-The Notion integration is now considered one possible knowledge provider
-rather than the center of the platform.
+> **On document status.** AJS standards and SPEC specifications carry
+> `Status: Draft`, which in AJ-OS means *"approved for implementation, not yet
+> frozen."* A shipped release built on Draft documents is by design.
 
 ---
 
-# Roadmap
+## Documentation
 
-> AJ-OS is developed **product-first** — the platform grows to serve real products.
-> **Platform v2.0.0** shipped with the first product, **Knowledge Assistant v1.0.0**.
-> The detailed roadmap lives in [ROADMAP.md](ROADMAP.md).
+Active documentation follows one hierarchy — **VISION → Architecture →
+Specifications → Implementation** — and each concept has a single canonical home.
 
-## Phase 1 — Platform Foundation ✅
+| Area | What it holds |
+| --- | --- |
+| [docs/VISION.md](docs/VISION.md) | What AJ-OS is (source of truth) |
+| [docs/architecture/](docs/architecture/) | ARCH — how the system is structured (+ ADRs) |
+| [docs/standards/](docs/standards/) | AJS — the rules that govern the platform |
+| [docs/specifications/](docs/specifications/) | SPEC — how each subsystem is built |
+| [implementation/](implementation/) | The as-built engineering record |
+| [docs/archive/](docs/archive/) | Superseded implementations, preserved (see below) |
 
-- Architecture, Standards, Specifications
-
-## Phase 2 — Core Platform Services
-
-- ✅ Context Builder (SPEC-002) — delivered in Platform v2.0.0
-- End-of-Session Workflow (SPEC-003)
-- Knowledge Review Workflow (SPEC-004)
-- Wiki Generator Agent (SPEC-005)
-
-Project Kickoff (SPEC-001) is intentionally postponed until more of the platform is operational.
-
-## Phase 3 — Supporting Platform Services
-
-- Search, Configuration, Logging, Agent Registry, Workflow Registry
-
-## Phase 4 — Productivity Services
-
-- Portfolio Builder, Job Finder, Daily Planner, additional personal workflows
+Start with the [documentation index](docs/README.md) for the full map and
+recommended reading paths.
 
 ---
 
-# Design Goals
+## History
 
-AJ-OS aims to be:
-
-- Modular
-- Explainable
-- Observable
-- Extensible
-- Testable
-- Model-agnostic
-- Human-governed
-- Knowledge-driven
+AJ-OS began as something different — a code-first Notion **business** operating
+system (v1). That generation is preserved, frozen, under
+[docs/archive/v1/](docs/archive/v1/README.md). It is kept for reference, not
+carried forward: if AJ-OS needs one of those ideas again, it will be redesigned
+for the current architecture rather than revived. A `PROJECT-STORY` narrating the
+full evolution will be added once the cleanup is complete.
 
 ---
 
-# Contributing
+## Contributing
 
-The architecture-first approach is intentional.
+The architecture-first approach is intentional: update the relevant standard or
+specification before implementing, then capture reusable knowledge through the
+End-of-Session workflow. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Before implementing new functionality:
+## License
 
-1.  Update or create the relevant AJS standard if platform rules change.
-2.  Write or update the appropriate SPEC document.
-3.  Implement the feature.
-4.  Validate the implementation.
-5.  Capture reusable knowledge through the End-of-Session workflow.
+Released under the MIT License — see [LICENSE](LICENSE).
 
 ---
 
-# License
-
-Released under the MIT License.
-
-See the `LICENSE` file for details.
-
----
-
-> **Capture knowledge. Govern it. Reuse it.**
+> **Maintain the context. The work compounds.**

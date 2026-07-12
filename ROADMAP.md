@@ -1,261 +1,84 @@
 # AJ-OS Roadmap
 
-> **Roadmap Version:** v2.0\
-> **Status:** Active
+> **Status:** Active · **What this is:** where AJ-OS is going and what to do
+> next. For *what AJ-OS is*, see [docs/VISION.md](docs/VISION.md); for *how it is
+> built*, see [docs/architecture/](docs/architecture/). Itemized history lives in
+> the [CHANGELOG](CHANGELOG.md).
+
+AJ-OS grows **product-first**: the platform evolves because a product needs it,
+never as an isolated exercise. Each phase below advances the subsystems that
+serve the [loop](docs/VISION.md) — it does not restate the vision behind them.
 
 ---
 
-# Vision
+# Resume Here — Recommended Next Steps
 
-AJ-OS is evolving into a knowledge-driven developer operating system
-that continuously converts project work into reusable knowledge.
+> Read this first when returning to development. It is the single "where do I
+> pick up" pointer. Items are ordered; the first is the highest-leverage.
 
-The platform evolves **through building real products**. Products validate and
-drive the platform's capabilities: the platform stays reusable, but it grows because
-a product needs it — not as an isolated engineering exercise.
+1. **Wire the Knowledge Platform pipeline to an entry point.** The Wiki Generator
+   (SPEC-005), Source Connector (SPEC-006), and Wiki Store (SPEC-007) exist as
+   tested library code (`src/ingestion/`, `src/knowledge/`) but nothing invokes
+   `WikiGenerator.run()` yet. Add a thin CLI command (e.g. `aj wiki build`) that
+   composes the connectors, store, compiler, resolver, renderer, and merge engine
+   from config and runs a generation cycle. This closes the loop so the Knowledge
+   Assistant can read a wiki this repo actually generated.
+2. **Use the Knowledge Assistant against a real handbook** and capture friction
+   as backlog items (configuration, retrieval quality, citations, missing-wiki UX).
+3. **End-of-Session Workflow (SPEC-003)** — the orchestration layer that decides
+   when to run the generator and owns git commits (the engine never commits).
+4. **Knowledge Review Workflow (SPEC-004)** — human governance of what enters the
+   Handbook.
+5. **Context Builder M5 — Explainability & Profiles**, then M6 — Optimization
+   (see `implementation/phase-2-core-platform/spec-002-context-builder/`).
 
----
-
-# Guiding Principles
-
-- Products drive platform growth — the platform evolves to serve real products.
-- Architecture before implementation.
-- Standards before features.
-- Specifications before coding.
-- Knowledge before prompts.
-- Human governance over canonical knowledge.
-- Small, composable platform services.
-- Model-agnostic design.
-
----
-
-# Current Status
-
-## ✅ Phase 1 — Platform Foundation (Complete)
-
-The architectural foundation has been established.
-
-Completed:
-
-- ARCH-001 Platform Architecture
-- AJS-001 – AJS-007 Platform Standards
-- SPEC-000 Specification Writing Standard
-- SPEC-001 – SPEC-005 Core Platform Specifications
-
-This phase defines **how AJ-OS is built**, not just what it does.
+Deferred and future work is catalogued in the phases below.
 
 ---
 
-# Phase 2 — Core Knowledge Platform (In Progress)
+# Phases
 
-Build the reusable platform according to the approved architecture and specifications.
+## Phase 1 — Platform Foundation ✅
+Architecture (ARCH-001), Standards (AJS-001–007), and the core Specifications
+(SPEC-000–007) are established. This phase defines **how** AJ-OS is built.
 
-**Shipped in Platform v2.0.0:**
+## Phase 2 — Core Platform (in progress)
+- ✅ **Context Builder** (SPEC-002) — deterministic Collection → Selection →
+  Assembly, shipped in Platform v2.0.0.
+- 🟡 **Knowledge Platform pipeline** (ARCH-002; SPEC-005/006/007) — implemented at
+  the library level and tested, **pending orchestration wiring** (Resume Here #1).
+- ⬜ **End-of-Session** (SPEC-003) and **Knowledge Review** (SPEC-004).
 
-- **Context Builder** (SPEC-002) — collects, selects, and assembles knowledge deterministically end-to-end through `ContextBuilder.build(request)`, returning an immutable `ContextPackage`.
-- **Supporting platform capabilities** — Configuration, Handbook, Retrieval, Prompt Renderer, and AI Client — established by building the first product on the platform.
+Project Kickoff (SPEC-001) is intentionally postponed until more of the platform
+is operational, so it can be built as an early workflow on top of it.
 
-Detailed implementation history lives in the [CHANGELOG](CHANGELOG.md) and the [specifications](docs/specifications/); it is intentionally not duplicated here.
+## Products (active track)
+- **Knowledge Assistant v1.0.0** — the first product, shipped with Platform
+  v2.0.0. Future products build on the same pattern.
 
-**Remaining platform work (upcoming):**
+Platform and products are versioned independently — see
+[versioning & releases](docs/project/versioning-and-releases.md).
 
-- Further Context Builder capabilities — explainability, context profiles, rendering
-- End-of-Session Workflow (SPEC-003)
-- Knowledge Review Workflow (SPEC-004)
-- Wiki Generator Agent (SPEC-005)
+## Phase 3 — Developer Experience
+Workflows and applications that consume the platform — starting with Project
+Kickoff (SPEC-001). Supporting services (search, logging, agent/workflow
+registries, notifications) expand as implementation reveals reusable needs.
 
-Project Kickoff (SPEC-001) remains intentionally postponed until more of the core platform is operational, so it can become an early workflow built on top of it.
+## Phase 4 — New Context Sources
+Additional sources feed the loop as pluggable providers: GitHub, Jira, calendar,
+domain databases — and Notion, **redesigned for the current architecture** rather
+than revived from the archived v1 sync. The v1 implementation is preserved in
+[docs/archive/v1/](docs/archive/v1/README.md); if AJ-OS needs one of its ideas
+again, it is rebuilt against the current architecture, not carried forward.
 
----
+## Phase 5 — Productivity Services
+User-facing capabilities on top of the platform (e.g. Portfolio Builder, Daily
+Planner). These consume the platform rather than define it.
 
-# Products (Active Track)
-
-Products are now a live development track, not a distant future phase. AJ-OS grows **product-first**: each product validates and drives the platform capabilities it needs.
-
-- **Knowledge Assistant v1.0.0** — the first complete product, shipped with Platform v2.0.0: a CLI (`aj ask`) that answers handbook questions with grounded, cited responses.
-
-Future products (see Phase 5 — Productivity Services) build on the same pattern.
-
-> **Versioning.** The AJ-OS Platform and each product are versioned independently — see [docs/project/versioning-and-releases.md](docs/project/versioning-and-releases.md).
-
----
-
-# Phase 3 --- Developer Experience
-
-Once the core platform services have been completed, implementation shifts to workflows and applications that consume the platform.
-
-Priority:
-
-- Project Kickoff Workflow (SPEC-001)
-
-Supporting platform services may expand as implementation reveals reusable capabilities.
-
-Examples include:
-
-- Search
-- Configuration
-- Logging
-- Agent Registry
-- Workflow Registry
-- Notification Service
-
-Existing integrations, including Notion, will be adapted as KnowledgeProviders using the established provider contracts rather than bespoke integrations.
+## Phase 6 — Platform Evolution
+Longer-term: MCP integration, public APIs, plugin architecture, multi-user
+support, semantic search, and autonomous engineering workflows.
 
 ---
 
-# Phase 4 --- Legacy Migration
-
-Review and migrate existing project components.
-
-Existing implementations include:
-
-- Code-first Notion synchronization
-- Schema engine
-- REST API
-- Handbook agent
-- n8n workflows
-- Experimental AI agents
-
-Each component will be evaluated to determine whether it should be:
-
-- Migrated
-- Refactored
-- Replaced
-- Archived
-
-The architecture remains the source of truth.
-
----
-
-# Phase 5 --- Productivity Services
-
-Build user-facing capabilities on top of the platform.
-
-Examples:
-
-- Portfolio Builder
-- Job Finder
-- Daily Planner
-- Documentation Assistant
-- Career Dashboard
-- Personal Automation Workflows
-
-These services should consume the platform rather than define it.
-
----
-
-# Phase 6 --- Platform Evolution
-
-Long-term goals include:
-
-- MCP integration
-- Public APIs
-- Plugin architecture
-- Multi-user support
-- Distributed execution
-- Additional KnowledgeProviders
-- Advanced retrieval
-- Semantic search
-- Autonomous engineering workflows
-
----
-
-# Knowledge Roadmap
-
-The long-term knowledge flow is:
-
-```text
-Project Work
-      ↓
-Project Documentation
-      ↓
-End-of-Session Workflow
-      ↓
-Candidate Knowledge
-      ↓
-Knowledge Review
-      ↓
-Handbook (Canonical)
-      ↓
-Wiki Generator
-      ↓
-Generated LLM Wiki
-      ↓
-Context Builder
-      ↓
-Better AI Context
-```
-
----
-
-# Platform Maturity
-
-AJ-OS is implemented in layers.
-
-Layer 1 — Platform Contracts
-
-- Configuration
-- Knowledge Request
-- Knowledge Provider
-- Knowledge Item
-- Context Package
-
-Layer 2 — Core Services
-
-- Context Builder
-- Provider Registry
-
-Layer 3 — Platform Behavior
-
-- Context Collection
-- Ranking
-- Context Assembly
-
-Layer 4 — Platform Consumers
-
-- Project Kickoff
-- End-of-Session
-- Knowledge Review
-- Wiki Generator
-
-Each layer builds upon the contracts established by the previous layer.
-
----
-
-# Success Metrics
-
-AJ-OS succeeds when:
-
-- Every project improves the next project.
-- Canonical knowledge remains trusted and maintainable.
-- AI context is generated automatically.
-- Manual prompting is minimized.
-- Platform components remain modular and replaceable.
-
----
-
-# Relationship to Documentation
-
-- ARCH documents describe the platform.
-- AJS documents define the governing rules.
-- SPEC documents define implementations.
-- Project documentation records execution.
-- The handbook stores canonical knowledge.
-- The generated wiki enables AI retrieval.
-
----
-
-# Roadmap Philosophy
-
-Implementation follows the architecture.
-
-Existing experiments are valuable but will be migrated only after the
-core platform has been implemented according to the current standards
-and specifications.
-
-The architecture---not legacy implementations---defines the future
-direction of AJ-OS.
-
----
-
-> **Every project makes the next project better.**
+> **Every project makes the next one easier.**

@@ -1,185 +1,100 @@
 # AJ-OS Documentation
 
-Welcome to the AJ-OS documentation.
+The map of AJ-OS's active documentation. Each document has **one
+responsibility**; each concept has **one canonical home**. Everything else links
+to it rather than restating it.
 
-The documentation is organized into focused sections, each with a single responsibility.
+Active documentation follows one hierarchy:
 
-Whether you want to use, understand or contribute to AJ-OS, the documents below provide a recommended path.
+```text
+VISION  →  Architecture (ARCH)  →  Specifications (SPEC)  →  Implementation
+```
+
+Standards (**AJS**) govern the platform across all layers; decision records
+(**ADR**) capture *why* significant choices were made.
 
 ---
 
-# Documentation Structure
+# Start here
+
+```text
+../README.md      → VISION.md      → ARCH-001 → ARCH-002 → the relevant SPECs
+(what & how to run)  (what it is)     (how it is structured)   (how it is built)
+```
+
+Contributors: after VISION and ARCH, read the [standards](standards/) and the
+[Knowledge Assistant](../implementation/products/knowledge-assistant/) as a
+worked example. Full contribution guide: [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+---
+
+# Map
 
 ```text
 docs/
-
-├── guides/
-├── architecture/
-├── api/
-├── modules/
-└── adr/
-```
-
-Each section serves a different purpose.
-
----
-
-# Getting Started
-
-If you are new to AJ-OS, begin here.
-
-1. `../README.md`
-2. `guides/installation.md`
-3. `guides/configuration.md`
-
-These documents explain what AJ-OS is and how to get it running.
-
----
-
-# Guides
-
-The Guides explain how to use and develop AJ-OS.
-
-| Document                  | Purpose                         |
-| ------------------------- | ------------------------------- |
-| `guides/README.md`        | Guide overview                  |
-| `guides/installation.md`  | Installation                    |
-| `guides/configuration.md` | Configuration                   |
-| `guides/development.md`   | Development workflow            |
-| `guides/ai-workflow.md`   | AI-assisted engineering process |
-
----
-
-# Architecture
-
-The Architecture documents explain how AJ-OS works internally.
-
-Recommended reading order:
-
-1. `architecture/README.md`
-2. `architecture/module-registry.md`
-3. `architecture/schema-engine.md`
-4. `architecture/translation-layer.md`
-5. `architecture/application-layer.md`
-6. `architecture/workspace-synchronization.md`
-7. `architecture/business-rules.md`
-8. `architecture/ceo-dashboard.md`
-
-Together these documents describe the complete architecture of the system.
-
----
-
-# API & Agent
-
-The API documents the REST interface and the AI services built on the platform.
-
-| Document            | Purpose                                             |
-| ------------------- | --------------------------------------------------- |
-| `api/README.md`     | API overview and current status                     |
-| `api/architecture.md` | API architecture and layer responsibilities       |
-| `api/agent.md`      | Handbook AI agent and inbox-capture endpoints        |
-| `api/roadmap.md`    | Planned evolution of the API platform               |
-
-n8n orchestration (chat, Telegram) is documented in `../infrastructure/n8n/README.md`.
-
----
-
-# Business Modules
-
-Business Modules describe the business capabilities managed by AJ-OS.
-
-Current modules include:
-
-- Projects
-- CRM
-- Portfolio
-- Production Music
-- Finance
-- Game Jams
-
-Each module is documented independently.
-
----
-
-# Architecture Decision Records
-
-Architecture Decision Records (ADRs) explain why significant architectural decisions were made.
-
-Unlike the Architecture documentation, which explains how the system works, ADRs capture the reasoning behind important design choices.
-
-They provide historical context for contributors and future maintainers.
-
----
-
-# Recommended Reading Paths
-
-## New Users
-
-```text
-README
-
-↓
-
-Installation
-
-↓
-
-Configuration
+├── VISION.md         What AJ-OS is — the source of truth
+├── architecture/     ARCH — how the system is structured (+ ADRs)
+├── standards/        AJS — the rules that govern the platform
+├── specifications/   SPEC — how each subsystem is built (+ products/)
+├── guides/           How to install, configure, and develop
+├── api/              The Handbook agent and HTTP interface
+├── project/          Project governance (versioning & releases)
+└── archive/          Superseded implementations (v1) — frozen
 ```
 
 ---
 
-## Contributors
+# Architecture (ARCH)
 
-```text
-README
+| Document | Purpose |
+| --- | --- |
+| [ARCH-001](architecture/ARCH-001-AJ-OS-Platform-Architecture.md) | Platform architecture map, principles, and contracts |
+| [ARCH-002](architecture/ARCH-002-Knowledge-Platform-Architecture.md) | The knowledge engine: sources → wiki → retrieval → context |
+| [architecture/adr/](architecture/adr/) | Architecture Decision Records (ADR-001–006) — the *why* |
 
-↓
+# Standards (AJS)
 
-Development Guide
+| Document | Governs |
+| --- | --- |
+| [AJS-001](standards/AJS-001-Daily-Workflow-Standard.md) | The daily operating cadence of a work session |
+| [AJS-002](standards/AJS-002-Context-Assembly-Standard.md) | Context assembly |
+| [AJS-003](standards/AJS-003-Knowledge-Standard.md) | What knowledge exists, where it lives, who owns it |
+| [AJS-004](standards/AJS-004-AJ-OS-Agent-Specification-Standard.md) | How agents are specified |
+| [AJS-005](standards/AJS-005-Workflow-Orchestration-Standard.md) | How agents compose into workflows |
+| [AJS-006](standards/AJS-006-Knowledge-Governance-Standard.md) | Knowledge lifecycle and governance |
+| [AJS-007](standards/AJS-007-Engineering-Lifecycle-Standard.md) | The engineering lifecycle |
 
-↓
+# Specifications (SPEC)
 
-Architecture
+| Document | Subsystem |
+| --- | --- |
+| [SPEC-000](specifications/SPEC-000-Specification-Writing-Standard.md) | How to write specifications |
+| [SPEC-001](specifications/SPEC-001-Project-Kickoff-Workflow.md) | Project Kickoff |
+| [SPEC-002](specifications/SPEC-002-Context-Builder-Agent.md) | Context Builder |
+| [SPEC-003](specifications/SPEC-003-End-of-Session-Workflow.md) | End-of-Session (owns commits) |
+| [SPEC-004](specifications/SPEC-004-Knowledge-Review-Workflow.md) | Knowledge Review |
+| [SPEC-005](specifications/SPEC-005-Wiki-Generator-Agent.md) | Wiki Generator |
+| [SPEC-006](specifications/SPEC-006-Source-Connector.md) | Source Connector |
+| [SPEC-007](specifications/SPEC-007-Wiki-Store.md) | Wiki Store |
 
-↓
+Product specifications live under [specifications/products/](specifications/products/).
 
-Modules
+# Guides · API · Governance
 
-↓
+| Document | Purpose |
+| --- | --- |
+| [guides/](guides/) | Installation, configuration, development |
+| [api/agent.md](api/agent.md) | The Handbook agent and inbox-capture endpoints |
+| [project/versioning-and-releases.md](project/versioning-and-releases.md) | How the platform and products are versioned |
 
-ADRs
-```
+n8n orchestration (chat, Telegram) is documented in
+[../infrastructure/n8n/README.md](../infrastructure/n8n/README.md).
 
 ---
 
-## Architecture Review
+# History
 
-```text
-Architecture Overview
-
-↓
-
-Architecture Documents
-
-↓
-
-Modules
-
-↓
-
-ADRs
-```
-
----
-
-# Documentation Principles
-
-The AJ-OS documentation follows a simple philosophy:
-
-- Every document has a single responsibility.
-- Every concept has one canonical location.
-- Documentation evolves together with the software.
-- Architecture is documented before implementation.
-
-This structure helps keep the documentation consistent, discoverable and maintainable as the project grows.
+The original AJ-OS was a code-first Notion **business** operating system (v1),
+now superseded and preserved, frozen, under
+[archive/v1/](archive/v1/README.md). See [archive/README.md](archive/README.md)
+for what the archive is and how it relates to AJ-OS today.
