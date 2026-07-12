@@ -15,6 +15,9 @@ export const entityTypeSchema = z
   .enum(["person", "organization", "place", "product", "tool", "other"])
   .catch("other");
 
+/** Names of other extracted entities/concepts this item relates to. */
+const relatedSchema = z.array(z.string().min(1)).default([]);
+
 export const sourceExtractionSchema = z.object({
   summary: z.object({
     title: z.string().min(1),
@@ -25,12 +28,14 @@ export const sourceExtractionSchema = z.object({
       name: z.string().min(1),
       type: entityTypeSchema,
       description: z.string().min(1),
+      related: relatedSchema,
     }),
   ),
   concepts: z.array(
     z.object({
       name: z.string().min(1),
       description: z.string().min(1),
+      related: relatedSchema,
     }),
   ),
 });

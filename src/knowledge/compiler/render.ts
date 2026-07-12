@@ -42,6 +42,36 @@ function sourcesBlock(sources: readonly string[]): string[] {
   return ["sources:", ...sources.map((id) => `  - ${id}`)];
 }
 
+interface LookupEntry {
+  readonly kind: "entity" | "concept";
+  readonly slug: string;
+  readonly name: string;
+}
+
+/**
+ * Resolve `related` names to lateral `[[wiki-links]]`, skipping self and any
+ * name that isn't one of this source's extracted items (so links never break).
+ * Returns the "## Related" section lines, or [] when there are none.
+ */
+function renderRelated(
+  related: readonly string[] | undefined,
+  lookup: ReadonlyMap<string, LookupEntry>,
+  selfSlug: string,
+): string[] {
+  const links: string[] = [];
+  const seen = new Set<string>();
+  for (const name of related ?? []) {
+    const entry = lookup.get(slugify(name));
+    if (entry === undefined || entry.slug === selfSlug || seen.has(entry.slug)) {
+      continue;
+    }
+    seen.add(entry.slug);
+    const dir = entry.kind === "entity" ? "entities" : "concepts";
+    links.push(`- [[${dir}/${entry.slug}|${entry.name}]]`);
+  }
+  return links.length === 0 ? [] : ["", "## Related", ...links];
+}
+
 /** Dedupe by slug, keeping the first occurrence. */
 function bySlug<T extends { name: string }>(
   items: readonly T[],
@@ -74,6 +104,19 @@ export function renderPages(
   const entities = bySlug(extraction.entities);
   const concepts = bySlug(extraction.concepts);
 
+  // Name → page lookup for resolving lateral `related` links.
+  const lookup = new Map<string, LookupEntry>();
+  for (const { slug, item } of entities) {
+    if (!lookup.has(slug)) {
+      lookup.set(slug, { kind: "entity", slug, name: item.name });
+    }
+  }
+  for (const { slug, item } of concepts) {
+    if (!lookup.has(slug)) {
+      lookup.set(slug, { kind: "concept", slug, name: item.name });
+    }
+  }
+
   const pages: CompiledPage[] = [];
 
   // Entity pages.
@@ -96,6 +139,7 @@ export function renderPages(
         ]),
         [
           item.description,
+          ...renderRelated(item.related, lookup, slug),
           "",
           `Source: [[${summaryLink}|${extraction.summary.title}]]`,
         ].join("\n"),
@@ -122,6 +166,7 @@ export function renderPages(
         ]),
         [
           item.description,
+          ...renderRelated(item.related, lookup, slug),
           "",
           `Source: [[${summaryLink}|${extraction.summary.title}]]`,
         ].join("\n"),

@@ -118,6 +118,32 @@ describe("renderPages", () => {
     expect(pages[0]!.content).not.toContain("## Concepts");
   });
 
+  it("renders lateral related links, skipping unknown targets", () => {
+    const pages = renderPages(
+      SOURCE,
+      {
+        summary: { title: "T", keyPoints: ["p"] },
+        entities: [
+          { name: "AJ-OS", type: "product", description: "d", related: ["Notion", "Schema Engine", "Ghost"] },
+          { name: "Notion", type: "product", description: "d", related: [] },
+        ],
+        concepts: [{ name: "Schema Engine", description: "d", related: ["AJ-OS"] }],
+      },
+      AT,
+    );
+
+    const ajos = byPath(pages, "entities/aj-os.md")!;
+    expect(ajos.content).toContain("## Related");
+    expect(ajos.content).toContain("- [[entities/notion|Notion]]");
+    expect(ajos.content).toContain("- [[concepts/schema-engine|Schema Engine]]");
+    // "Ghost" is not an extracted item → no link (no broken links).
+    expect(ajos.content).not.toContain("Ghost");
+    // Concept links back to the entity (a web, not a star).
+    expect(byPath(pages, "concepts/schema-engine.md")!.content).toContain(
+      "- [[entities/aj-os|AJ-OS]]",
+    );
+  });
+
   it("dedupes entities that slugify to the same name", () => {
     const pages = renderPages(
       SOURCE,
