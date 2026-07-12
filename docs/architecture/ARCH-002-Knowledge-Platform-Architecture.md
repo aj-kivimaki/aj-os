@@ -7,7 +7,7 @@
 **Related Architecture:** ARCH-001\
 **Related Standards:** AJS-002, AJS-003, AJS-005, AJS-006\
 **Related Specifications:** SPEC-002, SPEC-005, SPEC-006, SPEC-007\
-**Related Decisions:** ADR-002, ADR-003, ADR-004
+**Related Decisions:** ADR-002, ADR-003, ADR-004, ADR-005
 
 ---
 
@@ -71,7 +71,11 @@ the internal design of individual agents (see AJS-004 and their SPECs).
 | Component | Responsibility | Contract |
 |---|---|---|
 | **Source Connector** | Enumerate and read documents from a backend; normalize each into a `SourceRecord`. | SPEC-006 |
-| **Wiki Generator** | Maintain the wiki from `SourceRecord`s (INGEST/LINT). Owns no location or git knowledge. | SPEC-005 |
+| **Wiki Generator** | Orchestrate the pipeline (INGEST/RECONCILE/LINT). Owns no location or git knowledge. | SPEC-005 |
+| **Knowledge Compiler** | Extract renderer-agnostic structured knowledge from a source (no Markdown). | SPEC-005 §22, ADR-005 |
+| **Identity Resolver** | Map each candidate entity/concept to a canonical identity (existing page or new). | ADR-005 |
+| **Wiki Renderer** | Render Markdown pages from the extraction using canonical identities. | SPEC-005 §22, ADR-005 |
+| **Merge Engine** | Enrich an existing page with a new contribution. | ADR-004 |
 | **Wiki Store** | Read and write wiki pages. Persistence only; no git. | SPEC-007 |
 | **Retrieval** | Select candidate wiki pages for a query. Interface stable across implementations. | AJS-002 |
 | **Context Builder** | Assemble retrieved knowledge into a deterministic Context Package. | SPEC-002 |

@@ -18,6 +18,19 @@ import type { SourceRecord } from "../../ingestion/index.js";
 import type { AIResponse } from "../../platform/ai/index.js";
 import type { RenderedPrompt } from "../../platform/prompt/index.js";
 
+import type { SourceExtraction } from "./extraction.js";
+
+/**
+ * The renderer-agnostic output of compiling one source (ADR-005): structured
+ * knowledge, no Markdown. The IdentityResolver and WikiRenderer (and future
+ * renderers — graph, search index) consume this; the extraction stage never
+ * depends on any output format.
+ */
+export interface ExtractedKnowledge {
+  readonly source: SourceRecord;
+  readonly extraction: SourceExtraction;
+}
+
 /** Raised when the model output cannot be parsed or validated. */
 export class CompilerError extends Error {
   constructor(message: string) {

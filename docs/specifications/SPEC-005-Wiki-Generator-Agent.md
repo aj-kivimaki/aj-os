@@ -4,7 +4,7 @@
 **Owner:** AJ-OS **Related Standards:** AJS-002, AJS-003, AJS-004,
 AJS-005, AJS-006 **Related Specifications:** SPEC-002, SPEC-003, SPEC-006,
 SPEC-007 **Related Architecture:** ARCH-002 **Related Decisions:** ADR-002,
-ADR-003 **Last Updated:** 2026-07-12
+ADR-003, ADR-004, ADR-005 **Last Updated:** 2026-07-12
 
 > **v2.1 note:** SPEC-005 is now the **authoritative functional
 > specification for INGEST** (§22), folding in the historical
@@ -492,20 +492,29 @@ conflicts are **surfaced** (§22.7), never silently resolved.
 
 Entity vs. concept: **proper noun → entity; abstraction → concept.**
 
-## 22.4 The compilation pipeline
+## 22.4 The compilation pipeline (ADR-005)
 
-`SourceRecord` → **Knowledge Compiler** → pages, in two stages:
+`SourceRecord` flows through five stages, orchestrated by the generator:
 
-1. **LLM extraction (behind a port).** The model returns structured JSON —
-   `{ summary { title, keyPoints }, entities[{ name, type, description }],
-   concepts[{ name, description }] }` — validated against a schema. The
-   model **extracts knowledge; it does not format pages.**
-2. **Deterministic rendering.** The validated extraction is rendered to
-   pages — frontmatter (§22.6), kebab-case slugs, and `[[wiki-links]]`.
+1. **KnowledgeCompiler — extract.** The model returns structured JSON
+   (`summary`, `entities`, `concepts`, with `related`), validated against a
+   schema. The compiler is **renderer-agnostic** — it emits an extraction
+   model, **no Markdown** — so other renderers (graph, search index) can
+   reuse it.
+2. **IdentityResolver — resolve.** Each candidate entity/concept is mapped to
+   a **canonical identity** (an existing page or a new one) — normalize →
+   lexical shortlist → LLM adjudication → confidence, biased to split on
+   uncertainty (ADR-005, ADR-004 §9).
+3. **WikiRenderer — render.** Pages are rendered using the canonical paths
+   and `[[wiki-links]]` the resolver decided — frontmatter (§22.6), slugs,
+   links canonical by construction (no post-hoc repair).
+4. **MergeEngine — enrich.** When a candidate resolved to an existing page,
+   the rendered page is merged into it under §22.7's guards.
+5. **WikiStore — persist.**
 
-Non-determinism is confined to stage 1; rendering and the page schema are
-deterministic and unit-tested. **Provider isolation:** the LLM is reached
-only through the platform AI client; the compiler and generator hold no
+Non-determinism is confined to stages 1–2 (both behind ports); rendering and
+the page schema are deterministic and unit-tested. **Provider isolation:**
+the LLM is reached only through the platform AI client; no other stage holds
 provider detail (model-agnostic per §3).
 
 ## 22.5 Graph shape
@@ -573,9 +582,10 @@ region, or **defers** with a needs-merge proposal if even that isn't safe.
 **Contradictions** are surfaced as retained `> [!warning] Contradiction`
 callouts (both claims, both sources, date); never auto-resolved.
 
-**Identity** (which page receives the merge) is resolved behind the compiler
-port: **v1 = deterministic slug matching**; semantic matching is a future
-extension. When uncertain, MERGE prefers a **new page** over a wrong merge.
+**Identity** (which page receives the merge) is decided by the
+**IdentityResolver** stage (ADR-005), upstream of rendering: a
+deterministic slug matcher or an LLM-backed semantic matcher, both biased to
+a **new page** when uncertain (a false split over a false merge).
 
 Structural consequence: the reverse index generalizes to
 `source → [pages]`; the generator persists a per-page generated-content hash

@@ -82,6 +82,7 @@ Architecture Decision Records:
 | `architecture/adr/ADR-002-Wiki-Ownership-and-Persistence.md` | Wiki ownership, location, and persistence |
 | `architecture/adr/ADR-003-Knowledge-Reconciliation-and-Page-Lifecycle.md` | Page lifecycle, staleness, and RECONCILE policy |
 | `architecture/adr/ADR-004-Knowledge-Merge-Policy.md` | Merge = enrichment; guards, human-owned regions, identity |
+| `architecture/adr/ADR-005-Identity-Resolution.md` | Staged pipeline (extract→resolve→render→merge→persist); semantic identity |
 
 Recommended reading order: ARCH-001 → ARCH-002 → the relevant SPECs.
 

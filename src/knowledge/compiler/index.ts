@@ -6,6 +6,7 @@ export type {
   CompiledKnowledge,
   CompiledPage,
   CompiledPageKind,
+  ExtractedKnowledge,
   TextGenerator,
 } from "./KnowledgeCompiler.js";
 export { CompilerError } from "./KnowledgeCompiler.js";
