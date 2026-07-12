@@ -1,6 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 
-import { env } from "../config/env.js";
+import { env } from "../config/app-env.js";
 import { getAnthropicClient } from "./client.js";
 import { SYSTEM_PROMPT } from "./system-prompt.js";
 import { AGENT_TOOLS, executeTool } from "./tools.js";
