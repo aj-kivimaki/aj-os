@@ -47,10 +47,3 @@ The server fails fast with a clear message if a required variable is missing.
 
 - Never commit `.env`, API keys, or tokens; ensure `.env` is in `.gitignore`.
 - Generate `API_AUTH_TOKEN` from a strong source, e.g. `openssl rand -hex 32`.
-
-## Legacy — Notion sync
-
-`NOTION_API_KEY` and `NOTION_PARENT_PAGE_ID` configure only the **v1** Notion sync
-CLI (`npm run sync`), preserved with the v1 record in
-[docs/archive/v1/](../archive/v1/README.md). They are not used by the Assistant or
-the agent.

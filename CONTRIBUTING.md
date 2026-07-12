@@ -67,7 +67,6 @@ npm run typecheck  # type check
 npm run build      # build
 npm test           # run the test suite
 npm run dev -- ask "…"   # run the Knowledge Assistant from source
-npm run sync       # synchronize the Notion workspace (legacy v1 sync CLI)
 ```
 
 Before opening a pull request, ensure `npm run typecheck`, `npm run build`, and

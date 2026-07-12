@@ -101,7 +101,7 @@ npm run serve:prod   # node dist/server.js (after npm run build)
 
 Required configuration (see `docs/guides/configuration.md`): `ANTHROPIC_API_KEY`,
 `HANDBOOK_PATH`, `API_AUTH_TOKEN` (plus optional `ANTHROPIC_MODEL`, `API_PORT`, `API_HOST`).
-These are only needed for the server; the workspace sync CLI (`npm run sync`) does not use them.
+These are only needed for the server.
 
 Example:
 

@@ -7,12 +7,10 @@
     "aj": "dist/cli/index.js"
   },
   "scripts": {
-    "sync": "tsx src/index.ts",
     "dev": "tsx src/cli/index.ts",
     "serve": "tsx src/server.ts",
     "serve:prod": "node dist/server.js",
     "build": "tsc",
-    "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -24,7 +22,6 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
-    "@notionhq/client": "^2.3.0",
     "commander": "^15.0.0",
     "dotenv": "^17.0.0",
     "fastify": "^5.10.0",
