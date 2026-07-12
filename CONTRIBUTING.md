@@ -3,8 +3,8 @@
 Contributions of all sizes are welcome — bug reports, documentation, design
 discussion, and code.
 
-This document answers **how to work in this repository.** For *what AJ-OS is*,
-read [docs/VISION.md](docs/VISION.md); for *how it is structured*, read
+This document answers **how to work in this repository.** For _what AJ-OS is_,
+read [docs/VISION.md](docs/VISION.md); for _how it is structured_, read
 [docs/architecture/](docs/architecture/).
 
 ---

@@ -1,7 +1,7 @@
 # Installation
 
 How to install AJ-OS and run the Knowledge Assistant for the first time. For what
-AJ-OS *is*, see [VISION](../VISION.md); for every setting, see the
+AJ-OS _is_, see [VISION](../VISION.md); for every setting, see the
 [configuration guide](configuration.md).
 
 ## Requirements
