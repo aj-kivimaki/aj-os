@@ -138,8 +138,8 @@ the project root and in `docs/`:
   [ROADMAP](../../../ROADMAP.md) — the whole AJ-OS project.
 - [docs/architecture/](../../../docs/architecture/),
   [docs/standards/](../../../docs/standards/), and
-  [docs/adr/](../../../docs/adr/) — platform-wide architecture, standards, and
-  decisions.
+  [docs/architecture/adr/](../../../docs/architecture/adr/) — platform-wide
+  architecture, standards, and decisions.
 
 If you are looking for how the *platform* or the *repository* works, start there.
 If you are looking for how the *Knowledge Assistant* works, you are in the right

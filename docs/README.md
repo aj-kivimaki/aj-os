@@ -17,8 +17,7 @@ docs/
 ├── architecture/    ARCH — how the system is structured (+ ADRs)
 ├── specifications/  SPEC — how components are implemented
 ├── api/             REST API and agent services
-├── modules/         Business capabilities (legacy v1)
-└── adr/             Legacy v1 architecture decision records
+└── archive/         Superseded implementations (v1) — frozen; see archive/README.md
 ```
 
 Taxonomy:
@@ -120,13 +119,15 @@ n8n orchestration (chat, Telegram) is documented in
 
 ---
 
-# Business Modules (legacy v1)
+# Superseded Implementation (v1)
 
-Business Modules describe capabilities managed by the legacy Notion-sync
-platform: Projects, CRM, Portfolio, Production Music, Finance, Game Jams.
-Each is documented independently under `modules/`. Legacy v1 architecture
-notes live under `architecture/v1/` and `adr/001`–`adr/007`; their
-migration is governed by ADR-001.
+The original AJ-OS was a code-first Notion **business** operating system:
+Business Modules (Projects, CRM, Portfolio, Production Music, Finance, Game
+Jams) synchronized into a Notion workspace, with their own architecture and
+decision records. That generation has been superseded by the current platform
+and is preserved, frozen, under [`archive/v1/`](archive/v1/README.md). See
+[`archive/README.md`](archive/README.md) for what the archive is and how it
+relates to AJ-OS today.
 
 ---
 
