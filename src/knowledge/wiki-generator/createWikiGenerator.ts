@@ -186,6 +186,8 @@ export function createWikiGenerator(
         continue;
       }
       const resolution = await resolver.resolve(candidate, existing);
+      // `unsure` is treated as `new` here (a new page), but the resolver
+      // still records the distinction for future review workflows (ADR-005).
       const path =
         resolution.kind === "existing"
           ? resolution.targetPath
@@ -194,7 +196,7 @@ export function createWikiGenerator(
         path,
         title: candidate.name,
         kind: candidate.kind,
-        isNew: resolution.kind === "new",
+        isNew: resolution.kind !== "existing",
       });
     }
     return identities;

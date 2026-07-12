@@ -24,8 +24,13 @@ export function createSlugIdentityResolver(): IdentityResolver {
       const path = pagePathFor(candidate.kind, candidate.name);
       const match = existing.some((page) => page.path === path);
       return match
-        ? { kind: "existing", targetPath: path, confidence: 1 }
-        : { kind: "new", confidence: 1 };
+        ? {
+            kind: "existing",
+            targetPath: path,
+            confidence: 1,
+            explanation: `exact slug match (${path})`,
+          }
+        : { kind: "new", confidence: 1, explanation: "no existing page at slug path" };
     },
   };
 }

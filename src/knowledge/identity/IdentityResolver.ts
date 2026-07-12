@@ -30,13 +30,35 @@ export interface ExistingPage {
 }
 
 /**
- * The resolver's decision for one candidate. `confidence` is in [0, 1]; an
- * `existing` result below the resolver's threshold is never returned (it
- * degrades to `new`).
+ * The resolver's decision for one candidate (`confidence` in [0, 1]), with a
+ * short human-readable `explanation` (which candidates were considered, why
+ * the verdict) for debugging and threshold tuning.
+ *
+ * Three-way by design:
+ * - `existing` — a confident match; merge into `targetPath`.
+ * - `unsure`   — a plausible match (`targetPath`) below the merge threshold.
+ *   Today's orchestration treats it like `new`, but the distinction is
+ *   preserved so future review workflows can surface "did you mean X?"
+ *   without changing this contract.
+ * - `new`      — no match; a new page.
+ *
+ * Bias: false splits are acceptable, false merges are not — uncertain cases
+ * resolve to `unsure`/`new`, never `existing`.
  */
 export type Resolution =
-  | { readonly kind: "existing"; readonly targetPath: string; readonly confidence: number }
-  | { readonly kind: "new"; readonly confidence: number };
+  | {
+      readonly kind: "existing";
+      readonly targetPath: string;
+      readonly confidence: number;
+      readonly explanation: string;
+    }
+  | {
+      readonly kind: "unsure";
+      readonly targetPath: string;
+      readonly confidence: number;
+      readonly explanation: string;
+    }
+  | { readonly kind: "new"; readonly confidence: number; readonly explanation: string };
 
 /**
  * Resolves a candidate against the current wiki. Implementations range from

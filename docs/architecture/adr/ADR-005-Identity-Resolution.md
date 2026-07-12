@@ -72,10 +72,16 @@ For each candidate `(name, kind, description)` against the existing pages:
 2. **Lexical shortlist** — select the few most similar existing pages
    (token overlap), so the LLM never sees the whole wiki.
 3. **LLM adjudication** — decide *same-as-X* (which shortlist page) vs *new*.
-4. **Confidence** — return a confidence score.
-5. **Bias to split** — below a confidence threshold, or an empty shortlist,
-   resolve to **new**. A false split is cheap (a benign duplicate LINT can
-   flag); a false merge corrupts accumulated knowledge (ADR-004 §9).
+4. **Confidence + explanation** — return a confidence score and a short
+   explanation (which candidates were considered, why the verdict) for
+   debugging and threshold tuning.
+5. **Three-way verdict, biased to split** — a high-confidence match is
+   `existing`; a plausible-but-uncertain match is `unsure` (below the merge
+   threshold); everything else — including an empty shortlist or an
+   unparseable adjudication — is `new`. Orchestration today treats `unsure`
+   like `new`, but the distinction is preserved in the contract for future
+   review workflows ("did you mean X?"). A false split is cheap; a false
+   merge corrupts accumulated knowledge (ADR-004 §9).
 
 The LLM adjudication is the only non-deterministic step and is isolated
 behind the resolver port; the shortlist and normalization are deterministic.
