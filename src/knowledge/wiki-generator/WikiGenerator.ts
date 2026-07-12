@@ -22,6 +22,8 @@ import type {
   KnowledgeCompiler,
   MergeEngine,
 } from "../compiler/index.js";
+import type { IdentityResolver } from "../identity/index.js";
+import type { WikiRenderer } from "../renderer/index.js";
 import type { WikiStore } from "../wiki-store/index.js";
 
 /**
@@ -34,8 +36,12 @@ export interface WikiGeneratorConfig {
   readonly connectors: readonly SourceConnector[];
   /** The persistence destination for the wiki. */
   readonly store: WikiStore;
-  /** Compiles a source into pages (INGEST). */
+  /** Extracts renderer-agnostic knowledge from a source (INGEST). */
   readonly compiler: KnowledgeCompiler;
+  /** Resolves candidates to canonical identities (ADR-005). */
+  readonly resolver: IdentityResolver;
+  /** Renders the extraction into pages using canonical identities. */
+  readonly renderer: WikiRenderer;
   /** Merges a new contribution into an existing page (MERGE). */
   readonly mergeEngine: MergeEngine;
 }

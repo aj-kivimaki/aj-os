@@ -32,10 +32,12 @@ export interface WikiRenderer {
   /**
    * Render the extraction into pages. `identities` maps each extracted
    * candidate name to its resolved canonical identity, so paths and
-   * `[[wiki-links]]` use canonical targets throughout.
+   * `[[wiki-links]]` use canonical targets throughout. `generatedAt` is the
+   * ISO timestamp stamped into frontmatter (deterministic).
    */
   render(
     extracted: ExtractedKnowledge,
     identities: ReadonlyMap<string, ResolvedIdentity>,
+    generatedAt: string,
   ): CompiledPage[];
 }

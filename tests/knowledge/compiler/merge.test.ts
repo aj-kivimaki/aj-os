@@ -13,12 +13,15 @@ import {
   createLlmMergeEngine,
   parsePage,
   readFrontmatter,
-  renderPages,
   serializePage,
   type CompiledPage,
   type SourceExtraction,
   type TextGenerator,
 } from "../../../src/knowledge/compiler/index.js";
+import {
+  buildSlugIdentities,
+  renderPages,
+} from "../../../src/knowledge/renderer/index.js";
 
 const AT = () => new Date("2026-07-12T10:00:00.000Z");
 
@@ -42,9 +45,11 @@ function extraction(title: string, description: string): SourceExtraction {
 
 /** The `entities/aj-os.md` page compiled from a single source. */
 function entityPage(id: string, title: string, description: string): CompiledPage {
+  const ex = extraction(title, description);
   const pages = renderPages(
     source(id),
-    extraction(title, description),
+    ex,
+    buildSlugIdentities(ex),
     AT().toISOString(),
   );
   return pages.find((p) => p.path === "entities/aj-os.md")!;

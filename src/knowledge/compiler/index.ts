@@ -3,7 +3,6 @@
  */
 export type {
   KnowledgeCompiler,
-  CompiledKnowledge,
   CompiledPage,
   CompiledPageKind,
   ExtractedKnowledge,
@@ -20,7 +19,6 @@ export {
   type SourceExtraction,
   type EntityType,
 } from "./extraction.js";
-export { renderPages, slugify } from "./render.js";
 export { buildCompilePrompt } from "./prompt.js";
 export {
   createLlmMergeEngine,

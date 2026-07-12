@@ -25,7 +25,13 @@ import { createHash } from "node:crypto";
 
 import type { SourceRecord } from "../../ingestion/index.js";
 import { parsePage, readFrontmatter } from "../compiler/index.js";
-import type { CompiledPage } from "../compiler/index.js";
+import type { CompiledPage, SourceExtraction } from "../compiler/index.js";
+import type {
+  Candidate,
+  ExistingPage,
+} from "../identity/index.js";
+import { pagePathFor } from "../naming.js";
+import type { ResolvedIdentity } from "../renderer/index.js";
 import type {
   GenerationMode,
   GenerationReport,
@@ -131,7 +137,68 @@ export function createWikiGenerator(
   config: WikiGeneratorConfig,
   now: () => Date = () => new Date(),
 ): WikiGenerator {
-  const { connectors, store, compiler, mergeEngine } = config;
+  const { connectors, store, compiler, resolver, renderer, mergeEngine } =
+    config;
+
+  /** Snapshot of existing entity/concept pages for the resolver (live per run). */
+  async function buildCatalog(): Promise<ExistingPage[]> {
+    const paths = [
+      ...(await store.list("entities")),
+      ...(await store.list("concepts")),
+    ];
+    const catalog: ExistingPage[] = [];
+    for (const path of paths) {
+      const content = await store.read(path);
+      if (content === null) {
+        continue;
+      }
+      const fm = readFrontmatter(parsePage(content).frontmatter);
+      catalog.push({
+        path,
+        kind: path.startsWith("entities/") ? "entity" : "concept",
+        title: fm.fields.title ?? "",
+        description: parsePage(content).generated ?? "",
+      });
+    }
+    return catalog;
+  }
+
+  /** Resolve one source's candidates to canonical identities. */
+  async function resolveIdentities(
+    extraction: SourceExtraction,
+    existing: readonly ExistingPage[],
+  ): Promise<Map<string, ResolvedIdentity>> {
+    const candidates: Candidate[] = [
+      ...extraction.entities.map((e) => ({
+        name: e.name,
+        kind: "entity" as const,
+        description: e.description,
+      })),
+      ...extraction.concepts.map((c) => ({
+        name: c.name,
+        kind: "concept" as const,
+        description: c.description,
+      })),
+    ];
+    const identities = new Map<string, ResolvedIdentity>();
+    for (const candidate of candidates) {
+      if (identities.has(candidate.name)) {
+        continue;
+      }
+      const resolution = await resolver.resolve(candidate, existing);
+      const path =
+        resolution.kind === "existing"
+          ? resolution.targetPath
+          : pagePathFor(candidate.kind, candidate.name);
+      identities.set(candidate.name, {
+        path,
+        title: candidate.name,
+        kind: candidate.kind,
+        isNew: resolution.kind === "new",
+      });
+    }
+    return identities;
+  }
 
   async function loadState(): Promise<GeneratorState> {
     const raw = await store.read(STATE_PATH);
@@ -225,10 +292,13 @@ export function createWikiGenerator(
     ctx: RunContext,
     record: SourceRecord,
   ): Promise<void> {
-    const compiled = await compiler.compile(record);
-    const pages = [...compiled.pages].sort((a, b) =>
-      a.path.localeCompare(b.path),
-    );
+    // extract → resolve → render (ADR-005).
+    const extracted = await compiler.compile(record);
+    const catalog = await buildCatalog();
+    const identities = await resolveIdentities(extracted.extraction, catalog);
+    const rendered = renderer.render(extracted, identities, ctx.generatedAt);
+
+    const pages = [...rendered].sort((a, b) => a.path.localeCompare(b.path));
     for (const page of pages) {
       await ingestPage(ctx, record, page);
     }

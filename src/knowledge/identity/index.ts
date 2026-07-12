@@ -8,3 +8,4 @@ export type {
   Resolution,
   PageKind,
 } from "./IdentityResolver.js";
+export { createSlugIdentityResolver } from "./createSlugIdentityResolver.js";

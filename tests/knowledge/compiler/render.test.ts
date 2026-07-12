@@ -7,11 +7,12 @@
 import { describe, expect, it } from "vitest";
 
 import type { SourceRecord } from "../../../src/ingestion/index.js";
+import type { SourceExtraction } from "../../../src/knowledge/compiler/index.js";
+import { slugify } from "../../../src/knowledge/naming.js";
 import {
+  buildSlugIdentities,
   renderPages,
-  slugify,
-  type SourceExtraction,
-} from "../../../src/knowledge/compiler/index.js";
+} from "../../../src/knowledge/renderer/index.js";
 
 const SOURCE: SourceRecord = {
   id: "handbook:foundation/04-aj-os/vision.md",
@@ -32,8 +33,8 @@ const EXTRACTION: SourceExtraction = {
 
 const AT = "2026-07-12T08:00:00.000Z";
 
-function render() {
-  return renderPages(SOURCE, EXTRACTION, AT);
+function render(extraction: SourceExtraction = EXTRACTION) {
+  return renderPages(SOURCE, extraction, buildSlugIdentities(extraction), AT);
 }
 
 function byPath(pages: ReturnType<typeof render>, path: string) {
@@ -108,29 +109,25 @@ describe("renderPages", () => {
   });
 
   it("omits the Entities/Concepts sections when there are none", () => {
-    const pages = renderPages(
-      SOURCE,
-      { summary: { title: "T", keyPoints: ["only a point"] }, entities: [], concepts: [] },
-      AT,
-    );
+    const pages = render({
+      summary: { title: "T", keyPoints: ["only a point"] },
+      entities: [],
+      concepts: [],
+    });
     expect(pages).toHaveLength(1);
     expect(pages[0]!.content).not.toContain("## Entities");
     expect(pages[0]!.content).not.toContain("## Concepts");
   });
 
   it("renders lateral related links, skipping unknown targets", () => {
-    const pages = renderPages(
-      SOURCE,
-      {
-        summary: { title: "T", keyPoints: ["p"] },
-        entities: [
-          { name: "AJ-OS", type: "product", description: "d", related: ["Notion", "Schema Engine", "Ghost"] },
-          { name: "Notion", type: "product", description: "d", related: [] },
-        ],
-        concepts: [{ name: "Schema Engine", description: "d", related: ["AJ-OS"] }],
-      },
-      AT,
-    );
+    const pages = render({
+      summary: { title: "T", keyPoints: ["p"] },
+      entities: [
+        { name: "AJ-OS", type: "product", description: "d", related: ["Notion", "Schema Engine", "Ghost"] },
+        { name: "Notion", type: "product", description: "d", related: [] },
+      ],
+      concepts: [{ name: "Schema Engine", description: "d", related: ["AJ-OS"] }],
+    });
 
     const ajos = byPath(pages, "entities/aj-os.md")!;
     expect(ajos.content).toContain("## Related");
@@ -145,18 +142,14 @@ describe("renderPages", () => {
   });
 
   it("dedupes entities that slugify to the same name", () => {
-    const pages = renderPages(
-      SOURCE,
-      {
-        summary: { title: "T", keyPoints: ["p"] },
-        entities: [
-          { name: "AJ-OS", type: "product", description: "first" },
-          { name: "AJ OS", type: "product", description: "dup" },
-        ],
-        concepts: [],
-      },
-      AT,
-    );
+    const pages = render({
+      summary: { title: "T", keyPoints: ["p"] },
+      entities: [
+        { name: "AJ-OS", type: "product", description: "first" },
+        { name: "AJ OS", type: "product", description: "dup" },
+      ],
+      concepts: [],
+    });
     expect(pages.filter((p) => p.path === "entities/aj-os.md")).toHaveLength(1);
   });
 });

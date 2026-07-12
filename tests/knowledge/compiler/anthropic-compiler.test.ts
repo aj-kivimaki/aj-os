@@ -1,7 +1,7 @@
 /**
- * Tests the AnthropicKnowledgeCompiler wiring (prompt → generate → parse →
- * render) with a stub TextGenerator, so the whole flow is exercised without
- * the network or model non-determinism.
+ * Tests the AnthropicKnowledgeCompiler wiring (prompt → generate → parse)
+ * with a stub TextGenerator. The compiler is renderer-agnostic (ADR-005): it
+ * returns an extraction, not pages.
  */
 import { describe, expect, it, vi } from "vitest";
 
@@ -32,31 +32,23 @@ function stubGenerator(text: string): TextGenerator {
   return { complete: vi.fn(async (): Promise<AIResponse> => ({ text, model: "stub" })) };
 }
 
-const AT = () => new Date("2026-07-12T09:00:00.000Z");
-
 describe("createAnthropicKnowledgeCompiler", () => {
-  it("compiles a source into summary + entity + concept pages", async () => {
-    const compiler = createAnthropicKnowledgeCompiler(
-      { generator: stubGenerator(MODEL_JSON) },
-      AT,
-    );
+  it("extracts renderer-agnostic knowledge from a source (no pages)", async () => {
+    const compiler = createAnthropicKnowledgeCompiler({
+      generator: stubGenerator(MODEL_JSON),
+    });
 
     const compiled = await compiler.compile(SOURCE);
 
-    expect(compiled.sourceId).toBe("handbook:library/note.md");
-    expect(compiled.pages.map((p) => p.path).sort()).toEqual([
-      "concepts/code-first.md",
-      "entities/aj-os.md",
-      "sources/library/note.md",
-    ]);
-    const summary = compiled.pages.find((p) => p.kind === "source")!;
-    expect(summary.content).toContain("- [[entities/aj-os|AJ-OS]]");
-    expect(summary.content).toContain("generated_at: 2026-07-12T09:00:00.000Z");
+    expect(compiled.source.id).toBe("handbook:library/note.md");
+    expect(compiled.extraction.summary.title).toBe("AJ-OS Note");
+    expect(compiled.extraction.entities.map((e) => e.name)).toEqual(["AJ-OS"]);
+    expect(compiled.extraction.concepts.map((c) => c.name)).toEqual(["Code-first"]);
   });
 
   it("passes an enlarged token budget to the generator", async () => {
     const generator = stubGenerator(MODEL_JSON);
-    const compiler = createAnthropicKnowledgeCompiler({ generator }, AT);
+    const compiler = createAnthropicKnowledgeCompiler({ generator });
 
     await compiler.compile(SOURCE);
 
@@ -67,10 +59,9 @@ describe("createAnthropicKnowledgeCompiler", () => {
   });
 
   it("surfaces a CompilerError when the model returns junk", async () => {
-    const compiler = createAnthropicKnowledgeCompiler(
-      { generator: stubGenerator("not json at all") },
-      AT,
-    );
+    const compiler = createAnthropicKnowledgeCompiler({
+      generator: stubGenerator("not json at all"),
+    });
 
     await expect(compiler.compile(SOURCE)).rejects.toBeInstanceOf(CompilerError);
   });

@@ -53,13 +53,6 @@ export interface CompiledPage {
   readonly sources: readonly string[];
 }
 
-/** The graph of pages compiled from a single source. */
-export interface CompiledKnowledge {
-  readonly sourceId: string;
-  /** The source summary page plus its entity and concept pages. */
-  readonly pages: readonly CompiledPage[];
-}
-
 /**
  * The narrow text-generation capability the compiler needs. Structurally
  * satisfied by the platform `AIClient`; a stub satisfies it in tests.
@@ -71,7 +64,10 @@ export interface TextGenerator {
   ): Promise<AIResponse>;
 }
 
-/** Compiles a source into a small graph of interlinked wiki pages. */
+/**
+ * Extracts renderer-agnostic structured knowledge from a source (ADR-005).
+ * It does not render Markdown — that is the WikiRenderer's job.
+ */
 export interface KnowledgeCompiler {
-  compile(source: SourceRecord): Promise<CompiledKnowledge>;
+  compile(source: SourceRecord): Promise<ExtractedKnowledge>;
 }

@@ -9,13 +9,12 @@
 import type { SourceRecord } from "../../ingestion/index.js";
 
 import type {
-  CompiledKnowledge,
+  ExtractedKnowledge,
   KnowledgeCompiler,
   TextGenerator,
 } from "./KnowledgeCompiler.js";
 import { parseExtraction } from "./extraction.js";
 import { buildCompilePrompt } from "./prompt.js";
-import { renderPages } from "./render.js";
 
 /**
  * Token budget for a compilation. Larger than the concise-answer default: one
@@ -30,16 +29,14 @@ export interface AnthropicKnowledgeCompilerConfig {
 
 export function createAnthropicKnowledgeCompiler(
   config: AnthropicKnowledgeCompilerConfig,
-  now: () => Date = () => new Date(),
 ): KnowledgeCompiler {
-  async function compile(source: SourceRecord): Promise<CompiledKnowledge> {
+  async function compile(source: SourceRecord): Promise<ExtractedKnowledge> {
     const prompt = buildCompilePrompt(source);
     const response = await config.generator.complete(prompt, {
       maxTokens: COMPILE_MAX_TOKENS,
     });
     const extraction = parseExtraction(response.text);
-    const pages = renderPages(source, extraction, now().toISOString());
-    return { sourceId: source.id, pages };
+    return { source, extraction };
   }
 
   return { compile };
