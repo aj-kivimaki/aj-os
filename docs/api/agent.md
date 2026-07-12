@@ -134,7 +134,7 @@ setup is documented in `infrastructure/n8n/README.md`.
 # Future Direction
 
 - Expose the same handbook capabilities over **MCP**, reusing `src/handbook/` unchanged.
-- Extend AI services to consume structured business data (business summaries, briefings,
-  recommendations) once the Notion-backed business endpoints exist.
+- Extend the agent to additional context sources as they become available,
+  keeping capability logic transport-agnostic.
 
 > **The agent is an interface onto shared capabilities — not a separate application.**

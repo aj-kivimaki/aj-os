@@ -200,7 +200,7 @@ Future versions may include:
 
 # Relationship to Other Standards
 
--   **AJS-001** --- Defines the overall developer operating workflow.
+-   **AJS-001** --- Daily Workflow Standard: the daily operating cadence of a work session.
 -   **AJS-002** --- Defines how implementation context is assembled.
 -   **AJS-003** --- Will define what knowledge belongs where.
 -   **AJS-004** --- Will define AI agent contracts.

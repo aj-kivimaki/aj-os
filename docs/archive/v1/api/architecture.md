@@ -1,5 +1,9 @@
 # API Architecture
 
+> **Archived (AJ-OS v1).** Superseded technical documentation for the v1
+> business API — not AJ-OS today. See [`docs/archive/v1/api/`](README.md) and
+> [`docs/VISION.md`](../../../VISION.md).
+
 The AJ-OS API provides a REST interface for consuming business capabilities implemented by the AJ-OS platform.
 
 It is an application interface, not a separate application.

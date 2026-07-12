@@ -1,232 +1,56 @@
 # Configuration
 
-This guide explains how to configure AJ-OS to communicate with your Notion workspace.
+Reference for AJ-OS settings. To get running quickly, follow the
+[installation guide](installation.md) first.
 
----
+AJ-OS reads configuration from two places:
 
-# Environment Variables
+- **`aj.config.json`** — the Knowledge Assistant's handbook location.
+- **`.env`** — secrets and service settings (API keys, the Agent/API server).
 
-AJ-OS is configured using environment variables.
+## Knowledge Assistant (`aj ask`)
 
-Create a `.env` file in the project root.
+`aj.config.json`:
 
-```env
-NOTION_API_KEY=your_notion_api_key
-NOTION_PARENT_PAGE_ID=your_parent_page_id
+```json
+{
+  "handbook": { "path": "/path/to/your/handbook" }
+}
 ```
 
----
+`.env`:
 
-# NOTION_API_KEY
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `ANTHROPIC_API_KEY` | yes | Anthropic key used to generate answers |
+| `ANTHROPIC_MODEL` | no | Model id; a built-in default is used if unset |
 
-This is your Notion Integration Token.
+The Assistant locates its handbook via `aj.config.json` — **not** `HANDBOOK_PATH`.
 
-Create one by:
+## Handbook Agent / API server (`npm run serve`)
 
-1. Visit https://www.notion.so/profile/integrations
-2. Create a new Internal Integration.
-3. Give it a name.
-4. Copy the Internal Integration Token.
-5. Paste it into:
+Only needed to run the REST API and Handbook agent; the Assistant CLI does not use
+these. The agent itself is documented in [api/agent.md](../api/agent.md).
 
-```env
-NOTION_API_KEY=ntn_xxxxxxxxxxxxxxxxx
-```
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `ANTHROPIC_API_KEY` | yes | Powers the agent |
+| `ANTHROPIC_MODEL` | no | Model id (default applied if unset) |
+| `HANDBOOK_PATH` | yes | Absolute path to the handbook the agent reads/writes |
+| `API_PORT` | no | HTTP port (default `3000`) |
+| `API_HOST` | no | Bind address (default `0.0.0.0`; keep so Docker n8n can reach the host) |
+| `API_AUTH_TOKEN` | yes | Bearer token clients must send; at least 16 characters |
 
-Keep this token private.
+The server fails fast with a clear message if a required variable is missing.
 
-Never commit it to Git.
+## Security
 
----
+- Never commit `.env`, API keys, or tokens; ensure `.env` is in `.gitignore`.
+- Generate `API_AUTH_TOKEN` from a strong source, e.g. `openssl rand -hex 32`.
 
-# NOTION_PARENT_PAGE_ID
+## Legacy — Notion sync
 
-AJ-OS creates all databases underneath a single parent page.
-
-Create a new page in your Notion workspace.
-
-Example:
-
-```
-Game Audio Business OS
-```
-
-Share this page with your Notion Integration.
-
-Copy the page ID from the URL.
-
-Example:
-
-```
-https://www.notion.so/Game-Audio-Business-OS-38d2d7cf41c78183a388c8e2aba8e125
-```
-
-The page ID is:
-
-```
-38d2d7cf41c78183a388c8e2aba8e125
-```
-
-Configure it as:
-
-```env
-NOTION_PARENT_PAGE_ID=38d2d7cf41c78183a388c8e2aba8e125
-```
-
----
-
-# Sharing the Parent Page
-
-This is the most common setup issue.
-
-After creating your integration:
-
-1. Open the parent page.
-2. Click **Share**.
-3. Select **Invite**.
-4. Search for your integration.
-5. Add it.
-6. Save.
-
-Without this permission AJ-OS cannot access the page.
-
----
-
-# API & Handbook Agent Variables
-
-These variables are **only** required to run the REST API and handbook agent
-(`npm run serve`). The workspace sync CLI (`npm run sync`) does not use them, so you can leave
-them unset if you only sync to Notion.
-
-```env
-ANTHROPIC_API_KEY=your_anthropic_api_key
-ANTHROPIC_MODEL=claude-sonnet-5
-HANDBOOK_PATH=/absolute/path/to/your/handbook
-API_PORT=3000
-API_HOST=0.0.0.0
-API_AUTH_TOKEN=a_long_random_secret
-```
-
-| Variable            | Required | Purpose                                                                 |
-| ------------------- | -------- | ----------------------------------------------------------------------- |
-| `ANTHROPIC_API_KEY` | yes      | Anthropic API key that powers the agent                                 |
-| `ANTHROPIC_MODEL`   | no       | Model id (default `claude-sonnet-5`); change without editing code       |
-| `HANDBOOK_PATH`     | yes      | Absolute path to the handbook vault the agent reads/writes              |
-| `API_PORT`          | no       | HTTP port (default `3000`)                                              |
-| `API_HOST`          | no       | Bind address (default `0.0.0.0`; keep it so Docker n8n can reach the host) |
-| `API_AUTH_TOKEN`    | yes      | Bearer token clients must send; minimum 16 characters                   |
-
-The server fails fast with a clear message if a required variable is missing. See
-`docs/api/agent.md` for the agent architecture and endpoints.
-
----
-
-# Synchronization
-
-Once configured, synchronize the workspace.
-
-```bash
-npm run sync
-```
-
-Synchronization performs the following steps:
-
-```
-Discover existing databases
-
-↓
-
-Create missing databases
-
-↓
-
-Collect database IDs
-
-↓
-
-Resolve relations
-
-↓
-
-Generate CEO Dashboard
-
-↓
-
-Summary
-```
-
-Synchronization is idempotent.
-
-Running it repeatedly will never create duplicate databases or duplicate relations.
-
----
-
-# Project Structure
-
-AJ-OS generates a connected workspace.
-
-Current business modules include:
-
-- Projects
-- CRM
-- Portfolio
-- Production Music
-- Finance
-- Game Jams
-
-The CEO Dashboard is generated automatically after synchronization.
-
----
-
-# Security
-
-Never commit:
-
-- `.env`
-- API keys
-- Personal workspace IDs
-
-Ensure `.env` is listed in `.gitignore`.
-
----
-
-# Multiple Workspaces
-
-You can maintain multiple AJ-OS workspaces by changing the environment variables.
-
-For example:
-
-```
-.env.local
-
-.env.production
-
-.env.demo
-```
-
-Each environment can target a different Notion workspace.
-
----
-
-# Verification Checklist
-
-Before using AJ-OS, verify:
-
-- Node.js is installed.
-- Dependencies are installed.
-- `.env` exists.
-- API key is valid.
-- Parent page is shared with the integration.
-- Synchronization completes successfully.
-- CEO Dashboard is generated.
-
----
-
-# Next Steps
-
-After configuration:
-
-- Explore the generated workspace.
-- Review the CEO Dashboard.
-- Customize business modules.
-- Read the Development guide to extend AJ-OS.
+`NOTION_API_KEY` and `NOTION_PARENT_PAGE_ID` configure only the **v1** Notion sync
+CLI (`npm run sync`), preserved with the v1 record in
+[docs/archive/v1/](../archive/v1/README.md). They are not used by the Assistant or
+the agent.

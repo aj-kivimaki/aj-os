@@ -1,182 +1,69 @@
 # Installation
 
-This guide explains how to install and configure AJ-OS for the first time.
+How to install AJ-OS and run the Knowledge Assistant for the first time. For what
+AJ-OS *is*, see [VISION](../VISION.md); for every setting, see the
+[configuration guide](configuration.md).
 
----
+## Requirements
 
-# Requirements
+- **Node.js 22+** and npm
+- An **[Anthropic API key](https://console.anthropic.com/)** — the Assistant uses it to generate answers
+- A **handbook with a generated `wiki/`** (see the prerequisite note below)
 
-Before installing AJ-OS, ensure you have:
-
-- Node.js 22 or newer
-- npm
-- A Notion account
-- A Notion integration
-- A Notion page that will act as the workspace root
-
----
-
-# Clone the Repository
+## Install
 
 ```bash
 git clone https://github.com/aj-kivimaki/aj-os.git
-
 cd aj-os
-```
-
----
-
-# Install Dependencies
-
-```bash
 npm install
 ```
 
----
+## Configure the minimum to run
 
-# Create Environment File
-
-Create a `.env` file in the project root.
-
-Example:
-
-```env
-NOTION_API_KEY=your_notion_api_key
-
-NOTION_PARENT_PAGE_ID=your_parent_page_id
-```
-
----
-
-# Configure Notion
-
-## Step 1
-
-Create a new Notion Integration.
-
-Copy the Internal Integration Token.
-
-Use it as:
-
-```env
-NOTION_API_KEY=...
-```
-
----
-
-## Step 2
-
-Create a new page inside your Notion workspace.
-
-This page becomes the root of your AJ-OS workspace.
-
-Share the page with your integration.
-
-Without this step AJ-OS cannot access the page.
-
----
-
-## Step 3
-
-Copy the page ID from the URL.
-
-Example:
-
-```
-https://www.notion.so/My-Workspace/38d2d7cf41c78183a388c8e2aba8e125
-```
-
-Page ID:
-
-```
-38d2d7cf41c78183a388c8e2aba8e125
-```
-
-Use it as:
-
-```env
-NOTION_PARENT_PAGE_ID=38d2d7cf41c78183a388c8e2aba8e125
-```
-
----
-
-# Verify Installation
-
-Run:
+Two settings are enough to ask your first question; the
+[configuration guide](configuration.md) covers the rest.
 
 ```bash
-npm run typecheck
-
-npm run build
-
-npm run sync
+cp aj.config.example.json aj.config.json   # set handbook.path
+cp .env.example .env                        # set ANTHROPIC_API_KEY
 ```
 
-Successful synchronization should:
+- `aj.config.json` → `handbook.path` — the path to your handbook.
+- `.env` → `ANTHROPIC_API_KEY` — your Anthropic key.
 
-- discover existing databases
-- create missing databases
-- synchronize relations
-- generate the CEO Dashboard
+## Run
 
----
+Install the `aj` command once, then ask a question:
 
-# Expected Output
-
-Typical synchronization:
-
-```text
-Workspace Synchronization
-
-Discover existing databases
-
-Create missing databases
-
-Collect database IDs
-
-Resolve relations
-
-Generate CEO Dashboard
-
-Summary
-
-Created: X
-Skipped: X
-Relations created: X
-Dashboard generated: 1
+```bash
+npm run build && npm link
+aj ask "How does the Context Builder work?"
 ```
 
-Running synchronization multiple times should never create duplicate databases or relations.
+Or run straight from source, without linking:
 
----
+```bash
+npm run dev -- ask "How does the Context Builder work?"
+```
 
-# Troubleshooting
+> **Prerequisite — a generated wiki.** The Assistant reads a handbook's generated
+> `wiki/`, not raw notes. Producing that wiki is the Knowledge Platform's job,
+> which is implemented but not yet wired to a runnable command (see the
+> [ROADMAP](../../ROADMAP.md)). Until then a pre-generated wiki is required — if
+> you see "no generated wiki," that is a known limitation, not a setup mistake.
 
-## Page not found
+## Troubleshooting
 
-Ensure the parent page has been shared with your Notion integration.
+- **"No generated wiki."** Expected until the wiki generator is wired (see above).
+- **Missing or invalid API key.** The Assistant needs a valid `ANTHROPIC_API_KEY`
+  in `.env` and reports this clearly.
+- **Wrong handbook path.** Ensure `aj.config.json` → `handbook.path` points at a
+  handbook that contains a `wiki/` directory.
 
----
+## Next steps
 
-## Unauthorized
+- [Configuration guide](configuration.md) — every setting, plus the Handbook Agent/API.
+- [Development guide](development.md) — build, test, and run from source.
 
-Verify that your API key is correct.
-
----
-
-## Missing databases
-
-Run synchronization again.
-
-AJ-OS is idempotent and safely retries incomplete synchronization.
-
----
-
-# Next Steps
-
-Once installation is complete:
-
-- Read the Configuration guide.
-- Explore the generated workspace.
-- Review the CEO Dashboard.
-- Begin customizing business modules for your own workflow.
+> The v1 Notion sync CLI (`npm run sync`) is legacy; its setup is preserved with
+> the v1 record in [docs/archive/v1/](../archive/v1/README.md).

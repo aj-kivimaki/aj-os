@@ -304,7 +304,7 @@ A compliant knowledge system should answer:
 
 # Relationship to Other Standards
 
--   **AJS-001** --- Defines the developer workflow.
+-   **AJS-001** --- Daily Workflow Standard: the daily operating cadence of a work session.
 -   **AJS-002** --- Defines how context is assembled.
 -   **AJS-003** --- Defines what knowledge exists, where it belongs, and
     who owns it.

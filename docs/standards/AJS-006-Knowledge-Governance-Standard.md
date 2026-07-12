@@ -298,7 +298,7 @@ A governed knowledge system should:
 
 # Relationship to Other Standards
 
--   **AJS-001** --- Developer Operating System
+-   **AJS-001** --- Daily Workflow Standard: the daily operating cadence of a work session.
 -   **AJS-002** --- Context Assembly
 -   **AJS-003** --- Knowledge Standard
 -   **AJS-004** --- AJ-OS Agent Specification

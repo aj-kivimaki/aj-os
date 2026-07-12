@@ -27,6 +27,12 @@ system.
 - [`adr/`](adr/README.md) — the v1 architecture decision records (001–007).
 - [`modules/`](modules/README.md) — the v1 business modules: Projects, CRM,
   Portfolio, Production Music, Finance, and Game Jams.
+- [`ai/`](ai/README.md) — the v1 AI engineering-context layer: project context,
+  coding standards, engineering philosophy, implementation rules, workflow, and
+  the milestone prompt history.
+- [`api/`](api/README.md) — the v1 REST API documentation (overview,
+  architecture, roadmap) for the Notion-backed business endpoints. The current
+  API surface — the Handbook agent — remains active at `docs/api/agent.md`.
 
 These documents are frozen. References inside them point to other v1 documents
 as they existed at the time.

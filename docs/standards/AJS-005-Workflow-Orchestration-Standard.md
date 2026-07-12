@@ -340,7 +340,7 @@ Future versions may support:
 
 # Relationship to Other Standards
 
--   **AJS-001** --- Defines the developer operating workflow.
+-   **AJS-001** --- Daily Workflow Standard: the daily operating cadence of a work session.
 -   **AJS-002** --- Defines context assembly.
 -   **AJS-003** --- Defines knowledge ownership.
 -   **AJS-004** --- Defines individual AJ-OS Agents.

@@ -1,5 +1,14 @@
 # AJ-OS API
 
+> **Archived (AJ-OS v1).** This describes the v1 REST API, designed to expose the
+> Notion-backed **business** capabilities (Projects, CRM, Portfolio, Dashboard).
+> It is superseded and preserved, frozen, as a historical record. The only
+> current API surface is the Handbook agent, documented in
+> [`docs/api/agent.md`](../../../api/agent.md). See
+> [`docs/archive/v1/`](../README.md) and [`docs/VISION.md`](../../../VISION.md).
+> If AJ-OS needs a broader API in v2, it will be designed from the current
+> architecture rather than evolved from these documents.
+
 The AJ-OS API extends the business operating system by exposing business capabilities through a REST interface.
 
 The API is not a wrapper around the Notion API.

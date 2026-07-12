@@ -291,7 +291,7 @@ logging:
 
 # Relationship to Other Standards
 
--   **AJS-001** defines the developer workflow.
+-   **AJS-001** defines the daily operating cadence of a work session.
 -   **AJS-002** defines context assembly.
 -   **AJS-003** defines knowledge ownership.
 -   **AJS-004** defines AJ-OS Agent behavior.
