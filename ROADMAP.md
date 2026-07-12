@@ -46,6 +46,33 @@ This phase defines **how AJ-OS is built**, not just what it does.
 
 ---
 
+# Resume Here — Recommended Next Steps
+
+> Read this first when returning to development. It is the single "where do I
+> pick up" pointer. Items are ordered; the first is the highest-leverage.
+
+1. **Wire the Knowledge Platform pipeline to an entry point.** The Wiki Generator
+   (SPEC-005), Source Connector (SPEC-006), and Wiki Store (SPEC-007) exist as
+   tested library code (`src/ingestion/`, `src/knowledge/`) but nothing invokes
+   `WikiGenerator.run()` yet. Add a thin CLI command (e.g. `aj wiki build`) that
+   composes the connectors, store, compiler, resolver, renderer, and merge engine
+   from config and runs a generation cycle. This closes the loop so the Knowledge
+   Assistant can read a wiki this repo actually generated, and it exercises the
+   pipeline against a real handbook — which is exactly what the upcoming
+   real-world usage will stress.
+2. **Use the Knowledge Assistant against a real handbook** and capture friction
+   as backlog items (configuration, retrieval quality, citations, missing-wiki UX).
+3. **End-of-Session Workflow (SPEC-003)** — the orchestration layer that decides
+   when to run the generator and owns git commits (the engine never commits).
+4. **Knowledge Review Workflow (SPEC-004)** — human governance of what enters the
+   Handbook.
+5. **Context Builder M5 — Explainability & Profiles**, then M6 — Optimization
+   (see `implementation/phase-2-core-platform/spec-002-context-builder/`).
+
+Deferred and future work is catalogued in the phases below.
+
+---
+
 # Phase 2 — Core Knowledge Platform (In Progress)
 
 Build the reusable platform according to the approved architecture and specifications.
@@ -55,14 +82,21 @@ Build the reusable platform according to the approved architecture and specifica
 - **Context Builder** (SPEC-002) — collects, selects, and assembles knowledge deterministically end-to-end through `ContextBuilder.build(request)`, returning an immutable `ContextPackage`.
 - **Supporting platform capabilities** — Configuration, Handbook, Retrieval, Prompt Renderer, and AI Client — established by building the first product on the platform.
 
+**Implemented since v2.0.0 (library level, not yet wired):**
+
+- **Knowledge Platform pipeline** (ARCH-002) — Source Connector (SPEC-006), Wiki
+  Store (SPEC-007), and the Wiki Generator (SPEC-005) with its Knowledge Compiler,
+  Identity Resolvers (ADR-005/006), Wiki Renderer, and Merge Engine. Tested library
+  code with no orchestration entry point yet — see **Resume Here**, item 1.
+
 Detailed implementation history lives in the [CHANGELOG](CHANGELOG.md) and the [specifications](docs/specifications/); it is intentionally not duplicated here.
 
 **Remaining platform work (upcoming):**
 
+- Wire the Knowledge Platform pipeline to an orchestration entry point
 - Further Context Builder capabilities — explainability, context profiles, rendering
 - End-of-Session Workflow (SPEC-003)
 - Knowledge Review Workflow (SPEC-004)
-- Wiki Generator Agent (SPEC-005)
 
 Project Kickoff (SPEC-001) remains intentionally postponed until more of the core platform is operational, so it can become an early workflow built on top of it.
 

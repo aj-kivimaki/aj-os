@@ -8,8 +8,38 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
 
 ## [Unreleased]
 
+### Added
+
+- **Knowledge Platform pipeline (library level)** — the sources → wiki engine
+  specified by **ARCH-002** and SPEC-005/006/007, implemented as tested library
+  code. It is **not yet wired to a runnable orchestration entry point** (no CLI
+  command or service invokes it yet); wiring is the next step (see `ROADMAP.md`).
+  - **Source Connector (SPEC-006)** — enumerates and normalizes source documents
+    into `SourceRecord`s with stable ids and content hashes; filesystem
+    implementation (`src/ingestion/`).
+  - **Wiki Store (SPEC-007)** — persistence-only read/write of wiki pages, no git
+    (`src/knowledge/wiki-store/`).
+  - **Wiki Generator (SPEC-005)** — orchestrates the incremental cycle
+    (INGEST → RECONCILE → LINT) via `WikiGenerator.run()`, returning a
+    `GenerationReport`; never commits and never deletes pages headless
+    (`src/knowledge/wiki-generator/`).
+  - **Knowledge Compiler** — extracts renderer-agnostic structured knowledge from
+    a source behind an LLM port, with an Anthropic implementation
+    (`src/knowledge/compiler/`).
+  - **Identity Resolvers (ADR-005, ADR-006)** — map candidate entities/concepts to
+    canonical identities: deterministic slug baseline, LLM-based semantic
+    resolver, and an alias-aware decorator (`src/knowledge/identity/`).
+  - **Wiki Renderer & Merge Engine** — render pages from the extraction using
+    canonical identities and enrich existing pages without rewriting human-owned
+    regions (`src/knowledge/renderer/`, `src/knowledge/compiler/merge.ts`).
+- Architecture and decisions for the pipeline: **ARCH-002**, **ADR-002**–**ADR-006**.
+- The automated test suite grew to **328 tests** across the platform, the
+  knowledge pipeline, and the product.
+
 ### Planned
 
+- Wire the Knowledge Platform pipeline to an orchestration entry point (CLI/service) so it can generate a wiki end-to-end
+- End-of-Session Workflow (SPEC-003) and Knowledge Review Workflow (SPEC-004)
 - Repository integration and Notion-backed business endpoints (Projects, Portfolio, CRM, Dashboard, Business Health)
 - Additional Business Rules
 - Morning Brief

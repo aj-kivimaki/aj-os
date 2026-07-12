@@ -200,6 +200,20 @@ platform architecture, delivered together with its first complete product,
   [Products](#products).
 - **A REST API and Handbook AI Agent** for integrations and automation.
 
+## In progress since v2.0.0 (unreleased)
+
+- **The Knowledge Platform pipeline** (ARCH-002) — the sources → wiki engine that
+  *produces* the generated wiki the Knowledge Assistant reads. It is **implemented
+  at the library level and covered by tests**, but is **not yet wired to a runnable
+  command** — no CLI or service invokes it yet. Its pieces:
+  - **Source Connector** (SPEC-006), **Wiki Store** (SPEC-007), and the **Wiki
+    Generator** (SPEC-005) with its Knowledge Compiler, Identity Resolvers
+    (ADR-005/006), Wiki Renderer, and Merge Engine.
+  - Code: `src/ingestion/` and `src/knowledge/`. Architecture: `ARCH-002`.
+
+  Wiring this pipeline to an orchestration entry point is the top of the
+  [roadmap](ROADMAP.md).
+
 ## Learn more
 
 - [CHANGELOG.md](CHANGELOG.md) — the full, itemized release history (including the
@@ -245,13 +259,15 @@ aj ask "How does the Context Builder work?"
 > Run `npm run build && npm link` once to make the `aj` command available, or use
 > `npm run dev -- ask "…"` to run straight from source without building.
 
-> **Prerequisite — a pre-generated wiki (an intentional v2.0.0 limitation).**
+> **Prerequisite — a pre-generated wiki.**
 > The Knowledge Assistant searches a handbook's **generated `wiki/`**, not its raw
 > notes — reading a curated, AI-optimized wiki is what keeps answers grounded and
-> citable. Producing that wiki is the job of the **Wiki Generator (SPEC-005)**, which
-> is planned but **not yet part of Platform v2.0.0** (see the [roadmap](ROADMAP.md)).
-> So at this stage a **pre-generated wiki is required** — if you see "no generated
-> wiki," that is a known platform limitation, not a missed setup step. The
+> citable. Producing that wiki is the job of the **Wiki Generator (SPEC-005)**. As
+> of v2.0.0 the generator was not yet built; it now exists as a **tested library**
+> (ARCH-002) but is **not yet wired to a runnable command**, so it cannot yet be
+> invoked end-to-end (see the [roadmap](ROADMAP.md)). Until that wiring lands, a
+> **pre-generated wiki is required** — if you see "no generated wiki," that is a
+> known limitation, not a missed setup step. The
 > [usage guide](implementation/products/knowledge-assistant/usage.md) has the
 > details.
 
@@ -307,9 +323,11 @@ rather than the center of the platform.
 ## Phase 2 — Core Platform Services
 
 - ✅ Context Builder (SPEC-002) — delivered in Platform v2.0.0
+- 🟡 Knowledge Platform pipeline — Wiki Generator (SPEC-005), Source Connector
+  (SPEC-006), Wiki Store (SPEC-007): implemented at the library level, **pending
+  orchestration wiring**
 - End-of-Session Workflow (SPEC-003)
 - Knowledge Review Workflow (SPEC-004)
-- Wiki Generator Agent (SPEC-005)
 
 Project Kickoff (SPEC-001) is intentionally postponed until more of the platform is operational.
 
