@@ -3,8 +3,8 @@
 Contributions of all sizes are welcome — bug reports, documentation, design
 discussion, and code.
 
-This document answers **how to work in this repository.** For *what AJ-OS is*,
-read [docs/VISION.md](docs/VISION.md); for *how it is structured*, read
+This document answers **how to work in this repository.** For _what AJ-OS is_,
+read [docs/VISION.md](docs/VISION.md); for _how it is structured_, read
 [docs/architecture/](docs/architecture/).
 
 ---
@@ -67,7 +67,6 @@ npm run typecheck  # type check
 npm run build      # build
 npm test           # run the test suite
 npm run dev -- ask "…"   # run the Knowledge Assistant from source
-npm run sync       # synchronize the Notion workspace (legacy v1 sync CLI)
 ```
 
 Before opening a pull request, ensure `npm run typecheck`, `npm run build`, and

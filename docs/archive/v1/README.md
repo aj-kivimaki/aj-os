@@ -36,3 +36,7 @@ system.
 
 These documents are frozen. References inside them point to other v1 documents
 as they existed at the time.
+
+The v1 **source code** is archived separately at
+[`archive/v1/src/`](../../../archive/v1/README.md) (kept outside `src/` so it is
+excluded from the active build).

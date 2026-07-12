@@ -1,4 +1,4 @@
-import { env } from "./env.js";
+import { env } from "./app-env.js";
 
 /**
  * Configuration required by the agent + API server.

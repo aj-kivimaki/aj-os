@@ -1,7 +1,7 @@
 # Installation
 
 How to install AJ-OS and run the Knowledge Assistant for the first time. For what
-AJ-OS *is*, see [VISION](../VISION.md); for every setting, see the
+AJ-OS _is_, see [VISION](../VISION.md); for every setting, see the
 [configuration guide](configuration.md).
 
 ## Requirements
@@ -65,5 +65,5 @@ npm run dev -- ask "How does the Context Builder work?"
 - [Configuration guide](configuration.md) — every setting, plus the Handbook Agent/API.
 - [Development guide](development.md) — build, test, and run from source.
 
-> The v1 Notion sync CLI (`npm run sync`) is legacy; its setup is preserved with
-> the v1 record in [docs/archive/v1/](../archive/v1/README.md).
+> The original v1 Notion implementation is preserved, frozen, in the
+> [v1 archive](../archive/v1/README.md) — it is no longer part of the active system.
