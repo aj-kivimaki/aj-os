@@ -31,10 +31,10 @@ export {
   parsePage,
   serializePage,
   readFrontmatter,
+  patchFrontmatter,
+  carryLearnedMetadata,
   extractLinks,
   extractCallouts,
-  GENERATED_BEGIN,
-  GENERATED_END,
   type ParsedPage,
   type Frontmatter,
 } from "./regions.js";

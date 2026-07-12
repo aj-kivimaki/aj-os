@@ -13,6 +13,13 @@
 
 ---
 
+> **Amended by ADR-006 (2026-07-12).** The "human-owned region" of §5 and the
+> human-edit protection in §6 are **superseded**: realigning to ADR-002, the
+> wiki body is fully generator-owned and MERGE re-synthesizes it. The guards
+> below still hold (they protect accumulated *generated* knowledge); only the
+> manual-wiki-edit protection is removed. Learned frontmatter metadata
+> (`aliases`) is the sole preserved exception.
+
 # Context
 
 INGEST compiles a source into a small graph of pages (SPEC-005 §22). Once

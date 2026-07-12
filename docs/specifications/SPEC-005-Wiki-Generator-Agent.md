@@ -569,15 +569,14 @@ fails any guard is **never persisted**:
 - no silent loss of supported knowledge;
 - no implausible collapse in size.
 
-**Human-owned vs generator-owned regions.** MERGE only rewrites the
-**generator-owned region**; a **human-owned region** is never touched
-(structural protection, long-term). Interim, a page that has **drifted from
-its last generated hash** is treated as human-owned and protected.
+**The body is generator-owned (ADR-002, ADR-006).** MERGE re-synthesizes the
+whole page body; the guards protect accumulated *generated* knowledge, not
+manual edits. A hand-edited body is drift, surfaced by LINT (hash), not
+preserved. Learned frontmatter metadata (`aliases`) is carried forward.
 
-**Fallback.** When re-synthesis is unsafe (human-owned/drifted page, or
-guards fail), MERGE never writes a lossy page and never touches human
-content: it **appends** the new knowledge losslessly into the generated
-region, or **defers** with a needs-merge proposal if even that isn't safe.
+**Fallback.** When re-synthesis fails the guards, MERGE never writes a lossy
+page: it **appends** the new knowledge losslessly, or **defers** with a
+needs-merge proposal if the existing page is unparseable.
 
 **Contradictions** are surfaced as retained `> [!warning] Contradiction`
 callouts (both claims, both sources, date); never auto-resolved.

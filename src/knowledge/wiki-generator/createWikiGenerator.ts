@@ -24,7 +24,11 @@
 import { createHash } from "node:crypto";
 
 import type { SourceRecord } from "../../ingestion/index.js";
-import { parsePage, readFrontmatter } from "../compiler/index.js";
+import {
+  carryLearnedMetadata,
+  parsePage,
+  readFrontmatter,
+} from "../compiler/index.js";
 import type { CompiledPage, SourceExtraction } from "../compiler/index.js";
 import type {
   Candidate,
@@ -98,10 +102,11 @@ function sorted(values: Iterable<string>): string[] {
   return [...values].sort((a, b) => a.localeCompare(b));
 }
 
-/** Hash of the generator-owned region — the drift-detection signal. */
+/** Hash of the generator-owned body — the drift-detection signal (ADR-002). */
 function generatedHash(content: string): string {
-  const generated = parsePage(content).generated ?? content;
-  return createHash("sha256").update(generated, "utf8").digest("hex");
+  return createHash("sha256")
+    .update(parsePage(content).body, "utf8")
+    .digest("hex");
 }
 
 /** A page's contributing source ids, read from its frontmatter. */
@@ -152,12 +157,14 @@ export function createWikiGenerator(
       if (content === null) {
         continue;
       }
-      const fm = readFrontmatter(parsePage(content).frontmatter);
+      const parsed = parsePage(content);
+      const fm = readFrontmatter(parsed.frontmatter);
       catalog.push({
         path,
         kind: path.startsWith("entities/") ? "entity" : "concept",
         title: fm.fields.title ?? "",
-        description: parsePage(content).generated ?? "",
+        description: parsed.body,
+        aliases: [...fm.aliases],
       });
     }
     return catalog;
@@ -276,7 +283,8 @@ export function createWikiGenerator(
       ctx.updated.add(page.path);
       ctx.merged.add(page.path);
     } else if (prov.length === 1) {
-      await writePage(ctx, page.path, page.content); // RE-DERIVE own page
+      // RE-DERIVE own page; carry learned metadata (aliases) forward.
+      await writePage(ctx, page.path, carryLearnedMetadata(existing, page.content));
       ctx.updated.add(page.path);
     } else {
       // Shared page this source already backs, now modified → stale, never

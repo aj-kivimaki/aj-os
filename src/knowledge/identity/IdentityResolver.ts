@@ -27,6 +27,8 @@ export interface ExistingPage {
   readonly kind: PageKind;
   readonly title: string;
   readonly description: string;
+  /** Learned alternative names for this page (ADR-006). */
+  readonly aliases: readonly string[];
 }
 
 /**

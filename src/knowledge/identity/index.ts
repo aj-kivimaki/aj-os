@@ -13,3 +13,4 @@ export {
   createSemanticIdentityResolver,
   type SemanticIdentityResolverConfig,
 } from "./createSemanticIdentityResolver.js";
+export { createAliasAwareResolver } from "./createAliasAwareResolver.js";

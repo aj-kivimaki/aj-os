@@ -3,21 +3,22 @@
  *
  * When a new source contributes to an entity/concept that already has a
  * page, MERGE folds the new extraction into the existing page so the page
- * ends up **richer than before**. The Wiki is the sole knowledge artifact:
- * MERGE reads the existing *page* and the incoming compiled page — there is
- * no claim store.
+ * ends up **richer than before**. The whole body is generator-owned
+ * (ADR-002); MERGE re-synthesizes it — the guards protect accumulated
+ * *generated* knowledge, not manual edits. The Wiki is the sole knowledge
+ * artifact: MERGE reads the existing *page* and the incoming page — no claim
+ * store.
  *
- * Enrichment is **validated, not proven**, against five mechanical guards:
+ * Enrichment is **validated, not proven**, against mechanical guards:
  *  1. provenance is a superset,
  *  2. every prior `[[link]]` is retained,
  *  3. every prior contradiction callout is retained,
- *  4. the human-owned region is untouched (structural — §regions),
- *  5. the result has valid structure/frontmatter.
+ *  4. the result is non-empty / structurally valid.
  * If any guard fails, MERGE never persists the lossy result: it falls back
- * to a lossless **append** into the generated region, or **defers** with a
- * needs-merge proposal when it cannot even append safely.
+ * to a lossless **append**, or **defers** when it cannot even append safely.
  *
- * No semantic fact-loss detection — that is intentionally out of scope.
+ * Learned frontmatter metadata (`aliases`) is preserved across the merge;
+ * no semantic fact-loss detection — that is intentionally out of scope.
  */
 import type {
   CompiledPage,
@@ -29,9 +30,9 @@ import {
   extractCallouts,
   extractLinks,
   parsePage,
+  patchFrontmatter,
   readFrontmatter,
   serializePage,
-  type Frontmatter,
 } from "./regions.js";
 
 const MERGE_MAX_TOKENS = 4096;
@@ -101,28 +102,22 @@ function unionSources(
   );
 }
 
+/**
+ * Rebuild the merged frontmatter by patching the existing block: widen
+ * `sources`, bump `updated`/`generated_at`, and **preserve every other
+ * field** — title, type, created, and human-added fields like `aliases`
+ * (ADR-006).
+ */
 function mergedFrontmatter(
-  existing: Frontmatter,
+  existingFrontmatter: string,
   mergedSources: readonly string[],
   now: Date,
 ): string {
   const iso = now.toISOString();
-  const date = iso.slice(0, 10);
-  const f = existing.fields;
-  const lines: string[] = [
-    `type: ${f.type ?? "concept"}`,
-    `title: ${JSON.stringify(f.title ?? "")}`,
-  ];
-  if (f.entity_type !== undefined) {
-    lines.push(`entity_type: ${f.entity_type}`);
-  }
-  lines.push("sources:", ...mergedSources.map((s) => `  - ${s}`));
-  lines.push(
-    `created: ${f.created ?? date}`,
-    `updated: ${date}`,
-    `generated_at: ${iso}`,
-  );
-  return lines.join("\n");
+  return patchFrontmatter(existingFrontmatter, {
+    sources: mergedSources,
+    scalars: { updated: iso.slice(0, 10), generated_at: iso },
+  });
 }
 
 /** The five mechanical guards; returns the list of failures (empty = pass). */
@@ -176,34 +171,38 @@ export function createLlmMergeEngine(
     const incomingSources = [...incoming.sources];
     const mergedSources = unionSources(existingSources, incomingSources);
 
-    // No generator-owned region → cannot rewrite or append safely → defer.
-    if (existingPage.generated === null) {
+    // No frontmatter → malformed page we cannot safely patch → defer.
+    if (existingPage.frontmatter === "") {
       return {
         path: incoming.path,
         mode: "deferred",
         provenance: mergedSources,
-        guardFailures: ["no-generated-region"],
+        guardFailures: ["no-frontmatter"],
         proposal: {
           path: incoming.path,
-          reason:
-            "Existing page has no generator-owned region; needs a manual merge.",
+          reason: "Existing page has no frontmatter; needs a manual merge.",
         },
       };
     }
 
-    const existingGenerated = existingPage.generated;
-    const incomingGenerated = parsePage(incoming.content).generated ?? "";
+    // The whole body is generator-owned (ADR-002): re-synthesize it.
+    const existingBody = existingPage.body;
+    const incomingBody = parsePage(incoming.content).body;
     const title = frontmatter.fields.title ?? incoming.title;
-    const newFrontmatter = mergedFrontmatter(frontmatter, mergedSources, now());
+    const newFrontmatter = mergedFrontmatter(
+      existingPage.frontmatter,
+      mergedSources,
+      now(),
+    );
 
     // Default: guarded re-synthesis.
     const response = await config.generator.complete(
-      buildMergePrompt(title, existingGenerated, incomingGenerated),
+      buildMergePrompt(title, existingBody, incomingBody),
       { maxTokens: MERGE_MAX_TOKENS },
     );
     const candidate = response.text.trim();
     const failures = checkGuards(
-      existingGenerated,
+      existingBody,
       candidate,
       existingSources,
       incomingSources,
@@ -216,19 +215,20 @@ export function createLlmMergeEngine(
         mode: "resynthesized",
         provenance: mergedSources,
         guardFailures: [],
-        content: serializePage(newFrontmatter, candidate, existingPage.human),
+        content: serializePage(newFrontmatter, candidate),
       };
     }
 
-    // Fallback: lossless append into the generated region. Existing content
-    // is untouched, so it trivially satisfies every guard.
-    const appended = `${existingGenerated}\n\n${MERGE_APPEND_MARKER}\n${incomingGenerated}`.trim();
+    // Fallback: lossless append. Existing generated knowledge is untouched, so
+    // it trivially satisfies every guard (this protects accumulated *generated*
+    // knowledge, not manual edits).
+    const appended = `${existingBody}\n\n${MERGE_APPEND_MARKER}\n${incomingBody}`.trim();
     return {
       path: incoming.path,
       mode: "appended",
       provenance: mergedSources,
       guardFailures: failures,
-      content: serializePage(newFrontmatter, appended, existingPage.human),
+      content: serializePage(newFrontmatter, appended),
     };
   }
 

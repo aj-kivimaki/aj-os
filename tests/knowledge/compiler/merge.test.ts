@@ -121,38 +121,32 @@ describe("MERGE — guarded re-synthesis", () => {
     expect(outcome.content).toContain("> [!warning] Contradiction");
   });
 
-  it("never touches the human-owned region", async () => {
-    const withHuman = serializePage(
-      `type: entity\ntitle: "AJ-OS"\nsources:\n  - handbook:library/a.md\ncreated: 2026-07-01\ngenerated_at: 2026-07-01T00:00:00.000Z`,
+  it("preserves learned aliases in frontmatter across a merge", async () => {
+    const withAlias = serializePage(
+      `type: entity\ntitle: "AJ-OS"\naliases:\n  - The OS\nsources:\n  - handbook:library/a.md\ncreated: 2026-07-01`,
       `AJ-OS is an OS.\n\nSource: ${EXISTING_LINK}`,
-      "## My notes\nHand-written and sacred.",
     );
     const engine = createLlmMergeEngine(
       { generator: stub(`AJ-OS syncs with Notion.\nSource: ${EXISTING_LINK}`) },
       AT,
     );
 
-    const outcome = await engine.merge(withHuman, INCOMING);
+    const outcome = await engine.merge(withAlias, INCOMING);
 
     expect(outcome.mode).toBe("resynthesized");
-    expect(parsePage(outcome.content!).human).toBe(
-      "## My notes\nHand-written and sacred.",
+    expect(readFrontmatter(parsePage(outcome.content!).frontmatter).aliases).toEqual(
+      ["The OS"],
     );
   });
 
-  it("defers with a proposal when the page has no generator-owned region", async () => {
-    const noMarkers = `---\ntype: entity\ntitle: "AJ-OS"\nsources:\n  - handbook:library/a.md\n---\nentirely hand-written page`;
+  it("defers with a proposal when the existing page has no frontmatter", async () => {
+    const noFrontmatter = `entirely bodyless page`;
     const engine = createLlmMergeEngine({ generator: stub("ignored") }, AT);
 
-    const outcome = await engine.merge(noMarkers, INCOMING);
+    const outcome = await engine.merge(noFrontmatter, INCOMING);
 
     expect(outcome.mode).toBe("deferred");
     expect(outcome.content).toBeUndefined();
     expect(outcome.proposal?.path).toBe("entities/aj-os.md");
-    // provenance is still computed as the intended superset.
-    expect(outcome.provenance).toEqual([
-      "handbook:library/a.md",
-      "handbook:library/b.md",
-    ]);
   });
 });

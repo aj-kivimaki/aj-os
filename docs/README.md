@@ -83,6 +83,7 @@ Architecture Decision Records:
 | `architecture/adr/ADR-003-Knowledge-Reconciliation-and-Page-Lifecycle.md` | Page lifecycle, staleness, and RECONCILE policy |
 | `architecture/adr/ADR-004-Knowledge-Merge-Policy.md` | Merge = enrichment; guards, human-owned regions, identity |
 | `architecture/adr/ADR-005-Identity-Resolution.md` | Staged pipeline (extract→resolve→render→merge→persist); semantic identity |
+| `architecture/adr/ADR-006-Identity-Learning.md` | Learned aliases + review; wiki body is generator-owned (realigns ADR-004) |
 
 Recommended reading order: ARCH-001 → ARCH-002 → the relevant SPECs.
 
