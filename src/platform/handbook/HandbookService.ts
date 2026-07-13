@@ -3,9 +3,6 @@ import { resolve } from "node:path";
 
 import type { HandbookInfo } from "./types.js";
 
-/** The generated-wiki directory expected inside a handbook. */
-const WIKI_DIR_NAME = "wiki";
-
 /**
  * A handbook problem with a message safe to show the user.
  *
@@ -33,14 +30,22 @@ export class HandbookService {
    * @param handbookPath The handbook root directory. This is provided by the
    * caller (the product passes the validated path from configuration); the
    * service does not read configuration itself.
+   * @param wikiDirName The generated-wiki directory to locate inside the
+   * handbook, relative to {@link handbookPath}. The caller supplies it from
+   * configuration (`handbook.generatedWikiPath`) — the directory name is the
+   * loop's contract, not an assumption the service bakes in.
    */
-  constructor(private readonly handbookPath: string) {}
+  constructor(
+    private readonly handbookPath: string,
+    private readonly wikiDirName: string,
+  ) {}
 
   /**
    * Validate the handbook structure and return its useful paths.
    *
    * Confirms the handbook directory exists (defensive — the caller usually
-   * guarantees this) and that a generated `wiki/` directory is present.
+   * guarantees this) and that the configured generated-wiki directory is
+   * present.
    */
   async locateWiki(): Promise<HandbookInfo> {
     const handbookPath = resolve(this.handbookPath);
@@ -49,7 +54,7 @@ export class HandbookService {
       `The configured handbook directory does not exist:\n\n  ${handbookPath}`,
     );
 
-    const wikiPath = resolve(handbookPath, WIKI_DIR_NAME);
+    const wikiPath = resolve(handbookPath, this.wikiDirName);
     await this.requireDirectory(
       wikiPath,
       "The configured handbook does not contain a generated wiki.",

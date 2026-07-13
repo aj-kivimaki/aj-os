@@ -28,37 +28,52 @@ afterEach(async () => {
 
 describe("HandbookService", () => {
   it("returns handbook and wiki paths when the wiki exists", async () => {
-    await mkdir(join(handbook, "wiki"));
+    await mkdir(join(handbook, "wiki-generated"));
 
-    const info = await new HandbookService(handbook).locateWiki();
+    const info = await new HandbookService(
+      handbook,
+      "wiki-generated",
+    ).locateWiki();
 
     expect(info).toEqual({
       handbookPath: resolve(handbook),
-      wikiPath: resolve(handbook, "wiki"),
+      wikiPath: resolve(handbook, "wiki-generated"),
     });
+  });
+
+  it("resolves whatever generated-wiki directory name it is given", async () => {
+    await mkdir(join(handbook, "custom-wiki"));
+
+    const info = await new HandbookService(handbook, "custom-wiki").locateWiki();
+
+    expect(info.wikiPath).toBe(resolve(handbook, "custom-wiki"));
   });
 
   it("fails when the handbook directory does not exist", async () => {
     const missing = join(handbook, "nope");
 
-    await expect(new HandbookService(missing).locateWiki()).rejects.toThrow(
-      /handbook directory does not exist/,
-    );
+    await expect(
+      new HandbookService(missing, "wiki-generated").locateWiki(),
+    ).rejects.toThrow(/handbook directory does not exist/);
   });
 
   it("fails with a clear message when the wiki is missing", async () => {
-    await expect(new HandbookService(handbook).locateWiki()).rejects.toThrow(
+    await expect(
+      new HandbookService(handbook, "wiki-generated").locateWiki(),
+    ).rejects.toThrow(
       "The configured handbook does not contain a generated wiki.",
     );
     await expect(
-      new HandbookService(handbook).locateWiki(),
+      new HandbookService(handbook, "wiki-generated").locateWiki(),
     ).rejects.toBeInstanceOf(HandbookError);
   });
 
   it("fails when the wiki path is a file, not a directory", async () => {
-    await writeFile(join(handbook, "wiki"), "not a dir", "utf8");
+    await writeFile(join(handbook, "wiki-generated"), "not a dir", "utf8");
 
-    await expect(new HandbookService(handbook).locateWiki()).rejects.toThrow(
+    await expect(
+      new HandbookService(handbook, "wiki-generated").locateWiki(),
+    ).rejects.toThrow(
       "The configured handbook does not contain a generated wiki.",
     );
   });
