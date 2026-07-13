@@ -210,6 +210,9 @@ handbook/
 - `index.md` is the catalog: it lists which articles are part of your knowledge
   base. The assistant only ever searches articles the index links to, and the
   generator regenerates it on every build.
+- **Today, entities and concepts are retrievable.** Source summaries (under
+  `sources/`) are catalogued but not yet searched — a known limitation of the
+  current retrieval, not a setup problem.
 
 > **Why does it read a generated wiki instead of my actual notes?**
 > Your handbook is written for *you* — full of shorthand, drafts, and files that

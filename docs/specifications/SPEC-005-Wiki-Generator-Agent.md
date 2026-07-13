@@ -627,7 +627,10 @@ Append-only; one entry per operation:
   `aj wiki build` CLI command. MERGE (§22.7) is implemented (guarded LLM
   re-synthesis with a lossless append fallback). Every run regenerates
   `index.md`, the corpus catalog RetrievalService reads, so a generated wiki is
-  consumable by the Knowledge Assistant.
+  consumable by the Knowledge Assistant. **Today entities and concepts are
+  retrievable; source summaries nest under `sources/<path>` and are catalogued
+  but not yet resolved by RetrievalService** — a known limitation recorded in
+  `implementation/backlog/AFTER-WIKI-BUILD.md`.
 - **Pending:** `overview.md` (top-level synthesis) and contradiction callouts.
   The composed pipeline currently uses the deterministic slug identity baseline;
   the semantic + alias-aware resolvers exist and can be swapped in when
