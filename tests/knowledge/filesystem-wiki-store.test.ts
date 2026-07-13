@@ -123,6 +123,33 @@ describe("FilesystemWikiStore", () => {
     });
   });
 
+  describe("removeTree", () => {
+    it("removes a single file", async () => {
+      const s = store();
+      await s.write("log.md", "x");
+      await s.removeTree("log.md");
+      expect(await s.read("log.md")).toBeNull();
+    });
+
+    it("recursively removes a directory subtree", async () => {
+      const s = store();
+      await s.write("entities/a.md", "a");
+      await s.write("entities/nested/b.md", "b");
+      await s.removeTree("entities");
+      expect(await s.list("entities")).toEqual([]);
+    });
+
+    it("is idempotent when the entry is already gone", async () => {
+      await expect(store().removeTree(".generator")).resolves.toBeUndefined();
+    });
+
+    it("is path-guarded against escaping the destination", async () => {
+      await expect(store().removeTree("../outside")).rejects.toBeInstanceOf(
+        WikiStoreError,
+      );
+    });
+  });
+
   describe("appendLog", () => {
     it("creates log.md and accumulates entries with newlines", async () => {
       const s = store();

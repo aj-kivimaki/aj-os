@@ -181,7 +181,10 @@ export class KnowledgeAssistant {
       const config = await measure(timings, "config", () => this.config.load());
       handbookPath = config.handbook.path;
 
-      const handbook = new HandbookService(config.handbook.path);
+      const handbook = new HandbookService(
+        config.handbook.path,
+        config.handbook.generatedWikiPath,
+      );
       const info = await measure(timings, "handbook", () =>
         handbook.locateWiki(),
       );

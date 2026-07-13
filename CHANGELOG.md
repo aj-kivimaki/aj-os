@@ -10,10 +10,29 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
 
 ### Added
 
+- **Closed the first loop — AJ-OS generates and consumes its own knowledge.**
+  The Knowledge Platform is no longer just a library; a thin entry point now runs
+  it end to end.
+  - **`aj wiki build` command** — composes the connectors, store, compiler,
+    resolver, renderer and merge engine from configuration and runs one
+    generation cycle, printing a report. `--rebuild` regenerates from scratch. The
+    command performs no git (commits remain an orchestration concern, SPEC-003).
+  - **Knowledge Platform Composition Root** (`src/knowledge/composition/`) — the
+    single place that assembles the platform into a ready-to-run pipeline, reused
+    by the CLI and future callers (End-of-Session, CI, automations).
+  - **Configuration contract** — `handbook.generatedWikiPath` (default
+    `wiki-generated`) is the shared seam between producer and consumer: the Wiki
+    Generator writes it and the Knowledge Assistant reads it, neither aware of the
+    other.
+  - **Corpus catalog generation** — the Wiki Generator now writes `index.md`, the
+    catalog RetrievalService reads, so `aj ask` answers from the generated wiki.
+  - **`--rebuild` reset semantics** — a rebuild first clears exactly the
+    generator-owned outputs (`GENERATED_WIKI_ARTIFACTS`, one shared definition)
+    via a new path-guarded `WikiStore.removeTree`, preserving anything else in the
+    destination. The engine still never deletes headless.
 - **Knowledge Platform pipeline (library level)** — the sources → wiki engine
   specified by **ARCH-002** and SPEC-005/006/007, implemented as tested library
-  code. It is **not yet wired to a runnable orchestration entry point** (no CLI
-  command or service invokes it yet); wiring is the next step (see `ROADMAP.md`).
+  code and now wired to the `aj wiki build` entry point above.
   - **Source Connector (SPEC-006)** — enumerates and normalizes source documents
     into `SourceRecord`s with stable ids and content hashes; filesystem
     implementation (`src/ingestion/`).
@@ -33,12 +52,11 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
     canonical identities and enrich existing pages without rewriting human-owned
     regions (`src/knowledge/renderer/`, `src/knowledge/compiler/merge.ts`).
 - Architecture and decisions for the pipeline: **ARCH-002**, **ADR-002**–**ADR-006**.
-- The automated test suite grew to **328 tests** across the platform, the
-  knowledge pipeline, and the product.
+- The automated test suite grew to **340 tests** across the platform, the
+  knowledge pipeline, the composition root, and the product.
 
 ### Planned
 
-- Wire the Knowledge Platform pipeline to an orchestration entry point (CLI/service) so it can generate a wiki end-to-end
 - End-of-Session Workflow (SPEC-003) and Knowledge Review Workflow (SPEC-004)
 - Repository integration and Notion-backed business endpoints (Projects, Portfolio, CRM, Dashboard, Business Health)
 - Additional Business Rules

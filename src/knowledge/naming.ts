@@ -20,3 +20,23 @@ export function pagePathFor(kind: "entity" | "concept", name: string): string {
   const dir = kind === "entity" ? "entities" : "concepts";
   return `${dir}/${slugify(name)}.md`;
 }
+
+/**
+ * The generator-owned top-level entries of a generated wiki — the single
+ * source of truth for what the Knowledge Platform produces at the top level:
+ * the rendered pages (`entities/`, `concepts/`, `sources/`), the generation
+ * log (`log.md`), and the generator's private bookkeeping (`.generator/`).
+ *
+ * `aj wiki build` owns the lifecycle of everything it generates, so a
+ * `--rebuild` removes exactly these before regenerating and preserves anything
+ * else in the destination. If the generator ever gains another top-level
+ * artifact, add it here — this list is the one place that defines ownership.
+ */
+export const GENERATED_WIKI_ARTIFACTS = [
+  "entities",
+  "concepts",
+  "sources",
+  "index.md",
+  "log.md",
+  ".generator",
+] as const;

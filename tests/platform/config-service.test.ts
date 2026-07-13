@@ -28,13 +28,41 @@ async function writeConfig(contents: string): Promise<void> {
 }
 
 describe("ConfigService", () => {
-  it("returns a typed config when the handbook directory exists", async () => {
+  it("returns a typed config, defaulting generatedWikiPath, when the handbook directory exists", async () => {
     await mkdir(join(root, "handbook"));
     await writeConfig(JSON.stringify({ handbook: { path: "./handbook" } }));
 
     const config = await new ConfigService(root).load();
 
-    expect(config).toEqual({ handbook: { path: "./handbook" } });
+    expect(config).toEqual({
+      handbook: { path: "./handbook", generatedWikiPath: "wiki-generated" },
+    });
+  });
+
+  it("honors an explicit generatedWikiPath", async () => {
+    await mkdir(join(root, "handbook"));
+    await writeConfig(
+      JSON.stringify({
+        handbook: { path: "./handbook", generatedWikiPath: "wiki" },
+      }),
+    );
+
+    const config = await new ConfigService(root).load();
+
+    expect(config.handbook.generatedWikiPath).toBe("wiki");
+  });
+
+  it("fails when generatedWikiPath is set but not a non-empty string", async () => {
+    await mkdir(join(root, "handbook"));
+    await writeConfig(
+      JSON.stringify({
+        handbook: { path: "./handbook", generatedWikiPath: "  " },
+      }),
+    );
+
+    await expect(new ConfigService(root).load()).rejects.toThrow(
+      /generatedWikiPath/,
+    );
   });
 
   it("fails when the configuration file is missing", async () => {

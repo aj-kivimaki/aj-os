@@ -7,6 +7,12 @@ import type { AjConfig } from "./types.js";
 const CONFIG_FILE_NAME = "aj.config.json";
 
 /**
+ * Where the generated wiki lives when the file does not say. Relative to
+ * `handbook.path`; kept inside the vault so AJ-OS remains its sole producer.
+ */
+const DEFAULT_GENERATED_WIKI_PATH = "wiki-generated";
+
+/**
  * A configuration problem with a message safe to show the user.
  *
  * The product catches this to print a friendly explanation, while letting
@@ -42,11 +48,11 @@ export class ConfigService {
 
     const raw = await this.readConfigFile(configPath);
     const parsed = this.parseJson(raw);
-    const handbookPath = this.validateShape(parsed);
+    const handbook = this.validateShape(parsed);
 
-    await this.validateHandbookPath(handbookPath);
+    await this.validateHandbookPath(handbook.path);
 
-    return { handbook: { path: handbookPath } };
+    return { handbook };
   }
 
   private async readConfigFile(configPath: string): Promise<string> {
@@ -70,8 +76,12 @@ export class ConfigService {
     }
   }
 
-  /** Confirm the object has a non-empty `handbook.path` string. */
-  private validateShape(parsed: unknown): string {
+  /**
+   * Confirm the object has a non-empty `handbook.path` string and resolve the
+   * optional `handbook.generatedWikiPath` (defaulting when absent). Returns the
+   * validated, fully-defaulted `handbook` block.
+   */
+  private validateShape(parsed: unknown): AjConfig["handbook"] {
     if (!isObject(parsed) || !isObject(parsed.handbook)) {
       throw new ConfigError(
         `${CONFIG_FILE_NAME} must contain a "handbook" object with a "path".`,
@@ -85,7 +95,25 @@ export class ConfigService {
       );
     }
 
-    return path;
+    return { path, generatedWikiPath: this.resolveGeneratedWikiPath(parsed) };
+  }
+
+  /**
+   * Read the optional `handbook.generatedWikiPath`. Absent falls back to the
+   * default; present-but-not-a-non-empty-string is a configuration error (a
+   * silent default would hide a typo).
+   */
+  private resolveGeneratedWikiPath(parsed: Record<string, unknown>): string {
+    const value = (parsed.handbook as Record<string, unknown>).generatedWikiPath;
+    if (value === undefined) {
+      return DEFAULT_GENERATED_WIKI_PATH;
+    }
+    if (typeof value !== "string" || value.trim() === "") {
+      throw new ConfigError(
+        `${CONFIG_FILE_NAME} "handbook.generatedWikiPath" must be a non-empty string when set.`,
+      );
+    }
+    return value;
   }
 
   /** Confirm the configured handbook path exists and is a directory. */

@@ -55,17 +55,19 @@ always with citations.
 npm install
 cp aj.config.example.json aj.config.json   # then set handbook.path
 cp .env.example .env                        # then set ANTHROPIC_API_KEY
+aj wiki build                               # compile your handbook into a wiki
 aj ask "How does the Context Builder work?"
 ```
 
 > Run `npm run build && npm link` once to install the `aj` command, or use
-> `npm run dev -- ask "…"` to run from source.
+> `npm run dev -- wiki build` and `npm run dev -- ask "…"` to run from source.
 
-> **Prerequisite — a pre-generated wiki.** The assistant reads a handbook's
-> generated `wiki/`, not raw notes. Producing that wiki is the Knowledge
-> Platform's job, which is implemented but **not yet wired to a runnable
-> command** (see [status](#current-status)). Until it is, a pre-generated wiki
-> is required — "no generated wiki" is a known limitation, not a setup mistake.
+> **The loop is closed.** `aj wiki build` compiles your handbook's sources into a
+> generated wiki — including the `index.md` catalog the assistant retrieves from —
+> and `aj ask` answers from exactly that wiki. Producer and consumer meet through
+> one configuration contract, `handbook.generatedWikiPath` (default
+> `wiki-generated/`). The first build calls the model once per source, so it takes
+> a few minutes; `aj wiki build --rebuild` regenerates from scratch.
 
 Full instructions: the
 [Knowledge Assistant docs](implementation/products/knowledge-assistant/README.md)
@@ -81,9 +83,12 @@ platform, delivered with its first product, **Knowledge Assistant v1.0.0**.
 - **Shipped:** the Context Builder (SPEC-002) and the supporting platform
   capabilities (configuration, handbook, retrieval, prompt rendering, AI
   client), plus the Knowledge Assistant that composes them.
-- **In progress:** the Knowledge Platform pipeline (ARCH-002) — the sources → wiki
-  engine — is implemented at the library level and tested, but **not yet wired to
-  a runnable command**. Wiring it is the top of the roadmap.
+- **Wired:** the Knowledge Platform pipeline (ARCH-002) — the sources → wiki
+  engine — is now runnable end to end via `aj wiki build`, which generates the
+  wiki (and its `index.md` corpus catalog) that `aj ask` reads. This closes the
+  first loop: **AJ-OS generates and consumes its own knowledge.**
+- **Next:** the workflows that keep the context evolving automatically —
+  End-of-Session (SPEC-003) and Knowledge Review (SPEC-004).
 
 The full itemized history is in the [CHANGELOG](CHANGELOG.md); what to do next is
 in the [ROADMAP](ROADMAP.md) under **Resume Here**. Platform and products are

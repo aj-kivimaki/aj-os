@@ -86,8 +86,8 @@ Before you can ask anything, you need three things:
 1. **Node.js** installed (a current LTS version).
 2. **An Anthropic API key** — the assistant uses Anthropic's models to write
    answers. You can get a key from your Anthropic account.
-3. **A handbook with a generated wiki** — a folder of knowledge that has already had
-   its AI wiki generated. See [Section 4](#4-the-handbook-requirement).
+3. **A handbook with a generated wiki** — a folder of knowledge whose AI wiki you
+   generate with `aj wiki build`. See [Section 4](#4-the-handbook-requirement).
 
 If you have all three, setup takes a couple of minutes.
 
@@ -174,7 +174,7 @@ A quick reference to confirm you are ready — and a troubleshooting list when
 something is off:
 
 - ☐ Handbook path in `aj.config.json` exists and is a directory
-- ☐ Generated `wiki/` directory exists inside the handbook
+- ☐ Generated wiki directory exists inside the handbook (`aj wiki build` creates it)
 - ☐ `ANTHROPIC_API_KEY` is set in `.env`
 - ☐ *(Optional)* `ANTHROPIC_MODEL` is set in `.env`
 - ☐ Project built (`npm run build`)
@@ -190,23 +190,29 @@ is almost always the cause, and it maps directly to a message in
 
 The Knowledge Assistant does **not** read your handbook's raw source. It reads a
 **generated wiki** inside the handbook — an AI-optimized version of your knowledge.
-Your handbook folder must therefore contain a `wiki/` directory:
+Your handbook folder must therefore contain the generated-wiki directory named by
+`handbook.generatedWikiPath` (default `wiki-generated/`):
 
 ```text
 handbook/
 ├── ...your source knowledge...
-└── wiki/
+└── wiki-generated/
     ├── index.md          ← the catalog of what counts as knowledge
-    ├── about-me.md
+    ├── sources/
     ├── concepts/
     └── entities/
 ```
 
-- The `wiki/` directory is produced by the AJ-OS **Wiki Generator** (a separate
-  tool). If it is missing, the assistant will tell you the wiki has not been
-  generated yet.
+- The generated wiki is produced by the AJ-OS **Wiki Generator**, which you run
+  with `aj wiki build` (see the main README). If the directory is missing, the
+  assistant will tell you the wiki has not been generated yet — run
+  `aj wiki build` to create it.
 - `index.md` is the catalog: it lists which articles are part of your knowledge
-  base. The assistant only ever searches articles the index links to.
+  base. The assistant only ever searches articles the index links to, and the
+  generator regenerates it on every build.
+- **Today, entities and concepts are retrievable.** Source summaries (under
+  `sources/`) are catalogued but not yet searched — a known limitation of the
+  current retrieval, not a setup problem.
 
 > **Why does it read a generated wiki instead of my actual notes?**
 > Your handbook is written for *you* — full of shorthand, drafts, and files that
@@ -215,9 +221,10 @@ handbook/
 > more consistent answers, and it keeps your original notes untouched.
 
 > **Why does the assistant never change my handbook?**
-> Version 1.0 is strictly read-only. It retrieves and explains; it never writes,
-> edits, or regenerates anything. Your knowledge is safe — the worst it can do is
-> tell you it doesn't know.
+> `aj ask` is strictly read-only: it retrieves and explains; it never writes or
+> edits. Generating the wiki is a separate, explicit command (`aj wiki build`),
+> and even that only writes the generated-wiki directory it owns — your source
+> notes are never touched.
 
 ---
 
@@ -369,7 +376,7 @@ messages you are most likely to see, and what to do about each.
 | *Invalid JSON in aj.config.json.* | The config file has a syntax error. | Check for a missing comma or quote. |
 | *aj.config.json must set "handbook.path"…* | The config is missing the handbook path. | Add the `handbook.path` value. |
 | *Configured handbook path does not exist…* | The path in your config points nowhere. | Correct the path to your handbook folder. |
-| *The configured handbook does not contain a generated wiki.* | The handbook has no `wiki/` directory. | Generate the wiki first (Wiki Generator), see [Section 4](#4-the-handbook-requirement). |
+| *The configured handbook does not contain a generated wiki.* | The handbook has no generated-wiki directory. | Run `aj wiki build` to generate it, see [Section 4](#4-the-handbook-requirement). |
 | *No relevant handbook articles were found for that question.* | Nothing in your wiki matched. | Rephrase, or ask about a topic your handbook actually covers. |
 | *ANTHROPIC_API_KEY is not configured…* | No API key was found. | Add it to `.env` — see [Section 3b](#3b-provide-your-api-key--env). |
 | *The AI request failed: …* | The call to Anthropic failed (network, quota, etc.). | Check your connection and account, then retry. |
@@ -409,7 +416,7 @@ connection and a valid API key. Your handbook itself is read locally.
 
 **Can I use it with any handbook?**
 Yes, as long as the handbook follows the expected structure and has a generated
-`wiki/` directory. Point `aj.config.json` at it.
+wiki directory. Point `aj.config.json` at the handbook and run `aj wiki build`.
 
 **Does my handbook content get sent anywhere?**
 Only the relevant retrieved article text is sent to Anthropic as context for your
@@ -429,9 +436,10 @@ generated wiki up to date. Use `--debug` to see which articles a question is
 actually matching.
 
 **It says nothing was found, but I know the topic is in my handbook. Why?**
-The assistant searches your *generated wiki*, and only the articles your
-`wiki/index.md` links to. If the topic isn't in the wiki yet, regenerate the wiki;
-if it's there, try phrasing the question with the same words the article uses.
+The assistant searches your *generated wiki*, and only the articles its
+`index.md` links to. If the topic isn't in the wiki yet, regenerate it with
+`aj wiki build`; if it's there, try phrasing the question with the same words the
+article uses.
 
 ---
 

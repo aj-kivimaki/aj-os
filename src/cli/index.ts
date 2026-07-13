@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { askCommand } from "./commands/ask.js";
+import { wikiBuildCommand } from "./commands/wiki.js";
 
 /** Options parsed off the `ask` command line. */
 interface AskCliOptions {
@@ -24,6 +25,19 @@ program
   .option(DEBUG_FLAG, DEBUG_DESCRIPTION)
   .action(async (question: string | undefined, options: AskCliOptions) => {
     await askCommand(question, { debug: options.debug === true });
+  });
+
+// `aj wiki build` runs one Wiki Generator cycle over the configured sources,
+// closing the producer side of the loop. The command is a thin entry point;
+// composition lives in the Knowledge Platform composition root.
+program
+  .command("wiki")
+  .description("Manage the generated wiki")
+  .command("build")
+  .description("Generate the wiki from the configured sources")
+  .option("--rebuild", "rebuild from scratch instead of updating incrementally")
+  .action(async (options: { rebuild?: boolean }) => {
+    await wikiBuildCommand({ rebuild: options.rebuild === true });
   });
 
 // Deprecated alias: `aj knowledge ask` is kept working for backward

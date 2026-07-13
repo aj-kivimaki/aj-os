@@ -4,7 +4,7 @@
 **Owner:** AJ-OS **Related Standards:** AJS-002, AJS-003, AJS-004,
 AJS-005, AJS-006 **Related Specifications:** SPEC-002, SPEC-003, SPEC-006,
 SPEC-007 **Related Architecture:** ARCH-002 **Related Decisions:** ADR-002,
-ADR-003, ADR-004, ADR-005 **Last Updated:** 2026-07-12
+ADR-003, ADR-004, ADR-005 **Last Updated:** 2026-07-13
 
 > **v2.1 note:** SPEC-005 is now the **authoritative functional
 > specification for INGEST** (§22), folding in the historical
@@ -619,11 +619,19 @@ Append-only; one entry per operation:
 
 ## 22.11 Implementation status (spec ↔ code)
 
-- **Implemented** (`src/knowledge/compiler/`): Knowledge Compiler port +
-  Anthropic compiler (extraction → deterministic render), single-source
-  compilation, schema/rendering unit tests. `AIClient` gained a
-  larger-budget `complete()`.
-- **Pending:** MERGE (§22.7 — policy settled in ADR-004, implementation
-  next), `overview.md`/`index.md`, contradiction callouts, and integration
-  into `WikiGenerator.run()` (the compiler is proven standalone, not yet
-  invoked by the generator).
+- **Implemented and wired:** the full INGEST pipeline runs end to end. The
+  Knowledge Compiler (`src/knowledge/compiler/`), Identity Resolver, Wiki
+  Renderer and Merge Engine compose in `WikiGenerator.run()`
+  (`src/knowledge/wiki-generator/`), driven from configuration by the Knowledge
+  Platform composition root (`src/knowledge/composition/`) and invoked by the
+  `aj wiki build` CLI command. MERGE (§22.7) is implemented (guarded LLM
+  re-synthesis with a lossless append fallback). Every run regenerates
+  `index.md`, the corpus catalog RetrievalService reads, so a generated wiki is
+  consumable by the Knowledge Assistant. **Today entities and concepts are
+  retrievable; source summaries nest under `sources/<path>` and are catalogued
+  but not yet resolved by RetrievalService** — a known limitation recorded in
+  `implementation/backlog/AFTER-WIKI-BUILD.md`.
+- **Pending:** `overview.md` (top-level synthesis) and contradiction callouts.
+  The composed pipeline currently uses the deterministic slug identity baseline;
+  the semantic + alias-aware resolvers exist and can be swapped in when
+  dogfooding evidence warrants (Resume Here, `ROADMAP.md`).

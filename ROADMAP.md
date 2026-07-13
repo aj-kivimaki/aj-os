@@ -16,20 +16,23 @@ serve the [loop](docs/VISION.md) — it does not restate the vision behind them.
 > Read this first when returning to development. It is the single "where do I
 > pick up" pointer. Items are ordered; the first is the highest-leverage.
 
-1. **Wire the Knowledge Platform pipeline to an entry point.** The Wiki Generator
-   (SPEC-005), Source Connector (SPEC-006), and Wiki Store (SPEC-007) exist as
-   tested library code (`src/ingestion/`, `src/knowledge/`) but nothing invokes
-   `WikiGenerator.run()` yet. Add a thin CLI command (e.g. `aj wiki build`) that
-   composes the connectors, store, compiler, resolver, renderer, and merge engine
-   from config and runs a generation cycle. This closes the loop so the Knowledge
-   Assistant can read a wiki this repo actually generated.
-2. **Use the Knowledge Assistant against a real handbook** and capture friction
-   as backlog items (configuration, retrieval quality, citations, missing-wiki UX).
-3. **End-of-Session Workflow (SPEC-003)** — the orchestration layer that decides
+> ✅ **The first loop is closed.** `aj wiki build` composes the Knowledge
+> Platform from config and runs a generation cycle, producing a wiki — with its
+> `index.md` corpus catalog — that `aj ask` reads through the shared
+> `handbook.generatedWikiPath` contract. AJ-OS now generates and consumes its own
+> knowledge. What remains is to make that context *evolve automatically*.
+
+1. **End-of-Session Workflow (SPEC-003)** — the orchestration layer that decides
    when to run the generator and owns git commits (the engine never commits).
-4. **Knowledge Review Workflow (SPEC-004)** — human governance of what enters the
+2. **Knowledge Review Workflow (SPEC-004)** — human governance of what enters the
    Handbook.
-5. **Context Builder M5 — Explainability & Profiles**, then M6 — Optimization
+3. **Acceptance Review & dogfooding — after SPEC-003 and SPEC-004.** Only once the
+   loop *maintains* the context automatically can we honestly evaluate what the
+   VISION asks — *"is AJ-OS helping maintain an accurate, evolving working
+   context?"* Evaluating a single subsystem earlier would answer a smaller
+   question. Capture friction (retrieval quality, citations, identity dedup,
+   cost/latency, UX) then.
+4. **Context Builder M5 — Explainability & Profiles**, then M6 — Optimization
    (see `implementation/phase-2-core-platform/spec-002-context-builder/`).
 
 Deferred and future work is catalogued in the phases below.
@@ -45,9 +48,12 @@ Architecture (ARCH-001), Standards (AJS-001–007), and the core Specifications
 ## Phase 2 — Core Platform (in progress)
 - ✅ **Context Builder** (SPEC-002) — deterministic Collection → Selection →
   Assembly, shipped in Platform v2.0.0.
-- 🟡 **Knowledge Platform pipeline** (ARCH-002; SPEC-005/006/007) — implemented at
-  the library level and tested, **pending orchestration wiring** (Resume Here #1).
-- ⬜ **End-of-Session** (SPEC-003) and **Knowledge Review** (SPEC-004).
+- ✅ **Knowledge Platform pipeline** (ARCH-002; SPEC-005/006/007) — implemented,
+  tested, and **wired end to end** via `aj wiki build`. The generator produces the
+  `index.md` corpus catalog the Knowledge Assistant retrieves from, closing the
+  producer → consumer loop.
+- ⬜ **End-of-Session** (SPEC-003) and **Knowledge Review** (SPEC-004) — the
+  workflows that keep the context evolving automatically (Resume Here #1–2).
 
 Project Kickoff (SPEC-001) is intentionally postponed until more of the platform
 is operational, so it can be built as an early workflow on top of it.
