@@ -3,7 +3,7 @@
 **Specification ID:** SPEC-007 **Version:** 1.0 **Status:** Draft
 **Owner:** AJ-OS **Related Standards:** AJS-002, AJS-003, AJS-005
 **Related Specifications:** SPEC-002, SPEC-005 **Related Architecture:**
-ARCH-002 **Related Decisions:** ADR-002 **Last Updated:** 2026-07-11
+ARCH-002 **Related Decisions:** ADR-002 **Last Updated:** 2026-07-13
 
 ---
 
@@ -55,11 +55,13 @@ understand page structure — that knowledge lives in the Wiki Generator.
 Operations:
 
 - `locate`, `read(path)`, `list(prefix?)`
-- `write(path, content)`, `delete(path)`, `appendLog(entry)`
+- `write(path, content)`, `delete(path)`, `removeTree(path)`, `appendLog(entry)`
 
 There is **no `commit()`** — version control is out of scope. `delete`
-exists for orchestration/maintenance; the headless generator never calls
-it (SPEC-005).
+(single entry) and `removeTree` (a file or a whole subtree, recursively)
+exist for orchestration/maintenance — e.g. `aj wiki build --rebuild`
+resetting generator-owned outputs; the headless generator never calls
+either (SPEC-005). Both are path-guarded to the destination and idempotent.
 
 ---
 
