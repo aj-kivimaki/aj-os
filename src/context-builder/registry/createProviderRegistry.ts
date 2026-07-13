@@ -1,15 +1,13 @@
 /**
- * Provider Registry public factory (CB-005).
+ * Provider Registry public factory.
  *
- * The Provider Registry is an **immutable catalogue** of {@link KnowledgeProvider}s
- * available to the Context Builder. Its entire responsibility is:
+ * The Provider Registry is an immutable catalogue of {@link KnowledgeProvider}s:
  *
  *   KnowledgeProviders → validation → immutable registry → lookup
  *
- * It does **not** execute, discover, load, configure or rank providers, and it
- * does not build Context Packages. It is created once through a factory (never
- * instantiated directly) and never mutated afterwards, mirroring the
- * `createContextBuilder()` service pattern.
+ * It never executes, discovers, loads, configures, or ranks providers, and builds
+ * no Context Packages. It is created once through a factory and never mutated,
+ * mirroring the other service factories.
  */
 
 import type { KnowledgeProvider } from "../providers/index.js";

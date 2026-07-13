@@ -1,19 +1,14 @@
 /**
- * Context Package schema (CB-003).
+ * Context Package schema — the runtime-validated, public Context Package contract:
+ * the canonical output of the Context Builder and the primary input to a coding
+ * agent.
  *
- * Defines the runtime-validated, public **Context Package contract** — the
- * canonical output of the Context Builder and the primary input to a coding
- * agent (SPEC-002; AJS-002 Appendix B).
- *
- * This task defines *what* a Context Package contains, not *how* it is produced.
- * No collection, ranking, token estimation, assembly or rendering logic lives
- * here. The contract is portable (independent of output format), deterministic
- * and immutable: `parseContextPackage()` validates then deep-freezes.
- *
- * Structural invariants (unique reference ids, unique section kinds, referential
- * integrity) enforce the standard's *Explainable* and *Self-Contained*
- * principles at the contract boundary. They are validation only — not business
- * logic.
+ * This defines *what* a Context Package contains, not *how* it is produced — no
+ * collection, ranking, assembly, or rendering logic lives here. The contract is
+ * portable (independent of output format), deterministic, and immutable:
+ * `parseContextPackage()` validates then deep-freezes. Its structural invariants
+ * (unique reference ids, unique section kinds, referential integrity) are
+ * validation only, not business logic.
  */
 
 import { z } from "zod";
@@ -21,10 +16,9 @@ import { z } from "zod";
 import type { ContextPackage, DeepReadonly } from "./types.js";
 
 /**
- * Canonical Context Package section identifiers (AJS-002 Appendix B, Required
- * Sections 1–12). The `kind` labels the section's role independently of any
- * rendering; section bodies are carried as opaque text so the contract stays
- * portable across output formats.
+ * Canonical Context Package section identifiers. The `kind` labels a section's
+ * role independently of rendering; section bodies are carried as opaque text so
+ * the contract stays portable across output formats.
  */
 export const SECTION_KINDS = [
   "objective",
@@ -42,9 +36,8 @@ export const SECTION_KINDS = [
 ] as const;
 
 /**
- * Knowledge-source categories a reference can originate from (AJS-002 §"Context
- * Sources"). These are model- and provider-agnostic source *kinds*, not
- * provider identities or transports.
+ * Knowledge-source categories a reference can originate from. These are model- and
+ * provider-agnostic source *kinds*, not provider identities or transports.
  */
 export const REFERENCE_TYPES = [
   "specification",
@@ -58,24 +51,17 @@ export const REFERENCE_TYPES = [
   "git-history",
 ] as const;
 
-/**
- * Immutable metadata identifying the package and its provenance (AJS-002
- * Appendix B, Metadata). `branch`/`commit` are optional inputs (SPEC-002 §7);
- * `generatedAt` is an ISO-8601 timestamp.
- */
+/** Immutable metadata identifying the package and its provenance. */
 export const contextPackageMetadataSchema = z
   .object({
     /** Version of the Context Package contract this package conforms to. */
     contextVersion: z.string().min(1),
-    /** ISO-8601 timestamp of when the package was generated. */
     generatedAt: z.iso.datetime(),
     /** Project the package was assembled for. */
     project: z.string().min(1),
     /** Task the package was assembled for. */
     task: z.string().min(1),
-    /** Optional source branch (SPEC-002 §7). */
     branch: z.string().min(1).optional(),
-    /** Optional source commit (SPEC-002 §7). */
     commit: z.string().min(1).optional(),
     /** Version of the Context Builder that produced the package. */
     contextBuilderVersion: z.string().min(1),
@@ -84,16 +70,14 @@ export const contextPackageMetadataSchema = z
 
 /**
  * A citable knowledge source that contributed to the package. `locator` is an
- * optional *logical* pointer (e.g. `"AJS-002 §6"`, a repo-relative file) — never
- * an absolute path or provider/transport internal.
+ * optional *logical* pointer (e.g. a doc section or a repo-relative file path) —
+ * never an absolute path or provider/transport internal.
  */
 export const sourceReferenceSchema = z
   .object({
     /** Stable identifier used to link sections and explainability entries. */
     id: z.string().min(1),
-    /** Knowledge-source category (AJS-002). */
     type: z.enum(REFERENCE_TYPES),
-    /** Human-readable title of the source. */
     title: z.string().min(1),
     /** Optional logical pointer to the source. */
     locator: z.string().min(1).optional(),
@@ -107,9 +91,7 @@ export const sourceReferenceSchema = z
  */
 export const contextSectionSchema = z
   .object({
-    /** Canonical section identifier (AJS-002 Appendix B). */
     kind: z.enum(SECTION_KINDS),
-    /** Display title for the section. */
     title: z.string().min(1),
     /** Opaque section body; may be empty when the section has no content. */
     content: z.string(),
@@ -143,18 +125,13 @@ export const contextExplainabilitySchema = z
   .strict();
 
 /**
- * The Context Package contract.
- *
- * Top-level shape mirrors AJS-002 Appendix B / CB-003:
+ * The Context Package contract:
  * `Metadata · Context Sections · References · Explainability · Summary`.
  */
 export const contextPackageSchema = z
   .object({
-    /** Package identity and provenance. */
     metadata: contextPackageMetadataSchema,
-    /** Ordered, self-contained context sections. */
     sections: z.array(contextSectionSchema),
-    /** Knowledge sources referenced by the package. */
     references: z.array(sourceReferenceSchema),
     /** Traceability: why the package's content was selected. */
     explainability: contextExplainabilitySchema,
@@ -163,7 +140,6 @@ export const contextPackageSchema = z
   })
   .strict()
   .superRefine((pkg, ctx) => {
-    // Reference ids must be unique.
     const seenRefIds = new Set<string>();
     pkg.references.forEach((ref, index) => {
       if (seenRefIds.has(ref.id)) {
@@ -176,7 +152,7 @@ export const contextPackageSchema = z
       seenRefIds.add(ref.id);
     });
 
-    // Section kinds must be unique — each canonical section appears at most once.
+    // Each canonical section kind may appear at most once.
     const seenKinds = new Set<string>();
     pkg.sections.forEach((section, index) => {
       if (seenKinds.has(section.kind)) {
@@ -189,8 +165,7 @@ export const contextPackageSchema = z
       seenKinds.add(section.kind);
     });
 
-    // Referential integrity: every referenced id must resolve to a declared
-    // source (Self-Contained / Explainable).
+    // Referential integrity: every referenced id must resolve to a declared source.
     pkg.sections.forEach((section, sectionIndex) => {
       section.referenceIds.forEach((refId, refIndex) => {
         if (!seenRefIds.has(refId)) {

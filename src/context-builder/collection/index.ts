@@ -1,20 +1,16 @@
 /**
  * Collection module — public surface.
  *
- * Exposes the Collection Engine service boundary — the `createCollectionEngine()`
- * factory and the `CollectionEngine` contract (CB-007) — the CollectionError
- * contract (CB-008): the deterministic, provider-agnostic representation of a
- * single collection failure, and the CollectionResult contract (CB-009): the
- * complete deterministic outcome of collection (items + errors). Internal
- * construction details remain private — consumers never instantiate
- * implementation classes. Remaining collection behaviour (provider execution) is
- * introduced by later Milestone M2 tasks through this same surface.
+ * Exposes the Collection Engine (factory + `CollectionEngine` contract), the
+ * CollectionError contract (a provider-agnostic representation of a single
+ * collection failure), and the CollectionResult contract (the complete outcome of
+ * collection: items + errors). Internal construction details stay private.
  */
 
 export { createCollectionEngine } from "./createCollectionEngine.js";
 export type { CollectionEngine } from "./createCollectionEngine.js";
 
-// Collection Error contract — failure representation for partial collection (CB-008).
+// Collection Error contract — failure representation for partial collection.
 export {
   collectionErrorSchema,
   parseCollectionError,
@@ -22,8 +18,7 @@ export {
 } from "./errors/index.js";
 export type { CollectionError, FailureCategory } from "./errors/index.js";
 
-// CollectionResult contract — the complete deterministic outcome of collection,
-// aggregating collected items and collected errors (CB-009).
+// CollectionResult contract — collected items and errors together.
 export {
   collectionResultSchema,
   collectionResultMetadataSchema,

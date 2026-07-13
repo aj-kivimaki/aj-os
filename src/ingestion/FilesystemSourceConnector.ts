@@ -1,18 +1,17 @@
 /**
- * Filesystem Source Connector — SPEC-006 (first connector).
+ * Filesystem Source Connector.
  *
- * Reads Markdown documents from one or more source directories and
- * normalizes each into a {@link SourceRecord}. This is the connector for
- * the Handbook vault (`foundation/`, `library/`), but it is not
- * Handbook-specific: it is configured with a `kind`, a `baseDir`, and a
- * set of source directories.
+ * Reads Markdown documents from one or more source directories and normalizes each
+ * into a {@link SourceRecord}. This is the connector for the Handbook vault
+ * (`foundation/`, `library/`), but it is not Handbook-specific: it is configured
+ * with a `kind`, a `baseDir`, and a set of source directories.
  *
- * Contract guarantees (SPEC-006):
+ * Contract guarantees:
  * - One Markdown file = one record.
- * - `id` is `${kind}:${path-relative-to-baseDir}` — stable across content
- *   edits (an edit changes `hash`, never `id`) and globally namespaced.
- * - `hash` is a content hash, computed on line-ending-normalized content
- *   so it is stable across platforms; it is the change signal.
+ * - `id` is `${kind}:${path-relative-to-baseDir}` — stable across content edits (an
+ *   edit changes `hash`, never `id`) and globally namespaced.
+ * - `hash` is a content hash, computed on line-ending-normalized content so it is
+ *   stable across platforms; it is the change signal.
  * - Read-only: the connector never mutates the filesystem.
  * - Output is deterministic: records are returned sorted by `id`.
  */
@@ -23,7 +22,7 @@ import { pathToFileURL } from "node:url";
 
 import type { SourceConnector, SourceRecord } from "./SourceConnector.js";
 
-/** Raised on connector misconfiguration (SPEC-006 §11, fatal). */
+/** Raised on connector misconfiguration (fatal). */
 export class SourceConnectorError extends Error {
   constructor(message: string) {
     super(message);

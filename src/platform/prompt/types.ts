@@ -1,5 +1,5 @@
 /**
- * Prompt Renderer types (PRODUCT-001).
+ * Prompt Renderer types.
  *
  * The Prompt Renderer's only contract: the shape of a rendered prompt. A
  * `RenderedPrompt` is transport- and provider-agnostic — it is plain text ready

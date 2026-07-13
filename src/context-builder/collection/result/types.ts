@@ -1,13 +1,10 @@
 /**
- * CollectionResult contract — types (CB-009).
+ * CollectionResult contract — types.
  *
- * Types are inferred from the Zod schema and wrapped in `DeepReadonly` so the
- * runtime contract and the compile-time contract can never drift, and so the
- * contract is immutable at every level (mirroring the runtime deep-freeze).
- *
- * `CollectionResult` is a plain immutable **data** type: the complete outcome of
- * collection (items + errors) plus the request provenance it answered. It carries
- * no behaviour and no execution detail.
+ * Inferred from the Zod schema and wrapped in `DeepReadonly` so the runtime and
+ * compile-time contracts can never drift and the contract is immutable at every
+ * level. `CollectionResult` is a plain immutable data type — no behaviour, no
+ * execution detail.
  */
 
 import type { z } from "zod";
@@ -20,8 +17,8 @@ import type {
 } from "./schema.js";
 
 /**
- * Immutable provenance of a collection result — the `KnowledgeRequest` (CB-004)
- * the collection answered. Reused, not redefined.
+ * Immutable provenance of a collection result — the `KnowledgeRequest` the
+ * collection answered. Reused, not redefined.
  */
 export type CollectionResultMetadata = DeepReadonly<
   z.infer<typeof collectionResultMetadataSchema>

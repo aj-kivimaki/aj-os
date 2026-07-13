@@ -1,33 +1,17 @@
 /**
- * Selection Policy — deterministic ordering via an ordered comparator chain (CB-015).
+ * Selection Policy — deterministic ordering via an ordered comparator chain.
  *
- * Ordering is the Selection Policy's **public guarantee**: Selection produces a
- * canonical deterministic sequence of selected KnowledgeItems, and that order is
- * what Assembly (M4) consumes exactly as given. This module defines *how that order
- * is decided* — an **ordered comparator chain** — while keeping the comparator
- * implementation itself internal platform behaviour (PIPELINE-ARCHITECTURE
- * §Deterministic Ordering).
+ * Ordering is the policy's public guarantee: Selection produces a canonical
+ * sequence of selected KnowledgeItems that Assembly consumes exactly as given. The
+ * chain applies each comparator in turn, taking the first non-zero result, and
+ * terminates with an immutable-identifier comparator ({@link compareById}) so the
+ * composed comparator is a stable total order. The policy introduces no scoring,
+ * priority, or ranking heuristic.
  *
- * The chain is an ordered list of deterministic comparators. To order two items the
- * chain applies each comparator in turn and takes the first non-zero result; the
- * chain **terminates with an immutable platform identifier** ({@link compareById},
- * over `KnowledgeItem.id`) so the composed comparator is a stable **total** order.
- * The policy introduces **no scoring algorithm, no numeric priority value and no
- * business-specific ranking heuristic** — it specifies a deterministic guarantee,
- * not a ranking heuristic, and exposes no priority/score/ranking value.
- *
- * At Milestone M3 the chain consists **solely of its mandated terminal comparator**.
- * Selection is profile-agnostic here, and no prioritization comparator is defined by
- * the frozen plan — inventing one would introduce a business heuristic the
- * architecture forbids. The chain is structured so future comparators (e.g. Context
- * Profile-driven ordering, M5) are **prepended** ahead of the terminal identifier
- * comparator without changing this structure, the ordering guarantee, or the
- * SelectionResult contract.
- *
- * Every comparator here is **pure, deterministic and identity-preserving**: it reads
- * two immutable KnowledgeItems and never modifies them. This module defines ordering
- * *policy* only — it does not execute the Selection Engine, sort any collection, or
- * construct a SelectionResult (that application is CB-016).
+ * The chain currently holds only its terminal comparator. It is structured so
+ * future comparators (e.g. profile-driven ordering) are prepended ahead of
+ * `compareById` without changing the ordering guarantee or the SelectionResult
+ * contract.
  */
 
 import type { KnowledgeItem } from "../../providers/index.js";
@@ -50,9 +34,9 @@ export type KnowledgeItemComparator = (a: KnowledgeItem, b: KnowledgeItem) => nu
  *
  * `id` is compared by UTF-16 code unit (via `<` / `>`), **not** `localeCompare`,
  * because locale-aware collation is environment-dependent and would break
- * determinism. This is the stable tie-breaker that terminates the comparator chain
- * and guarantees a total ordering: it is the identifier's role as tie-breaker, not
- * as duplicate identity (see CB-015 note on exact-duplicate identity).
+ * determinism. This is the stable tie-breaker that terminates the chain and
+ * guarantees a total ordering — the identifier's role here is as tie-breaker, not
+ * as duplicate identity.
  */
 export const compareById: KnowledgeItemComparator = (a, b) => {
   if (a.id < b.id) return -1;
@@ -61,31 +45,17 @@ export const compareById: KnowledgeItemComparator = (a, b) => {
 };
 
 /**
- * The ordered Selection Policy comparator chain.
- *
- * Comparators are applied in array order; the first non-zero result determines the
- * ordering of a pair. The chain **terminates with** the immutable-identifier
- * comparator ({@link compareById}) so the composed order is a stable total order.
- *
- * At M3 the chain holds only its terminal comparator — no prioritization heuristic
- * is defined (and none may be invented). Future comparators are prepended ahead of
- * `compareById`; the array is frozen so the chain cannot be mutated at runtime.
+ * The ordered Selection Policy comparator chain. Frozen so it cannot be mutated at
+ * runtime; future comparators are prepended ahead of the terminal {@link compareById}.
  */
 export const selectionComparatorChain: readonly KnowledgeItemComparator[] =
   Object.freeze([compareById]);
 
 /**
- * Compose the ordered {@link selectionComparatorChain} into a single deterministic
- * comparator.
+ * Compose {@link selectionComparatorChain} into a single comparator: apply each in
+ * order and return the first non-zero result, or `0` if all tie. The result is a
+ * stable total order — the canonical ordering used to produce `selectedItems`.
  *
- * Applies each comparator in chain order and returns the first non-zero result;
- * if every comparator ties, returns `0`. Because the chain terminates in the
- * immutable-identifier comparator, the composed comparator is a stable total order
- * over KnowledgeItems — the canonical deterministic ordering the Selection Engine
- * (CB-016) applies to produce `selectedItems`.
- *
- * @param a - the first immutable KnowledgeItem (never modified)
- * @param b - the second immutable KnowledgeItem (never modified)
  * @returns negative to order `a` first, positive to order `b` first, `0` if equal
  */
 export const compareKnowledgeItems: KnowledgeItemComparator = (a, b) => {

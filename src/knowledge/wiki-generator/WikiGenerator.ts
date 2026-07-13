@@ -1,20 +1,20 @@
 /**
- * Wiki Generator contract — SPEC-005.
+ * Wiki Generator contract.
  *
- * Maintains the LLM Wiki from normalized {@link SourceRecord}s. The
- * generator is composed with its connectors and store (it pulls sources
- * itself); orchestration simply calls {@link WikiGenerator.run}.
+ * Maintains the LLM Wiki from normalized {@link SourceRecord}s. The generator is
+ * composed with its connectors and store (it pulls sources itself); orchestration
+ * simply calls {@link WikiGenerator.run}.
  *
- * Invariants (ARCH-002 §5, SPEC-005):
- * - Source-agnostic: operates only on normalized records, never branching
- *   on source type.
- * - Never performs version control (no git); never deletes pages headless
- *   (removal is *proposed* via {@link GenerationReport.removalProposals}).
- * - The wiki is not a mirror of the sources: removing a source triggers
- *   RECONCILE, not deletion.
+ * Invariants:
+ * - Source-agnostic: operates only on normalized records, never branching on
+ *   source type.
+ * - Never performs version control (no git); never deletes pages headless (removal
+ *   is *proposed* via {@link GenerationReport.removalProposals}).
+ * - The wiki is not a mirror of the sources: removing a source triggers RECONCILE,
+ *   not deletion.
  * - Every page records all contributing source ids; a reverse index
- *   (source id → pages) is maintained so changed/removed sources
- *   re-evaluate only affected pages.
+ *   (source id → pages) is maintained so changed/removed sources re-evaluate only
+ *   affected pages.
  */
 
 import type { SourceConnector } from "../../ingestion/index.js";
@@ -38,7 +38,7 @@ export interface WikiGeneratorConfig {
   readonly store: WikiStore;
   /** Extracts renderer-agnostic knowledge from a source (INGEST). */
   readonly compiler: KnowledgeCompiler;
-  /** Resolves candidates to canonical identities (ADR-005). */
+  /** Resolves candidates to canonical identities. */
   readonly resolver: IdentityResolver;
   /** Renders the extraction into pages using canonical identities. */
   readonly renderer: WikiRenderer;
@@ -50,11 +50,11 @@ export interface WikiGeneratorConfig {
 export type GenerationMode = "incremental" | "rebuild";
 
 export interface RunOptions {
-  /** Defaults to `"incremental"`. `"rebuild"` is a recovery path (ADR-002). */
+  /** Defaults to `"incremental"`. `"rebuild"` is a recovery path. */
   readonly mode?: GenerationMode;
 }
 
-/** Lifecycle state of a wiki page (SPEC-005 §12). */
+/** Lifecycle state of a wiki page. */
 export type PageStatus = "active" | "stale";
 
 /**

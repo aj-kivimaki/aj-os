@@ -1,6 +1,4 @@
-/**
- * Ingestion contracts and connectors — SPEC-006.
- */
+/** Ingestion contracts and connectors. */
 export type { SourceConnector, SourceRecord } from "./SourceConnector.js";
 export {
   createFilesystemSourceConnector,

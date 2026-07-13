@@ -1,30 +1,17 @@
 /**
- * CollectionResult contract — runtime schema (CB-009).
+ * CollectionResult contract — the complete outcome of knowledge collection.
  *
- * Defines the runtime-validated, public **CollectionResult contract**: the
- * canonical, complete, deterministic outcome of knowledge collection. Under the
- * Context Builder's **partial-collection** model a single provider failure never
- * aborts collection — a provider contributes *either* KnowledgeItems *or* a
- * CollectionError, and the result aggregates **both** (SPEC-002 §15; CB-009).
- *
- * A `CollectionResult` therefore carries three stable platform concepts:
+ * Under the partial-collection model a single provider failure never aborts
+ * collection: a provider contributes *either* KnowledgeItems *or* a
+ * CollectionError, and the result aggregates both, alongside the provenance of the
+ * request it answers:
  *
  *   metadata · items · errors
  *
- * - `metadata` is the **provenance** of the collection — the `KnowledgeRequest`
- *   (CB-004) this result answers. It is reused wholesale (composition, not
- *   duplication), mirroring how the CB-003 Context Package metadata records
- *   `project`/`task`/`branch`/`commit`. It is deterministic and provider-agnostic.
- * - `items` compose the CB-004 `knowledgeItemSchema`.
- * - `errors` compose the CB-008 `collectionErrorSchema`.
- *
- * This task defines *what a completed collection is*, not *how it is produced*.
- * No provider execution, collection engine behaviour, ranking, selection,
- * duplicate detection, Context Package generation, retry, recovery, logging or
- * timing lives here. The contract is deterministic and immutable:
- * `parseCollectionResult()` validates then deep-freezes. An empty `errors`
- * collection is a valid result; a result carrying both items and errors is a
- * valid *partial* outcome; an empty result (no items, no errors) is also valid.
+ * This defines *what a completed collection is*, not *how it is produced* — no
+ * provider execution, ranking, selection, or retry logic lives here. The contract
+ * is immutable: `parseCollectionResult()` validates then deep-freezes. Any
+ * combination of empty/non-empty items and errors is valid.
  */
 
 import { z } from "zod";
@@ -39,42 +26,28 @@ import { collectionErrorSchema } from "../errors/schema.js";
 import type { CollectionResult } from "./types.js";
 
 /**
- * Provenance metadata for a collection result.
- *
- * A `CollectionResult` records *which request it answered*. That provenance is
- * exactly a {@link knowledgeRequestSchema} (`{ project, task, branch?, commit?,
- * issue? }`), so the request contract is **reused** rather than redefined —
- * composition mirroring how a `KnowledgeItem`'s `source` reuses the CB-003
- * source-reference contract. Reusing the schema also guarantees the metadata can
- * never drift from the request the collection was run for.
- *
- * The metadata is deliberately provenance only. Execution-specific information —
- * timestamps, durations, retry counts, token estimates, diagnostics or provider
- * internals — is **not** part of this contract (it would break determinism and
- * leak implementation detail).
+ * Provenance metadata for a collection result: exactly the
+ * {@link knowledgeRequestSchema} it answered, reused rather than redefined so the
+ * metadata can never drift from the request the collection ran for. Provenance
+ * only — no timestamps, durations, or diagnostics, which would break determinism
+ * and leak implementation detail.
  */
 export const collectionResultMetadataSchema = knowledgeRequestSchema;
 
 /**
- * The CollectionResult contract.
- *
- * The complete, deterministic outcome of knowledge collection: the request that
- * was collected for (`metadata`), the collected {@link knowledgeItemSchema}s, and
- * the {@link collectionErrorSchema}s for providers that failed. The schema is
- * `.strict()` so no execution-, ranking- or selection-specific fields can enter
- * the contract; `items` and `errors` compose the existing CB-004 and CB-008
- * contracts unchanged. Both arrays may be empty.
+ * The CollectionResult contract. `.strict()` so no execution-, ranking-, or
+ * selection-specific fields can enter; `items` and `errors` compose the existing
+ * KnowledgeItem and CollectionError contracts unchanged. Both arrays may be empty.
  */
 export const collectionResultSchema = z
   .object({
-    /** Provenance: the request this collection answered (CB-004, reused). */
+    /** Provenance: the request this collection answered. */
     metadata: collectionResultMetadataSchema,
-    /** Knowledge collected from providers (CB-004; may be empty). */
+    /** Knowledge collected from providers (may be empty). */
     items: z.array(knowledgeItemSchema),
     /**
-     * Per-provider failures collected under partial collection (CB-008; may be
-     * empty). An empty collection means every provider that ran either
-     * contributed items or found nothing — no provider failed.
+     * Per-provider failures under partial collection (may be empty). Empty means
+     * every provider that ran contributed items or found nothing — none failed.
      */
     errors: z.array(collectionErrorSchema),
   })

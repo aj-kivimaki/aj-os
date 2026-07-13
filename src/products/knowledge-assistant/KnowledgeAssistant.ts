@@ -152,8 +152,8 @@ export class KnowledgeAssistant {
   /**
    * Answer a single question — the product's one-shot entry point.
    *
-   * This is the entire PRODUCT-001 pipeline, end to end, for one question. The
-   * product composes the platform capabilities in order: load configuration,
+   * This is the entire pipeline, end to end, for one question. The product
+   * composes the platform capabilities in order: load configuration,
    * locate the generated wiki, retrieve the most relevant articles, then hand
    * those articles to the Context Builder to assemble a Context Package, render
    * that package into an AI-ready prompt, then hand the prompt to the AI client

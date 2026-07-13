@@ -1,8 +1,6 @@
 /**
- * Context Builder configuration types (CB-002).
- *
- * Types are inferred from the Zod schema so the runtime contract and the
- * compile-time contract can never drift.
+ * Context Builder configuration types, inferred from the Zod schema so the runtime
+ * and compile-time contracts can never drift.
  */
 
 import type { z } from "zod";
@@ -14,8 +12,8 @@ export type ContextBuilderConfig = Readonly<
   z.infer<typeof contextBuilderConfigSchema>
 >;
 
-/** Ranking profile applied when assembling context (SPEC-002 §6). */
+/** Ranking profile applied when assembling context. */
 export type ContextProfile = ContextBuilderConfig["profile"];
 
-/** Primary Context Package rendering (SPEC-002 §8). */
+/** Primary Context Package rendering. */
 export type OutputFormat = ContextBuilderConfig["outputFormat"];

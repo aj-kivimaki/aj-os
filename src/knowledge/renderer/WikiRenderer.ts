@@ -1,15 +1,14 @@
 /**
- * Wiki Renderer contract — ADR-005.
+ * Wiki Renderer contract.
  *
- * The stage that turns renderer-agnostic {@link ExtractedKnowledge} into
- * Markdown pages, using the **canonical identities** the IdentityResolver
- * decided. Because paths and links come from resolved identities, links are
- * canonical by construction — pages are never rendered with candidate slugs
- * and repaired later.
+ * The stage that turns renderer-agnostic {@link ExtractedKnowledge} into Markdown
+ * pages, using the **canonical identities** the IdentityResolver decided. Because
+ * paths and links come from resolved identities, links are canonical by
+ * construction — pages are never rendered with candidate slugs and repaired later.
  *
- * This is one renderer of potentially several (a graph export or search
- * index could consume the same extraction); it is the only stage that knows
- * Markdown and the wiki page schema (SPEC-005 §22.6).
+ * This is one renderer of potentially several (a graph export or search index could
+ * consume the same extraction); it is the only stage that knows Markdown and the
+ * wiki page schema.
  */
 import type {
   CompiledPage,

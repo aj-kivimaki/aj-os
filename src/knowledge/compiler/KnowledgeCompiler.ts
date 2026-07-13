@@ -1,18 +1,14 @@
 /**
- * Knowledge Compiler contract — the LLM synthesis seam (SPEC-005 INGEST).
+ * Knowledge Compiler contract — the LLM synthesis seam (INGEST).
  *
- * This is where the wiki stops being a document mirror and becomes an LLM
- * Wiki: a compiler turns one source into a small graph of pages — a source
- * summary plus the entities and concepts it introduces — cross-linked so
- * future queries read compiled knowledge instead of the raw document.
+ * This is where the wiki stops being a document mirror and becomes an LLM Wiki: a
+ * compiler turns one source into a small graph of pages — a source summary plus the
+ * entities and concepts it introduces — cross-linked so future queries read
+ * compiled knowledge instead of the raw document.
  *
- * All model non-determinism lives behind this port. The compiler depends on
- * a {@link TextGenerator} (the platform AI Client implements it), so the
- * pipeline and the deterministic rendering can be tested without the network.
- *
- * First slice (real LLM, single source): no cross-source MERGE, no
- * `overview.md`/`index.md`, no contradiction callouts yet — those are the
- * next slices. The page shape is designed so merge can layer on later.
+ * All model non-determinism lives behind this port. The compiler depends on a
+ * {@link TextGenerator} (the platform AI Client implements it), so the pipeline and
+ * the deterministic rendering can be tested without the network.
  */
 import type { SourceRecord } from "../../ingestion/index.js";
 import type { AIResponse } from "../../platform/ai/index.js";
@@ -21,10 +17,10 @@ import type { RenderedPrompt } from "../../platform/prompt/index.js";
 import type { SourceExtraction } from "./extraction.js";
 
 /**
- * The renderer-agnostic output of compiling one source (ADR-005): structured
- * knowledge, no Markdown. The IdentityResolver and WikiRenderer (and future
- * renderers — graph, search index) consume this; the extraction stage never
- * depends on any output format.
+ * The renderer-agnostic output of compiling one source: structured knowledge, no
+ * Markdown. The IdentityResolver and WikiRenderer (and future renderers — graph,
+ * search index) consume this; the extraction stage never depends on any output
+ * format.
  */
 export interface ExtractedKnowledge {
   readonly source: SourceRecord;
@@ -49,7 +45,7 @@ export interface CompiledPage {
   readonly title: string;
   /** Full page markdown, including frontmatter. */
   readonly content: string;
-  /** Contributing source ids (one, this slice; many once MERGE exists). */
+  /** Contributing source ids (one per source; several after a MERGE). */
   readonly sources: readonly string[];
 }
 
@@ -65,8 +61,8 @@ export interface TextGenerator {
 }
 
 /**
- * Extracts renderer-agnostic structured knowledge from a source (ADR-005).
- * It does not render Markdown — that is the WikiRenderer's job.
+ * Extracts renderer-agnostic structured knowledge from a source. It does not render
+ * Markdown — that is the WikiRenderer's job.
  */
 export interface KnowledgeCompiler {
   compile(source: SourceRecord): Promise<ExtractedKnowledge>;

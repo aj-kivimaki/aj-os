@@ -1,22 +1,19 @@
 /**
- * Wiki Store contract — SPEC-007.
+ * Wiki Store contract.
  *
  * A persistence-only, generic path-keyed Markdown blob store scoped to the
- * configured wiki destination. Pages, the index, the reverse (provenance)
- * index, and the log are all just path-keyed *entries*; the store does not
- * parse frontmatter or understand page structure (that lives in the Wiki
- * Generator).
+ * configured wiki destination. Pages, the index, the reverse (provenance) index,
+ * and the log are all just path-keyed *entries*; the store does not parse
+ * frontmatter or understand page structure (that lives in the Wiki Generator).
  *
- * Invariants (ARCH-002 §5, SPEC-007 §15):
- * - Persistence only — the store never performs version control (no
- *   `commit`); committing is an orchestration concern (AJS-005).
+ * Invariants:
+ * - Persistence only — the store never performs version control; committing is an
+ *   orchestration concern.
  * - All wiki reads/writes go through the store; no caller uses raw paths.
  * - Writes never escape the configured destination (path-guarded).
  */
 
-/**
- * A validated handle to the wiki destination.
- */
+/** A validated handle to the wiki destination. */
 export interface WikiLocation {
   /** Resolved (realpath) absolute root of the wiki destination. */
   readonly root: string;
@@ -35,26 +32,18 @@ export interface WikiStore {
    */
   locate(): Promise<WikiLocation>;
 
-  /**
-   * Read an entry's content, or `null` if it does not exist.
-   */
+  /** Read an entry's content, or `null` if it does not exist. */
   read(path: string): Promise<string | null>;
 
-  /**
-   * List entry paths, optionally restricted to those under `prefix`
-   * (e.g. `"concepts/"`).
-   */
+  /** List entry paths, optionally restricted to those under `prefix`. */
   list(prefix?: string): Promise<string[]>;
 
-  /**
-   * Create or overwrite an entry. Confined to the destination.
-   */
+  /** Create or overwrite an entry. Confined to the destination. */
   write(path: string, content: string): Promise<void>;
 
   /**
-   * Delete an entry. Exists for orchestration/maintenance flows; the
-   * headless Wiki Generator never calls this (SPEC-005 — removal is
-   * proposed, not performed headless).
+   * Delete an entry. Exists for orchestration/maintenance flows; the headless Wiki
+   * Generator never calls this (it proposes removals rather than performing them).
    */
   delete(path: string): Promise<void>;
 

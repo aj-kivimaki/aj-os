@@ -23,7 +23,7 @@ const WIKI_PROVIDER_ID = "wiki";
  * `content`). It lives in the product layer precisely because only the product
  * composes platform capabilities.
  *
- * Retrieval has **already** chosen the articles (the milestone pipeline is
+ * Retrieval has **already** chosen the articles (the pipeline is
  * `Question → RetrievalResult[] → Context Builder`), so this provider does not
  * rank, filter or re-retrieve, and it ignores the {@link KnowledgeRequest}. Its
  * one job is to read each chosen article's body — the `content` the

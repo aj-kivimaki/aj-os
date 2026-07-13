@@ -1,8 +1,8 @@
 /**
- * The compiler's LLM boundary: the JSON contract the model must return, and
- * a validating parser. The model does knowledge *extraction* (entities,
- * concepts, a faithful summary); deterministic rendering (SPEC-005 §21.5
- * frontmatter, slugs, `[[wiki-links]]`) happens in `render.ts`.
+ * The compiler's LLM boundary: the JSON contract the model must return, and a
+ * validating parser. The model does knowledge *extraction* (entities, concepts, a
+ * faithful summary); deterministic rendering (frontmatter, slugs, `[[wiki-links]]`)
+ * happens in the renderer.
  */
 import { z } from "zod";
 

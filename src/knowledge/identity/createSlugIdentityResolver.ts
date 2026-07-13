@@ -1,10 +1,9 @@
 /**
- * Slug Identity Resolver (ADR-005) — the deterministic default.
+ * Slug Identity Resolver — the deterministic default.
  *
- * Reproduces pre-resolver behavior exactly: a candidate's canonical path is
- * its slug path; it resolves to an existing page iff a page already exists at
- * that path, otherwise new. No LLM, always confidence 1. The semantic
- * resolver (Step B) slots in behind the same interface.
+ * A candidate's canonical path is its slug path; it resolves to an existing page
+ * iff a page already exists at that path, otherwise new. No LLM, always
+ * confidence 1. The semantic resolver slots in behind the same interface.
  */
 import { pagePathFor } from "../naming.js";
 

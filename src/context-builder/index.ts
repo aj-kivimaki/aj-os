@@ -1,42 +1,12 @@
 /**
  * Context Builder module — public entry point.
  *
- * The Context Builder assembles the smallest, highest-value Context Package
- * required for a coding agent to complete a single task (see SPEC-002).
- *
- * This is the sole public surface of the module; internal components remain
- * private and are re-exported here as they are implemented.
- *
- * Scope note: CB-001 established the module boundary; CB-002 adds the public
- * configuration contract and the `createContextBuilder()` factory; CB-003 adds
- * the public Context Package contract (the canonical output type); CB-004 adds
- * the public Knowledge Provider contracts (the platform's input types); CB-005
- * adds the immutable Provider Registry (the catalogue of KnowledgeProviders);
- * CB-007 adds the Collection Engine service boundary (constructed with the
- * registry, which it holds but does not execute); CB-011 integrates the pipeline:
- * the Context Builder composes and owns a Collection Engine (built from an
- * injected Provider Registry) and exposes the first end-to-end collection
- * behaviour; CB-013 opens Milestone M3 by adding the Selection Engine service
- * boundary, extended in CB-014…CB-016 with the SelectionResult contract, the
- * Selection Policy and `select(collectionResult)`; CB-017 extends the Context
- * Builder pipeline with the Selection stage and reconciles the public entry point:
- * the Context Builder now composes and owns both a Collection Engine and a
- * Selection Engine and exposes a single public entry point, `build(request)`, which
- * runs Collection → Selection and returns the resulting SelectionResult unchanged
- * (this supersedes the Milestone 2 era `collect(request)` public method — an
- * approved public API evolution); CB-019 opens Milestone M4 by adding the Assembly
- * Engine service boundary (a pure boundary that holds nothing and exposes no
- * members yet), extended in CB-022 with the deterministic
- * `assemble(selectionResult, generatedAt)` stage operation; CB-023 completes the
- * Milestone M4 pipeline: the Context Builder now composes and owns the Collection,
- * Selection and Assembly Engines, and `build(request)` runs Collection → Selection →
- * Assembly and returns the resulting ContextPackage (CB-003) unchanged — the `build`
- * input signature is unchanged and only its return type advances SelectionResult →
- * ContextPackage (the pre-approved CB-017 evolution). Profiles and explainability
- * behaviour are delivered by later Milestone M5+ tasks.
+ * The Context Builder assembles the smallest, highest-value Context Package a
+ * coding agent needs to complete a single task. This is the module's sole public
+ * surface; internal components stay private and are re-exported here.
  */
 
-/** Identity of the Context Builder agent (see AJS-004 required metadata). */
+/** Identity metadata for the Context Builder agent. */
 export const CONTEXT_BUILDER = {
   id: "context-builder",
   name: "Context Builder",
@@ -47,11 +17,11 @@ export const CONTEXT_BUILDER = {
     "Assembles deterministic, explainable Context Packages from approved AJ-OS knowledge sources.",
 } as const;
 
-// Public factory and handle (CB-002; pipeline entry point `build` added by CB-017).
+// Public factory and handle.
 export { createContextBuilder } from "./createContextBuilder.js";
 export type { ContextBuilder } from "./createContextBuilder.js";
 
-// Public configuration contract (CB-002).
+// Public configuration contract.
 export {
   contextBuilderConfigSchema,
   parseContextBuilderConfig,
@@ -64,7 +34,7 @@ export type {
   OutputFormat,
 } from "./config/index.js";
 
-// Public Context Package contract — the canonical Context Builder output (CB-003).
+// Public Context Package contract — the canonical Context Builder output.
 export {
   contextPackageSchema,
   contextPackageMetadataSchema,
@@ -87,7 +57,7 @@ export type {
   ReferenceType,
 } from "./package/index.js";
 
-// Public Knowledge Provider contracts — the platform's input types (CB-004).
+// Public Knowledge Provider contracts — the platform's input types.
 export {
   knowledgeRequestSchema,
   knowledgeItemSchema,
@@ -102,17 +72,16 @@ export type {
   KnowledgeProvider,
 } from "./providers/index.js";
 
-// Provider Registry — the immutable catalogue of KnowledgeProviders (CB-005).
+// Provider Registry — the immutable catalogue of KnowledgeProviders.
 export { createProviderRegistry } from "./registry/index.js";
 export type { ProviderRegistry } from "./registry/index.js";
 
-// Collection Engine — the service boundary that coordinates knowledge
-// collection; constructed with the Provider Registry, held not executed (CB-007).
+// Collection Engine — the service boundary that coordinates knowledge collection.
 export { createCollectionEngine } from "./collection/index.js";
 export type { CollectionEngine } from "./collection/index.js";
 
-// Collection Error contract — the deterministic, provider-agnostic representation
-// of a single collection failure under the partial-collection model (CB-008).
+// Collection Error contract — the provider-agnostic representation of a single
+// collection failure under the partial-collection model.
 export {
   collectionErrorSchema,
   parseCollectionError,
@@ -120,8 +89,8 @@ export {
 } from "./collection/index.js";
 export type { CollectionError, FailureCategory } from "./collection/index.js";
 
-// CollectionResult contract — the complete, deterministic outcome of knowledge
-// collection: collected items and collected errors together (CB-009).
+// CollectionResult contract — the complete outcome of knowledge collection:
+// collected items and collected errors together.
 export {
   collectionResultSchema,
   collectionResultMetadataSchema,
@@ -133,16 +102,13 @@ export type {
 } from "./collection/index.js";
 
 // Selection Engine — the service boundary that performs deterministic knowledge
-// selection; a pure boundary at CB-013 (holds nothing), extended in CB-016 with the
-// `select(collectionResult)` stage operation that applies the Selection Policy
-// (CB-015) to a CollectionResult and returns an immutable SelectionResult (CB-014).
+// selection by applying the Selection Policy to a CollectionResult.
 export { createSelectionEngine } from "./selection/index.js";
 export type { SelectionEngine } from "./selection/index.js";
 
-// SelectionResult contract — the complete, deterministic outcome of knowledge
-// selection: the ordered selected items and the excluded items together, plus the
-// answered-request provenance. Ordering of `selectedItems` is the contract; there
-// is no priority field (CB-014).
+// SelectionResult contract — the complete outcome of knowledge selection: ordered
+// selected items and excluded items, plus provenance. Ordering of `selectedItems`
+// is the contract; there is no priority field.
 export {
   selectionResultSchema,
   selectionResultMetadataSchema,
@@ -154,11 +120,6 @@ export type {
 } from "./selection/index.js";
 
 // Assembly Engine — the service boundary that constructs an immutable
-// ContextPackage (CB-003) from an ordered SelectionResult (CB-014). A pure
-// boundary at CB-019 (holds nothing); CB-022 adds the deterministic
-// `assemble(selectionResult, generatedAt)` stage operation to the same interface,
-// realizing the frozen CB-020 section-composition strategy and CB-021 metadata
-// composition. The `assemble` behaviour stays internal; only the factory and
-// interface are public (assemble is a method on the returned handle).
+// ContextPackage from an ordered SelectionResult via `assemble`.
 export { createAssemblyEngine } from "./assembly/index.js";
 export type { AssemblyEngine } from "./assembly/index.js";

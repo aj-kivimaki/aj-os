@@ -1,10 +1,10 @@
 /**
- * Wiki Renderer implementation (ADR-005).
+ * Wiki Renderer implementation.
  *
- * Renders an extraction into Markdown pages using the canonical identities
- * the IdentityResolver decided — paths and `[[wiki-links]]` are canonical by
- * construction. This is the only stage that knows Markdown and the page
- * schema (SPEC-005 §22.6); it is otherwise deterministic.
+ * Renders an extraction into Markdown pages using the canonical identities the
+ * IdentityResolver decided — paths and `[[wiki-links]]` are canonical by
+ * construction. This is the only stage that knows Markdown and the page schema; it
+ * is otherwise deterministic.
  */
 import type { SourceRecord } from "../../ingestion/index.js";
 import type {
@@ -82,8 +82,8 @@ function renderRelated(
 
 /**
  * Build slug-based identities for an extraction — the deterministic default
- * that reproduces pre-resolver behavior (path = slug, title = candidate
- * name). Used by tests and the SlugIdentityResolver path.
+ * (path = slug, title = candidate name). Used by tests and the
+ * SlugIdentityResolver path.
  */
 export function buildSlugIdentities(
   extraction: SourceExtraction,

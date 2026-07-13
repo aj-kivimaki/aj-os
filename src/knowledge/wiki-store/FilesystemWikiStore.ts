@@ -1,18 +1,18 @@
 /**
- * Filesystem Wiki Store — SPEC-007 (first store).
+ * Filesystem Wiki Store.
  *
- * A persistence-only, generic path-keyed Markdown blob store scoped to a
- * configured destination directory. It knows nothing about wiki semantics
- * (pages, frontmatter, the index) and nothing about version control — it
- * only reads and writes entries by wiki-relative path.
+ * A persistence-only, generic path-keyed Markdown blob store scoped to a configured
+ * destination directory. It knows nothing about wiki semantics (pages, frontmatter,
+ * the index) and nothing about version control — it only reads and writes entries
+ * by wiki-relative path.
  *
- * Contract guarantees (SPEC-007):
+ * Contract guarantees:
  * - Persistence only: no git, no `commit`.
- * - Every operation is path-guarded to the destination — both lexically
- *   (no `..` / absolute paths) and against symlink escape.
+ * - Every operation is path-guarded to the destination — both lexically (no `..` /
+ *   absolute paths) and against symlink escape.
  * - `write` creates parent directories as needed; `delete` is idempotent.
- * - `locate` resolves the destination to its canonical (realpath) root and
- *   requires it to exist and be a directory.
+ * - `locate` resolves the destination to its canonical (realpath) root and requires
+ *   it to exist and be a directory.
  */
 import {
   appendFile,

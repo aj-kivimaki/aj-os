@@ -1,6 +1,4 @@
-/**
- * Knowledge Compiler — the LLM synthesis seam (SPEC-005 INGEST).
- */
+/** Knowledge Compiler — the LLM synthesis seam (INGEST). */
 export type {
   KnowledgeCompiler,
   CompiledPage,
