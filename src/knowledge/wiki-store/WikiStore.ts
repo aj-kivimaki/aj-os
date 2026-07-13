@@ -59,6 +59,16 @@ export interface WikiStore {
   delete(path: string): Promise<void>;
 
   /**
+   * Recursively remove an entry — a file or an entire directory subtree —
+   * confined to the destination and idempotent (removing a missing entry is a
+   * no-op). Like {@link delete}, this exists for orchestration/maintenance
+   * flows (e.g. a `--rebuild` resetting generator-owned outputs); the headless
+   * Wiki Generator never calls it. The store stays semantics-free: the caller
+   * supplies the paths to remove.
+   */
+  removeTree(path: string): Promise<void>;
+
+  /**
    * Append a line/entry to the generation log (`log.md`). A convenience
    * over read-modify-write; carries no version-control semantics.
    */

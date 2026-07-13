@@ -23,8 +23,12 @@ import {
   type TextGenerator,
 } from "../compiler/index.js";
 import { createSlugIdentityResolver } from "../identity/index.js";
+import { GENERATED_WIKI_ARTIFACTS } from "../naming.js";
 import { createWikiRenderer } from "../renderer/index.js";
-import { createFilesystemWikiStore } from "../wiki-store/index.js";
+import {
+  createFilesystemWikiStore,
+  type WikiStore,
+} from "../wiki-store/index.js";
 import {
   createWikiGenerator,
   type WikiGenerator,
@@ -51,7 +55,19 @@ export interface KnowledgePipelineDeps {
 }
 
 /**
- * Assemble the Knowledge Platform into a ready-to-run {@link WikiGenerator}.
+ * The assembled Knowledge Platform: the ready-to-run generator plus the store
+ * it writes to. The store is exposed so orchestration can manage the lifecycle
+ * of generated outputs — notably resetting them for a `--rebuild` (see
+ * {@link resetGeneratedWiki}) — without the generator engine ever deleting
+ * headless (SPEC-005).
+ */
+export interface KnowledgePipeline {
+  readonly generator: WikiGenerator;
+  readonly store: WikiStore;
+}
+
+/**
+ * Assemble the Knowledge Platform into a ready-to-run {@link KnowledgePipeline}.
  *
  * Async because it ensures the store's destination exists (`mkdir -p`): the
  * FilesystemWikiStore requires its destination to be present, and the
@@ -60,7 +76,7 @@ export interface KnowledgePipelineDeps {
 export async function createKnowledgePipeline(
   config: AjConfig,
   deps: KnowledgePipelineDeps = {},
-): Promise<WikiGenerator> {
+): Promise<KnowledgePipeline> {
   const generator = deps.generator ?? new AIClient();
   const now = deps.now ?? (() => new Date());
 
@@ -68,6 +84,7 @@ export async function createKnowledgePipeline(
   const destination = resolve(handbookPath, config.handbook.generatedWikiPath);
   await mkdir(destination, { recursive: true });
 
+  const store = createFilesystemWikiStore({ destination });
   const connectors = [
     createFilesystemSourceConnector({
       kind: HANDBOOK_KIND,
@@ -76,15 +93,30 @@ export async function createKnowledgePipeline(
     }),
   ];
 
-  return createWikiGenerator(
-    {
-      connectors,
-      store: createFilesystemWikiStore({ destination }),
-      compiler: createAnthropicKnowledgeCompiler({ generator }),
-      resolver: createSlugIdentityResolver(),
-      renderer: createWikiRenderer(),
-      mergeEngine: createLlmMergeEngine({ generator }),
-    },
-    now,
-  );
+  return {
+    generator: createWikiGenerator(
+      {
+        connectors,
+        store,
+        compiler: createAnthropicKnowledgeCompiler({ generator }),
+        resolver: createSlugIdentityResolver(),
+        renderer: createWikiRenderer(),
+        mergeEngine: createLlmMergeEngine({ generator }),
+      },
+      now,
+    ),
+    store,
+  };
+}
+
+/**
+ * Reset the generator-owned outputs in `store` — the precondition for a true
+ * `--rebuild`. Removes exactly {@link GENERATED_WIKI_ARTIFACTS} and preserves
+ * everything else in the destination, because `aj wiki build` owns the
+ * lifecycle of what it generates and nothing more.
+ */
+export async function resetGeneratedWiki(store: WikiStore): Promise<void> {
+  for (const artifact of GENERATED_WIKI_ARTIFACTS) {
+    await store.removeTree(artifact);
+  }
 }

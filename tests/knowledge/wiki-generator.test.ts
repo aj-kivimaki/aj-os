@@ -134,6 +134,17 @@ describe("WikiGenerator INGEST (staged pipeline)", () => {
     expect(await provenance("entities/shared.md")).toEqual(["a.md"]);
   });
 
+  it("writes a corpus catalog (index.md) listing generated pages", async () => {
+    await generator([record("a.md")]).run();
+
+    const index = await store.read("index.md");
+    expect(index).not.toBeNull();
+    expect(index).toContain("## Entities");
+    expect(index).toContain("[[shared]]"); // entity linked by bare slug
+    expect(index).toContain("## Sources");
+    expect(index).toContain("[[sources/a]]"); // source linked by path
+  });
+
   it("merges a second source into a shared page, unioning provenance", async () => {
     const report = await generator([record("a.md"), record("b.md")]).run();
 

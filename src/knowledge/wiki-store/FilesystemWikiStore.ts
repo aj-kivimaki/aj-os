@@ -20,6 +20,7 @@ import {
   readdir,
   readFile,
   realpath,
+  rm,
   stat,
   unlink,
   writeFile,
@@ -211,11 +212,18 @@ export function createFilesystemWikiStore(
     }
   }
 
+  async function removeTree(relPath: string): Promise<void> {
+    // resolveInRoot rejects the root itself, `..` escapes and symlink escapes,
+    // so recursion can never reach outside the destination.
+    const abs = await resolveInRoot(relPath);
+    await rm(abs, { recursive: true, force: true }); // idempotent on missing
+  }
+
   async function appendLog(entry: string): Promise<void> {
     const abs = await resolveInRoot(LOG_FILE);
     const line = entry.endsWith("\n") ? entry : `${entry}\n`;
     await appendFile(abs, line, "utf8");
   }
 
-  return { locate, read, list, write, delete: remove, appendLog };
+  return { locate, read, list, write, delete: remove, removeTree, appendLog };
 }

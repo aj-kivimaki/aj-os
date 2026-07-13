@@ -1,4 +1,7 @@
-import { createKnowledgePipeline } from "../../knowledge/composition/index.js";
+import {
+  createKnowledgePipeline,
+  resetGeneratedWiki,
+} from "../../knowledge/composition/index.js";
 import type { GenerationReport } from "../../knowledge/wiki-generator/index.js";
 import { ConfigError, ConfigService } from "../../platform/config/index.js";
 import { AIError } from "../../platform/ai/index.js";
@@ -25,12 +28,17 @@ export async function wikiBuildCommand(
   let report: GenerationReport;
   try {
     const config = await new ConfigService().load();
-    const pipeline = await createKnowledgePipeline(config);
+    const { generator, store } = await createKnowledgePipeline(config);
+    // A rebuild starts from a clean slate: reset the generator-owned outputs
+    // (nothing else in the destination) before regenerating.
+    if (options.rebuild === true) {
+      await resetGeneratedWiki(store);
+    }
     console.log(
       `Building wiki (${mode})… each changed source is compiled with the ` +
         "model, so this may take a few minutes.",
     );
-    report = await pipeline.run({ mode });
+    report = await generator.run({ mode });
   } catch (error) {
     // Known, user-facing problems (missing config, missing API key) print a
     // friendly message; anything unexpected surfaces loudly.

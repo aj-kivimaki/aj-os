@@ -49,6 +49,8 @@ import type {
 const METADATA_DIR = ".generator";
 const STATE_PATH = `${METADATA_DIR}/state.json`;
 const STATE_VERSION = 2;
+/** The corpus catalog RetrievalService reads (SPEC-007 §consumer contract). */
+const INDEX_PATH = "index.md";
 const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---\n?/;
 const STALE_KEY_RE = /^(status|stale_reason|stale_since):/;
 
@@ -112,6 +114,40 @@ function generatedHash(content: string): string {
 /** A page's contributing source ids, read from its frontmatter. */
 function provenanceOf(content: string): string[] {
   return [...readFrontmatter(parsePage(content).frontmatter).sources];
+}
+
+/** Bare filename slug of a page path: `entities/acme-corp.md` → `acme-corp`. */
+function bareSlug(pagePath: string): string {
+  return pagePath.slice(pagePath.lastIndexOf("/") + 1).replace(/\.md$/, "");
+}
+
+/**
+ * Build the corpus catalog `index.md` — a simple list of wiki-links grouped by
+ * sources, entities and concepts. This is the catalog the consumer contract
+ * (RetrievalService) expects the generator to maintain. Entities and concepts
+ * are linked by bare slug — the form retrieval resolves — while sources are
+ * linked by their wiki-relative path, since they nest under `sources/`.
+ */
+function buildIndex(
+  sources: readonly string[],
+  entities: readonly string[],
+  concepts: readonly string[],
+): string {
+  const lines: string[] = [
+    "# Index",
+    "",
+    "Generated catalog of the wiki. Rebuilt on every generation cycle.",
+  ];
+  const section = (title: string, items: readonly string[]): void => {
+    if (items.length > 0) {
+      lines.push("", `## ${title}`, ...items);
+    }
+  };
+  section("Sources", sources.map((p) => `- [[${p.replace(/\.md$/, "")}]]`));
+  section("Entities", entities.map((p) => `- [[${bareSlug(p)}]]`));
+  section("Concepts", concepts.map((p) => `- [[${bareSlug(p)}]]`));
+  lines.push("");
+  return lines.join("\n");
 }
 
 /** Inject stale lifecycle fields into a page's frontmatter (ADR-003). */
@@ -357,6 +393,16 @@ export function createWikiGenerator(
     delete ctx.nextSources[id];
   }
 
+  /** Regenerate the corpus catalog (`index.md`) from the store's pages. */
+  async function writeIndex(): Promise<void> {
+    const [sources, entities, concepts] = await Promise.all([
+      store.list("sources"),
+      store.list("entities"),
+      store.list("concepts"),
+    ]);
+    await store.write(INDEX_PATH, buildIndex(sources, entities, concepts));
+  }
+
   async function run(options?: RunOptions): Promise<GenerationReport> {
     const mode: GenerationMode = options?.mode ?? "incremental";
     const previous = mode === "rebuild" ? emptyState() : await loadState();
@@ -398,6 +444,11 @@ export function createWikiGenerator(
     )) {
       await reconcileRemoved(ctx, id);
     }
+
+    // Regenerate the corpus catalog the consumer (RetrievalService) reads. It
+    // is a derived projection of the current pages, not knowledge, so it is
+    // rewritten every run and kept out of the page/provenance state.
+    await writeIndex();
 
     const nextState: GeneratorState = {
       version: STATE_VERSION,
