@@ -1,13 +1,10 @@
 /**
- * Knowledge Provider contracts — types (CB-004).
+ * Knowledge Provider contracts — types.
  *
- * Data types are inferred from the Zod schemas and wrapped in `DeepReadonly` so
- * the runtime contract and the compile-time contract can never drift, and so the
- * contracts are immutable at every level (mirroring the runtime freeze).
- *
- * `KnowledgeProvider` is a *behavioural* contract (it has a method), so it is a
- * TypeScript interface rather than a schema. It is the sole abstraction every
- * knowledge source implements.
+ * Data types are inferred from the Zod schemas and wrapped in `DeepReadonly` so the
+ * runtime and compile-time contracts can never drift. `KnowledgeProvider` is a
+ * behavioural contract (it has a method), so it is a TypeScript interface rather
+ * than a schema — the sole abstraction every knowledge source implements.
  */
 
 import type { z } from "zod";
@@ -20,7 +17,7 @@ import type {
   providerMetadataSchema,
 } from "./schema.js";
 
-/** Immutable public request supplied to every provider (SPEC-002 §7). */
+/** Immutable public request supplied to every provider. */
 export type KnowledgeRequest = DeepReadonly<
   z.infer<typeof knowledgeRequestSchema>
 >;

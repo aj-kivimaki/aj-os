@@ -8,7 +8,7 @@ import { AIError } from "../../platform/ai/index.js";
 
 /** Options parsed off the `wiki build` command line. */
 export interface WikiBuildOptions {
-  /** Rebuild from scratch instead of an incremental update (ADR-002). */
+  /** Rebuild from scratch instead of an incremental update. */
   readonly rebuild?: boolean;
 }
 
@@ -18,7 +18,7 @@ export interface WikiBuildOptions {
  * The CLI stays thin: it loads configuration, asks the composition root for a
  * ready-to-run pipeline, runs it, and prints the report. All wiring lives in
  * `createKnowledgePipeline`; all generation logic lives in the platform. This
- * command performs no git — orchestration and commits arrive with SPEC-003.
+ * command performs no git — orchestration and commits are handled elsewhere.
  */
 export async function wikiBuildCommand(
   options: WikiBuildOptions = {},

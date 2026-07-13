@@ -17,7 +17,7 @@ loadDotenv();
  */
 export const DEFAULT_MODEL = "claude-sonnet-5";
 
-/** Upper bound on generated answer length. Small: PRODUCT-001 wants concise answers. */
+/** Upper bound on generated answer length. Small: the assistant wants concise answers. */
 const MAX_TOKENS = 1024;
 
 /**
@@ -45,8 +45,8 @@ export class AIError extends Error {
  * returns an {@link AIResponse}. It does not render prompts, assemble context, or
  * retrieve knowledge — those are upstream capabilities it knows nothing about.
  *
- * Scope is intentionally minimal for PRODUCT-001: a single non-streaming request,
- * no conversation memory, and no provider abstraction beyond this class.
+ * Scope is intentionally minimal: a single non-streaming request, no conversation
+ * memory, and no provider abstraction beyond this class.
  */
 export class AIClient {
   /**
@@ -122,8 +122,8 @@ export class AIClient {
 }
 
 /**
- * Concatenate the text blocks of a Messages response into a single answer.
- * PRODUCT-001 prompts produce only text, so non-text blocks (if any) are ignored.
+ * Concatenate the text blocks of a Messages response into a single answer. These
+ * prompts produce only text, so non-text blocks (if any) are ignored.
  */
 function extractText(message: Anthropic.Message): string {
   return message.content

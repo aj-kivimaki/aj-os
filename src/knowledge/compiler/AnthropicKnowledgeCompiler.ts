@@ -1,10 +1,10 @@
 /**
- * Anthropic-backed Knowledge Compiler (SPEC-005 INGEST, first slice).
+ * Anthropic-backed Knowledge Compiler (INGEST).
  *
- * Wires the three deterministic pieces around the one non-deterministic step:
- * build the compilation prompt → generate (LLM) → parse+validate the JSON →
- * render pages. The LLM is reached through a {@link TextGenerator} (the
- * platform `AIClient`), so this composes without knowing any provider detail.
+ * Wires the deterministic pieces around the one non-deterministic step: build the
+ * compilation prompt → generate (LLM) → parse and validate the JSON. The LLM is
+ * reached through a {@link TextGenerator} (the platform `AIClient`), so this
+ * composes without knowing any provider detail.
  */
 import type { SourceRecord } from "../../ingestion/index.js";
 

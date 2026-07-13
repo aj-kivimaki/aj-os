@@ -1,10 +1,10 @@
 /**
- * AI Client types (PRODUCT-001).
+ * AI Client types.
  *
  * The AI Client's only outward contract: the shape of a generated answer. The
- * response is deliberately minimal — the model's text plus which model produced
- * it — because PRODUCT-001 needs nothing more. Streaming, token usage,
- * tool-calls and conversation history are intentionally out of scope.
+ * response is deliberately minimal — the model's text plus which model produced it.
+ * Streaming, token usage, tool-calls, and conversation history are intentionally
+ * out of scope.
  */
 
 /**

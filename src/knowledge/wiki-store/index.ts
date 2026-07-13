@@ -1,6 +1,4 @@
-/**
- * Wiki Store contract and stores — SPEC-007.
- */
+/** Wiki Store contract and stores. */
 export type { WikiStore, WikiLocation } from "./WikiStore.js";
 export {
   createFilesystemWikiStore,

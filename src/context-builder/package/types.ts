@@ -1,9 +1,7 @@
 /**
- * Context Package types (CB-003).
- *
- * Types are inferred from the Zod schema and wrapped in `DeepReadonly` so the
- * runtime contract and the compile-time contract can never drift, and so the
- * package is immutable at every level (mirroring the runtime deep-freeze).
+ * Context Package types, inferred from the Zod schema and wrapped in `DeepReadonly`
+ * so the runtime and compile-time contracts can never drift and the package is
+ * immutable at every level.
  */
 
 import type { z } from "zod";
@@ -26,7 +24,7 @@ export type DeepReadonly<T> = T extends (infer U)[]
       ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
       : T;
 
-/** Immutable package identity and provenance (AJS-002 Appendix B). */
+/** Immutable package identity and provenance. */
 export type ContextPackageMetadata = DeepReadonly<
   z.infer<typeof contextPackageMetadataSchema>
 >;
@@ -52,8 +50,8 @@ export type ContextExplainability = DeepReadonly<
 /** The immutable Context Package contract. */
 export type ContextPackage = DeepReadonly<z.infer<typeof contextPackageSchema>>;
 
-/** Canonical section identifier (AJS-002 Appendix B). */
+/** Canonical section identifier. */
 export type ContextSectionKind = z.infer<typeof contextSectionSchema>["kind"];
 
-/** Knowledge-source category (AJS-002). */
+/** Knowledge-source category. */
 export type ReferenceType = z.infer<typeof sourceReferenceSchema>["type"];

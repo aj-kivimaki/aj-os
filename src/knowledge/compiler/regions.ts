@@ -1,15 +1,14 @@
 /**
- * Page structure: frontmatter + a **generator-owned body** (ADR-002).
+ * Page structure: frontmatter + a **generator-owned body**.
  *
- * The wiki is generator-owned: humans maintain the Handbook, AJ-OS maintains
- * the wiki. The entire page body is generator-owned — MERGE re-synthesizes it
- * under the enrichment guards (which preserve accumulated *generated*
- * knowledge, not manual edits). A hand-edited body is drift, surfaced by LINT
- * (hash), not preserved. The one exception is learned *compiler metadata* in
- * frontmatter (e.g. `aliases`), which survives regeneration (ADR-006).
+ * Humans maintain the Handbook; AJ-OS maintains the wiki. The entire page body is
+ * generator-owned — MERGE re-synthesizes it under the enrichment guards (which
+ * preserve accumulated *generated* knowledge, not manual edits). A hand-edited body
+ * is drift, surfaced by LINT (hash), not preserved. The one exception is learned
+ * *compiler metadata* in frontmatter (e.g. `aliases`), which survives regeneration.
  *
- * Also provides the small, mechanical extractors MERGE's guards rely on
- * (links, contradiction callouts) and a minimal frontmatter reader.
+ * Also provides the small, mechanical extractors MERGE's guards rely on (links,
+ * contradiction callouts) and a minimal frontmatter reader.
  */
 const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---\n?/;
 
@@ -44,7 +43,7 @@ export interface Frontmatter {
   readonly lists: Readonly<Record<string, readonly string[]>>;
   /** The `sources:` list (convenience). */
   readonly sources: readonly string[];
-  /** The `aliases:` list — learned identity knowledge (ADR-006). */
+  /** The `aliases:` list — learned identity knowledge. */
   readonly aliases: readonly string[];
 }
 
@@ -62,7 +61,7 @@ function collectListItems(lines: string[], i: number): { items: string[]; end: n
   return { items, end: j - 1 };
 }
 
-/** Minimal reader for the controlled frontmatter format (§22.6). */
+/** Minimal reader for the controlled frontmatter format. */
 export function readFrontmatter(frontmatter: string): Frontmatter {
   const fields: Record<string, string> = {};
   const lists: Record<string, string[]> = {};
@@ -92,16 +91,16 @@ export function readFrontmatter(frontmatter: string): Frontmatter {
 }
 
 /**
- * Learned compiler-metadata frontmatter keys — annotations (not knowledge)
- * that survive regeneration even though the body is generator-owned
- * (ADR-006). Currently just `aliases`; the human-feedback layer may add more.
+ * Learned compiler-metadata frontmatter keys — annotations (not knowledge) that
+ * survive regeneration even though the body is generator-owned. Currently just
+ * `aliases`; the human-feedback layer may add more.
  */
 const LEARNED_METADATA_KEYS = new Set(["aliases"]);
 
 /**
  * Patch a frontmatter block: replace the `sources:` list and given scalar
- * overrides, preserving every other line (aliases, tags, human-added
- * fields) — extends ADR-004 human-edit protection to frontmatter.
+ * overrides, preserving every other line (aliases, tags, human-added fields) —
+ * extending human-edit protection to frontmatter.
  */
 export function patchFrontmatter(
   frontmatter: string,
@@ -146,8 +145,8 @@ export function patchFrontmatter(
 
 /**
  * Carry learned compiler metadata (e.g. `aliases`) from an existing page's
- * frontmatter into a freshly re-derived page that lacks it, so teaching
- * survives regeneration while the body stays generator-owned (ADR-006).
+ * frontmatter into a freshly re-derived page that lacks it, so teaching survives
+ * regeneration while the body stays generator-owned.
  */
 export function carryLearnedMetadata(existing: string, next: string): string {
   const existingFm = readFrontmatter(parsePage(existing).frontmatter);

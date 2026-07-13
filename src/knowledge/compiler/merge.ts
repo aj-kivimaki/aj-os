@@ -1,23 +1,22 @@
 /**
- * MERGE — guarded LLM re-synthesis (ADR-004).
+ * MERGE — guarded LLM re-synthesis.
  *
- * When a new source contributes to an entity/concept that already has a
- * page, MERGE folds the new extraction into the existing page so the page
- * ends up **richer than before**. The whole body is generator-owned
- * (ADR-002); MERGE re-synthesizes it — the guards protect accumulated
- * *generated* knowledge, not manual edits. The Wiki is the sole knowledge
- * artifact: MERGE reads the existing *page* and the incoming page — no claim
- * store.
+ * When a new source contributes to an entity/concept that already has a page,
+ * MERGE folds the new extraction into the existing page so the page ends up
+ * **richer than before**. The whole body is generator-owned; MERGE re-synthesizes
+ * it — the guards protect accumulated *generated* knowledge, not manual edits. The
+ * Wiki is the sole knowledge artifact: MERGE reads the existing *page* and the
+ * incoming page — there is no separate claim store.
  *
  * Enrichment is **validated, not proven**, against mechanical guards:
  *  1. provenance is a superset,
  *  2. every prior `[[link]]` is retained,
  *  3. every prior contradiction callout is retained,
  *  4. the result is non-empty / structurally valid.
- * If any guard fails, MERGE never persists the lossy result: it falls back
- * to a lossless **append**, or **defers** when it cannot even append safely.
+ * If any guard fails, MERGE never persists the lossy result: it falls back to a
+ * lossless **append**, or **defers** when it cannot even append safely.
  *
- * Learned frontmatter metadata (`aliases`) is preserved across the merge;
+ * Learned frontmatter metadata (`aliases`) is preserved across the merge; there is
  * no semantic fact-loss detection — that is intentionally out of scope.
  */
 import type {
@@ -103,10 +102,9 @@ function unionSources(
 }
 
 /**
- * Rebuild the merged frontmatter by patching the existing block: widen
- * `sources`, bump `updated`/`generated_at`, and **preserve every other
- * field** — title, type, created, and human-added fields like `aliases`
- * (ADR-006).
+ * Rebuild the merged frontmatter by patching the existing block: widen `sources`,
+ * bump `updated`/`generated_at`, and **preserve every other field** — title, type,
+ * created, and human-added fields like `aliases`.
  */
 function mergedFrontmatter(
   existingFrontmatter: string,
@@ -120,7 +118,7 @@ function mergedFrontmatter(
   });
 }
 
-/** The five mechanical guards; returns the list of failures (empty = pass). */
+/** Run the mechanical enrichment guards; returns the failures (empty = pass). */
 function checkGuards(
   existingGenerated: string,
   candidateGenerated: string,
@@ -185,7 +183,7 @@ export function createLlmMergeEngine(
       };
     }
 
-    // The whole body is generator-owned (ADR-002): re-synthesize it.
+    // The whole body is generator-owned: re-synthesize it.
     const existingBody = existingPage.body;
     const incomingBody = parsePage(incoming.content).body;
     const title = frontmatter.fields.title ?? incoming.title;

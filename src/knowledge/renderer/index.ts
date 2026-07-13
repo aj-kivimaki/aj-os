@@ -1,6 +1,4 @@
-/**
- * Wiki Renderer stage — ADR-005.
- */
+/** Wiki Renderer stage. */
 export type { WikiRenderer, ResolvedIdentity } from "./WikiRenderer.js";
 export {
   createWikiRenderer,

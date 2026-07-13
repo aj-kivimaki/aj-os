@@ -1,14 +1,14 @@
 /**
- * Knowledge Platform Composition Root (SPEC-005 wiring).
+ * Knowledge Platform composition root.
  *
- * The one place that assembles the Knowledge Platform from configuration into
- * a ready-to-run pipeline: connectors + store + compiler + resolver + renderer
- * + merge engine → {@link WikiGenerator}. Entry points call this and nothing
- * else knows how to build the pipeline — the `aj wiki build` CLI today, and
- * End-of-Session, CI, automations or a UI later.
+ * The one place that assembles the Knowledge Platform from configuration into a
+ * ready-to-run pipeline: connectors + store + compiler + resolver + renderer +
+ * merge engine → {@link WikiGenerator}. Entry points call this and nothing else
+ * knows how to build the pipeline — the `aj wiki build` CLI today, and
+ * End-of-Session, CI, automations, or a UI later.
  *
  * It is deliberately the only module allowed to depend across `ingestion/`,
- * `knowledge/*` and `platform/ai` at once — composition needs every concrete
+ * `knowledge/*`, and `platform/ai` at once — composition needs every concrete
  * piece. The pieces themselves stay reusable and unaware of one another.
  */
 import { mkdir } from "node:fs/promises";
@@ -55,11 +55,10 @@ export interface KnowledgePipelineDeps {
 }
 
 /**
- * The assembled Knowledge Platform: the ready-to-run generator plus the store
- * it writes to. The store is exposed so orchestration can manage the lifecycle
- * of generated outputs — notably resetting them for a `--rebuild` (see
- * {@link resetGeneratedWiki}) — without the generator engine ever deleting
- * headless (SPEC-005).
+ * The assembled Knowledge Platform: the ready-to-run generator plus the store it
+ * writes to. The store is exposed so orchestration can manage the lifecycle of
+ * generated outputs — notably resetting them for a `--rebuild` (see
+ * {@link resetGeneratedWiki}) — without the generator engine ever deleting headless.
  */
 export interface KnowledgePipeline {
   readonly generator: WikiGenerator;

@@ -1,25 +1,25 @@
 /**
- * Wiki Generator — the single INGEST pipeline (SPEC-005 §22).
+ * Wiki Generator — the single INGEST pipeline.
  *
- * The generator orchestrates; it owns no knowledge and no persistence
- * mechanics of its own. It composes:
+ * The generator orchestrates; it owns no knowledge and no persistence mechanics of
+ * its own. It composes:
  *   - KnowledgeCompiler — compiles a source into pages (extraction + render);
  *   - MergeEngine       — folds a new contribution into an existing page;
  *   - WikiStore         — persists pages.
  *
- * Per changed source it compiles the source and, for each produced page,
- * decides by identity (slug = page path) and provenance:
+ * Per changed source it compiles the source and, for each produced page, decides by
+ * identity (slug = page path) and provenance:
  *   - page absent            → CREATE it;
- *   - source not yet on page → MERGE the new contribution (ADR-004);
+ *   - source not yet on page → MERGE the new contribution;
  *   - page is this source's alone → RE-DERIVE it (a plain refresh);
- *   - shared page, this source modified → mark STALE (source-modified),
- *     never re-merge (no double-counting; ADR-003).
- * Removed sources are RECONCILEd via the reverse index: fully-orphaned pages
- * become stale + a removal proposal; partial orphans stay stale-but-kept.
+ *   - shared page, this source modified → mark STALE (source-modified), never
+ *     re-merge (avoids double-counting).
+ * Removed sources are RECONCILEd via the reverse index: fully-orphaned pages become
+ * stale + a removal proposal; partial orphans stay stale-but-kept.
  *
- * Generator-owned state lives under `.generator/` and is pure bookkeeping —
- * a reverse index (`source → [pages]`) and a per-page generated-region hash
- * (for future in-region drift detection) — never knowledge (ADR-004).
+ * Generator-owned state lives under `.generator/` and is pure bookkeeping — a
+ * reverse index (`source → [pages]`) and a per-page generated-region hash (for
+ * future in-region drift detection) — never knowledge.
  */
 import { createHash } from "node:crypto";
 
@@ -49,7 +49,7 @@ import type {
 const METADATA_DIR = ".generator";
 const STATE_PATH = `${METADATA_DIR}/state.json`;
 const STATE_VERSION = 2;
-/** The corpus catalog RetrievalService reads (SPEC-007 §consumer contract). */
+/** The corpus catalog the RetrievalService reads. */
 const INDEX_PATH = "index.md";
 const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---\n?/;
 const STALE_KEY_RE = /^(status|stale_reason|stale_since):/;
@@ -104,7 +104,7 @@ function sorted(values: Iterable<string>): string[] {
   return [...values].sort((a, b) => a.localeCompare(b));
 }
 
-/** Hash of the generator-owned body — the drift-detection signal (ADR-002). */
+/** Hash of the generator-owned body — the drift-detection signal. */
 function generatedHash(content: string): string {
   return createHash("sha256")
     .update(parsePage(content).body, "utf8")
@@ -150,7 +150,7 @@ function buildIndex(
   return lines.join("\n");
 }
 
-/** Inject stale lifecycle fields into a page's frontmatter (ADR-003). */
+/** Inject stale lifecycle fields into a page's frontmatter. */
 function markPageStale(content: string, reason: string, since: string): string {
   const match = FRONTMATTER_RE.exec(content);
   if (match === null) {
@@ -229,8 +229,8 @@ export function createWikiGenerator(
         continue;
       }
       const resolution = await resolver.resolve(candidate, existing);
-      // `unsure` is treated as `new` here (a new page), but the resolver
-      // still records the distinction for future review workflows (ADR-005).
+      // `unsure` is treated as `new` here (a new page), but the resolver still
+      // records the distinction for future review workflows.
       const path =
         resolution.kind === "existing"
           ? resolution.targetPath
@@ -324,7 +324,7 @@ export function createWikiGenerator(
       ctx.updated.add(page.path);
     } else {
       // Shared page this source already backs, now modified → stale, never
-      // re-merge (avoids double-counting; ADR-003).
+      // re-merge (avoids double-counting).
       await writePage(
         ctx,
         page.path,
@@ -338,7 +338,7 @@ export function createWikiGenerator(
     ctx: RunContext,
     record: SourceRecord,
   ): Promise<void> {
-    // extract → resolve → render (ADR-005).
+    // extract → resolve → render.
     const extracted = await compiler.compile(record);
     const catalog = await buildCatalog();
     const identities = await resolveIdentities(extracted.extraction, catalog);
@@ -355,7 +355,7 @@ export function createWikiGenerator(
     };
   }
 
-  /** RECONCILE the pages a removed source contributed to (ADR-003). */
+  /** RECONCILE the pages a removed source contributed to. */
   async function reconcileRemoved(ctx: RunContext, id: string): Promise<void> {
     ctx.reconciled.push(id);
     const entry = ctx.previous.sources[id];
@@ -430,7 +430,7 @@ export function createWikiGenerator(
       try {
         await ingestRecord(ctx, record);
       } catch (error) {
-        // A single source's failure must not abort the batch (SPEC-005 §14).
+        // A single source's failure must not abort the batch.
         ctx.failed.push(record.id);
         const message = error instanceof Error ? error.message : String(error);
         await store.appendLog(

@@ -1,15 +1,15 @@
 /**
- * Semantic Identity Resolver (ADR-005) — the LLM-backed matcher.
+ * Semantic Identity Resolver — the LLM-backed matcher.
  *
- * Staged: normalize → lexical shortlist (token overlap, same kind only) →
- * LLM adjudicates same-vs-new among the shortlist → confidence → thresholds.
+ * Staged: normalize → lexical shortlist (token overlap, same kind only) → LLM
+ * adjudicates same-vs-new among the shortlist → confidence → thresholds.
  * Conservative by construction: only a high-confidence match resolves to
  * `existing`; a plausible-but-uncertain match is `unsure`; everything else is
  * `new`. A false split is acceptable; a false merge is not.
  *
- * The LLM (behind {@link TextGenerator}) is the only non-deterministic step;
- * the shortlist and thresholds are deterministic. Any parse failure or
- * out-of-shortlist answer falls back to `new` (never a risky merge).
+ * The LLM (behind {@link TextGenerator}) is the only non-deterministic step; the
+ * shortlist and thresholds are deterministic. Any parse failure or out-of-shortlist
+ * answer falls back to `new`, never a risky merge.
  */
 import { z } from "zod";
 

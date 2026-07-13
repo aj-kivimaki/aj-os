@@ -1,11 +1,8 @@
 /**
- * Context Builder configuration schema (CB-002).
- *
- * Defines the runtime-validated, public configuration contract. The schema is
- * `.strict()` and every field is required: the contract is explicit with no
- * hidden defaults (CB-002 design principles). Fields model stable platform
- * capabilities only — provider configuration, filesystem paths, token budgets
- * and environment settings are intentionally excluded from this task.
+ * Context Builder configuration schema — the public configuration contract.
+ * `.strict()` with every field required: explicit, with no hidden defaults.
+ * Provider configuration, filesystem paths, token budgets, and environment
+ * settings are intentionally excluded.
  */
 
 import { z } from "zod";
@@ -13,8 +10,8 @@ import { z } from "zod";
 import type { ContextBuilderConfig } from "./types.js";
 
 /**
- * Context profiles defined by SPEC-002 §6. A profile influences ranking
- * weights but never changes the Context Package schema.
+ * Context profiles. A profile influences ranking weights but never changes the
+ * Context Package schema.
  */
 export const CONTEXT_PROFILES = [
   "implementation",
@@ -24,21 +21,16 @@ export const CONTEXT_PROFILES = [
   "planning",
 ] as const;
 
-/** Primary Context Package renderings defined by SPEC-002 §8. */
+/** Primary Context Package renderings. */
 export const OUTPUT_FORMATS = ["markdown", "json"] as const;
 
-/**
- * Runtime schema for the Context Builder public configuration contract.
- *
- * `.strict()` rejects unknown keys so the contract stays explicit.
- */
+/** Runtime schema for the Context Builder public configuration contract. */
 export const contextBuilderConfigSchema = z
   .object({
-    /** Ranking profile applied when assembling context (SPEC-002 §6). */
+    /** Ranking profile applied when assembling context. */
     profile: z.enum(CONTEXT_PROFILES),
-    /** Whether an explainability report is produced (SPEC-002 §8). */
+    /** Whether an explainability report is produced. */
     explainability: z.boolean(),
-    /** Primary Context Package rendering (SPEC-002 §8). */
     outputFormat: z.enum(OUTPUT_FORMATS),
   })
   .strict();

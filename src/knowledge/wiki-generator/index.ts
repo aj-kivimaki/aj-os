@@ -1,6 +1,4 @@
-/**
- * Wiki Generator contract and implementation — SPEC-005.
- */
+/** Wiki Generator contract and implementation. */
 export {
   createWikiGenerator,
   WikiGeneratorError,

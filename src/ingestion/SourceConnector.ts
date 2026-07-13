@@ -1,21 +1,19 @@
 /**
- * Source Connector contract — SPEC-006.
+ * Source Connector contract.
  *
- * A Source Connector enumerates and reads documents from a backend and
- * normalizes each into a {@link SourceRecord}, so the Wiki Generator
- * (SPEC-005) never depends on any specific source technology.
+ * A Source Connector enumerates and reads documents from a backend and normalizes
+ * each into a {@link SourceRecord}, so the Wiki Generator never depends on any
+ * specific source technology.
  *
- * Invariants (ARCH-002 §5, SPEC-006 §15):
- * - Records are uniform across backends; the generator never branches on
- *   source type.
+ * Invariants:
+ * - Records are uniform across backends; the generator never branches on source
+ *   type.
  * - Connectors are read-only; they never mutate their backend.
- * - `id` is stable across content edits and globally namespaced by
- *   connector; `hash` is a separate change signal.
+ * - `id` is stable across content edits and globally namespaced by connector;
+ *   `hash` is a separate change signal.
  */
 
-/**
- * The normalized unit of source knowledge. Backend-agnostic.
- */
+/** The normalized unit of source knowledge. Backend-agnostic. */
 export interface SourceRecord {
   /**
    * Stable, globally-namespaced identity: `<connector>:<local-id>`.
@@ -57,9 +55,9 @@ export interface SourceConnector {
   /**
    * Enumerate the backend and return one normalized record per document.
    *
-   * For the filesystem/Handbook connector, one Markdown file maps to
-   * exactly one record (SPEC-006 §2). Returned eagerly with content;
-   * streaming enumeration for large backends is a future enhancement.
+   * For the filesystem/Handbook connector, one Markdown file maps to exactly one
+   * record. Returned eagerly with content; streaming enumeration for large
+   * backends is a future enhancement.
    */
   list(): Promise<SourceRecord[]>;
 }

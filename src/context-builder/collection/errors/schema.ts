@@ -1,21 +1,12 @@
 /**
- * Collection Error contract — runtime schema (CB-008).
+ * CollectionError contract — the provider-agnostic description of a single
+ * knowledge-collection failure.
  *
- * Defines the runtime-validated, public **CollectionError contract**: the
- * deterministic, provider-agnostic description of a single knowledge-collection
- * failure. Under the Context Builder's **partial-collection** model a provider
- * contributes *either* KnowledgeItems *or* a `CollectionError`; a single failure
- * never aborts collection (SPEC-002 §15; CB-008 Failure Model).
- *
- * A `CollectionError` is a **data contract, not a thrown exception**. It carries
- * only stable platform concepts (an identifier, the failing provider, a failure
- * category and a human-readable message) — never provider-specific exceptions,
- * stack traces, timestamps or runtime objects. Error *representation* lives here;
- * error *handling* (retry, recovery, logging) does not.
- *
- * This task defines *what a collection failure is*, not *how it is produced or
- * handled*. No provider execution, `CollectionResult` (CB-009) or collection
- * behaviour lives here. The contract is deterministic and immutable:
+ * A `CollectionError` is a data contract, not a thrown exception. It carries only
+ * stable platform concepts (an identifier, the failing provider, a failure
+ * category, and a human-readable message) — never provider exceptions, stack
+ * traces, or runtime objects. Error representation lives here; error handling
+ * (retry, recovery, logging) does not. The contract is immutable:
  * `parseCollectionError()` validates then deep-freezes.
  */
 
@@ -26,29 +17,16 @@ import type { DeepReadonly } from "../../package/types.js";
 import type { CollectionError } from "./types.js";
 
 /**
- * The closed set of deterministic, provider-agnostic failure categories.
+ * The closed set of provider-agnostic failure categories. Classifies *why* a
+ * provider failed without exposing implementation details; a closed `z.enum` so
+ * providers cannot leak their own error codes into the platform contract.
  *
- * A category classifies *why* a provider failed to contribute knowledge, without
- * exposing provider implementation details. The set is intentionally small and
- * closed (a `z.enum`, mirroring the CB-003 `SECTION_KINDS`/`REFERENCE_TYPES`
- * convention) so providers cannot leak implementation-specific error codes into
- * the platform contract. It is grounded in SPEC-002 §15 (Error Handling) and
- * AJS-004 (Failure Handling):
+ * - `invalid-request`      — the `KnowledgeRequest` was not valid for the provider.
+ * - `provider-unavailable` — the provider's knowledge source could not be reached.
+ * - `provider-error`       — the provider failed unexpectedly (catch-all).
  *
- * - `invalid-request`      — the `KnowledgeRequest` was not valid for the
- *                            provider (a validation failure; cf. SPEC-002 §15
- *                            "Invalid task").
- * - `provider-unavailable` — the provider's knowledge source could not be
- *                            reached or read (cf. SPEC-002 §15 recoverable
- *                            "Missing …" sources).
- * - `provider-error`       — the provider failed unexpectedly while producing
- *                            knowledge (a provider-agnostic catch-all).
- *
- * A provider that simply finds nothing is **not** an error — it contributes an
- * empty set of KnowledgeItems. A `CollectionError` represents an actual failure.
- *
- * Note: this is a *failure classification*, not a recovery policy. Retry and
- * recoverability semantics are deliberately out of scope for this contract.
+ * A provider that simply finds nothing is not an error — it contributes an empty
+ * set of items. This is a failure classification, not a recovery policy.
  */
 export const FAILURE_CATEGORIES = [
   "invalid-request",
@@ -57,23 +35,15 @@ export const FAILURE_CATEGORIES = [
 ] as const;
 
 /**
- * The CollectionError contract.
- *
- * Represents a single, deterministic collection failure. Carries only stable
- * platform concepts; the schema is `.strict()` so no provider-specific fields
- * (exceptions, stack traces, transport details) can enter the contract.
+ * The CollectionError contract. `.strict()` so no provider-specific fields
+ * (exceptions, stack traces, transport details) can enter.
  */
 export const collectionErrorSchema = z
   .object({
     /** Stable identifier for this collection failure. */
     id: z.string().min(1),
-    /**
-     * Identifier of the provider that failed to contribute (CB-008 Inputs: a
-     * provider `id` identifies the failing source). Provider-agnostic — the
-     * platform knows only the provider's `id`, never its implementation.
-     */
+    /** Id of the failing provider — the platform knows only this, never its guts. */
     providerId: z.string().min(1),
-    /** Deterministic, provider-agnostic failure category. */
     category: z.enum(FAILURE_CATEGORIES),
     /** Human-readable description of the failure (not a stack trace). */
     message: z.string().min(1),

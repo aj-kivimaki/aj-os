@@ -1,6 +1,4 @@
-/**
- * Identity Resolution contracts — ADR-005.
- */
+/** Identity Resolution contracts. */
 export type {
   IdentityResolver,
   Candidate,

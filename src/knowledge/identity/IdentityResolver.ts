@@ -1,14 +1,14 @@
 /**
- * Identity Resolution contract — ADR-005.
+ * Identity Resolution contract.
  *
  * The stage between extraction and rendering: it maps each candidate
- * entity/concept to a **canonical identity** — an existing page or a
- * genuinely new one — so rendering can use canonical paths and links by
- * construction (no post-hoc repair).
+ * entity/concept to a **canonical identity** — an existing page or a genuinely new
+ * one — so rendering can use canonical paths and links by construction (no post-hoc
+ * repair).
  *
- * Policy (ADR-004 §9, ADR-005): a false split is acceptable (a benign
- * duplicate LINT can flag); a false merge corrupts accumulated knowledge.
- * So uncertain resolutions bias to **new**.
+ * Policy: a false split is acceptable (a benign duplicate LINT can flag), but a
+ * false merge corrupts accumulated knowledge — so uncertain resolutions bias to
+ * **new**.
  */
 
 export type PageKind = "entity" | "concept";
@@ -27,7 +27,7 @@ export interface ExistingPage {
   readonly kind: PageKind;
   readonly title: string;
   readonly description: string;
-  /** Learned alternative names for this page (ADR-006). */
+  /** Learned alternative names for this page. */
   readonly aliases: readonly string[];
 }
 
