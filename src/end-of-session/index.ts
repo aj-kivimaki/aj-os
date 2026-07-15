@@ -55,6 +55,13 @@ export {
   parseChangeSet,
   CHANGE_KINDS,
   CHANGE_TYPES,
+  knowledgeExtractionSchema,
+  knowledgeFindingSchema,
+  extractionSummarySchema,
+  extractionKindSchema,
+  parseExtractionResponse,
+  ExtractionError,
+  EXTRACTION_KINDS,
 } from "./contracts/index.js";
 
 export type {
@@ -77,6 +84,10 @@ export type {
   ChangeKind,
   ChangeType,
   Analyzer,
+  KnowledgeExtraction,
+  KnowledgeFinding,
+  ExtractionSummary,
+  ExtractionKind,
 } from "./contracts/index.js";
 
 // The Analyzer Registry — infrastructure (deterministic registration + lookup only;
@@ -95,6 +106,20 @@ export { collectChanges } from "./collection/index.js";
 // invokes read-only `git diff` and parses its output into `GitFileChange`s.
 export { createGitChangeAnalyzer, createGitPort } from "./analyzers/git/index.js";
 export type { GitPort, GitFileChange } from "./analyzers/git/index.js";
+
+// The Knowledge Extraction stage (EOS-202) — the pipeline's single non-deterministic
+// seam: build a deterministic prompt from the `ChangeSet`, generate through the
+// injected `TextGenerator` port, and parse into an immutable `KnowledgeExtraction`
+// (EOS-201). Orchestration + structural validation only (the Extractor Invariant).
+export {
+  createKnowledgeExtractor,
+  buildExtractionPrompt,
+} from "./extraction/index.js";
+export type {
+  KnowledgeExtractor,
+  TextGenerator,
+  KnowledgeExtractorConfig,
+} from "./extraction/index.js";
 
 // Extensibility seams (EOS-006): how a session is triggered and how completion is
 // announced. v1 ships the manual trigger and the no-op notifier; future

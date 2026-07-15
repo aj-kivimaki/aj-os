@@ -94,3 +94,23 @@ export type {
   ChangeType,
   Analyzer,
 } from "./change/index.js";
+
+// The extraction stage's output vocabulary (EOS-201) — the internal pipeline
+// contract the text-generation model produces, with its raw-response parser. Not a
+// cross-spec boundary (that is `CandidateKnowledge`); immutable all the same.
+export {
+  knowledgeExtractionSchema,
+  knowledgeFindingSchema,
+  extractionSummarySchema,
+  extractionKindSchema,
+  parseExtractionResponse,
+  ExtractionError,
+  EXTRACTION_KINDS,
+} from "./knowledge-extraction/index.js";
+
+export type {
+  KnowledgeExtraction,
+  KnowledgeFinding,
+  ExtractionSummary,
+  ExtractionKind,
+} from "./knowledge-extraction/index.js";
