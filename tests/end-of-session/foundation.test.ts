@@ -25,10 +25,12 @@ import * as contracts from "../../src/end-of-session/contracts/index.js";
  * here and is pinned deliberately alongside the operations).
  */
 const EXPECTED_OPERATIONS = [
+  "buildExtractionPrompt",
   "collectChanges",
   "createAnalyzerRegistry",
   "createGitChangeAnalyzer",
   "createGitPort",
+  "createKnowledgeExtractor",
   "createManualTriggerSource",
   "createNoopNotificationPort",
   "ExtractionError",

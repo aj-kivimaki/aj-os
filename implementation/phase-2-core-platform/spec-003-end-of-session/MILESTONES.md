@@ -4,7 +4,7 @@
 >
 > **Related Specification:** SPEC-003
 >
-> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) task breakdown (EOS-201, EOS-202) **PLANNING-FROZEN** (reviewer: AJ, 2026-07-16); implementation in progress, beginning with EOS-201 per the AJS-007 cycle.
+> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) task breakdown (EOS-201, EOS-202) **PLANNING-FROZEN** (reviewer: AJ, 2026-07-16); both tasks implemented, reviewed, and committed — **M3 is implementation-complete and awaiting the Freeze Review.**
 
 ---
 
@@ -200,7 +200,7 @@ non-deterministic *content* is isolated behind the port and stubbed in tests.
 | Task | Description | Status |
 |------|-------------|--------|
 | EOS-201 | `KnowledgeExtraction` contract, schema & parser (immutable internal contract, `ExtractionError`, fence-strip/validate/deep-freeze `parseExtractionResponse`) | ✅ |
-| EOS-202 | Knowledge Extractor stage (EOS-local `TextGenerator` port, deterministic `buildExtractionPrompt`, `createKnowledgeExtractor` wiring; stub-driven behaviour/determinism tests) | ⬜ |
+| EOS-202 | Knowledge Extractor stage (EOS-local `TextGenerator` port, deterministic `buildExtractionPrompt`, `createKnowledgeExtractor` wiring; stub-driven behaviour/determinism tests) | ✅ |
 
 _Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-16 —
 decomposed into EOS-201 (extraction contract + parser) and EOS-202 (extractor stage
@@ -222,6 +222,9 @@ knowledge beyond validating the contract (those responsibilities remain outside
 M3). The reviewer judged **no EOS-D6 warranted** — the port ownership follows the
 existing architectural pattern and records no genuine architectural decision. The
 M3 breakdown is frozen; EOS-201 may begin under the AJS-007 implementation cycle._
+
+_M3 tasks (EOS-201, EOS-202) implemented, reviewed, and committed under the AJS-007
+cycle. **M3 is implementation-complete and awaiting the Freeze Review.**_
 
 ## Dependencies
 
@@ -375,6 +378,7 @@ beyond the graceful `AnalyzerError` fallback).
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-16 | 1.10 | **M3 (Knowledge Extraction) implementation complete — EOS-201..202 all done**, each independently code-reviewed and committed. EOS-201 (`KnowledgeExtraction` internal contract + `ExtractionError` + fence-strip/validate/deep-freeze `parseExtractionResponse`) and EOS-202 (Knowledge Extractor stage: EOS-local `TextGenerator` port, pure/deterministic `buildExtractionPrompt`, `createKnowledgeExtractor` wiring prompt → generate → parse; frozen handle; Extractor Invariant enforced by shape). Public surface: 4 new operations (`parseExtractionResponse`, `ExtractionError`, `createKnowledgeExtractor`, `buildExtractionPrompt`). End-of-Session suite grew to **15 files / 167 tests**; full platform suite **507 tests / 47 files**, all green. M3 Integration Check satisfied — extraction is the one non-deterministic seam, isolated behind the injected port; no git/wiki side effect, `run` entry point unchanged. **Pending the M3 Freeze Review.** |
 | 2026-07-16 | 1.9 | **M3 Planning Freeze ratified by the reviewer (AJ).** M3 Planning Review passed; the EOS-201/EOS-202 breakdown and its architectural choices are approved (two-task decomposition; EOS-local `TextGenerator`; `parseExtractionResponse` owning fence-strip/parse/validate/immutability; `KnowledgeExtraction` as an internal, non-boundary contract). Per the reviewer's request, an explicit **Extractor Invariant** (orchestration + structural validation only — no classify / deduplicate / merge / score / enrich) was recorded in EOS-202 before freeze. **EOS-D6 judged unnecessary** — port ownership follows the existing pattern with no genuine decision to record. The M3 breakdown is frozen; EOS-201 may begin under the AJS-007 implementation cycle. |
 | 2026-07-16 | 1.8 | **M3 (Knowledge Extraction) task breakdown authored** — decomposed into EOS-201 (`KnowledgeExtraction` contract, schema & fence-strip/validate/deep-freeze parser + `ExtractionError`) and EOS-202 (Knowledge Extractor stage: EOS-local `TextGenerator` port, deterministic `buildExtractionPrompt`, `createKnowledgeExtractor` wiring, stub-driven behaviour/determinism tests), following the same per-milestone planning approved for M1/M2. M3 objective/deliverables unchanged (within the frozen plan). No separate tests/integration task (no new production adapter in M3 — the stubbed port is the test double). Two decisions flagged for the review: port ownership (EOS-local vs. promoted `TextGenerator`, possible EOS-D6) and parser layering. **Pending M3 Planning Review + Planning Freeze** before EOS-201 implementation. |
 | 2026-07-16 | 1.7 | **Milestone 2 (Session Change Collection) Freeze declared by the reviewer (AJ).** Freeze Review passed: deterministic collection execution, correct partial collection, git analyzer behind the read-only `GitPort`, a minimal policy-free adapter, integration tests validating the full pipeline, and no architectural drift — M2 Definition of Done fully satisfied. The `createGitPort` `execFile` `maxBuffer` note is **reviewer-accepted** and recorded as future hardening (not expanded now; current behavior degrades correctly into a recoverable `AnalyzerError`). M2 is frozen; changes to M2 now follow the AJS-007 Frozen Plan Change Proposal process. Next: **M3 (Knowledge Extraction)**, beginning with M3 planning (EOS-2xx decomposition → Planning Review → Planning Freeze). |

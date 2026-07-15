@@ -7,14 +7,19 @@ milestones are planned and implemented. It does not replace ADRs or the
 architecture-review decisions in `decisions/`, which explain *why* individual
 choices were made.
 
-**Implementation status.** Milestone M1 (Foundation & Contracts) is **complete**:
-the immutable contracts (`SessionContext`, `Session`, `CandidateKnowledge`,
-`ReviewPackage`, `SessionReport`, `SessionChange`, `AnalyzerError`, `ChangeSet`) and
-the extensibility seams (`Analyzer` port + registry, `TriggerSource`,
-`NotificationPort`) exist in `src/end-of-session/` as shape-only, public-surface
-contracts. The stage *behaviors* below (collection, extraction, candidate
-generation, persistence, projection, orchestration) are **not yet implemented** —
-they arrive in M2–M5. `KnowledgeExtraction` is an M3 contract and does not exist yet.
+**Implementation status.** Milestones **M1–M3 are complete**. M1 (Foundation &
+Contracts) established the immutable contracts (`SessionContext`, `Session`,
+`CandidateKnowledge`, `ReviewPackage`, `SessionReport`, `SessionChange`,
+`AnalyzerError`, `ChangeSet`) and the extensibility seams (`Analyzer` port +
+registry, `TriggerSource`, `NotificationPort`). M2 (Session Change Collection)
+implemented the **Collection** stage — `collectChanges` execution + the
+`GitChangeAnalyzer` behind a read-only `GitPort` — producing a `ChangeSet`. M3
+(Knowledge Extraction) implemented the **Extraction** stage: the
+`KnowledgeExtraction` contract (`parseExtractionResponse`) and the
+`KnowledgeExtractor` behind the injected `TextGenerator` port (the pipeline's one
+non-deterministic seam). The remaining stage *behaviors* (candidate generation,
+persistence, projection, orchestration) are **not yet implemented** — they arrive in
+M4–M5.
 
 ## Overview
 
