@@ -21,6 +21,8 @@ import {
   type SessionContext,
 } from "../../src/end-of-session/index.js";
 
+import { firstUnfrozenPath } from "./support.js";
+
 const validContext = {
   project: "aj-os",
   repository: "systems/aj-os",
@@ -76,11 +78,7 @@ describe("SessionContext contract", () => {
   });
 
   it("returns a deeply-frozen request (immutable after creation)", () => {
-    const context = parseSessionContext(validContext);
-    expect(Object.isFrozen(context)).toBe(true);
-    expect(() => {
-      (context as { project: string }).project = "changed";
-    }).toThrow();
+    expect(firstUnfrozenPath(parseSessionContext(validContext))).toBeNull();
   });
 
   it("is deterministic — same input yields an equal contract", () => {
@@ -146,12 +144,7 @@ describe("Session contract", () => {
   });
 
   it("returns a deeply-frozen session, including nested gitState", () => {
-    const session = parseSession(validSession);
-    expect(Object.isFrozen(session)).toBe(true);
-    expect(Object.isFrozen(session.gitState)).toBe(true);
-    expect(() => {
-      (session.gitState as { dirty: boolean }).dirty = true;
-    }).toThrow();
+    expect(firstUnfrozenPath(parseSession(validSession))).toBeNull();
   });
 
   it("is deterministic — same input yields an equal contract", () => {

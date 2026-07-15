@@ -23,6 +23,8 @@ import {
   type SessionChange,
 } from "../../src/end-of-session/index.js";
 
+import { firstUnfrozenPath } from "./support.js";
+
 const validChange = {
   id: "git:src/end-of-session/contracts/change/schema.ts",
   kind: "source",
@@ -98,12 +100,7 @@ describe("SessionChange contract", () => {
   });
 
   it("returns a deeply-frozen change, including metadata", () => {
-    const change = parseSessionChange(validChange);
-    expect(Object.isFrozen(change)).toBe(true);
-    expect(Object.isFrozen(change.metadata)).toBe(true);
-    expect(() => {
-      (change as { path: string }).path = "changed";
-    }).toThrow();
+    expect(firstUnfrozenPath(parseSessionChange(validChange))).toBeNull();
   });
 });
 
@@ -122,7 +119,7 @@ describe("AnalyzerError contract", () => {
   });
 
   it("returns a frozen error", () => {
-    expect(Object.isFrozen(parseAnalyzerError(validError))).toBe(true);
+    expect(firstUnfrozenPath(parseAnalyzerError(validError))).toBeNull();
   });
 });
 
@@ -155,11 +152,7 @@ describe("ChangeSet contract", () => {
   });
 
   it("returns a deeply-frozen change set, including nested changes and errors", () => {
-    const changeSet = parseChangeSet(validChangeSet);
-    expect(Object.isFrozen(changeSet)).toBe(true);
-    expect(Object.isFrozen(changeSet.changes)).toBe(true);
-    expect(Object.isFrozen(changeSet.changes[0])).toBe(true);
-    expect(Object.isFrozen(changeSet.errors[0])).toBe(true);
+    expect(firstUnfrozenPath(parseChangeSet(validChangeSet))).toBeNull();
   });
 
   it("exposes the schema for composition (registry execution, M2)", () => {

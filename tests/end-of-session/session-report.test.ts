@@ -19,6 +19,8 @@ import {
   type SessionReport,
 } from "../../src/end-of-session/index.js";
 
+import { firstUnfrozenPath } from "./support.js";
+
 const validReport = {
   sessionId: "01J8Z3K7Q9WV0FB2XN4MABCDEF",
   trigger: "manual",
@@ -130,14 +132,7 @@ describe("SessionReport contract", () => {
   });
 
   it("returns a deeply-frozen report, including nested groups and arrays", () => {
-    const report = parseSessionReport(validReport);
-    expect(Object.isFrozen(report)).toBe(true);
-    expect(Object.isFrozen(report.candidatesProduced)).toBe(true);
-    expect(Object.isFrozen(report.candidatesProduced.ids)).toBe(true);
-    expect(Object.isFrozen(report.errors[0])).toBe(true);
-    expect(() => {
-      (report as { result: string }).result = "failed";
-    }).toThrow();
+    expect(firstUnfrozenPath(parseSessionReport(validReport))).toBeNull();
   });
 
   it("is deterministic — same input yields an equal contract", () => {

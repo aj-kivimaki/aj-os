@@ -85,7 +85,7 @@ No behavior — no git access, no LLM calls, no persistence. This milestone defi
 | EOS-004 | `ReviewPackage` (projection) & `SessionReport` contracts | ✅ |
 | EOS-005 | `SessionChange`/`ChangeSet` + `Analyzer` port & registry | ✅ |
 | EOS-006 | `TriggerSource` (manual) & `NotificationPort` (no-op) seams | ✅ |
-| EOS-007 | Contract testing foundation | ⬜ |
+| EOS-007 | Contract testing foundation | ✅ |
 
 ## Dependencies
 
@@ -327,6 +327,7 @@ generator orchestration** · playbooks / suggested-doc-updates / automation-idea
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-15 | 1.2 | **M1 implementation complete — EOS-001..EOS-007 all done**, each independently reviewed and committed. Contract testing foundation (EOS-007) consolidated the immutability idiom onto a shared `firstUnfrozenPath` inspector and added module-wide foundation guards. End-of-Session suite: **98 tests / 10 files**; full platform suite **438 tests / 42 files**, all green. Pending the Milestone 1 Freeze Review. |
 | 2026-07-15 | 1.1 | **Milestone 1 Planning Freeze ratified by the reviewer (AJ).** M1 (EOS-001..EOS-007) is frozen and ready to implement; M2–M5 remain planned (task breakdowns authored at each milestone's planning). Subsequent plan changes follow the AJS-007 Frozen Plan Change Proposal process. |
 | 2026-07-15 | 1.0 | Milestone roadmap created (M1–M5). M1 decomposed into EOS-001..EOS-007 and planning-frozen; M2–M5 objectives/deliverables defined, task breakdowns to be authored at each milestone's planning. |
 

@@ -20,6 +20,8 @@ import {
   type CandidateKnowledge,
 } from "../../src/end-of-session/index.js";
 
+import { firstUnfrozenPath } from "./support.js";
+
 const validCandidate = {
   id: "session:01J8Z3K7Q9WV0FB2XN4MABCDEF:1",
   kind: "handbook-entry",
@@ -172,17 +174,7 @@ describe("CandidateKnowledge contract", () => {
   });
 
   it("returns a deeply-frozen candidate, including nested provenance and arrays", () => {
-    const candidate = parseCandidateKnowledge(validCandidate);
-    expect(Object.isFrozen(candidate)).toBe(true);
-    expect(Object.isFrozen(candidate.provenance)).toBe(true);
-    expect(Object.isFrozen(candidate.provenance.sourcePaths)).toBe(true);
-    expect(Object.isFrozen(candidate.tags)).toBe(true);
-    expect(() => {
-      (candidate as { title: string }).title = "changed";
-    }).toThrow();
-    expect(() => {
-      (candidate.provenance as { generator: string }).generator = "changed";
-    }).toThrow();
+    expect(firstUnfrozenPath(parseCandidateKnowledge(validCandidate))).toBeNull();
   });
 
   it("is deterministic — same input yields an equal contract", () => {

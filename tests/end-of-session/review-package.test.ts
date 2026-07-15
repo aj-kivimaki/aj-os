@@ -17,6 +17,8 @@ import {
   type ReviewPackage,
 } from "../../src/end-of-session/index.js";
 
+import { firstUnfrozenPath } from "./support.js";
+
 const validPackage = {
   sessionId: "01J8Z3K7Q9WV0FB2XN4MABCDEF",
   generatedAt: "2026-07-15T10:30:00.000Z",
@@ -71,12 +73,7 @@ describe("ReviewPackage contract", () => {
   });
 
   it("returns a deeply-frozen projection, including candidateIds", () => {
-    const pkg = parseReviewPackage(validPackage);
-    expect(Object.isFrozen(pkg)).toBe(true);
-    expect(Object.isFrozen(pkg.candidateIds)).toBe(true);
-    expect(() => {
-      (pkg as { markdown: string }).markdown = "changed";
-    }).toThrow();
+    expect(firstUnfrozenPath(parseReviewPackage(validPackage))).toBeNull();
   });
 
   it("is deterministic — same input yields an equal contract", () => {
