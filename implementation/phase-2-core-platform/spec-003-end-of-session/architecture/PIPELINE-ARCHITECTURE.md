@@ -7,6 +7,15 @@ milestones are planned and implemented. It does not replace ADRs or the
 architecture-review decisions in `decisions/`, which explain *why* individual
 choices were made.
 
+**Implementation status.** Milestone M1 (Foundation & Contracts) is **complete**:
+the immutable contracts (`SessionContext`, `Session`, `CandidateKnowledge`,
+`ReviewPackage`, `SessionReport`, `SessionChange`, `AnalyzerError`, `ChangeSet`) and
+the extensibility seams (`Analyzer` port + registry, `TriggerSource`,
+`NotificationPort`) exist in `src/end-of-session/` as shape-only, public-surface
+contracts. The stage *behaviors* below (collection, extraction, candidate
+generation, persistence, projection, orchestration) are **not yet implemented** —
+they arrive in M2–M5. `KnowledgeExtraction` is an M3 contract and does not exist yet.
+
 ## Overview
 
 The End-of-Session Workflow is a **capture pipeline**: it transforms a finished

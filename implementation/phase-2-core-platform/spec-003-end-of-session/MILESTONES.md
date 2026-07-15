@@ -103,10 +103,12 @@ No behavior — no git access, no LLM calls, no persistence. This milestone defi
 
 ## Definition of Done
 
-- [ ] All EOS-001..EOS-007 completed.
-- [ ] Contract tests passing.
-- [ ] Documentation updated (README, PIPELINE-ARCHITECTURE).
+- [x] All EOS-001..EOS-007 completed.
+- [x] Contract tests passing.
+- [x] Documentation updated (README, PIPELINE-ARCHITECTURE).
 - [ ] Freeze Review completed; Milestone Freeze declared by the reviewer.
+      _(Freeze Review performed 2026-07-15 — all criteria satisfied; awaiting the
+      reviewer's freeze declaration.)_
 
 ---
 
