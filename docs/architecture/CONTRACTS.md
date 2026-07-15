@@ -89,7 +89,7 @@ the optional Context Package input to SPEC-003)
 | --- | --- | --- | --- | --- |
 | **SessionContext** | SPEC-003 | SPEC-003 (input) | Input request | Project, repository, branch (required); commit, notes, task id, Context Package ref (optional). SPEC-003 §7. |
 | **Session** | SPEC-003 | SPEC-003, SPEC-004 | Identity + metadata | Stable opaque `id`; `startedAt`/`endedAt`/`trigger`/`gitState`/`branch` are metadata. Identity is independent of trigger source. (EOS-D3) |
-| **CandidateKnowledge** | **SPEC-003** | **SPEC-004** | **Canonical boundary output** | The durable unit of proposed knowledge. Governance state = `candidate` (AJS-006). The primary SPEC-003→004 handoff. (EOS-D1, EOS-D4) |
+| **CandidateKnowledge** | **SPEC-003** | **SPEC-004** | **Canonical boundary output** | The durable unit of proposed knowledge. Governance state = `candidate` (AJS-006). `kind` ∈ the SPEC-003 §8 taxonomy (`handbook-entry`, `playbook`, `wiki-publication`, `lesson-learned`, `doc-update`, `automation-idea`; required, lenient to unknown values). Complete provenance traces back to `Session.id`. The primary SPEC-003→004 handoff. (EOS-D1, EOS-D4) |
 | **ReviewPackage** | SPEC-003 | Human reviewer (SPEC-004) | Projection (derived) | Human-readable markdown rendered *from* `CandidateKnowledge[]` + `Session`. Non-canonical; never parsed as data. (EOS-D4) |
 | **SessionReport** | SPEC-003 | Orchestration / audit | Execution log | Observability record: trigger, duration, files analyzed, candidates produced, errors, result. SPEC-003 §16. |
 | **Review decisions / Approval queue / Publication queue** | SPEC-004 | Handbook maintainer, SPEC-005 | Governance output | Out of scope for SPEC-003; listed for completeness. SPEC-004 §8. |

@@ -4,7 +4,7 @@
 >
 > **Related Specification:** SPEC-003
 >
-> **Status:** Milestone 1 planning **FROZEN** (reviewer: AJ, 2026-07-15) — ready to implement (EOS-001)
+> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). M2 (Change Collection) is the next implementation target.
 
 ---
 
@@ -28,7 +28,7 @@ established in M1 so later capabilities are additive.
 
 | Milestone | Name | Goal | Status |
 | --------- | ---- | ---- | ------ |
-| M1 | Foundation & Contracts | Module, immutable contracts, and the analyzer/trigger/notification seams | ⬜ |
+| M1 | Foundation & Contracts | Module, immutable contracts, and the analyzer/trigger/notification seams | ✅ |
 | M2 | Session Change Collection | Git changes collected deterministically behind the analyzer registry | ⬜ |
 | M3 | Knowledge Extraction | Reusable knowledge extracted from changes via the injected text-generation port | ⬜ |
 | M4 | Candidate Generation & Review Store | Canonical `CandidateKnowledge` generated and persisted to the review store | ⬜ |
@@ -79,13 +79,13 @@ No behavior — no git access, no LLM calls, no persistence. This milestone defi
 
 | Task | Description | Status |
 |------|-------------|--------|
-| EOS-001 | Establish End-of-Session module & scaffold | ⬜ |
-| EOS-002 | `SessionContext` & first-class `Session` contracts | ⬜ |
-| EOS-003 | `CandidateKnowledge` published boundary contract | ⬜ |
-| EOS-004 | `ReviewPackage` (projection) & `SessionReport` contracts | ⬜ |
-| EOS-005 | `SessionChange`/`ChangeSet` + `Analyzer` port & registry | ⬜ |
-| EOS-006 | `TriggerSource` (manual) & `NotificationPort` (no-op) seams | ⬜ |
-| EOS-007 | Contract testing foundation | ⬜ |
+| EOS-001 | Establish End-of-Session module & scaffold | ✅ |
+| EOS-002 | `SessionContext` & first-class `Session` contracts | ✅ |
+| EOS-003 | `CandidateKnowledge` published boundary contract | ✅ |
+| EOS-004 | `ReviewPackage` (projection) & `SessionReport` contracts | ✅ |
+| EOS-005 | `SessionChange`/`ChangeSet` + `Analyzer` port & registry | ✅ |
+| EOS-006 | `TriggerSource` (manual) & `NotificationPort` (no-op) seams | ✅ |
+| EOS-007 | Contract testing foundation | ✅ |
 
 ## Dependencies
 
@@ -103,10 +103,14 @@ No behavior — no git access, no LLM calls, no persistence. This milestone defi
 
 ## Definition of Done
 
-- [ ] All EOS-001..EOS-007 completed.
-- [ ] Contract tests passing.
-- [ ] Documentation updated (README, PIPELINE-ARCHITECTURE).
-- [ ] Freeze Review completed; Milestone Freeze declared by the reviewer.
+- [x] All EOS-001..EOS-007 completed.
+- [x] Contract tests passing.
+- [x] Documentation updated (README, PIPELINE-ARCHITECTURE).
+- [x] Freeze Review completed; Milestone Freeze declared by the reviewer.
+      _(Freeze Review performed and **Milestone 1 Freeze declared by the reviewer
+      (AJ) on 2026-07-15** — all six criteria satisfied: tasks complete, contracts
+      aligned with the frozen plan, documentation synchronized, public API minimal
+      and intentional, no architectural drift, Definition of Done met.)_
 
 ---
 
@@ -327,6 +331,8 @@ generator orchestration** · playbooks / suggested-doc-updates / automation-idea
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-15 | 1.3 | **Milestone 1 Freeze declared by the reviewer (AJ).** Freeze Review passed all six criteria; the M1 Definition of Done is fully satisfied. M1 (Foundation & Contracts) is frozen; changes to M1 contracts now follow the AJS-007 Frozen Plan Change Proposal process. Next implementation target: **M2 — Session Change Collection**. |
+| 2026-07-15 | 1.2 | **M1 implementation complete — EOS-001..EOS-007 all done**, each independently reviewed and committed. Contract testing foundation (EOS-007) consolidated the immutability idiom onto a shared `firstUnfrozenPath` inspector and added module-wide foundation guards. End-of-Session suite: **98 tests / 10 files**; full platform suite **438 tests / 42 files**, all green. Pending the Milestone 1 Freeze Review. |
 | 2026-07-15 | 1.1 | **Milestone 1 Planning Freeze ratified by the reviewer (AJ).** M1 (EOS-001..EOS-007) is frozen and ready to implement; M2–M5 remain planned (task breakdowns authored at each milestone's planning). Subsequent plan changes follow the AJS-007 Frozen Plan Change Proposal process. |
 | 2026-07-15 | 1.0 | Milestone roadmap created (M1–M5). M1 decomposed into EOS-001..EOS-007 and planning-frozen; M2–M5 objectives/deliverables defined, task breakdowns to be authored at each milestone's planning. |
 
