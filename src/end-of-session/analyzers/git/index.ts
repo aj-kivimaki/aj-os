@@ -6,4 +6,5 @@
  */
 
 export { createGitChangeAnalyzer } from "./createGitChangeAnalyzer.js";
+export { createGitPort } from "./createGitPort.js";
 export type { GitPort, GitFileChange } from "./GitPort.js";

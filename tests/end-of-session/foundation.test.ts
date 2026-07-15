@@ -24,6 +24,7 @@ const EXPECTED_OPERATIONS = [
   "collectChanges",
   "createAnalyzerRegistry",
   "createGitChangeAnalyzer",
+  "createGitPort",
   "createManualTriggerSource",
   "createNoopNotificationPort",
   "parseAnalyzerError",
