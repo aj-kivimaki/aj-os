@@ -2,7 +2,7 @@
 
 > **Implementation Package:** SPEC-003
 >
-> **Status:** Planning **FROZEN** (2026-07-15) — Milestone 1 (EOS-001) ready to implement
+> **Status:** M1–M3 **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — Milestone 4 (Candidate Generation & Review Store) is the next target
 >
 > **Phase:** Phase 2 — Core Knowledge Platform
 >
@@ -182,7 +182,7 @@ decisions.
 | --------- | ----------- | ------ |
 | M1 | Foundation & Contracts | ✅ |
 | M2 | Session Change Collection | ✅ |
-| M3 | Knowledge Extraction | ⬜ |
+| M3 | Knowledge Extraction | ✅ |
 | M4 | Candidate Generation & Review Store | ⬜ |
 | M5 | Review Package Projection, Orchestration & CLI | ⬜ |
 
