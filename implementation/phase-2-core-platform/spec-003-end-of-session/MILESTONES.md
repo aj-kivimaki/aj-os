@@ -137,7 +137,7 @@ the SPEC-002 Collection model).
 | Task | Description | Status |
 |------|-------------|--------|
 | EOS-101 | Collection Execution Stage (analyzer-agnostic; partial collection, deterministic ordering → `ChangeSet`) | ✅ |
-| EOS-102 | Git Port & GitChangeAnalyzer (injectable read-only `GitPort`, first concrete analyzer; no real git in unit tests) | ⬜ |
+| EOS-102 | Git Port & GitChangeAnalyzer (injectable read-only `GitPort`, first concrete analyzer; no real git in unit tests) | ✅ |
 | EOS-103 | Integration & Behaviour Tests (real `GitPort` adapter, end-to-end wiring, determinism, partial collection) | ⬜ |
 
 _Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-15. From here,

@@ -23,6 +23,7 @@ import * as contracts from "../../src/end-of-session/contracts/index.js";
 const EXPECTED_OPERATIONS = [
   "collectChanges",
   "createAnalyzerRegistry",
+  "createGitChangeAnalyzer",
   "createManualTriggerSource",
   "createNoopNotificationPort",
   "parseAnalyzerError",
