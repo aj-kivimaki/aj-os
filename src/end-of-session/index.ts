@@ -55,6 +55,13 @@ export {
   parseChangeSet,
   CHANGE_KINDS,
   CHANGE_TYPES,
+  knowledgeExtractionSchema,
+  knowledgeFindingSchema,
+  extractionSummarySchema,
+  extractionKindSchema,
+  parseExtractionResponse,
+  ExtractionError,
+  EXTRACTION_KINDS,
 } from "./contracts/index.js";
 
 export type {
@@ -77,6 +84,10 @@ export type {
   ChangeKind,
   ChangeType,
   Analyzer,
+  KnowledgeExtraction,
+  KnowledgeFinding,
+  ExtractionSummary,
+  ExtractionKind,
 } from "./contracts/index.js";
 
 // The Analyzer Registry — infrastructure (deterministic registration + lookup only;

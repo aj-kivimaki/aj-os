@@ -19,7 +19,11 @@ import { describe, it, expect } from "vitest";
 import * as endOfSession from "../../src/end-of-session/index.js";
 import * as contracts from "../../src/end-of-session/contracts/index.js";
 
-/** The intended public *operations* — every `parse*`/`create*` the module exposes. */
+/**
+ * The intended public *operations* — every `parse*`/`create*` the module exposes,
+ * plus any exported error class (a class constructor is a function, so it surfaces
+ * here and is pinned deliberately alongside the operations).
+ */
 const EXPECTED_OPERATIONS = [
   "collectChanges",
   "createAnalyzerRegistry",
@@ -27,9 +31,11 @@ const EXPECTED_OPERATIONS = [
   "createGitPort",
   "createManualTriggerSource",
   "createNoopNotificationPort",
+  "ExtractionError",
   "parseAnalyzerError",
   "parseCandidateKnowledge",
   "parseChangeSet",
+  "parseExtractionResponse",
   "parseReviewPackage",
   "parseSession",
   "parseSessionChange",
