@@ -84,6 +84,18 @@ export type {
 export { createAnalyzerRegistry } from "./registry/index.js";
 export type { AnalyzerRegistry } from "./registry/index.js";
 
+// The Collection stage (EOS-101) — analyzer-agnostic execution: runs the registry's
+// analyzers against a `Session` and assembles an immutable `ChangeSet` under the
+// partial-collection model (deterministic w.r.t. registry order and analyzer output).
+export { collectChanges } from "./collection/index.js";
+
+// The Git change analyzer (EOS-102) — the first concrete `Analyzer`, a pure
+// translator of git observations into `SessionChange`s over an injected read-only
+// `GitPort`. The concrete git-backed `GitPort` adapter (`createGitPort`, EOS-103)
+// invokes read-only `git diff` and parses its output into `GitFileChange`s.
+export { createGitChangeAnalyzer, createGitPort } from "./analyzers/git/index.js";
+export type { GitPort, GitFileChange } from "./analyzers/git/index.js";
+
 // Extensibility seams (EOS-006): how a session is triggered and how completion is
 // announced. v1 ships the manual trigger and the no-op notifier; future
 // triggers/notifiers plug in behind these ports without changing orchestration.
