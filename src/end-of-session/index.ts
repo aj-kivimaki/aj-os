@@ -83,3 +83,11 @@ export type {
 // no execution), exported alongside the contracts as the module's public surface.
 export { createAnalyzerRegistry } from "./registry/index.js";
 export type { AnalyzerRegistry } from "./registry/index.js";
+
+// Extensibility seams (EOS-006): how a session is triggered and how completion is
+// announced. v1 ships the manual trigger and the no-op notifier; future
+// triggers/notifiers plug in behind these ports without changing orchestration.
+export { createManualTriggerSource } from "./trigger/index.js";
+export type { TriggerSource } from "./trigger/index.js";
+export { createNoopNotificationPort } from "./notification/index.js";
+export type { NotificationPort } from "./notification/index.js";

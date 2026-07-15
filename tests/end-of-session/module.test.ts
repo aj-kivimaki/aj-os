@@ -39,6 +39,11 @@ describe("end-of-session public surface", () => {
     expect(endOfSession.CHANGE_TYPES).toContain("modified");
   });
 
+  it("re-exports the trigger and notification seams from the module entry point", () => {
+    expect(typeof endOfSession.createManualTriggerSource).toBe("function");
+    expect(typeof endOfSession.createNoopNotificationPort).toBe("function");
+  });
+
   it("exposes the contracts through the contracts barrel — the SPEC-004 import surface", () => {
     expect(typeof contracts.parseSessionContext).toBe("function");
     expect(typeof contracts.parseSession).toBe("function");

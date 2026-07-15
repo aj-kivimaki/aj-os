@@ -84,7 +84,7 @@ No behavior — no git access, no LLM calls, no persistence. This milestone defi
 | EOS-003 | `CandidateKnowledge` published boundary contract | ✅ |
 | EOS-004 | `ReviewPackage` (projection) & `SessionReport` contracts | ✅ |
 | EOS-005 | `SessionChange`/`ChangeSet` + `Analyzer` port & registry | ✅ |
-| EOS-006 | `TriggerSource` (manual) & `NotificationPort` (no-op) seams | ⬜ |
+| EOS-006 | `TriggerSource` (manual) & `NotificationPort` (no-op) seams | ✅ |
 | EOS-007 | Contract testing foundation | ⬜ |
 
 ## Dependencies
