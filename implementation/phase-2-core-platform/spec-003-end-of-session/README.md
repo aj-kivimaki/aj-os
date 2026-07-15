@@ -197,8 +197,8 @@ spec-003-end-of-session/
   README.md
   MILESTONES.md
   architecture/PIPELINE-ARCHITECTURE.md
-  decisions/          EOS-D1..EOS-D5 (planning-review decisions)
-  tasks/              EOS-001..EOS-007 (Milestone 1)
+  decisions/          EOS-D1..EOS-D6 (planning-review decisions)
+  tasks/              EOS-001..007 (M1), EOS-101..103 (M2), EOS-201..202 (M3), EOS-301..303 (M4)
   retrospectives/     (added at each Milestone Freeze)
 ```
 
@@ -214,7 +214,12 @@ spec-003-end-of-session/
 - ✅ **Planning review completed and Planning Freeze ratified by the reviewer
   (AJ) on 2026-07-15.** The plan is frozen; implementation may begin with
   Milestone 1 (EOS-001).
-- No code written yet.
+- ✅ M1–M3 implemented, reviewer-frozen, and merged (EOS-001..007, EOS-101..103,
+  EOS-201..202).
+- ✅ M4 (Candidate Generation & Review Store) task breakdown **Planning-Frozen**
+  (AJ, 2026-07-16): EOS-301 Candidate Generator, EOS-302 Review Store, EOS-303
+  `reviewPath` config. **EOS-D6 Accepted** (domain-aware Review Store API).
+  Implementation may begin with EOS-301.
 
 > **Frozen-plan discipline (AJS-007).** From the freeze onward, changes to the
 > frozen plan — contracts, milestone structure, or scope — follow the AJS-007
@@ -258,9 +263,12 @@ Remaining (to resolve within the milestone that needs them):
 
 - **Session change range** — working-tree vs. staged vs. commit range; default
   proposal in EOS-002/M2: uncommitted + staged, `--since <ref>` for a range.
-- **Candidate id scheme** — `session:<id>:<n>` vs. content-hash; decide in EOS-003.
-- **Review-store layout** — one directory per session with `candidates/*.md` +
-  `review-package.md` + `report.json`; confirm in M4.
+- **Candidate id scheme** — ✅ Resolved: `session:<id>:<n>` (documented in the EOS-003
+  contract; generation in EOS-301).
+- **Review-store layout** — ✅ Resolved (M4 Planning Freeze): one directory per session,
+  `pending/<session-id>/` with `candidates/<id>.json` (canonical JSON, one file per
+  candidate) + `report.json` + `log.md`; `review-package.md` added by the M5 projector.
+  Domain-aware store API recorded as EOS-D6.
 - **Spec hygiene** — the SPEC-003 Draft does not yet reflect the agreed decisions
   (SPEC-004 cross-reference, `aj session end`, storage location, v1 scope,
   canonical-vs-projection, first-class Session). Tracked as disciplined deferred

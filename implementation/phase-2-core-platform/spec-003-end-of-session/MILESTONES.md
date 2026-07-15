@@ -4,7 +4,7 @@
 >
 > **Related Specification:** SPEC-003
 >
-> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 4 (Candidate Generation & Review Store) is the next target; it begins with M4 planning (EOS-3xx decomposition → Planning Review → Planning Freeze) per AJS-007.
+> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 4 (Candidate Generation & Review Store) task breakdown (EOS-301..303) **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-16; EOS-D6 accepted (domain-aware Review Store API). Implementation may begin with EOS-301 under the AJS-007 cycle.
 
 ---
 
@@ -276,12 +276,37 @@ is validated to be non-canonical.
 
 | Task | Description | Status |
 |------|-------------|--------|
-| EOS-301 | (defined at M4 planning) | ⬜ |
+| EOS-301 | Candidate Generator (deterministic `KnowledgeExtraction` → canonical `CandidateKnowledge[]`: authoritative kind, `session:<id>:<n>` identity, complete provenance; injected clock; Candidate Generation Invariant) | ✅ |
+| EOS-302 | Review Store (`ReviewStore` + `createFilesystemReviewStore`: persistence-only, path-guarded, non-canonical destination guard, per-session layout writing candidates JSON + `SessionReport` + `log.md`; no git) | ⬜ |
+| EOS-303 | Review-path configuration (`AjConfig.handbook.reviewPath`, default `knowledge-review`, mirroring `generatedWikiPath`) | ⬜ |
+
+_Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-16, following the
+same per-milestone planning approved for M1–M3. Decomposed into three low-coupling,
+independently reviewable tasks: EOS-301 (pure deterministic candidate generation),
+EOS-302 (persistence-only review store), and EOS-303 (the `reviewPath` platform config
+knob). M4 objective/deliverables unchanged (within the frozen plan). No separate
+integration/tests task: each stage's behaviour tests live with it (the M3 precedent —
+EOS-302 uses temp dirs, no real vault), and end-to-end integration is M5's acceptance
+test (the two M4 stages are wired together only in M5 composition)._
+
+_Reviewer-ratified decisions: (1) the **Review Store exposes a domain-aware API**
+(`saveCandidates`/`saveReport`/`appendLog`/`locate`) rather than a semantics-free
+path-keyed surface — recorded as **[EOS-D6](decisions/EOS-D6-review-store-domain-api.md)**,
+establishing the long-term SPEC-003 → SPEC-004 filesystem boundary; (2) candidates
+persisted as **one canonical JSON file per candidate**; (3) **kind classification is a
+validated pass-through** (v1); (4) **`related` initialized empty** (v1); (5) the
+**non-canonical destination guard runs at Review Store construction**. Per the
+reviewer's requirement before freeze, the **Candidate Generation Invariant** (EOS-301)
+was strengthened to state it explicitly: candidate generation is a **deterministic
+one-to-one structural mapping** — each `KnowledgeExtraction` finding produces exactly
+one `CandidateKnowledge`; the generator must not merge, split, reorder, invent, or
+remove findings. The M4 breakdown is frozen; **EOS-301 may begin under the AJS-007
+implementation cycle.**_
 
 ## Dependencies
 
 ### Requires
-- M1 contracts, M3 extraction
+- M1 contracts (`CandidateKnowledge`, `SessionReport`), M3 extraction (`KnowledgeExtraction`)
 
 ### Enables
 - Milestone M5 (projection + orchestration), and SPEC-004 (consumes the store)
@@ -384,6 +409,8 @@ beyond the graceful `AnalyzerError` fallback).
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-16 | 1.13 | **M4 Planning Freeze ratified by the reviewer (AJ).** M4 Planning Review passed; the EOS-301/302/303 breakdown and its decisions are approved. Reviewer ratified: the **domain-aware Review Store API** (recorded as **EOS-D6** — the long-term SPEC-003→004 filesystem boundary), **one canonical JSON file per candidate**, **kind classification as a validated pass-through** (v1), **`related` initialized empty** (v1), and the **non-canonical destination guard at store construction**. Per the reviewer's requirement, the **Candidate Generation Invariant** was strengthened before freeze to state the property explicitly — candidate generation is a **deterministic one-to-one structural mapping**: each finding produces exactly one candidate; no merge/split/reorder/invent/remove (`candidates.length === findings.length`, order-preserving). The M4 breakdown is frozen; EOS-301 may begin under the AJS-007 implementation cycle. |
+| 2026-07-16 | 1.12 | **M4 (Candidate Generation & Review Store) task breakdown authored** — decomposed into EOS-301 (deterministic Candidate Generator: `KnowledgeExtraction` → canonical `CandidateKnowledge[]` with authoritative kind, `session:<id>:<n>` identity, complete provenance, injected clock; Candidate Generation Invariant), EOS-302 (persistence-only Review Store: `ReviewStore` + `createFilesystemReviewStore`, path-guarded, non-canonical destination guard, per-session layout of candidate JSON + `SessionReport` + `log.md`, no git; Persistence Invariant), and EOS-303 (`AjConfig.handbook.reviewPath` config, mirroring `generatedWikiPath`). Three low-coupling, independently reviewable tasks; no separate integration/tests task (behaviour tests co-located per the M3 precedent; end-to-end integration is M5). Two decisions flagged for the Planning Review: the Review Store surface (domain-aware vs. semantics-free — possible **EOS-D6**) and the candidate persistence format/layout (canonical JSON, one file per candidate). M4 objective/deliverables unchanged. **Pending M4 Planning Review + Planning Freeze** before EOS-301 implementation. |
 | 2026-07-16 | 1.11 | **Milestone 3 (Knowledge Extraction) Freeze declared by the reviewer (AJ).** Freeze Review passed: the `KnowledgeExtraction` contract implemented; parsing, validation, and immutability established; the Knowledge Extractor kept a simple orchestrator; non-determinism correctly isolated behind the injected `TextGenerator`; deterministic prompt construction; provider-independent behaviour tests; no architectural drift — M3 Definition of Done fully satisfied. M3 is frozen; changes now follow the AJS-007 Frozen Plan Change Proposal process. Next: **M4 (Candidate Generation & Review Store)**, beginning with M4 planning (EOS-3xx decomposition → Planning Review → Planning Freeze). |
 | 2026-07-16 | 1.10 | **M3 (Knowledge Extraction) implementation complete — EOS-201..202 all done**, each independently code-reviewed and committed. EOS-201 (`KnowledgeExtraction` internal contract + `ExtractionError` + fence-strip/validate/deep-freeze `parseExtractionResponse`) and EOS-202 (Knowledge Extractor stage: EOS-local `TextGenerator` port, pure/deterministic `buildExtractionPrompt`, `createKnowledgeExtractor` wiring prompt → generate → parse; frozen handle; Extractor Invariant enforced by shape). Public surface: 4 new operations (`parseExtractionResponse`, `ExtractionError`, `createKnowledgeExtractor`, `buildExtractionPrompt`). End-of-Session suite grew to **15 files / 167 tests**; full platform suite **507 tests / 47 files**, all green. M3 Integration Check satisfied — extraction is the one non-deterministic seam, isolated behind the injected port; no git/wiki side effect, `run` entry point unchanged. **Pending the M3 Freeze Review.** |
 | 2026-07-16 | 1.9 | **M3 Planning Freeze ratified by the reviewer (AJ).** M3 Planning Review passed; the EOS-201/EOS-202 breakdown and its architectural choices are approved (two-task decomposition; EOS-local `TextGenerator`; `parseExtractionResponse` owning fence-strip/parse/validate/immutability; `KnowledgeExtraction` as an internal, non-boundary contract). Per the reviewer's request, an explicit **Extractor Invariant** (orchestration + structural validation only — no classify / deduplicate / merge / score / enrich) was recorded in EOS-202 before freeze. **EOS-D6 judged unnecessary** — port ownership follows the existing pattern with no genuine decision to record. The M3 breakdown is frozen; EOS-201 may begin under the AJS-007 implementation cycle. |

@@ -28,6 +28,7 @@ const EXPECTED_OPERATIONS = [
   "buildExtractionPrompt",
   "collectChanges",
   "createAnalyzerRegistry",
+  "createCandidateGenerator",
   "createGitChangeAnalyzer",
   "createGitPort",
   "createKnowledgeExtractor",
