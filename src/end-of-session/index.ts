@@ -20,8 +20,9 @@
  * nothing that does not yet exist.
  */
 
-// Immutable workflow contracts (EOS-002+). The published SPEC-003 → SPEC-004
-// boundary contract (`CandidateKnowledge`, EOS-D1) will join them from `contracts/`.
+// Immutable workflow contracts (EOS-002+), including the published SPEC-003 →
+// SPEC-004 boundary contract (`CandidateKnowledge`, EOS-D1/D4), re-exported from
+// `contracts/`.
 export {
   sessionContextSchema,
   sessionSchema,
@@ -30,6 +31,11 @@ export {
   parseSessionContext,
   parseSession,
   TRIGGER_KINDS,
+  candidateKnowledgeSchema,
+  candidateProvenanceSchema,
+  candidateKindSchema,
+  parseCandidateKnowledge,
+  CANDIDATE_KINDS,
 } from "./contracts/index.js";
 
 export type {
@@ -37,4 +43,7 @@ export type {
   Session,
   GitState,
   TriggerKind,
+  CandidateKnowledge,
+  CandidateProvenance,
+  CandidateKind,
 } from "./contracts/index.js";

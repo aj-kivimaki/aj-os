@@ -20,10 +20,17 @@ describe("end-of-session public surface", () => {
     expect(endOfSession.TRIGGER_KINDS).toContain("manual");
   });
 
-  it("exposes the session contracts through the contracts barrel", () => {
+  it("re-exports the CandidateKnowledge boundary contract from the module entry point", () => {
+    expect(typeof endOfSession.parseCandidateKnowledge).toBe("function");
+    expect(endOfSession.CANDIDATE_KINDS).toContain("handbook-entry");
+  });
+
+  it("exposes the contracts through the contracts barrel — the SPEC-004 import surface", () => {
     expect(typeof contracts.parseSessionContext).toBe("function");
     expect(typeof contracts.parseSession).toBe("function");
+    expect(typeof contracts.parseCandidateKnowledge).toBe("function");
     expect(contracts.sessionContextSchema).toBeDefined();
     expect(contracts.sessionSchema).toBeDefined();
+    expect(contracts.candidateKnowledgeSchema).toBeDefined();
   });
 });
