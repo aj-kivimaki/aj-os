@@ -1,23 +1,29 @@
 /**
- * Scaffold test for the End-of-Session Workflow module (EOS-001).
+ * Public-surface test for the End-of-Session Workflow module.
  *
- * EOS-001 establishes the module skeleton with no behavior, so there is nothing
- * to exercise yet. This test only pins the acceptance criterion that the module
- * and its contracts barrel are importable through their public surface and that
- * the scaffold ships no exports. Contract and behaviour suites are authored by
- * EOS-002+ as the contracts and services arrive.
+ * Asserts that the module's contracts are reachable through its public entry point
+ * (`src/end-of-session/index.js`) and through the dedicated contracts barrel — the
+ * narrow import path SPEC-004 uses (EOS-D1). Contract *behaviour* (valid/invalid/
+ * immutable) is exercised in the per-contract suites; this test only pins the
+ * public surface. Started as the EOS-001 scaffold test; EOS-002 repurposed it once
+ * the module began exporting contracts.
  */
 import { describe, expect, it } from "vitest";
 
 import * as endOfSession from "../../src/end-of-session/index.js";
 import * as contracts from "../../src/end-of-session/contracts/index.js";
 
-describe("end-of-session module scaffold (EOS-001)", () => {
-  it("exposes an importable public barrel with no exports yet", () => {
-    expect(Object.keys(endOfSession)).toEqual([]);
+describe("end-of-session public surface", () => {
+  it("re-exports the session contracts from the module entry point", () => {
+    expect(typeof endOfSession.parseSessionContext).toBe("function");
+    expect(typeof endOfSession.parseSession).toBe("function");
+    expect(endOfSession.TRIGGER_KINDS).toContain("manual");
   });
 
-  it("exposes an importable contracts barrel with no exports yet", () => {
-    expect(Object.keys(contracts)).toEqual([]);
+  it("exposes the session contracts through the contracts barrel", () => {
+    expect(typeof contracts.parseSessionContext).toBe("function");
+    expect(typeof contracts.parseSession).toBe("function");
+    expect(contracts.sessionContextSchema).toBeDefined();
+    expect(contracts.sessionSchema).toBeDefined();
   });
 });

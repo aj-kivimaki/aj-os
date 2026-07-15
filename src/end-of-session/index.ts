@@ -14,9 +14,27 @@
  * only through this barrel as they are implemented. Consumers import from this
  * entry point, never from internal files.
  *
- * This file is the module's public surface. It currently exports nothing: the
- * scaffold (EOS-001) establishes the module structure with no behavior. Contracts
- * (EOS-002..EOS-005) and services land in later M1+ tasks and are re-exported here
- * as they arrive — the barrel exports nothing that does not yet exist.
+ * This file is the module's public surface. Contracts are re-exported here from
+ * the `contracts/` barrel as they arrive (EOS-002 adds the session contracts);
+ * services and the `run` entry point land in later M1+ tasks. The barrel exports
+ * nothing that does not yet exist.
  */
-export {};
+
+// Immutable workflow contracts (EOS-002+). The published SPEC-003 → SPEC-004
+// boundary contract (`CandidateKnowledge`, EOS-D1) will join them from `contracts/`.
+export {
+  sessionContextSchema,
+  sessionSchema,
+  gitStateSchema,
+  triggerKindSchema,
+  parseSessionContext,
+  parseSession,
+  TRIGGER_KINDS,
+} from "./contracts/index.js";
+
+export type {
+  SessionContext,
+  Session,
+  GitState,
+  TriggerKind,
+} from "./contracts/index.js";
