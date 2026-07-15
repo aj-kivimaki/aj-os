@@ -36,6 +36,14 @@ export {
   candidateKindSchema,
   parseCandidateKnowledge,
   CANDIDATE_KINDS,
+  reviewPackageSchema,
+  parseReviewPackage,
+  sessionReportSchema,
+  sessionReportErrorSchema,
+  candidatesProducedSchema,
+  sessionResultSchema,
+  parseSessionReport,
+  SESSION_RESULTS,
 } from "./contracts/index.js";
 
 export type {
@@ -46,4 +54,9 @@ export type {
   CandidateKnowledge,
   CandidateProvenance,
   CandidateKind,
+  ReviewPackage,
+  SessionReport,
+  SessionReportError,
+  CandidatesProduced,
+  SessionResult,
 } from "./contracts/index.js";

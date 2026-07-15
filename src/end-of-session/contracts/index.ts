@@ -8,9 +8,10 @@
  * without pulling in the module's services or analyzers.
  *
  * Contracts arrive incrementally across the M1 tasks: the session contracts
- * (`SessionContext`, `Session`) land here in EOS-002 and the canonical boundary
- * contract (`CandidateKnowledge`) in EOS-003; `ReviewPackage`/`SessionReport` and
- * `SessionChange`/`ChangeSet` follow in EOS-004..EOS-005.
+ * (`SessionContext`, `Session`) land here in EOS-002, the canonical boundary
+ * contract (`CandidateKnowledge`) in EOS-003, and the workflow outputs
+ * (`ReviewPackage` projection, `SessionReport` log) in EOS-004;
+ * `SessionChange`/`ChangeSet` follow in EOS-005.
  */
 
 export {
@@ -44,3 +45,25 @@ export type {
   CandidateProvenance,
   CandidateKind,
 } from "./candidate/index.js";
+
+// The workflow outputs: the human-readable projection (EOS-D4) and the execution
+// log (SPEC-003 §16).
+export { reviewPackageSchema, parseReviewPackage } from "./review-package/index.js";
+
+export type { ReviewPackage } from "./review-package/index.js";
+
+export {
+  sessionReportSchema,
+  sessionReportErrorSchema,
+  candidatesProducedSchema,
+  sessionResultSchema,
+  parseSessionReport,
+  SESSION_RESULTS,
+} from "./session-report/index.js";
+
+export type {
+  SessionReport,
+  SessionReportError,
+  CandidatesProduced,
+  SessionResult,
+} from "./session-report/index.js";

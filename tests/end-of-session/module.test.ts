@@ -25,12 +25,22 @@ describe("end-of-session public surface", () => {
     expect(endOfSession.CANDIDATE_KINDS).toContain("handbook-entry");
   });
 
+  it("re-exports the workflow output contracts from the module entry point", () => {
+    expect(typeof endOfSession.parseReviewPackage).toBe("function");
+    expect(typeof endOfSession.parseSessionReport).toBe("function");
+    expect(endOfSession.SESSION_RESULTS).toContain("completed");
+  });
+
   it("exposes the contracts through the contracts barrel — the SPEC-004 import surface", () => {
     expect(typeof contracts.parseSessionContext).toBe("function");
     expect(typeof contracts.parseSession).toBe("function");
     expect(typeof contracts.parseCandidateKnowledge).toBe("function");
+    expect(typeof contracts.parseReviewPackage).toBe("function");
+    expect(typeof contracts.parseSessionReport).toBe("function");
     expect(contracts.sessionContextSchema).toBeDefined();
     expect(contracts.sessionSchema).toBeDefined();
     expect(contracts.candidateKnowledgeSchema).toBeDefined();
+    expect(contracts.reviewPackageSchema).toBeDefined();
+    expect(contracts.sessionReportSchema).toBeDefined();
   });
 });
