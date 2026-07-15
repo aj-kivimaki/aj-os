@@ -9,9 +9,10 @@
  *
  * Contracts arrive incrementally across the M1 tasks: the session contracts
  * (`SessionContext`, `Session`) land here in EOS-002, the canonical boundary
- * contract (`CandidateKnowledge`) in EOS-003, and the workflow outputs
- * (`ReviewPackage` projection, `SessionReport` log) in EOS-004;
- * `SessionChange`/`ChangeSet` follow in EOS-005.
+ * contract (`CandidateKnowledge`) in EOS-003, the workflow outputs
+ * (`ReviewPackage` projection, `SessionReport` log) in EOS-004, and the analyzer
+ * stage's change contracts + `Analyzer` port (`SessionChange`, `AnalyzerError`,
+ * `ChangeSet`) in EOS-005.
  */
 
 export {
@@ -67,3 +68,29 @@ export type {
   CandidatesProduced,
   SessionResult,
 } from "./session-report/index.js";
+
+// The analyzer stage's change vocabulary and the `Analyzer` port (EOS-005). The
+// registry that holds analyzers is infrastructure, exported from `../registry/`.
+export {
+  sessionChangeSchema,
+  analyzerErrorSchema,
+  changeSetSchema,
+  analyzerMetadataSchema,
+  changeKindSchema,
+  changeTypeSchema,
+  parseSessionChange,
+  parseAnalyzerError,
+  parseChangeSet,
+  CHANGE_KINDS,
+  CHANGE_TYPES,
+} from "./change/index.js";
+
+export type {
+  SessionChange,
+  AnalyzerError,
+  ChangeSet,
+  AnalyzerMetadata,
+  ChangeKind,
+  ChangeType,
+  Analyzer,
+} from "./change/index.js";

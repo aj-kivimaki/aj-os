@@ -31,16 +31,26 @@ describe("end-of-session public surface", () => {
     expect(endOfSession.SESSION_RESULTS).toContain("completed");
   });
 
+  it("re-exports the change contracts and the analyzer registry from the module entry point", () => {
+    expect(typeof endOfSession.parseSessionChange).toBe("function");
+    expect(typeof endOfSession.parseChangeSet).toBe("function");
+    expect(typeof endOfSession.createAnalyzerRegistry).toBe("function");
+    expect(endOfSession.CHANGE_KINDS).toContain("other");
+    expect(endOfSession.CHANGE_TYPES).toContain("modified");
+  });
+
   it("exposes the contracts through the contracts barrel — the SPEC-004 import surface", () => {
     expect(typeof contracts.parseSessionContext).toBe("function");
     expect(typeof contracts.parseSession).toBe("function");
     expect(typeof contracts.parseCandidateKnowledge).toBe("function");
     expect(typeof contracts.parseReviewPackage).toBe("function");
     expect(typeof contracts.parseSessionReport).toBe("function");
+    expect(typeof contracts.parseChangeSet).toBe("function");
     expect(contracts.sessionContextSchema).toBeDefined();
     expect(contracts.sessionSchema).toBeDefined();
     expect(contracts.candidateKnowledgeSchema).toBeDefined();
     expect(contracts.reviewPackageSchema).toBeDefined();
     expect(contracts.sessionReportSchema).toBeDefined();
+    expect(contracts.changeSetSchema).toBeDefined();
   });
 });

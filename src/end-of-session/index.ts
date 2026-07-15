@@ -44,6 +44,17 @@ export {
   sessionResultSchema,
   parseSessionReport,
   SESSION_RESULTS,
+  sessionChangeSchema,
+  analyzerErrorSchema,
+  changeSetSchema,
+  analyzerMetadataSchema,
+  changeKindSchema,
+  changeTypeSchema,
+  parseSessionChange,
+  parseAnalyzerError,
+  parseChangeSet,
+  CHANGE_KINDS,
+  CHANGE_TYPES,
 } from "./contracts/index.js";
 
 export type {
@@ -59,4 +70,16 @@ export type {
   SessionReportError,
   CandidatesProduced,
   SessionResult,
+  SessionChange,
+  AnalyzerError,
+  ChangeSet,
+  AnalyzerMetadata,
+  ChangeKind,
+  ChangeType,
+  Analyzer,
 } from "./contracts/index.js";
+
+// The Analyzer Registry — infrastructure (deterministic registration + lookup only;
+// no execution), exported alongside the contracts as the module's public surface.
+export { createAnalyzerRegistry } from "./registry/index.js";
+export type { AnalyzerRegistry } from "./registry/index.js";
