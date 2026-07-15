@@ -79,7 +79,7 @@ No behavior — no git access, no LLM calls, no persistence. This milestone defi
 
 | Task | Description | Status |
 |------|-------------|--------|
-| EOS-001 | Establish End-of-Session module & scaffold | ⬜ |
+| EOS-001 | Establish End-of-Session module & scaffold | ✅ |
 | EOS-002 | `SessionContext` & first-class `Session` contracts | ⬜ |
 | EOS-003 | `CandidateKnowledge` published boundary contract | ⬜ |
 | EOS-004 | `ReviewPackage` (projection) & `SessionReport` contracts | ⬜ |
