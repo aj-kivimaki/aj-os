@@ -47,7 +47,10 @@ Handbook, Retrieval, Prompt Renderer, and AI Client.
 ## Remaining Phase 2 work
 
 - Wire the Knowledge Platform pipeline to an orchestration entry point.
-- End-of-Session Workflow (SPEC-003) — owns git commits.
+- End-of-Session Workflow (SPEC-003) — captures candidate knowledge for review.
+  Planning frozen; Milestone 1 ready to implement. Detailed record:
+  [spec-003-end-of-session/](spec-003-end-of-session/). (Git-commit ownership is
+  deferred to a later milestone — v1 is capture-only.)
 - Knowledge Review Workflow (SPEC-004).
 - Further Context Builder capabilities — Explainability & Profiles (M5),
   Optimization (M6).
