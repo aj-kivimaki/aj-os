@@ -4,7 +4,7 @@
 >
 > **Related Specification:** SPEC-003
 >
-> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) task breakdown **PLANNING-FROZEN** (reviewer: AJ, 2026-07-15); EOS-101 is the active implementation target.
+> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) is the next target; it begins with M3 planning (EOS-2xx decomposition → Planning Review → Planning Freeze) per AJS-007.
 
 ---
 
@@ -29,7 +29,7 @@ established in M1 so later capabilities are additive.
 | Milestone | Name | Goal | Status |
 | --------- | ---- | ---- | ------ |
 | M1 | Foundation & Contracts | Module, immutable contracts, and the analyzer/trigger/notification seams | ✅ |
-| M2 | Session Change Collection | Git changes collected deterministically behind the analyzer registry | ⬜ |
+| M2 | Session Change Collection | Git changes collected deterministically behind the analyzer registry | ✅ |
 | M3 | Knowledge Extraction | Reusable knowledge extracted from changes via the injected text-generation port | ⬜ |
 | M4 | Candidate Generation & Review Store | Canonical `CandidateKnowledge` generated and persisted to the review store | ⬜ |
 | M5 | Review Package Projection, Orchestration & CLI | Human-readable projection + `createEndOfSessionWorkflow` + `aj session end` | ⬜ |
@@ -162,8 +162,21 @@ implementation-complete and awaiting the Freeze Review.**_
 - [x] Git analyzer operational behind the registry.
 - [x] Partial collection with deterministic errors.
 - [x] Behaviour tests passing.
-- [ ] Freeze Review completed. _(pending — M2 implementation complete; handed off
-      for the reviewer's Freeze Review)_
+- [x] Freeze Review completed. _(**Milestone 2 Freeze declared by the reviewer
+      (AJ) on 2026-07-16.** Objectives satisfied — deterministic collection
+      execution, correct partial collection, git analyzer behind the read-only
+      `GitPort`, minimal policy-free adapter, integration tests validating the full
+      pipeline, no architectural drift. DoD met.)_
+
+## Future Hardening (reviewer-accepted deferral)
+
+- **`createGitPort` `execFile` `maxBuffer`.** The adapter uses Node's default
+  1 MB `execFile` `maxBuffer`; an extremely large `git diff --name-status` could
+  exceed it, which degrades **correctly** into a recoverable `AnalyzerError`
+  (partial collection). The reviewer **accepted the current implementation** at
+  the M2 Freeze (2026-07-16) and recorded this as a **future hardening
+  consideration**, consistent with M2's minimal-adapter philosophy — not expanded
+  now. See EOS-103 and [Deferred (post-v1)](#deferred-post-v1).
 
 ---
 
@@ -321,7 +334,9 @@ trigger only; notification is a no-op. **No git commit, no wiki generation.**
 Documentation & Lessons-Learned analyzers · additional triggers (git hook /
 scheduled / IDE / n8n) · real notifications · **git-commit ownership + wiki-
 generator orchestration** · playbooks / suggested-doc-updates / automation-ideas
-· handbook dedupe (owned by SPEC-004).
+· handbook dedupe (owned by SPEC-004) · **`createGitPort` `execFile` `maxBuffer`
+hardening** (reviewer-accepted deferral at the M2 Freeze; large-diff resilience
+beyond the graceful `AnalyzerError` fallback).
 
 ---
 
@@ -338,6 +353,7 @@ generator orchestration** · playbooks / suggested-doc-updates / automation-idea
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-16 | 1.7 | **Milestone 2 (Session Change Collection) Freeze declared by the reviewer (AJ).** Freeze Review passed: deterministic collection execution, correct partial collection, git analyzer behind the read-only `GitPort`, a minimal policy-free adapter, integration tests validating the full pipeline, and no architectural drift — M2 Definition of Done fully satisfied. The `createGitPort` `execFile` `maxBuffer` note is **reviewer-accepted** and recorded as future hardening (not expanded now; current behavior degrades correctly into a recoverable `AnalyzerError`). M2 is frozen; changes to M2 now follow the AJS-007 Frozen Plan Change Proposal process. Next: **M3 (Knowledge Extraction)**, beginning with M3 planning (EOS-2xx decomposition → Planning Review → Planning Freeze). |
 | 2026-07-16 | 1.6 | **M2 (Session Change Collection) implementation complete — EOS-101..103 all done**, each independently code-reviewed and committed. EOS-101 (`collectChanges` execution stage), EOS-102 (read-only `GitPort` + pure-translator `GitChangeAnalyzer`), EOS-103 (minimal git-backed `createGitPort` adapter + end-to-end integration/determinism/partial-collection tests over disposable fixture repos). Public surface: 14 operations. End-of-Session suite grew to **45 tests across the new files**; full platform suite **476 tests / 45 files**, all green. M2 Integration Check satisfied; no git-write/wiki side effect entered the pipeline. **Pending the M2 Freeze Review.** |
 | 2026-07-15 | 1.5 | **M2 Planning Freeze ratified by the reviewer (AJ).** M2 Planning Review passed; the EOS-101..103 task breakdown and its architectural decisions are approved (direct `collectChanges` call over a speculative engine wrapper; execution-caught failures treated as recoverable; read-only `GitPort`; real git adapter in EOS-103; range construction deferred outside the analyzer). Per the reviewer's request, an explicit **execution determinism invariant** (deterministic w.r.t. registry order and analyzer outputs) was recorded in EOS-101 before freeze. The M2 breakdown is frozen; EOS-101 may begin under the AJS-007 implementation cycle. |
 | 2026-07-15 | 1.4 | **M2 (Session Change Collection) task breakdown authored** — decomposed into EOS-101 (Collection Execution Stage), EOS-102 (Git Port & GitChangeAnalyzer), EOS-103 (Integration & Behaviour Tests), following the same per-milestone planning the reviewer approved. M2 objective/deliverables unchanged (within the frozen plan). **Pending M2 Planning Review + Planning Freeze** before EOS-101 implementation. |

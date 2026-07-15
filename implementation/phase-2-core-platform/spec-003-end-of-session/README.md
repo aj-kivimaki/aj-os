@@ -180,8 +180,8 @@ decisions.
 
 | Milestone | Description | Status |
 | --------- | ----------- | ------ |
-| M1 | Foundation & Contracts | ⬜ |
-| M2 | Session Change Collection | ⬜ |
+| M1 | Foundation & Contracts | ✅ |
+| M2 | Session Change Collection | ✅ |
 | M3 | Knowledge Extraction | ⬜ |
 | M4 | Candidate Generation & Review Store | ⬜ |
 | M5 | Review Package Projection, Orchestration & CLI | ⬜ |
