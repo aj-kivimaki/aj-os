@@ -21,6 +21,7 @@ import * as contracts from "../../src/end-of-session/contracts/index.js";
 
 /** The intended public *operations* — every `parse*`/`create*` the module exposes. */
 const EXPECTED_OPERATIONS = [
+  "collectChanges",
   "createAnalyzerRegistry",
   "createManualTriggerSource",
   "createNoopNotificationPort",

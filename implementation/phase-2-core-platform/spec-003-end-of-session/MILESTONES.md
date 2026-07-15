@@ -4,7 +4,7 @@
 >
 > **Related Specification:** SPEC-003
 >
-> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). M2 (Change Collection) is the next implementation target.
+> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) task breakdown **PLANNING-FROZEN** (reviewer: AJ, 2026-07-15); EOS-101 is the active implementation target.
 
 ---
 
@@ -136,7 +136,13 @@ the SPEC-002 Collection model).
 
 | Task | Description | Status |
 |------|-------------|--------|
-| EOS-101 | (defined at M2 planning) | ⬜ |
+| EOS-101 | Collection Execution Stage (analyzer-agnostic; partial collection, deterministic ordering → `ChangeSet`) | ✅ |
+| EOS-102 | Git Port & GitChangeAnalyzer (injectable read-only `GitPort`, first concrete analyzer; no real git in unit tests) | ⬜ |
+| EOS-103 | Integration & Behaviour Tests (real `GitPort` adapter, end-to-end wiring, determinism, partial collection) | ⬜ |
+
+_Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-15. From here,
+changes to the M2 task breakdown follow the AJS-007 Frozen Plan Change Proposal
+process. EOS-101 is cleared to implement._
 
 ## Dependencies
 
@@ -331,6 +337,8 @@ generator orchestration** · playbooks / suggested-doc-updates / automation-idea
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-15 | 1.5 | **M2 Planning Freeze ratified by the reviewer (AJ).** M2 Planning Review passed; the EOS-101..103 task breakdown and its architectural decisions are approved (direct `collectChanges` call over a speculative engine wrapper; execution-caught failures treated as recoverable; read-only `GitPort`; real git adapter in EOS-103; range construction deferred outside the analyzer). Per the reviewer's request, an explicit **execution determinism invariant** (deterministic w.r.t. registry order and analyzer outputs) was recorded in EOS-101 before freeze. The M2 breakdown is frozen; EOS-101 may begin under the AJS-007 implementation cycle. |
+| 2026-07-15 | 1.4 | **M2 (Session Change Collection) task breakdown authored** — decomposed into EOS-101 (Collection Execution Stage), EOS-102 (Git Port & GitChangeAnalyzer), EOS-103 (Integration & Behaviour Tests), following the same per-milestone planning the reviewer approved. M2 objective/deliverables unchanged (within the frozen plan). **Pending M2 Planning Review + Planning Freeze** before EOS-101 implementation. |
 | 2026-07-15 | 1.3 | **Milestone 1 Freeze declared by the reviewer (AJ).** Freeze Review passed all six criteria; the M1 Definition of Done is fully satisfied. M1 (Foundation & Contracts) is frozen; changes to M1 contracts now follow the AJS-007 Frozen Plan Change Proposal process. Next implementation target: **M2 — Session Change Collection**. |
 | 2026-07-15 | 1.2 | **M1 implementation complete — EOS-001..EOS-007 all done**, each independently reviewed and committed. Contract testing foundation (EOS-007) consolidated the immutability idiom onto a shared `firstUnfrozenPath` inspector and added module-wide foundation guards. End-of-Session suite: **98 tests / 10 files**; full platform suite **438 tests / 42 files**, all green. Pending the Milestone 1 Freeze Review. |
 | 2026-07-15 | 1.1 | **Milestone 1 Planning Freeze ratified by the reviewer (AJ).** M1 (EOS-001..EOS-007) is frozen and ready to implement; M2–M5 remain planned (task breakdowns authored at each milestone's planning). Subsequent plan changes follow the AJS-007 Frozen Plan Change Proposal process. |

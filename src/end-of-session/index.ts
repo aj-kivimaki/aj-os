@@ -84,6 +84,11 @@ export type {
 export { createAnalyzerRegistry } from "./registry/index.js";
 export type { AnalyzerRegistry } from "./registry/index.js";
 
+// The Collection stage (EOS-101) — analyzer-agnostic execution: runs the registry's
+// analyzers against a `Session` and assembles an immutable `ChangeSet` under the
+// partial-collection model (deterministic w.r.t. registry order and analyzer output).
+export { collectChanges } from "./collection/index.js";
+
 // Extensibility seams (EOS-006): how a session is triggered and how completion is
 // announced. v1 ships the manual trigger and the no-op notifier; future
 // triggers/notifiers plug in behind these ports without changing orchestration.
