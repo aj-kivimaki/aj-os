@@ -146,6 +146,15 @@ export type {
   CandidateGeneratorConfig,
 } from "./generation/index.js";
 
+// The Projection stage (EOS-403, EOS-D4) — renders the human-readable `ReviewPackage`
+// markdown *from* the canonical `CandidateKnowledge[]` + `Session`. A pure, deterministic
+// function of its explicit inputs (`generatedAt` is passed in, never read from a clock):
+// it renders every candidate in canonical order, adds nothing, drops nothing, and
+// persists nothing. The package is derived and regenerable from the review store — never
+// the source of truth, and never parsed back as data.
+export { createReviewPackageProjector } from "./projection/index.js";
+export type { ReviewPackageProjector } from "./projection/index.js";
+
 // The Review Store (EOS-302, EOS-D6) — the SPEC-003 → SPEC-004 filesystem boundary. A
 // persistence-only, path-guarded, domain-aware adapter: it writes a session's canonical
 // candidates (one JSON file each) + `SessionReport` + append-only log to the non-canonical
