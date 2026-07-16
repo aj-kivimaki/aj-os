@@ -2,7 +2,7 @@
 
 > **Implementation Package:** SPEC-003
 >
-> **Status:** M1–M4 **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — Milestone 5 (Review Package Projection, Orchestration & CLI) is the next target
+> **Status:** M1–M4 **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). **M5 is implementation-complete (EOS-401..411) and awaiting its Freeze Review** — the v1 vertical slice runs end to end via `aj session end` and is proven by an acceptance suite mapped to SPEC-003 §19 (713 tests / 58 files).
 >
 > **Phase:** Phase 2 — Core Knowledge Platform
 >
@@ -151,13 +151,13 @@ See:
 
 This implementation is complete (for its planned milestones) when the following exist:
 
-- [ ] End-of-Session module with immutable contracts and contract tests
-- [ ] Git change collection behind the analyzer registry
-- [ ] Deterministic-structure knowledge extraction (content behind the injected port)
-- [ ] Canonical `CandidateKnowledge` generation persisted to the review store
-- [ ] `ReviewPackage` projection + `SessionReport`
-- [ ] `createEndOfSessionWorkflow` composition root and `aj session end` command
-- [ ] Automated tests (unit, integration, acceptance) green
+- [x] End-of-Session module with immutable contracts and contract tests
+- [x] Git change collection behind the analyzer registry
+- [x] Deterministic-structure knowledge extraction (content behind the injected port)
+- [x] Canonical `CandidateKnowledge` generation persisted to the review store
+- [x] `ReviewPackage` projection + `SessionReport`
+- [x] `createEndOfSessionWorkflow` composition root and `aj session end` command
+- [x] Automated tests (unit, integration, acceptance) green — **713 / 58**
 
 ---
 
@@ -184,7 +184,7 @@ decisions.
 | M2 | Session Change Collection | ✅ |
 | M3 | Knowledge Extraction | ✅ |
 | M4 | Candidate Generation & Review Store | ✅ |
-| M5 | Review Package Projection, Orchestration & CLI | ⬜ |
+| M5 | Review Package Projection, Orchestration & CLI | ⬜ (implementation complete; awaiting Freeze Review) |
 
 See: [MILESTONES.md](MILESTONES.md)
 
@@ -197,9 +197,9 @@ spec-003-end-of-session/
   README.md
   MILESTONES.md
   architecture/PIPELINE-ARCHITECTURE.md
-  decisions/          EOS-D1..EOS-D9 (planning-review decisions)
+  decisions/          EOS-D1..EOS-D11 (planning-review decisions + 2 approved FPCPs)
   tasks/              EOS-001..007 (M1), EOS-101..103 (M2), EOS-201..202 (M3), EOS-301..303 (M4),
-                      EOS-401..409 (M5, planning-frozen)
+                      EOS-401..411 (M5, complete)
   retrospectives/     (added at each Milestone Freeze)
 ```
 
@@ -221,15 +221,18 @@ spec-003-end-of-session/
   2026-07-16): EOS-301 Candidate Generator, EOS-302 Review Store, EOS-303
   `reviewPath` config — implemented, reviewed, and committed. **EOS-D6 Accepted**
   (domain-aware Review Store API).
-- ⬜ M5 (Projection, Orchestration & CLI) — **task breakdown EOS-401..409
-  PLANNING-FROZEN by the reviewer (AJ) on 2026-07-16.** Three decisions accepted:
+- ⬜ M5 (Projection, Orchestration & CLI) — **implementation-complete
+  (EOS-401..411); awaiting the Freeze Review.** Five decisions accepted:
   **EOS-D7** (extend the existing `GitPort` — closing the gap that left no
   `Session` constructible), **EOS-D8** (the Review Store gains
-  `saveReviewPackage`, so it owns every file in the session directory), and
+  `saveReviewPackage`, so it owns every file in the session directory),
   **EOS-D9** (the composition root exposes the `TriggerSource`; session
-  construction and git stay out of the CLI). An explicit **Orchestrator
-  Invariant** was recorded in EOS-406 at the reviewer's requirement. Implementation
-  may begin with **EOS-401**. See
+  construction and git stay out of the CLI), and **two approved Frozen Plan
+  Change Proposals** — **EOS-D10** (session notes reach the extraction prompt,
+  byte-identical when absent) and **EOS-D11** (untracked files reach the change
+  stream, adapter-only). Reviewer-required invariants recorded: the
+  **Orchestrator Invariant** (EOS-406) and the **Report Builder Invariant**
+  (EOS-405). The slice runs end to end and is proven against SPEC-003 §19. See
   [MILESTONES.md](MILESTONES.md#milestone-m5--review-package-projection-orchestration--cli).
 
 > **Frozen-plan discipline (AJS-007).** From the freeze onward, changes to the

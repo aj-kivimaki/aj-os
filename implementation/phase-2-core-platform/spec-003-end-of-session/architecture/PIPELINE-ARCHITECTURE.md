@@ -7,33 +7,32 @@ milestones are planned and implemented. It does not replace ADRs or the
 architecture-review decisions in `decisions/`, which explain *why* individual
 choices were made.
 
-**Implementation status.** Milestones **M1–M4 are complete**. M1 (Foundation &
-Contracts) established the immutable contracts (`SessionContext`, `Session`,
-`CandidateKnowledge`, `ReviewPackage`, `SessionReport`, `SessionChange`,
-`AnalyzerError`, `ChangeSet`) and the extensibility seams (`Analyzer` port +
-registry, `TriggerSource`, `NotificationPort`). M2 (Session Change Collection)
-implemented the **Collection** stage — `collectChanges` execution + the
-`GitChangeAnalyzer` behind a read-only `GitPort` — producing a `ChangeSet`. M3
-(Knowledge Extraction) implemented the **Extraction** stage: the
-`KnowledgeExtraction` contract (`parseExtractionResponse`) and the
-`KnowledgeExtractor` behind the injected `TextGenerator` port (the pipeline's one
-non-deterministic seam). M4 (Candidate Generation & Review Store) implemented the
-**Candidate Generation** stage (`createCandidateGenerator` — the deterministic,
-one-to-one map from `KnowledgeExtraction` to canonical `CandidateKnowledge[]`) and
-the **Persistence** stage (`createFilesystemReviewStore` — the domain-aware,
-persistence-only Review Store writing to `knowledge-review/pending/<session-id>/`;
-EOS-D6), plus the `AjConfig.handbook.reviewPath` config. The remaining stage
-*behaviors* (session creation, review-package projection, report assembly,
-orchestration, CLI) are **not yet implemented** — they arrive in M5, whose plan is
-**frozen** (EOS-401..409; reviewer: AJ, 2026-07-16).
+**Implementation status.** **All five milestones are implemented (M1–M5); the v1 vertical
+slice is complete and proven end to end.** M1 (Foundation & Contracts) established the
+immutable contracts (`SessionContext`, `Session`, `CandidateKnowledge`, `ReviewPackage`,
+`SessionReport`, `SessionChange`, `AnalyzerError`, `ChangeSet`) and the extensibility seams
+(`Analyzer` port + registry, `TriggerSource`, `NotificationPort`). M2 implemented
+**Collection** — `collectChanges` + the `GitChangeAnalyzer` behind a read-only `GitPort`. M3
+implemented **Extraction** — the `KnowledgeExtraction` contract and the `KnowledgeExtractor`
+behind the injected `TextGenerator` (the pipeline's one non-deterministic seam). M4
+implemented **Candidate Generation** (`createCandidateGenerator`) and **Persistence**
+(`createFilesystemReviewStore`; EOS-D6), plus `AjConfig.handbook.reviewPath`.
 
-M5 planning surfaced two gaps between this document's target design and the
-delivered code, both resolved by ratified decisions: the **Session** stage could not
-be built at all, because M2's `GitPort` reads only `changes(range)` while `Session`
-requires an observed `head`/`dirty`/`branch` (**EOS-D7** extends the seam); and the
-**Projection** stage had nowhere to write its output, because EOS-D6 froze the store
-before the package's mechanism was settled (**EOS-D8** gives the store
-`saveReviewPackage`). **EOS-D9** fixes how a `SessionContext` reaches `run`.
+**M5 completed the pipeline** (EOS-401..411): the **Session** stage
+(`createSessionFactory`, over the git seam extended by EOS-D7), the **Projection** stage
+(`createReviewPackageProjector`), the **Observability** stage (`buildSessionReport`), the
+**Orchestrator** (`createSessionWorkflow` — the frozen `run(context)` entry point), the
+**composition root** (`createEndOfSessionWorkflow`, returning `{ workflow, store, trigger }`;
+EOS-D9), and the `aj session end` command. Two approved FPCPs landed within it: **EOS-D10**
+routes the engineer's session notes into the extraction prompt, and **EOS-D11** brings
+untracked files into the change stream. `saveReviewPackage` (**EOS-D8**) completed the store's
+ownership of the session directory.
+
+M5 planning and implementation surfaced four gaps between this document's target design and
+the delivered code, each closed by a ratified decision rather than absorbed silently: no
+`Session` was constructible (**EOS-D7**); the `ReviewPackage` had nowhere to be written
+(**EOS-D8**); `run(context)` had no upstream producer of its input (**EOS-D9**); session notes
+and untracked files never reached capture (**EOS-D10**, **EOS-D11**).
 
 ## Overview
 
