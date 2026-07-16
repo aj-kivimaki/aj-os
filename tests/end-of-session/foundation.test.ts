@@ -30,6 +30,7 @@ const EXPECTED_OPERATIONS = [
   "collectChanges",
   "createAnalyzerRegistry",
   "createCandidateGenerator",
+  "createEndOfSessionWorkflow",
   "createFilesystemReviewStore",
   "createGitChangeAnalyzer",
   "createGitPort",

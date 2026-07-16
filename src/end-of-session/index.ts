@@ -145,6 +145,19 @@ export type {
   CandidateGeneratorConfig,
 } from "./generation/index.js";
 
+// The composition root (EOS-407, EOS-D9) — assembles the whole workflow from `AjConfig` in
+// one place, the analog of `createKnowledgePipeline`. Resolves `<handbook>/<reviewPath>`,
+// ensures it exists, and fails fast via the store's `locate()` guard; builds the git port,
+// the single-analyzer registry, the session factory, the extractor over the `AIClient`, the
+// candidate generator, the projector, and the no-op notifier. Returns
+// `{ workflow, store, trigger }` — the trigger is exposed so an entry point obtains its
+// `SessionContext` without touching git. It constructs; it never orchestrates.
+export { createEndOfSessionWorkflow } from "./composition/index.js";
+export type {
+  EndOfSessionPipeline,
+  EndOfSessionWorkflowDeps,
+} from "./composition/index.js";
+
 // The Workflow orchestrator (EOS-406) — the module's single public entry point,
 // `run(context) → SessionReport`. Sequences the injected stages: session → change
 // collection → knowledge extraction → candidate generation → review-package projection →
