@@ -8,11 +8,10 @@
  * non-canonical review store; git commits and wiki generation are deferred
  * orchestration side effects, out of the v1 capture slice (ADR-002, AJS-005 §7).
  *
- * This module's single public entry point will be `run(context)` — the composed
- * workflow's `run(context: SessionContext): Promise<SessionReport>`, wired at the
- * composition root in Milestone M5. Internal stages stay private and are exposed
- * only through this barrel as they are implemented. Consumers import from this
- * entry point, never from internal files.
+ * This module's single public entry point is `run(context)` — the composed workflow's
+ * `run(context: SessionContext): Promise<SessionReport>` (EOS-406), assembled at the
+ * composition root. Internal stages stay private and are exposed only through this
+ * barrel. Consumers import from this entry point, never from internal files.
  *
  * This file is the module's public surface. Contracts are re-exported here from
  * the `contracts/` barrel as they arrive (EOS-002 adds the session contracts);
@@ -145,6 +144,20 @@ export type {
   CandidateGenerator,
   CandidateGeneratorConfig,
 } from "./generation/index.js";
+
+// The Workflow orchestrator (EOS-406) — the module's single public entry point,
+// `run(context) → SessionReport`. Sequences the injected stages: session → change
+// collection → knowledge extraction → candidate generation → review-package projection →
+// session report → persistence → notification. **It owns sequencing only** (the frozen
+// Orchestrator Invariant): it invokes stages and propagates their results unmodified,
+// introducing no business rule, transforming no contract, and bypassing no adapter. A stage
+// failure after the session is identified yields a persisted `failed` report rather than a
+// rejection — callers read `report.result`.
+export { createSessionWorkflow } from "./workflow/index.js";
+export type {
+  EndOfSessionWorkflow,
+  SessionWorkflowDeps,
+} from "./workflow/index.js";
 
 // The Observability stage (EOS-405) — assembles the `SessionReport` (SPEC-003 §16), the
 // workflow's execution log and the value `run` returns. A **pure projection over existing

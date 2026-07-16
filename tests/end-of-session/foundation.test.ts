@@ -38,6 +38,7 @@ const EXPECTED_OPERATIONS = [
   "createNoopNotificationPort",
   "createReviewPackageProjector",
   "createSessionFactory",
+  "createSessionWorkflow",
   "ExtractionError",
   "ReviewStoreError",
   "parseAnalyzerError",
