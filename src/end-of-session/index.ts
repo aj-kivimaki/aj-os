@@ -107,6 +107,20 @@ export { collectChanges } from "./collection/index.js";
 export { createGitChangeAnalyzer, createGitPort } from "./analyzers/git/index.js";
 export type { GitPort, GitFileChange } from "./analyzers/git/index.js";
 
+// The Session stage (EOS-402) — turns the input `SessionContext` into the identified
+// `Session` (EOS-D3): mints the stable opaque id, observes `head`/`dirty`/`branch`
+// through the read-only `GitPort` (EOS-D7) so provenance records facts rather than
+// claims, and constructs the change range (`<ref>..HEAD`, or `HEAD` for uncommitted +
+// staged work). A detached HEAD is captured, not refused: `branch` becomes
+// `detached@<short-head>` (the frozen Branch Policy), so nullable branch handling
+// stops at this stage.
+export { createSessionFactory } from "./session/index.js";
+export type {
+  SessionFactory,
+  SessionFactoryConfig,
+  SessionFactoryOptions,
+} from "./session/index.js";
+
 // The Knowledge Extraction stage (EOS-202) — the pipeline's single non-deterministic
 // seam: build a deterministic prompt from the `ChangeSet`, generate through the
 // injected `TextGenerator` port, and parse into an immutable `KnowledgeExtraction`

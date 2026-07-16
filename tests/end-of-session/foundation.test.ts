@@ -35,6 +35,7 @@ const EXPECTED_OPERATIONS = [
   "createKnowledgeExtractor",
   "createManualTriggerSource",
   "createNoopNotificationPort",
+  "createSessionFactory",
   "ExtractionError",
   "ReviewStoreError",
   "parseAnalyzerError",

@@ -58,8 +58,17 @@ whether "read-only git access" remains a single concept in SPEC-003 or becomes t
    > `Session.branch`'s `.min(1)` and would record a branch that does not exist, while being
    > indistinguishable from a branch genuinely named `HEAD`. `null` reports the fact instead
    > of laundering it. This refines the *signature*, not the decision: one seam, extended,
-   > read-only. It hands **EOS-402** the question of what a detached session's `branch`
-   > records (that contract is required and non-empty).
+   > read-only.
+   >
+   > **Ratified by the reviewer (AJ) on 2026-07-16:** "The port should report Git's actual
+   > state rather than forcing an invented branch name." The consequent question — what a
+   > detached session's required, non-empty `branch` records — was settled in the same review
+   > and belongs to the **Session factory**, not the port: detached HEAD is **not** fatal, the
+   > `Session` contract is **not** weakened, and the factory synthesizes
+   > `detached@<short-head>`. See the frozen **Branch Policy** in
+   > [EOS-402](../tasks/EOS-402.md#branch-policy--detached-head-frozen). The division is the
+   > point: the port *observes* that there is no branch; the factory *decides* what that
+   > means — so nullable handling stops at one stage instead of leaking downstream.
 2. **No second git abstraction is introduced.** There is one repository, read one way, by
    one composition root. `GitPort` remains the single seam for read-only git access in
    SPEC-003.
@@ -228,6 +237,7 @@ Implementation Tasks
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-16 | 1.2 | **`Promise<string \| null>` ratified by the reviewer (AJ)** — the port reports git's actual state rather than forcing an invented branch name. The consequent policy was settled in the same review and assigned to the **Session factory**, not the port: detached HEAD is **not fatal**, `Session.branch` stays **required**, and the factory synthesizes `detached@<short-head>` (the frozen Branch Policy, EOS-402). Implemented and tested in EOS-402; nullable branch handling stops at that stage. |
 | 2026-07-16 | 1.1 | **Signature refined during EOS-401 implementation** (code review): `branch()` returns `Promise<string \| null>` (implemented with `git branch --show-current`), because `git rev-parse --abbrev-ref HEAD` answers the literal `"HEAD"` for a detached repository — a non-empty value that would pass `Session.branch`'s `.min(1)` and record a branch that does not exist. The decision's substance is unchanged (extend the one read-only seam; no second git abstraction). Consequence for **EOS-402**: the Session factory must decide what a detached session's required, non-empty `branch` records. Recorded for the reviewer's ratification at the next gate. |
 | 2026-07-16 | 1.0 | Decision created and **Accepted** at the M5 Planning Review (reviewer: AJ). Closes the frozen-plan gap found at M5 planning — `Session.gitState.head`/`dirty` and `branch` are required but M2's `GitPort` exposes only `changes(range)`, so no `Session` was constructible. The existing read-only seam is **extended** with `head`/`dirty`/`branch` rather than joined by a second git abstraction; `changes(range)`, the analyzer, and every M2 guarantee are untouched. Read-only guarantee reaffirmed; fatal-vs-recoverable failure semantics fixed per caller. Ratified under AJS-007 §7.2 as an additive change to the M2-frozen contract. |
 
