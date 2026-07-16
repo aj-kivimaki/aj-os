@@ -4,7 +4,7 @@
 >
 > **Related Specification:** SPEC-003
 >
-> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 4 (Candidate Generation & Review Store) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — EOS-301..303 implemented, reviewed, and committed; EOS-D6 accepted (domain-aware Review Store API). Next target: **Milestone 5 (Review Package Projection, Orchestration & CLI)**, beginning with M5 planning (EOS-4xx decomposition → Planning Review → Planning Freeze) per AJS-007.
+> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 4 (Candidate Generation & Review Store) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — EOS-301..303 implemented, reviewed, and committed; EOS-D6 accepted (domain-aware Review Store API). Milestone 5 (Review Package Projection, Orchestration & CLI) — **task breakdown EOS-401..409 PLANNING-FROZEN by the reviewer (AJ) on 2026-07-16.** EOS-D7, EOS-D8, and EOS-D9 accepted; the **Orchestrator Invariant** recorded in EOS-406 at the reviewer's requirement. **Implementation may begin with EOS-401** under the AJS-007 cycle — see [Milestone M5](#milestone-m5--review-package-projection-orchestration--cli).
 
 ---
 
@@ -355,7 +355,80 @@ trigger only; notification is a no-op. **No git commit, no wiki generation.**
 
 | Task | Description | Status |
 |------|-------------|--------|
-| EOS-401 | (defined at M5 planning) | ⬜ |
+| EOS-401 | Git state seam (`GitPort` gains read-only `head`/`dirty`/`branch` + adapter) — **extends the M2-frozen port** | ✅ |
+| EOS-402 | Session Factory (`SessionContext` → identified `Session`: opaque id, `gitState`, range construction) | ⬜ |
+| EOS-403 | Review Package Projector (canonical candidates + `Session` → `ReviewPackage`; pure, deterministic) | ⬜ |
+| EOS-404 | Review Store `saveReviewPackage` (`pending/<id>/review-package.md`) — **extends the M4-frozen EOS-D6 surface** | ⬜ |
+| EOS-405 | Session Report Builder (run facts → `SessionReport`; outcome policy, `logEntry`) | ⬜ |
+| EOS-406 | Workflow Orchestrator (`createSessionWorkflow` → the frozen `run(context)` entry point) | ⬜ |
+| EOS-407 | Composition Root (`createEndOfSessionWorkflow(config, deps)`, mirroring `createKnowledgePipeline`) | ⬜ |
+| EOS-408 | `aj session end` command (`--since <ref>`, `--notes`), modeled on `wiki build` | ⬜ |
+| EOS-409 | Integration & Acceptance tests (fixture repo + fixture vault + stub generator; SPEC-003 §19) | ⬜ |
+
+_Task breakdown **PLANNING-FROZEN by the reviewer (AJ) on 2026-07-16**, following the same
+per-milestone planning used for M1–M4. Nine low-coupling, independently reviewable tasks
+composing the frozen M1–M4 stages rather than redesigning them. Sequencing: EOS-401 → EOS-402; EOS-403,
+EOS-404, EOS-405 independent; EOS-406 requires 402–405; EOS-407 requires 406; EOS-408
+requires 407; EOS-409 last. A dedicated integration/acceptance task **is** warranted here
+(unlike M3/M4): M5 introduces the pipeline's first end-to-end path and owns the SPEC-003
+§18/§19 acceptance proof — the deferral M4 planning recorded ("end-to-end integration is
+M5's acceptance test")._
+
+### Two frozen-plan gaps found at M5 planning — both resolved (AJS-007 §7.2)
+
+M5 planning surfaced **two gaps between the frozen plan and the delivered code**. Both were
+additive, both were required for M5 to exist at all, and both were **ratified by the reviewer
+(AJ) at the M5 Planning Review on 2026-07-16**:
+
+1. **The git state seam was missing (EOS-401).** `Session.gitState` requires `head`/`dirty`
+   and `Session.branch` is required, but M2's `GitPort` exposes only `changes(range)` —
+   EOS-002 recorded this git access as M2's job, and M2 delivered only what the analyzer
+   needed. **No `Session` was constructible**, and none was constructed in production.
+   **Resolved: [EOS-D7](decisions/EOS-D7-git-port-extension.md)** — extend the existing
+   read-only seam; no second git abstraction.
+2. **The `ReviewPackage` had nowhere to be written (EOS-404).** EOS-302 anticipated
+   `review-package.md` in the session directory, but EOS-D6 froze the store at four
+   operations, and the anticipated mechanism ("the projector writes it") contradicted EOS-D6's
+   store-owns-the-layout holding, bypassed the store's path guards, and would have cost the
+   projector its purity. **Resolved:
+   [EOS-D8](decisions/EOS-D8-review-store-save-review-package.md)** — add
+   `saveReviewPackage`; the store owns every file in the session directory. Extends EOS-D6
+   rather than revising it.
+
+### Decisions ratified at the M5 Planning Review (AJ, 2026-07-16)
+
+| # | Decision | Task | Outcome |
+|---|----------|------|---------|
+| 1 | Extend `GitPort` vs. a separate `GitStatePort` (**frozen M2 contract**) | EOS-401 | **Ratified: extend** — one seam for read-only git access → **[EOS-D7](decisions/EOS-D7-git-port-extension.md)** |
+| 2 | `ReviewStore.saveReviewPackage` vs. the projector writing the file (**frozen M4 surface**) | EOS-404 | **Ratified: store operation** — EOS-D6 consistency → **[EOS-D8](decisions/EOS-D8-review-store-save-review-package.md)** (extends EOS-D6) |
+| 3 | Who invokes the `TriggerSource`; the composition root's return shape | EOS-407 | **Ratified: expose the trigger** — `{ workflow, store, trigger }`; session construction stays out of the CLI → **[EOS-D9](decisions/EOS-D9-trigger-exposed-from-composition-root.md)** |
+| 4 | `Session.startedAt` semantics when session start is unobservable | EOS-402 | Ratified as proposed — `startedAt = endedAt =` trigger instant for v1; documented |
+| 5 | Fatal stage failure ⇒ persisted `failed` report vs. a throw | EOS-406 | Ratified as proposed — persisted `failed` report (§19 "Logs recorded"); reject only if the store is unwritable |
+| 6 | `ReviewPackage.summary` derivation | EOS-403 | **Explicitly ratified** — must remain derivable from **canonical persisted data**, never from transient `KnowledgeExtraction` output (EOS-D4) |
+| 7 | Session id generator (EOS-D3 deferred it to M5) | EOS-402 | Ratified as proposed — `randomUUID` |
+| 8 | Report times the **run**, not the session (same field names, different windows) | EOS-405 | Ratified as proposed — split confirmed; documented in both contracts |
+| 9 | `project`/`repository` resolution (no config key exists) | EOS-407 | Ratified as proposed — `repositoryPath` + basename; no speculative `AjConfig` key |
+| 10 | Exit code on a `failed` run | EOS-408 | Ratified as proposed — `exitCode = 1` on `failed`; `partial` stays 0 |
+
+**Reviewer-required before freeze — the Orchestrator Invariant (EOS-406).** The reviewer
+required an explicit, frozen **[Orchestrator Invariant](tasks/EOS-406.md#orchestrator-invariant)**
+as a condition of the Planning Freeze. Recorded in EOS-406 v1.1: the orchestrator **owns
+sequencing only** — it **may** invoke stages, propagate results unmodified, and coordinate
+execution; it **must not** perform transformations, duplicate stage logic, introduce business
+rules, or bypass the existing adapters. If a rule wants to live in the orchestrator, a stage
+is missing. It joins the module's other frozen invariants (Extractor — EOS-202; Candidate
+Generation — EOS-301; Persistence — EOS-302), is enforced by shape where possible, and is an
+explicit acceptance criterion verified at code review.
+
+**The reviewer also explicitly ratified** that `ReviewPackage.summary` must remain derivable
+from canonical persisted data (never transient extraction output) and that the **projector
+must remain a pure projection** — the property EOS-D8 exists to protect.
+
+_Possible task-merge candidates, noted for the reviewer: EOS-401+402 (both serve "produce an
+identified Session"; kept apart because the frozen-contract change deserves isolated review
+and the two have different test strategies — fixture repo vs. stub port), and EOS-403+404
+(render + persist; kept apart on single-responsibility grounds and because EOS-404 touches a
+frozen surface)._
 
 ## Dependencies
 
@@ -417,6 +490,9 @@ beyond the graceful `AnalyzerError` fallback).
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-16 | 1.18 | **EOS-401 (Git state seam) complete** — the first M5 task, implemented and reviewed under the AJS-007 cycle. `GitPort` gained read-only `head`/`dirty`/`branch` (EOS-D7), implemented in `createGitPort`; `changes(range)`, the analyzer, and collection untouched (M2 suites green unmodified — the proof the extension is additive). **A `Session` is now constructible for the first time.** New suite (14 tests, real git over disposable fixture repos) incl. an explicit read-only proof; no public-surface growth; full suite **548 / 50** green. High-effort review found **2 real defects, both fixed**: the extension had silently broken two M2 `GitPort` stubs into type errors that no check could see (`tsconfig` scopes typechecking to `src`), fixed by giving the stubs throwing state reads — which converts EOS-D7's accepted interface-segregation cost into an enforced guarantee; and `branch()` returned the literal `"HEAD"` when detached, a non-empty value that would satisfy `Session.branch`'s `.min(1)` and record a non-existent branch, fixed via `git branch --show-current` and a **`Promise<string \| null>`** signature. **Deviation recorded for ratification** (EOS-D7 v1.1): the decision documented `branch(): Promise<string>`; substance unchanged, but **EOS-402 must now decide what a detached session's required non-empty `branch` records**. |
+| 2026-07-16 | 1.17 | **M5 Planning Freeze ratified by the reviewer (AJ).** M5 Planning Review passed; the EOS-401..409 breakdown is approved. Reviewer ratified three architectural decisions, all now recorded: **[EOS-D7](decisions/EOS-D7-git-port-extension.md)** — extend the existing `GitPort` rather than introduce a second git abstraction (closing the "no `Session` is constructible" gap; `changes(range)` and every M2 guarantee untouched); **[EOS-D8](decisions/EOS-D8-review-store-save-review-package.md)** — extend the Review Store with a domain-level `saveReviewPackage`, so the store owns every file in the session directory (extends EOS-D6 rather than revising it; keeps the projector pure and every write path-guarded); **[EOS-D9](decisions/EOS-D9-trigger-exposed-from-composition-root.md)** — the composition root exposes the `TriggerSource` (`{ workflow, store, trigger }`), keeping session construction and git access out of the CLI while `run(context)` stays frozen. The reviewer also explicitly ratified that **`ReviewPackage.summary` must remain derivable from canonical persisted data** (never transient `KnowledgeExtraction` output) and that the **projector must remain a pure projection**. Per the reviewer's requirement before freeze, an explicit **Orchestrator Invariant** was recorded in EOS-406: the orchestrator **owns sequencing only** — it may invoke stages, propagate results unmodified, and coordinate execution; it must **not** perform transformations, duplicate stage logic, introduce business rules, or bypass the existing adapters (if a rule wants to live there, a stage is missing). It joins the Extractor, Candidate Generation, and Persistence Invariants, and is an acceptance criterion verified at code review. The seven remaining tabled decisions are ratified as proposed. PIPELINE-ARCHITECTURE updated for the EOS-D9 return shape. The M5 breakdown is frozen; **EOS-401 may begin under the AJS-007 implementation cycle.** |
+| 2026-07-16 | 1.16 | **M5 (Review Package Projection, Orchestration & CLI) task breakdown authored** — decomposed into **EOS-401..409**: EOS-401 (git state seam — `GitPort` gains read-only `head`/`dirty`/`branch`), EOS-402 (Session Factory — opaque id, `gitState`, range construction), EOS-403 (Review Package Projector — pure, deterministic, canonical-derived), EOS-404 (Review Store `saveReviewPackage`), EOS-405 (Session Report Builder — outcome policy + `logEntry`), EOS-406 (Workflow Orchestrator — the frozen `run(context)` entry point), EOS-407 (Composition Root, mirroring `createKnowledgePipeline`), EOS-408 (`aj session end`), EOS-409 (Integration & Acceptance — the v1 vertical-slice proof incl. the canonical-unchanged byte-identical snapshot). Nine low-coupling, independently reviewable tasks **composing** the frozen M1–M4 stages; M5 objective/deliverables unchanged (within the frozen plan). **Planning surfaced two frozen-plan gaps requiring AJS-007 §7.2 ratification**: (1) **no `Session` is constructible today** — M2's `GitPort` exposes only `changes(range)`, though `Session.gitState.head`/`dirty` and `branch` are required and EOS-002 recorded that access as M2's (→ EOS-401, possible **EOS-D7**); (2) the **`ReviewPackage` has nowhere to be written** — EOS-302 anticipated `review-package.md` but EOS-D6 froze the store at four operations, and "the projector writes it" contradicts EOS-D6's store-owns-the-layout holding and bypasses the path guards (→ EOS-404, possible **EOS-D8**). A third decision — who invokes the `TriggerSource`, and whether the composition root's frozen `{ workflow, store }` return extends to include it (→ EOS-407, possible **EOS-D9**) — plus seven smaller decisions are tabled for the review. **Pending M5 Planning Review + Planning Freeze** before EOS-401 implementation. |
 | 2026-07-16 | 1.15 | **Milestone 4 (Candidate Generation & Review Store) Freeze declared by the reviewer (AJ).** Freeze Review passed: candidate generation deterministic and provenance-complete, preserving the one-to-one mapping invariant (each finding → exactly one candidate; no merge/split/reorder/invent/remove); `CandidateKnowledge` remains the canonical SPEC-003 → SPEC-004 boundary; the Review Store persists artifacts (one JSON file per candidate + `SessionReport` + `log.md`) without introducing workflow logic and writes only beneath the approved `knowledge-review/pending/<session-id>/` location; configuration extended consistently with the `generatedWikiPath` pattern; no architectural drift — M4 Definition of Done fully satisfied. M4 is frozen; changes now follow the AJS-007 Frozen Plan Change Proposal process. Next: **M5 (Review Package Projection, Orchestration & CLI)**, beginning with M5 planning (EOS-4xx decomposition → Planning Review → Planning Freeze). |
 | 2026-07-16 | 1.14 | **M4 implementation complete — EOS-301..303 all done**, each independently code-reviewed and committed. EOS-301 (Candidate Generator: deterministic `KnowledgeExtraction` → canonical `CandidateKnowledge[]`, one-to-one order-preserving mapping via `parseCandidateKnowledge`, authoritative kind, `session:<id>:<n>` identity, complete provenance behind an injected clock, frozen output). EOS-302 (Review Store: `ReviewStore` + `createFilesystemReviewStore`, persistence-only + path-guarded + non-canonical-destination guard, per-session layout `candidates/<id>.json` + `report.json` + `log.md`, no git, no interpretation). EOS-303 (`AjConfig.handbook.reviewPath` default `knowledge-review`, mirroring `generatedWikiPath`). Public surface grew by 4 operations (`createCandidateGenerator`, `createFilesystemReviewStore`, `ReviewStoreError`; config unchanged surface). End-of-Session suite **17 files / 190 tests**; full platform suite **533 / 49**, all green. M4 Integration Check satisfied — both new stages deterministic, immutable contracts, no git/wiki side effect, `run` entry point unchanged. **Pending the M4 Freeze Review.** |
 | 2026-07-16 | 1.13 | **M4 Planning Freeze ratified by the reviewer (AJ).** M4 Planning Review passed; the EOS-301/302/303 breakdown and its decisions are approved. Reviewer ratified: the **domain-aware Review Store API** (recorded as **EOS-D6** — the long-term SPEC-003→004 filesystem boundary), **one canonical JSON file per candidate**, **kind classification as a validated pass-through** (v1), **`related` initialized empty** (v1), and the **non-canonical destination guard at store construction**. Per the reviewer's requirement, the **Candidate Generation Invariant** was strengthened before freeze to state the property explicitly — candidate generation is a **deterministic one-to-one structural mapping**: each finding produces exactly one candidate; no merge/split/reorder/invent/remove (`candidates.length === findings.length`, order-preserving). The M4 breakdown is frozen; EOS-301 may begin under the AJS-007 implementation cycle. |
