@@ -13,6 +13,13 @@ const CONFIG_FILE_NAME = "aj.config.json";
 const DEFAULT_GENERATED_WIKI_PATH = "wiki-generated";
 
 /**
+ * Where candidate knowledge awaits review when the file does not say. Relative to
+ * `handbook.path`; a non-canonical area the End-of-Session Workflow writes to and the
+ * Knowledge Review Workflow reads from (EOS-D2).
+ */
+const DEFAULT_REVIEW_PATH = "knowledge-review";
+
+/**
  * A configuration problem with a message safe to show the user.
  *
  * The product catches this to print a friendly explanation, while letting
@@ -95,7 +102,11 @@ export class ConfigService {
       );
     }
 
-    return { path, generatedWikiPath: this.resolveGeneratedWikiPath(parsed) };
+    return {
+      path,
+      generatedWikiPath: this.resolveGeneratedWikiPath(parsed),
+      reviewPath: this.resolveReviewPath(parsed),
+    };
   }
 
   /**
@@ -111,6 +122,26 @@ export class ConfigService {
     if (typeof value !== "string" || value.trim() === "") {
       throw new ConfigError(
         `${CONFIG_FILE_NAME} "handbook.generatedWikiPath" must be a non-empty string when set.`,
+      );
+    }
+    return value;
+  }
+
+  /**
+   * Read the optional `handbook.reviewPath` (EOS-D2). Absent falls back to the
+   * default; present-but-not-a-non-empty-string is a configuration error (a
+   * silent default would hide a typo). Mirrors {@link resolveGeneratedWikiPath};
+   * resolving it to an absolute directory is the composition root's concern, not
+   * this loader's.
+   */
+  private resolveReviewPath(parsed: Record<string, unknown>): string {
+    const value = (parsed.handbook as Record<string, unknown>).reviewPath;
+    if (value === undefined) {
+      return DEFAULT_REVIEW_PATH;
+    }
+    if (typeof value !== "string" || value.trim() === "") {
+      throw new ConfigError(
+        `${CONFIG_FILE_NAME} "handbook.reviewPath" must be a non-empty string when set.`,
       );
     }
     return value;

@@ -16,5 +16,15 @@ export interface AjConfig {
      * `"wiki-generated"`) so consumers never re-default it.
      */
     readonly generatedWikiPath: string;
+    /**
+     * The knowledge-review area, relative to {@link path}. The End-of-Session
+     * Workflow writes candidate knowledge here (under `pending/<session-id>/`)
+     * and the Knowledge Review Workflow reads from here — a non-canonical area,
+     * never `foundation/`/`library/`/`wiki/` (EOS-D2). Optional in the file;
+     * always resolved here (defaulting to `"knowledge-review"`) so consumers
+     * never re-default it. Turning it into an absolute location is the
+     * composition root's job, not this contract's.
+     */
+    readonly reviewPath: string;
   };
 }

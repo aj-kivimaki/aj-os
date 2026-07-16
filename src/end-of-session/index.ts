@@ -121,6 +121,32 @@ export type {
   KnowledgeExtractorConfig,
 } from "./extraction/index.js";
 
+// The Candidate Generation stage (EOS-301) — the deterministic map from the validated
+// `KnowledgeExtraction` to the canonical `CandidateKnowledge[]` (the SPEC-003 → SPEC-004
+// boundary). A one-to-one, order-preserving structural mapping behind an injected clock:
+// it attaches identity, provenance, and authoritative kind, and interprets nothing else
+// (the Candidate Generation Invariant).
+export { createCandidateGenerator } from "./generation/index.js";
+export type {
+  CandidateGenerator,
+  CandidateGeneratorConfig,
+} from "./generation/index.js";
+
+// The Review Store (EOS-302, EOS-D6) — the SPEC-003 → SPEC-004 filesystem boundary. A
+// persistence-only, path-guarded, domain-aware adapter: it writes a session's canonical
+// candidates (one JSON file each) + `SessionReport` + append-only log to the non-canonical
+// review area (`pending/<session-id>/`). It never performs version control and never
+// interprets the artifacts (the Persistence Invariant).
+export {
+  createFilesystemReviewStore,
+  ReviewStoreError,
+} from "./store/index.js";
+export type {
+  ReviewStore,
+  ReviewLocation,
+  FilesystemReviewStoreOptions,
+} from "./store/index.js";
+
 // Extensibility seams (EOS-006): how a session is triggered and how completion is
 // announced. v1 ships the manual trigger and the no-op notifier; future
 // triggers/notifiers plug in behind these ports without changing orchestration.

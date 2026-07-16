@@ -7,7 +7,7 @@ milestones are planned and implemented. It does not replace ADRs or the
 architecture-review decisions in `decisions/`, which explain *why* individual
 choices were made.
 
-**Implementation status.** Milestones **M1–M3 are complete**. M1 (Foundation &
+**Implementation status.** Milestones **M1–M4 are complete**. M1 (Foundation &
 Contracts) established the immutable contracts (`SessionContext`, `Session`,
 `CandidateKnowledge`, `ReviewPackage`, `SessionReport`, `SessionChange`,
 `AnalyzerError`, `ChangeSet`) and the extensibility seams (`Analyzer` port +
@@ -17,9 +17,14 @@ implemented the **Collection** stage — `collectChanges` execution + the
 (Knowledge Extraction) implemented the **Extraction** stage: the
 `KnowledgeExtraction` contract (`parseExtractionResponse`) and the
 `KnowledgeExtractor` behind the injected `TextGenerator` port (the pipeline's one
-non-deterministic seam). The remaining stage *behaviors* (candidate generation,
-persistence, projection, orchestration) are **not yet implemented** — they arrive in
-M4–M5.
+non-deterministic seam). M4 (Candidate Generation & Review Store) implemented the
+**Candidate Generation** stage (`createCandidateGenerator` — the deterministic,
+one-to-one map from `KnowledgeExtraction` to canonical `CandidateKnowledge[]`) and
+the **Persistence** stage (`createFilesystemReviewStore` — the domain-aware,
+persistence-only Review Store writing to `knowledge-review/pending/<session-id>/`;
+EOS-D6), plus the `AjConfig.handbook.reviewPath` config. The remaining stage
+*behaviors* (review-package projection, composition root, CLI) are **not yet
+implemented** — they arrive in M5.
 
 ## Overview
 
