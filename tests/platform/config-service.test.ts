@@ -28,14 +28,18 @@ async function writeConfig(contents: string): Promise<void> {
 }
 
 describe("ConfigService", () => {
-  it("returns a typed config, defaulting generatedWikiPath, when the handbook directory exists", async () => {
+  it("returns a typed config, defaulting generatedWikiPath and reviewPath, when the handbook directory exists", async () => {
     await mkdir(join(root, "handbook"));
     await writeConfig(JSON.stringify({ handbook: { path: "./handbook" } }));
 
     const config = await new ConfigService(root).load();
 
     expect(config).toEqual({
-      handbook: { path: "./handbook", generatedWikiPath: "wiki-generated" },
+      handbook: {
+        path: "./handbook",
+        generatedWikiPath: "wiki-generated",
+        reviewPath: "knowledge-review",
+      },
     });
   });
 
@@ -63,6 +67,45 @@ describe("ConfigService", () => {
     await expect(new ConfigService(root).load()).rejects.toThrow(
       /generatedWikiPath/,
     );
+  });
+
+  it("honors an explicit reviewPath", async () => {
+    await mkdir(join(root, "handbook"));
+    await writeConfig(
+      JSON.stringify({
+        handbook: { path: "./handbook", reviewPath: "review-area" },
+      }),
+    );
+
+    const config = await new ConfigService(root).load();
+
+    expect(config.handbook.reviewPath).toBe("review-area");
+  });
+
+  it("fails when reviewPath is set but not a non-empty string", async () => {
+    await mkdir(join(root, "handbook"));
+    await writeConfig(
+      JSON.stringify({
+        handbook: { path: "./handbook", reviewPath: "  " },
+      }),
+    );
+
+    await expect(new ConfigService(root).load()).rejects.toThrow(/reviewPath/);
+  });
+
+  it("resolves reviewPath and generatedWikiPath independently", async () => {
+    await mkdir(join(root, "handbook"));
+    await writeConfig(
+      JSON.stringify({
+        handbook: { path: "./handbook", generatedWikiPath: "wiki" },
+      }),
+    );
+
+    const config = await new ConfigService(root).load();
+
+    // An explicit generatedWikiPath does not disturb the reviewPath default.
+    expect(config.handbook.generatedWikiPath).toBe("wiki");
+    expect(config.handbook.reviewPath).toBe("knowledge-review");
   });
 
   it("fails when the configuration file is missing", async () => {
