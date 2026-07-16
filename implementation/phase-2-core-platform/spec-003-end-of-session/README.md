@@ -2,7 +2,7 @@
 
 > **Implementation Package:** SPEC-003
 >
-> **Status:** M1–M3 **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — Milestone 4 (Candidate Generation & Review Store) is the next target
+> **Status:** M1–M4 **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — Milestone 5 (Review Package Projection, Orchestration & CLI) is the next target
 >
 > **Phase:** Phase 2 — Core Knowledge Platform
 >
@@ -183,7 +183,7 @@ decisions.
 | M1 | Foundation & Contracts | ✅ |
 | M2 | Session Change Collection | ✅ |
 | M3 | Knowledge Extraction | ✅ |
-| M4 | Candidate Generation & Review Store | ⬜ |
+| M4 | Candidate Generation & Review Store | ✅ |
 | M5 | Review Package Projection, Orchestration & CLI | ⬜ |
 
 See: [MILESTONES.md](MILESTONES.md)
@@ -216,10 +216,10 @@ spec-003-end-of-session/
   Milestone 1 (EOS-001).
 - ✅ M1–M3 implemented, reviewer-frozen, and merged (EOS-001..007, EOS-101..103,
   EOS-201..202).
-- ✅ M4 (Candidate Generation & Review Store) task breakdown **Planning-Frozen**
-  (AJ, 2026-07-16): EOS-301 Candidate Generator, EOS-302 Review Store, EOS-303
-  `reviewPath` config. **EOS-D6 Accepted** (domain-aware Review Store API).
-  Implementation may begin with EOS-301.
+- ✅ M4 (Candidate Generation & Review Store) **COMPLETE and FROZEN** (AJ,
+  2026-07-16): EOS-301 Candidate Generator, EOS-302 Review Store, EOS-303
+  `reviewPath` config — implemented, reviewed, and committed. **EOS-D6 Accepted**
+  (domain-aware Review Store API). Next: **M5** (Projection, Orchestration & CLI).
 
 > **Frozen-plan discipline (AJS-007).** From the freeze onward, changes to the
 > frozen plan — contracts, milestone structure, or scope — follow the AJS-007
