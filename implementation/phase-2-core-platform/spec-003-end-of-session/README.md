@@ -197,8 +197,9 @@ spec-003-end-of-session/
   README.md
   MILESTONES.md
   architecture/PIPELINE-ARCHITECTURE.md
-  decisions/          EOS-D1..EOS-D6 (planning-review decisions)
-  tasks/              EOS-001..007 (M1), EOS-101..103 (M2), EOS-201..202 (M3), EOS-301..303 (M4)
+  decisions/          EOS-D1..EOS-D9 (planning-review decisions)
+  tasks/              EOS-001..007 (M1), EOS-101..103 (M2), EOS-201..202 (M3), EOS-301..303 (M4),
+                      EOS-401..409 (M5, planning-frozen)
   retrospectives/     (added at each Milestone Freeze)
 ```
 
@@ -219,7 +220,17 @@ spec-003-end-of-session/
 - ✅ M4 (Candidate Generation & Review Store) **COMPLETE and FROZEN** (AJ,
   2026-07-16): EOS-301 Candidate Generator, EOS-302 Review Store, EOS-303
   `reviewPath` config — implemented, reviewed, and committed. **EOS-D6 Accepted**
-  (domain-aware Review Store API). Next: **M5** (Projection, Orchestration & CLI).
+  (domain-aware Review Store API).
+- ⬜ M5 (Projection, Orchestration & CLI) — **task breakdown EOS-401..409
+  PLANNING-FROZEN by the reviewer (AJ) on 2026-07-16.** Three decisions accepted:
+  **EOS-D7** (extend the existing `GitPort` — closing the gap that left no
+  `Session` constructible), **EOS-D8** (the Review Store gains
+  `saveReviewPackage`, so it owns every file in the session directory), and
+  **EOS-D9** (the composition root exposes the `TriggerSource`; session
+  construction and git stay out of the CLI). An explicit **Orchestrator
+  Invariant** was recorded in EOS-406 at the reviewer's requirement. Implementation
+  may begin with **EOS-401**. See
+  [MILESTONES.md](MILESTONES.md#milestone-m5--review-package-projection-orchestration--cli).
 
 > **Frozen-plan discipline (AJS-007).** From the freeze onward, changes to the
 > frozen plan — contracts, milestone structure, or scope — follow the AJS-007
@@ -261,8 +272,16 @@ Resolved during planning review (recorded in `decisions/`):
 
 Remaining (to resolve within the milestone that needs them):
 
-- **Session change range** — working-tree vs. staged vs. commit range; default
-  proposal in EOS-002/M2: uncommitted + staged, `--since <ref>` for a range.
+- **Session change range** — working-tree vs. staged vs. commit range. Proposed
+  resolution in **EOS-402** (M5): `range = "HEAD"` by default (which makes
+  `git diff … HEAD` report uncommitted + staged, the EOS-002/M2 proposal) and
+  `range = "<ref>..HEAD"` with `--since <ref>`. Range construction sits in the
+  Session factory, where EOS-102 deferred it. _Pending the M5 Planning Review._
+- **`Session.startedAt` when session start is unobservable** — new at M5
+  planning. A manual trigger observes only that the session *ended*. Proposed in
+  **EOS-402**: `startedAt = endedAt =` the trigger instant for v1, documented
+  explicitly; deriving it from the range's base commit is recorded as a future
+  enhancement. _Pending the M5 Planning Review._
 - **Candidate id scheme** — ✅ Resolved: `session:<id>:<n>` (documented in the EOS-003
   contract; generation in EOS-301).
 - **Review-store layout** — ✅ Resolved (M4 Planning Freeze): one directory per session,

@@ -1,6 +1,11 @@
 # EOS-D6 — Review Store Exposes a Domain-Aware API
 
-> **Status:** Accepted
+> **Status:** Accepted · **Extended by
+> [EOS-D8](EOS-D8-review-store-save-review-package.md)** (2026-07-16) — the store gained a
+> fifth operation, `saveReviewPackage`, so it owns *every* file in the session directory. The
+> four operations decided here are unchanged; this decision's holding (the store owns the
+> layout and serialization) is what EOS-D8 applies. **The current store surface is the five
+> operations listed in EOS-D8.**
 >
 > **Specification:** SPEC-003
 >
@@ -207,4 +212,5 @@ Implementation Tasks
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-16 | 1.1 | **Extended by [EOS-D8](EOS-D8-review-store-save-review-package.md)** (M5 Planning Review, reviewer: AJ). This decision was taken while the `ReviewPackage`'s write mechanism was still ambiguous, so the four-operation surface it fixed proved **incomplete** rather than wrong: nothing could write `review-package.md`, and the mechanism EOS-302 hinted at ("the projector writes it") contradicted this decision's own holding. EOS-D8 adds `saveReviewPackage` — applying, not revising, the principle recorded here that the store owns the per-session layout and serialization. The four operations decided here are untouched; the decision's status remains **Accepted**. |
 | 2026-07-16 | 1.0 | Decision created and **Accepted** at the M4 Planning Review (reviewer: AJ). The Review Store exposes a domain-aware API (`saveCandidates`/`saveReport`/`appendLog`/`locate`) and owns the per-session JSON layout, diverging intentionally from the semantics-free `WikiStore`; persistence-only and path-guarded guarantees preserved. Establishes the long-term SPEC-003 → SPEC-004 filesystem boundary shape. |

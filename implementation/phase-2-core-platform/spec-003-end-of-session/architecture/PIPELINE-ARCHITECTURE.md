@@ -23,8 +23,17 @@ one-to-one map from `KnowledgeExtraction` to canonical `CandidateKnowledge[]`) a
 the **Persistence** stage (`createFilesystemReviewStore` — the domain-aware,
 persistence-only Review Store writing to `knowledge-review/pending/<session-id>/`;
 EOS-D6), plus the `AjConfig.handbook.reviewPath` config. The remaining stage
-*behaviors* (review-package projection, composition root, CLI) are **not yet
-implemented** — they arrive in M5.
+*behaviors* (session creation, review-package projection, report assembly,
+orchestration, CLI) are **not yet implemented** — they arrive in M5, whose plan is
+**frozen** (EOS-401..409; reviewer: AJ, 2026-07-16).
+
+M5 planning surfaced two gaps between this document's target design and the
+delivered code, both resolved by ratified decisions: the **Session** stage could not
+be built at all, because M2's `GitPort` reads only `changes(range)` while `Session`
+requires an observed `head`/`dirty`/`branch` (**EOS-D7** extends the seam); and the
+**Projection** stage had nowhere to write its output, because EOS-D6 froze the store
+before the package's mechanism was settled (**EOS-D8** gives the store
+`saveReviewPackage`). **EOS-D9** fixes how a `SessionContext` reaches `run`.
 
 ## Overview
 
@@ -91,6 +100,13 @@ and metadata (`startedAt`, `endedAt`, `trigger`, `gitState`, `branch`). Identity
 is independent of the trigger source (EOS-D3), so provenance stays stable as new
 triggers appear.
 
+`gitState` (`head`, `dirty`) and `branch` are **observed** through the read-only
+git seam (EOS-D7), never asserted by the caller — provenance must record facts, not
+claims. `gitState.range` is **constructed** here: `HEAD` by default (uncommitted +
+staged) or `<ref>..HEAD` with `--since <ref>`. A failure to read the session's git
+state is **fatal** (SPEC-003 §15): a session whose head or branch is unknown cannot
+be identified.
+
 ## Collection (Analyzers)
 
 Determines *what changed* in the session. The `Analyzer` registry runs every
@@ -124,12 +140,16 @@ complete, immutable, governance state `candidate` (AJS-006).
 
 ## Persistence (Review Store)
 
-Writes the canonical candidates and the `SessionReport` to
-`<vault>/knowledge-review/pending/<session-id>/`.
+Writes the canonical candidates, the `SessionReport`, and the rendered
+`ReviewPackage` to `<vault>/knowledge-review/pending/<session-id>/`.
 
 - Persistence-only; **never calls git** (ADR-002 §4, AJS-005 §7).
 - Destination validated non-canonical (`∉ foundation/, library/, wiki/`) and
   path-escape guarded.
+- **Domain-aware** (EOS-D6): `saveCandidates` / `saveReport` /
+  **`saveReviewPackage`** (EOS-D8) / `appendLog` / `locate`. The store **owns every
+  file in the session directory** — callers name a session and hand over contracts;
+  they never compose paths or serialize, and no write bypasses the guards.
 - Exposes `appendLog` for the execution log (WikiStore precedent).
 
 ## Projection (Review Package)
@@ -165,9 +185,18 @@ EndOfSessionWorkflow
 
 Everything is assembled in one place — the composition root
 `createEndOfSessionWorkflow(config, deps)` (modeled on
-`createKnowledgePipeline`). It returns `{ workflow, store }`. The workflow's
-single public entry point is `run(context)` returning a `SessionReport`. Stages
-are internal; only `run` is public.
+`createKnowledgePipeline`). It returns `{ workflow, store, trigger }` (EOS-D9).
+The workflow's single public entry point is `run(context)` returning a
+`SessionReport`. Stages are internal; only `run` is public.
+
+**The workflow owns the trigger's *kind*, but never invokes a trigger** (EOS-D9).
+Producing the `SessionContext` is upstream of the run: the composition root builds
+the `TriggerSource` and exposes it, so an entry point calls
+`trigger.createContext()` and then `workflow.run(context)` — and therefore needs
+no git and no knowledge of how a session is identified. `trigger.trigger` is
+stamped onto the `Session` (EOS-D3). Future triggers (git-hook, scheduled, IDE,
+n8n) are built at the composition root; the CLI, `run`, and every downstream stage
+are unchanged.
 
 ## Public Entry Point
 
@@ -177,6 +206,12 @@ run(context: SessionContext) : Promise<SessionReport>
 
 `run` always executes the highest-level implemented pipeline. Adding a later
 stage or analyzer does not change the entry point — callers always invoke `run`.
+
+The orchestrator behind `run` **owns sequencing only** (the frozen Orchestrator
+Invariant, EOS-406): it may invoke stages, propagate their results unmodified, and
+coordinate execution; it must not transform contracts in flight, duplicate stage
+logic, introduce business rules, or bypass the adapters. If a rule wants to live in
+the orchestrator, a stage is missing.
 
 ---
 
