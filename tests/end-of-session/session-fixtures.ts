@@ -82,11 +82,9 @@ export async function fixtureVault(): Promise<string> {
  * A disposable repo whose session touched source, test, doc, and config files — so the
  * analyzer's change-kind classification and `filesAnalyzed` are exercised for real.
  *
- * Everything is **staged**. That is deliberate: `git diff HEAD` does not report untracked
- * files, so whether a never-added file reaches the change stream is exactly the question
- * [EOS-D11](../../implementation/phase-2-core-platform/spec-003-end-of-session/decisions/EOS-D11-untracked-files-in-collection.md)
- * is deciding. This suite therefore asserts nothing about untracked files and will not need
- * changing whichever way that FPCP goes.
+ * The session ends with **one file never `git add`ed** and one **`.gitignore`d** — the shape
+ * of a real session, and the case EOS-D11 (approved) restored: an untracked file is
+ * uncommitted work, so it belongs to the default range, while an ignored file never does.
  */
 export async function fixtureRepo(): Promise<string> {
   const dir = await tempDir("aj-repo-");
@@ -117,10 +115,22 @@ export async function fixtureRepo(): Promise<string> {
   await mkdir(join(dir, "tests"), { recursive: true });
   await writeFile(join(dir, "tests", "src.test.ts"), "// a test\n"); // added · test
   await writeFile(join(dir, "tsconfig.json"), "{}\n"); // added · config
+  await writeFile(join(dir, ".gitignore"), "*.log\n");
   git(dir, "add", "-A");
+
+  // And the work the engineer has not staged at all — the EOS-D11 case. `build.log` is
+  // ignored and must never reach the session; `src/untracked.ts` is real new work and must.
+  await writeFile(join(dir, "src", "untracked.ts"), "export const fresh = 1;\n");
+  await writeFile(join(dir, "build.log"), "noise\n");
 
   return dir;
 }
+
+/** The untracked file the fixture session leaves behind — real new work, never `git add`ed. */
+export const UNTRACKED_PATH = "src/untracked.ts";
+
+/** The ignored file the fixture session leaves behind — noise that must never be captured. */
+export const IGNORED_PATH = "build.log";
 
 export function fixtureConfig(handbookPath: string): AjConfig {
   return {
@@ -143,9 +153,13 @@ export function fixtureConfig(handbookPath: string): AjConfig {
  * Yields two findings of different kinds — a `handbook-entry` and a `wiki-publication` — so
  * the §19 criteria about both can be asserted from one run.
  */
-export function stubGenerator(): TextGenerator {
+export function stubGenerator(seenPrompts?: string[]): TextGenerator {
   return {
     async complete(prompt) {
+      // Optionally record what the model was actually shown. That is the only honest way to
+      // prove a change reached extraction: asserting on a *finding* would only prove the
+      // stub chose to cite it.
+      seenPrompts?.push(prompt.user);
       const sessionId = /Session id: (\S+)/.exec(prompt.user)?.[1] ?? "unknown";
       const extraction = {
         sessionId,

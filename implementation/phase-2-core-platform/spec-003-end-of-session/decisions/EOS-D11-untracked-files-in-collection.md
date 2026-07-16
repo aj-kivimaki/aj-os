@@ -1,7 +1,11 @@
 # EOS-D11 — Untracked Files Belong to the Session's Change Stream
 
-> **Status:** **PROPOSED** — a **Frozen Plan Change Proposal** (AJS-007 §7.2) awaiting review.
-> **Not implemented.** No work depending on this change may begin until it is approved.
+> **Status:** **Accepted** — **APPROVED by the reviewer (AJ) on 2026-07-17** as a Frozen Plan
+> Change Proposal (AJS-007 §7.2): *"this qualifies as a narrowly scoped Frozen Plan Change
+> Proposal because it restores consistency with the already-approved semantics of the default
+> working range rather than introducing new functionality."* Implemented by
+> **[EOS-411](../tasks/EOS-411.md)**, adapter-only, with the analyzer and every contract
+> untouched.
 >
 > **Specification:** SPEC-003
 >
@@ -272,14 +276,14 @@ and every other milestone.
 
 A **Frozen Plan Change Proposal** (AJS-007 §7.2) against the M2-frozen `createGitPort`.
 
-- [ ] **Approved** — adapter change authorized; **EOS-411** added to M5 before EOS-409
-      finalizes acceptance; this decision becomes **Accepted**.
-- [ ] **Rejected** — then the limitation is **documented** in EOS-409's acceptance suite and
-      the SPEC-003 README: `aj session end` does not capture files that have never been
-      `git add`ed.
+- [x] **Approved (reviewer: AJ, 2026-07-17)** — adapter change authorized; **EOS-411**
+      implemented it; EOS-409's acceptance suite was extended with an untracked-file scenario
+      and the full M5 acceptance re-validated (713 tests / 58 files, green). This decision is
+      **Accepted**.
+- [ ] ~~Rejected~~ — would have required documenting the limitation. Not taken.
 
-*Not implemented. EOS-409 proceeds in parallel but will not finalize acceptance around
-untracked-file behaviour until this is settled.*
+**Delivered exactly as proposed**, and verified: one adapter file changed; the analyzer and
+`GitPort` byte-untouched; M2's tests passing unmodified.
 
 ---
 
@@ -309,6 +313,7 @@ Implementation Tasks
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-17 | 1.1 | **APPROVED and Accepted (reviewer: AJ).** The FPCP passed as "narrowly scoped… restores consistency with the already-approved semantics of the default working range rather than introducing new functionality". Implemented by **[EOS-411](../tasks/EOS-411.md)** exactly as proposed — adapter-only, analyzer and contracts untouched, M2's tests unmodified. EOS-409's acceptance suite gained an untracked-file scenario asserting on the prompt the model was actually shown, and the full M5 acceptance was re-validated (**713 / 58**, three consecutive runs). The workflow no longer contradicts its own `dirty` flag. |
 | 2026-07-17 | 1.0 | **Proposed** (not implemented). Second FPCP, raised at the reviewer's request after EOS-408's real run showed `Files analyzed : 1` for a two-file session. The workflow contradicts itself: `Session.gitState.dirty` is `true` (from `git status`, which sees untracked files) while the `ChangeSet` omits them (from `git diff HEAD`, which does not) — so a session that creates a file and ends before `git add` captures nothing about it. Proposes **one change to one adapter method**: `createGitPort.changes` also runs `git ls-files --others --exclude-standard` for **working-tree ranges** (distinguished from commit ranges by git's own `..` vocabulary — invocation strategy, which EOS-102 assigns to the adapter), mapping each untracked path to an ordinary `{ path, status: "A" }`. **`GitPort`, the analyzer, and every contract are untouched**; the analyzer stays a pure translator and cannot tell an untracked file from a staged one. Verified: `ls-files` lists files not directories, respects `.gitignore`, is disjoint from the diff (no dedupe needed), and is sorted. Alternatives rejected: `git status --porcelain` (rewrites the parser, cannot express a commit range), a new `untracked()` port read (adds a port *and* makes the analyzer hold policy), including untracked for every range (incoherent for `--since`), and do-nothing (then the limitation must be documented). **Awaiting review.** |
 
 ---

@@ -173,8 +173,9 @@ describe("EOS-409 — the stages' guarantees survive composition", () => {
   it("analyzes the session's real changes", async () => {
     const { report } = await run();
 
-    // The fixture staged one modification, one deletion, and three additions.
-    expect(report.filesAnalyzed).toBe(5);
+    // The fixture's session: one modification, one deletion, four staged additions, and
+    // one file never `git add`ed (EOS-D11). `build.log` is ignored and must not appear.
+    expect(report.filesAnalyzed).toBe(7);
     expect(report.analyzersRun).toEqual(["git"]);
   });
 
@@ -283,7 +284,7 @@ describe("EOS-409 — partial collection, end to end", () => {
       },
     ]);
     expect(report.candidatesProduced.count).toBe(2);
-    expect(report.filesAnalyzed).toBe(5);
+    expect(report.filesAnalyzed).toBe(7);
   });
 
   it("runs collection directly against the fixture with the same result", async () => {
@@ -311,12 +312,16 @@ describe("EOS-409 — partial collection, end to end", () => {
 
     // Path-sorted and classified by kind — the stage's guarantees, against real git.
     expect(changeSet.changes.map((change) => change.path)).toEqual([
+      ".gitignore",
       "docs/guide.md",
       "gone.ts",
       "src.ts",
+      "src/untracked.ts", // never staged — reaches the stream via EOS-D11
       "tests/src.test.ts",
       "tsconfig.json",
     ]);
+    // Ignored files never enter the session's knowledge.
+    expect(changeSet.changes.map((change) => change.path)).not.toContain("build.log");
     expect(changeSet.errors).toEqual([]);
   });
 });

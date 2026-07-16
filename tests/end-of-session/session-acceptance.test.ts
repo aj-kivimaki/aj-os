@@ -32,8 +32,10 @@ import {
   fixtureConfig,
   fixtureRepo,
   fixtureVault,
+  IGNORED_PATH,
   snapshotCanonical,
   stubGenerator,
+  UNTRACKED_PATH,
   type Snapshot,
 } from "./session-fixtures.js";
 
@@ -41,6 +43,8 @@ let handbook: string;
 let canonicalBefore: Snapshot;
 let report: SessionReport;
 let sessionDir: string;
+/** What the model was actually shown — the only honest proof a change reached extraction. */
+let seenPrompts: string[];
 
 /**
  * One real run, shared by every criterion below — the same run the acceptance claims are
@@ -50,10 +54,11 @@ beforeEach(async () => {
   handbook = await fixtureVault();
   const repositoryPath = await fixtureRepo();
   canonicalBefore = await snapshotCanonical(handbook);
+  seenPrompts = [];
 
   const { workflow, store, trigger } = await createEndOfSessionWorkflow(
     fixtureConfig(handbook),
-    { generator: stubGenerator(), now: () => FIXED_INSTANT, repositoryPath },
+    { generator: stubGenerator(seenPrompts), now: () => FIXED_INSTANT, repositoryPath },
   );
 
   report = await workflow.run(await trigger.createContext());
@@ -146,6 +151,30 @@ describe("SPEC-003 §19 — Acceptance Criteria", () => {
     expect(persisted.durationMs).toBeGreaterThanOrEqual(0);
     expect(persisted.filesAnalyzed).toBeGreaterThan(0);
     expect(log).toContain(report.logEntry);
+  });
+});
+
+describe("SPEC-003 §19 — the session's new files are captured (EOS-D11)", () => {
+  it("puts a file the engineer never staged in front of the model", () => {
+    // The gap EOS-408's real run exposed: `dirty` said the tree had new work while the
+    // change stream did not contain it. A new file is the strongest signal a session
+    // produced something — if it never reaches extraction, no candidate can come from it.
+    //
+    // Asserted on the prompt rather than on a finding: a stubbed finding would only prove
+    // the stub chose to cite the path, not that the pipeline ever saw it.
+    expect(seenPrompts).toHaveLength(1);
+    expect(seenPrompts[0]).toContain(UNTRACKED_PATH);
+  });
+
+  it("never shows the model an ignored file", () => {
+    // `--exclude-standard` keeps build output out of the session's knowledge for free.
+    expect(seenPrompts[0]).not.toContain(IGNORED_PATH);
+  });
+
+  it("agrees with the session's own dirty flag", async () => {
+    // The contradiction EOS-D11 closed: a workflow cannot report a dirty tree and then
+    // analyze a session in which that work does not exist.
+    expect(report.filesAnalyzed).toBe(7);
   });
 });
 

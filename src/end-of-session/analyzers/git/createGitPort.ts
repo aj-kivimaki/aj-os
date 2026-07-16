@@ -63,13 +63,50 @@ function parseNameStatus(stdout: string): GitFileChange[] {
 }
 
 /**
+ * Whether `range` compares against the **working tree** rather than two commits.
+ *
+ * Git's own vocabulary decides it: `main..HEAD` diffs commit to commit and carries no
+ * working-tree state, while `HEAD` (or a bare `main`) compares the tree as it stands. This
+ * is a fact about git, not about sessions — which is why the adapter, the component that
+ * speaks git, is the one that knows it.
+ */
+function comparesWorkingTree(range: string): boolean {
+  return !range.includes("..");
+}
+
+/**
+ * Untracked files in the working tree, as {@link GitFileChange}s (EOS-D11).
+ *
+ * `git diff` reports only *tracked* paths, so without this a session that creates a file and
+ * ends before `git add` would capture nothing about it — while `Session.gitState.dirty`
+ * simultaneously reported the tree as dirty. This closes that contradiction and restores
+ * EOS-402's ratified range semantics: the default range is the complete *uncommitted*
+ * working state, and an untracked file is uncommitted.
+ *
+ * `--exclude-standard` applies the repository's ignore rules, so build output, logs, and
+ * `node_modules` never enter the change stream. Each path is reported as an addition (`A`) —
+ * a shape the contract already defines and the analyzer already translates, which is why
+ * nothing above this function changes.
+ *
+ * Untracked paths are **disjoint** from `git diff`'s tracked ones, so the two reads never
+ * duplicate a file and no deduplication is needed.
+ */
+function parseUntracked(stdout: string): GitFileChange[] {
+  return stdout
+    .split("\n")
+    .filter((path) => path.length > 0)
+    .map((path) => ({ path, status: "A" }));
+}
+
+/**
  * Create the real git-backed {@link GitPort} over an injected repository directory.
  *
  * Every operation is a **read-only** invocation in that directory: `git diff` for
- * `changes` (`-M` lets git report renames, which the contract already models),
- * `git rev-parse` for `head`, `git status --porcelain` for `dirty`, and
- * `git branch --show-current` for `branch`. None of them stage, commit, or mutate
- * the repository (ADR-002).
+ * `changes` (`-M` lets git report renames, which the contract already models) plus
+ * `git ls-files --others --exclude-standard` for the untracked files a working-tree
+ * range covers (EOS-D11), `git rev-parse` for `head`, `git status --porcelain` for
+ * `dirty`, and `git branch --show-current` for `branch`. None of them stage, commit,
+ * or mutate the repository (ADR-002).
  *
  * A non-zero git exit rejects — the adapter surfaces the failure rather than
  * swallowing or retrying it, and each caller decides what it means: a `changes`
@@ -99,7 +136,24 @@ export function createGitPort(repositoryPath: string): GitPort {
 
   return Object.freeze({
     async changes(range: string): Promise<readonly GitFileChange[]> {
-      return parseNameStatus(await git("diff", "--name-status", "-M", range));
+      const tracked = parseNameStatus(
+        await git("diff", "--name-status", "-M", range),
+      );
+
+      // A commit range carries no working-tree state, so untracked files belong only to a
+      // working-tree comparison — including them for `main..HEAD` would report brand-new
+      // files beside none of the unstaged edits that sit with them (EOS-D11).
+      if (!comparesWorkingTree(range)) {
+        return tracked;
+      }
+
+      const untracked = parseUntracked(
+        await git("ls-files", "--others", "--exclude-standard"),
+      );
+
+      // Concatenated, not merged: the two reads are disjoint, and the analyzer sorts by
+      // path — so ordering stays deterministic without this adapter arranging anything.
+      return [...tracked, ...untracked];
     },
 
     async head(): Promise<string> {

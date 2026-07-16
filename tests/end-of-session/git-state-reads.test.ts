@@ -13,7 +13,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -206,5 +206,113 @@ describe("EOS-401 — the seam stays read-only (ADR-002)", () => {
       "head",
     ]);
     expect(Object.isFrozen(port)).toBe(true);
+  });
+});
+
+/**
+ * EOS-411 / EOS-D11 — untracked files reach the change stream.
+ *
+ * The adapter's second read. These live beside the other real-git tests because the
+ * behaviour is only meaningful against a real repository: no stub can tell you what
+ * `git ls-files --others --exclude-standard` actually returns.
+ */
+describe("EOS-411 — untracked files (EOS-D11)", () => {
+  /** A repo whose session modified a tracked file, staged a new one, and created two more. */
+  function buildMixedRepo(): string {
+    const dir = buildFixtureRepo();
+    writeFileSync(join(dir, "keep.ts"), "export const keep = 99;\n"); // modified
+    writeFileSync(join(dir, "staged.ts"), "export const staged = 1;\n");
+    git(dir, "add", "staged.ts"); // staged-new
+    writeFileSync(join(dir, "untracked.md"), "# notes\n"); // untracked
+    mkdirSync(join(dir, "newdir"), { recursive: true });
+    writeFileSync(join(dir, "newdir", "nested.ts"), "export const n = 1;\n"); // untracked, nested
+    return dir;
+  }
+
+  it("reports untracked files as additions for a working-tree range", async () => {
+    const dir = buildMixedRepo();
+    const changes = await createGitPort(dir).changes("HEAD");
+
+    // The gap EOS-D11 closed: before this, a brand-new file was invisible while
+    // `dirty` reported the tree as changed.
+    const untracked = changes.filter((change) => change.path === "untracked.md");
+    expect(untracked).toEqual([{ path: "untracked.md", status: "A" }]);
+    expect(changes.map((change) => change.path)).toContain("newdir/nested.ts");
+  });
+
+  it("reports tracked and untracked changes together", async () => {
+    const dir = buildMixedRepo();
+    const paths = (await createGitPort(dir).changes("HEAD"))
+      .map((change) => change.path)
+      .sort();
+
+    expect(paths).toEqual([
+      "keep.ts", // modified, tracked
+      "newdir/nested.ts", // untracked
+      "staged.ts", // staged-new, tracked
+      "untracked.md", // untracked
+    ]);
+  });
+
+  it("does not duplicate a staged-new file", async () => {
+    const dir = buildMixedRepo();
+    const changes = await createGitPort(dir).changes("HEAD");
+
+    // `git diff` reports tracked paths and `ls-files --others` untracked ones — disjoint
+    // sets, which is why the adapter needs no deduplication.
+    expect(changes.filter((change) => change.path === "staged.ts")).toHaveLength(1);
+  });
+
+  it("never reports a .gitignore'd file", async () => {
+    const dir = buildMixedRepo();
+    writeFileSync(join(dir, ".gitignore"), "*.log\n");
+    writeFileSync(join(dir, "debug.log"), "noise\n");
+
+    const paths = (await createGitPort(dir).changes("HEAD")).map((c) => c.path);
+
+    // `--exclude-standard` keeps build output, logs, and node_modules out of the session's
+    // knowledge for free.
+    expect(paths).not.toContain("debug.log");
+    expect(paths).toContain(".gitignore"); // itself untracked, and not ignored
+  });
+
+  it("excludes untracked files from a commit range", async () => {
+    const dir = buildMixedRepo();
+    git(dir, "commit", "-q", "-am", "session work");
+    writeFileSync(join(dir, "still-untracked.md"), "# later\n");
+
+    const paths = (await createGitPort(dir).changes("HEAD~1..HEAD")).map((c) => c.path);
+
+    // A commit range carries no working-tree state: reporting new files there but not the
+    // unstaged edits beside them would be incoherent.
+    expect(paths).not.toContain("still-untracked.md");
+    expect(paths).toContain("keep.ts");
+  });
+
+  it("includes untracked files for a bare ref, which also compares the working tree", async () => {
+    const dir = buildMixedRepo();
+
+    // `git diff main` compares the tree against a commit — no `..`, so working-tree state
+    // is in scope.
+    const paths = (await createGitPort(dir).changes("main")).map((c) => c.path);
+
+    expect(paths).toContain("untracked.md");
+  });
+
+  it("is deterministic across reads", async () => {
+    const port = createGitPort(buildMixedRepo());
+
+    expect(await port.changes("HEAD")).toEqual(await port.changes("HEAD"));
+  });
+
+  it("adds no git write", async () => {
+    const dir = buildMixedRepo();
+    const head = git(dir, "rev-parse", "HEAD");
+    const status = git(dir, "status", "--porcelain");
+
+    await createGitPort(dir).changes("HEAD");
+
+    expect(git(dir, "rev-parse", "HEAD")).toBe(head);
+    expect(git(dir, "status", "--porcelain")).toBe(status);
   });
 });
