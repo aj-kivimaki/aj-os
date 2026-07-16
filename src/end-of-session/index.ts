@@ -146,6 +146,16 @@ export type {
   CandidateGeneratorConfig,
 } from "./generation/index.js";
 
+// The Observability stage (EOS-405) — assembles the `SessionReport` (SPEC-003 §16), the
+// workflow's execution log and the value `run` returns. A **pure projection over existing
+// pipeline outputs**: it counts what the stages produced, maps their errors, and states the
+// run's outcome (`completed` / `partial` / `failed`) — performing no observation, consulting
+// no git, touching no filesystem, and duplicating no earlier stage's logic. A plain function,
+// not a factory: it owns no dependency, and the run window is an input rather than a clock
+// read. A failed run still yields a valid report — that is how a failure stays observable.
+export { buildSessionReport } from "./report/index.js";
+export type { SessionRunFacts, FatalStageError } from "./report/index.js";
+
 // The Projection stage (EOS-403, EOS-D4) — renders the human-readable `ReviewPackage`
 // markdown *from* the canonical `CandidateKnowledge[]` + `Session`. A pure, deterministic
 // function of its explicit inputs (`generatedAt` is passed in, never read from a clock):

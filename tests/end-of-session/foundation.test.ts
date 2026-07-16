@@ -26,6 +26,7 @@ import * as contracts from "../../src/end-of-session/contracts/index.js";
  */
 const EXPECTED_OPERATIONS = [
   "buildExtractionPrompt",
+  "buildSessionReport",
   "collectChanges",
   "createAnalyzerRegistry",
   "createCandidateGenerator",
