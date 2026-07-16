@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { askCommand } from "./commands/ask.js";
+import { sessionEndCommand } from "./commands/session.js";
 import { wikiBuildCommand } from "./commands/wiki.js";
 
 /** Options parsed off the `ask` command line. */
@@ -38,6 +39,25 @@ program
   .option("--rebuild", "rebuild from scratch instead of updating incrementally")
   .action(async (options: { rebuild?: boolean }) => {
     await wikiBuildCommand({ rebuild: options.rebuild === true });
+  });
+
+// `aj session end` closes the consumer side of the loop: it captures the finished
+// session's reusable knowledge as candidates for human review. The command is a thin
+// entry point; composition lives in the End-of-Session composition root, and the run
+// writes only to the non-canonical review area — never to canonical knowledge, and
+// never to git.
+program
+  .command("session")
+  .description("Capture knowledge from your coding sessions")
+  .command("end")
+  .description("End the current session and capture candidate knowledge for review")
+  .option("--since <ref>", "measure the session from <ref> instead of the working tree")
+  .option("--notes <text>", "your account of the session — what the diff cannot show")
+  .action(async (options: { since?: string; notes?: string }) => {
+    await sessionEndCommand({
+      ...(options.since !== undefined ? { since: options.since } : {}),
+      ...(options.notes !== undefined ? { notes: options.notes } : {}),
+    });
   });
 
 // Deprecated alias: `aj knowledge ask` is kept working for backward
