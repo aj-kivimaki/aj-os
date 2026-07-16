@@ -360,6 +360,7 @@ trigger only; notification is a no-op. **No git commit, no wiki generation.**
 | EOS-403 | Review Package Projector (canonical candidates + `Session` → `ReviewPackage`; pure, deterministic) | ✅ |
 | EOS-404 | Review Store `saveReviewPackage` (`pending/<id>/review-package.md`) — **extends the M4-frozen EOS-D6 surface** | ⬜ |
 | EOS-405 | Session Report Builder (run facts → `SessionReport`; outcome policy, `logEntry`) | ⬜ |
+| EOS-410 | Session notes → extraction prompt (**[EOS-D10](decisions/EOS-D10-session-notes-into-extraction.md) FPCP, approved**) — **runs before EOS-406** | ⬜ |
 | EOS-406 | Workflow Orchestrator (`createSessionWorkflow` → the frozen `run(context)` entry point) | ⬜ |
 | EOS-407 | Composition Root (`createEndOfSessionWorkflow(config, deps)`, mirroring `createKnowledgePipeline`) | ⬜ |
 | EOS-408 | `aj session end` command (`--since <ref>`, `--notes`), modeled on `wiki build` | ⬜ |
@@ -424,18 +425,22 @@ explicit acceptance criterion verified at code review.
 from canonical persisted data (never transient extraction output) and that the **projector
 must remain a pure projection** — the property EOS-D8 exists to protect.
 
-### Open during M5 implementation
+### Resolved during M5 implementation
 
-- **[EOS-D10](decisions/EOS-D10-session-notes-into-extraction.md) — PROPOSED, awaiting
-  review.** A **Frozen Plan Change Proposal** (AJS-007 §7.2) raised after EOS-402 confirmed
-  that `SessionContext.sessionNotes` reaches no consumer, so **EOS-408's `--notes` would
-  silently discard the engineer's notes** — the one input a diff cannot convey. Proposes one
-  optional `sessionNotes?: string` parameter on `KnowledgeExtractor.extract` /
-  `buildExtractionPrompt` (rendered verbatim; inert when absent), plus one new task —
-  **EOS-410, sequenced before EOS-406**. No new stage, contract, port, or field; Extractor
-  Invariant preserved. **Not implemented; no dependent work may begin until it is approved.**
-  If rejected, `--notes` must be removed from EOS-408 — collecting notes and dropping them is
-  not an acceptable v1 behaviour. EOS-403..405 are unaffected and proceed.
+- **[EOS-D10](decisions/EOS-D10-session-notes-into-extraction.md) — APPROVED (reviewer: AJ,
+  2026-07-16).** A **Frozen Plan Change Proposal** (AJS-007 §7.2) raised after EOS-402
+  confirmed that `SessionContext.sessionNotes` reaches no consumer, so EOS-408's `--notes`
+  would have silently discarded the engineer's notes — the one input a diff cannot convey.
+  Approved on the grounds that it "restores an intended input to knowledge extraction without
+  introducing new architectural concepts or changing existing boundaries". Authorizes one
+  optional `sessionNotes?: string` on `KnowledgeExtractor.extract` / `buildExtractionPrompt`
+  (verbatim; inert when absent), implemented by **[EOS-410](tasks/EOS-410.md)** — **sequenced
+  before EOS-406**. **`--notes` stays** in EOS-408. Two reviewer conditions are acceptance
+  criteria in EOS-410: **byte-identical when absent** (existing M3 tests must pass
+  *unmodified*) and the **Extractor Invariant unchanged** (not reworded, not relaxed — the
+  extractor stays a courier and never reads the notes' content). This is the project's **first
+  FPCP**, and the mechanism worked as designed: the gap was found in implementation, raised
+  rather than absorbed, scoped narrowly, and approved before any dependent work began.
 - **The shared git seam's location — reviewer-ruled: leave unchanged for SPEC-003.** EOS-402
   raised that `GitPort` lives at `src/end-of-session/analyzers/git/` while serving both the
   analyzer and the Session factory, which reads against EOS-D7's "the seam is not any one
@@ -509,6 +514,7 @@ beyond the graceful `AnalyzerError` fallback).
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-16 | 1.22 | **EOS-D10 APPROVED by the reviewer (AJ) — the project's first Frozen Plan Change Proposal, and EOS-403 approved.** The FPCP passed on the grounds that it "restores an intended input to knowledge extraction without introducing new architectural concepts or changing existing boundaries". **[EOS-410](tasks/EOS-410.md) authored and Planning-Frozen**, added to the M5 task table **before EOS-406**: threads one optional `sessionNotes?: string` from `extract` into the prompt, rendered verbatim under a system rule framing notes as context rather than instructions. **`--notes` stays in EOS-408.** Both reviewer conditions are recorded as EOS-410 acceptance criteria: **byte-identical when absent** (existing M3 tests must pass **unmodified** — a test needing an edit means the change is wrong) and the **Extractor Invariant unchanged** (not reworded, not relaxed; `sessionNotes` may appear only in prompt construction, never in parsing or control flow). EOS-410's one sharp edge is recorded: the system rule must be **conditional**, since an unconditional rule would change `system` for every call and break the byte-identical criterion. EOS-403 approved — the regenerability guarantee holds and the `ReviewPackage` derives exclusively from canonical persisted artifacts. Docs synchronized (EOS-202, PIPELINE-ARCHITECTURE, EOS-406/408). **NEXT: EOS-404**, then EOS-405 → EOS-410 → EOS-406 → EOS-408 → EOS-409. |
 | 2026-07-16 | 1.21 | **EOS-403 (Review Package Projector) complete** — `createReviewPackageProjector()` renders the human-readable `ReviewPackage` from canonical candidates + `Session`: a pure, dependency-free stage with `generatedAt` as an input rather than a clock read. **`summary` derives from canonical data only** (the reviewer's explicit ratification): the model's prose summary on the unpersisted `KnowledgeExtraction` is never touched, and a test proves EOS-D4's regenerability by rebuilding a deep-equal package from re-parsed candidates. Every candidate renders in canonical order with its provenance; the empty session is a valid review, not an error. 22 tests asserting **presence, order, and derivation — never prose** (the layout stays free; nothing parses it), plus a by-eye read of the rendered artifact. Public surface +1; drift-guard **22**; suite **590 / 52** green. High-effort review: 6 findings, 4 fixed — `summaryFor` computed twice (field/body could diverge); a newline in a model-authored `title` broke its `###` heading (flattened in the heading only — presentation, not interpretation); a vacuous `toContain("no")` assertion ("no" hides inside "knowledge"); and a no-op spread in a test. 2 accepted with notes (`SHORT_HEAD_LENGTH` duplicated across two stages; factory-vs-function convention now documented — the projector is *injected* as a replaceable stage per EOS-D4, `buildSessionReport` is called directly). **NEXT: EOS-404 (`saveReviewPackage`).** |
 | 2026-07-16 | 1.20 | **EOS-402 approved by the reviewer (AJ)** — the detached-HEAD split is as intended: the port reports reality, the factory applies domain policy, the `Session` stays complete. Two EOS-402 findings ruled on: (1) the **`--notes` gap warrants a focused FPCP** — the reviewer confirmed SPEC-003's intent that session notes are an input to knowledge extraction carrying information git cannot convey, and directed that they must **not** be silently discarded in v1; **[EOS-D10](decisions/EOS-D10-session-notes-into-extraction.md) authored and PROPOSED** (narrow: one optional `sessionNotes?: string` on `extract`/`buildExtractionPrompt`, verbatim, inert when absent; one new task **EOS-410 before EOS-406**; no new stage/contract/port/field; Extractor Invariant preserved) — **awaiting review; not implemented**. (2) The **git seam's location stays unchanged for SPEC-003**, reconsidered after the specification is complete if it still appears to violate the architecture. EOS-403 proceeds — it is independent of both. |
 | 2026-07-16 | 1.19 | **EOS-402 (Session Factory) complete** — `createSessionFactory` mints the opaque id (`randomUUID`), observes `head`/`dirty`/`branch` through the EOS-D7 seam in one `Promise.all`, constructs the range (`HEAD` default / `<ref>..HEAD`), records the trigger instant once (`startedAt === endedAt`), and validates through `parseSession`. **Branch Policy ratified and implemented** (reviewer: AJ): a detached HEAD is **captured, not refused** — `branch` becomes `detached@<short-head>` from the already-observed head, `Session.branch` stays **required and non-empty**, and nullable branch handling **stops at this stage** rather than propagating into candidates, projection, report, or SPEC-004. The reviewer also approved EOS-401's `Promise<string \| null>` port signature (the port reports git's actual state; the factory applies the policy). Public surface +1; drift-guard manifest **21**; suite **568 / 51** green. High-effort review: 5 findings — 2 fixed, 1 accepted with a note, **2 raised**: (a) **`SessionContext`'s request fields reach no consumer** — `sessionNotes`/`taskId`/`contextPackageRef`/`commitMessage` have no reader anywhere (the M3 extractor takes only `ChangeSet`), so **EOS-408's planned `--notes` would silently drop the engineer's notes** — lands on EOS-406/408 and would need an FPCP to reach the model; (b) the shared git seam still lives under `analyzers/`, contradicting EOS-D7's "the seam is not any one consumer's" (a move touches M2-frozen paths — deliberate decision, not a drive-by). **NEXT: EOS-403 (Review Package Projector).** |

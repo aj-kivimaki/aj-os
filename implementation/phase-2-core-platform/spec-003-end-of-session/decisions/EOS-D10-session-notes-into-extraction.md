@@ -1,7 +1,10 @@
 # EOS-D10 — Route Session Notes into Knowledge Extraction
 
-> **Status:** **PROPOSED** — a **Frozen Plan Change Proposal** (AJS-007 §7.2) awaiting review.
-> **Not implemented.** No work depending on this change may begin until it is approved.
+> **Status:** **Accepted** — **APPROVED by the reviewer (AJ) on 2026-07-16** as a Frozen Plan
+> Change Proposal (AJS-007 §7.2): *"The proposal restores an intended input to knowledge
+> extraction without introducing new architectural concepts or changing existing
+> boundaries."* Implemented by **[EOS-410](../tasks/EOS-410.md)**, sequenced **before
+> EOS-406**. `--notes` **stays** in EOS-408.
 >
 > **Specification:** SPEC-003
 >
@@ -274,13 +277,20 @@ This is a **Frozen Plan Change Proposal** (AJS-007 §7.2): *"the single sanction
 change something already frozen … reviewed and approved before any implementation dependent
 upon the change begins."*
 
-- [ ] **Approved** — M3 signature change authorized; EOS-410 added to M5 before EOS-406; this
-      decision becomes **Accepted**.
-- [ ] **Rejected** — then `--notes` must be **removed from EOS-408** (Option E), because
-      collecting notes and discarding them is not an acceptable v1 behaviour.
+- [x] **Approved (reviewer: AJ, 2026-07-16)** — the M3 signature change is authorized;
+      **EOS-410 is added to M5, sequenced before EOS-406**; `--notes` **stays** in EOS-408;
+      this decision is **Accepted**.
+- [ ] ~~Rejected~~ — would have required removing `--notes` from EOS-408 (Option E). Not taken.
 
-*No implementation of this change has begun. EOS-403 proceeds independently — it touches
-neither extraction nor the request.*
+**Reviewer's conditions, carried into EOS-410 as acceptance criteria:**
+
+1. **The byte-identical-when-absent criterion is preserved** — with no notes, the rendered
+   prompt must be byte-for-byte what it is today, and every existing M3 test must pass
+   **unmodified**. This is the proof the change is additive; it is not negotiable down to
+   "roughly the same".
+2. **The Extractor Invariant is unchanged** — not reworded, not relaxed, not reinterpreted.
+   The extractor remains a courier: build the prompt, call the port, parse the response. It
+   never reads the notes' content.
 
 ---
 
@@ -311,6 +321,7 @@ Implementation Tasks
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-16 | 1.1 | **APPROVED and Accepted (reviewer: AJ).** The FPCP passed on the grounds that it "restores an intended input to knowledge extraction without introducing new architectural concepts or changing existing boundaries". Authorized: the M3-frozen signature change; **EOS-410 added to M5 and sequenced before EOS-406**; **`--notes` stays in EOS-408**. Two reviewer conditions carried into EOS-410 as acceptance criteria: the **byte-identical-when-absent** property is preserved (existing M3 tests must pass unmodified — the proof the change is additive), and the **Extractor Invariant is unchanged** (not reworded, not relaxed — the extractor stays a courier and never reads the notes' content). Implementation may begin at EOS-410, after EOS-404/405 and before EOS-406. |
 | 2026-07-16 | 1.0 | **Proposed** (not implemented). Frozen Plan Change Proposal raised at the reviewer's request after EOS-402 confirmed that `SessionContext.sessionNotes` reaches no consumer and EOS-408's `--notes` would silently discard the engineer's notes. Proposes one optional `sessionNotes?: string` parameter on `KnowledgeExtractor.extract` and `buildExtractionPrompt`, rendered verbatim into the prompt under a system rule that frames notes as context rather than instructions; plus one new M5 task (EOS-410) before EOS-406. No new stage, port, contract, or field. Inert when absent (byte-identical prompt; existing M3 tests unmodified), so the change is provably additive. Extractor Invariant preserved — the extractor remains a courier and all interpretation stays behind the model port. Alternatives rejected: whole-`SessionContext` (too broad), notes on `ChangeSet` (wrong contract — analyzer output), notes analyzer (abuses the seam; notes would masquerade as a file), do-nothing (then `--notes` must be dropped). **Awaiting review.** |
 
 ---

@@ -120,13 +120,20 @@ registered analyzer and aggregates results into a `ChangeSet`.
 
 ## Extraction
 
-Identifies *reusable knowledge* in the `ChangeSet` using the injected
-`TextGenerator` port and a Zod-validated schema.
+Identifies *reusable knowledge* in the `ChangeSet` — and, when the engineer
+supplied them, the session's **notes** — using the injected `TextGenerator`
+port and a Zod-validated schema.
 
+- Consumes: the `ChangeSet`, plus optional `sessionNotes` (EOS-D10). Notes carry
+  what a diff cannot — intent, dead ends, why an approach was abandoned — and are
+  rendered into the prompt **verbatim**, as context for interpreting the changes
+  rather than as instructions. The stage is inert when they are absent.
 - Produces: `KnowledgeExtraction` (validated structured findings).
 - The **only** non-deterministic stage; content comes from the model, structure
   is validated and deterministic.
-- Does not: decide candidate identity, compare against the Handbook, or persist.
+- Does not: **read the notes** (it carries them to the model and never inspects
+  them — the Extractor Invariant), decide candidate identity, compare against the
+  Handbook, or persist.
 
 ## Candidate Generation
 
