@@ -277,7 +277,7 @@ is validated to be non-canonical.
 | Task | Description | Status |
 |------|-------------|--------|
 | EOS-301 | Candidate Generator (deterministic `KnowledgeExtraction` → canonical `CandidateKnowledge[]`: authoritative kind, `session:<id>:<n>` identity, complete provenance; injected clock; Candidate Generation Invariant) | ✅ |
-| EOS-302 | Review Store (`ReviewStore` + `createFilesystemReviewStore`: persistence-only, path-guarded, non-canonical destination guard, per-session layout writing candidates JSON + `SessionReport` + `log.md`; no git) | ⬜ |
+| EOS-302 | Review Store (`ReviewStore` + `createFilesystemReviewStore`: persistence-only, path-guarded, non-canonical destination guard, per-session layout writing candidates JSON + `SessionReport` + `log.md`; no git) | ✅ |
 | EOS-303 | Review-path configuration (`AjConfig.handbook.reviewPath`, default `knowledge-review`, mirroring `generatedWikiPath`) | ⬜ |
 
 _Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-16, following the
