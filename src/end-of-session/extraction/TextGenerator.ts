@@ -34,15 +34,32 @@ export interface TextGenerator {
 }
 
 /**
- * The Knowledge Extractor stage: given a session's `ChangeSet`, identify the reusable
- * knowledge in it and return a validated, immutable {@link KnowledgeExtraction}.
+ * The Knowledge Extractor stage: given a session's `ChangeSet` — and, when the engineer
+ * supplied them, the session's notes — identify the reusable knowledge and return a
+ * validated, immutable {@link KnowledgeExtraction}.
  *
  * Its responsibility is **orchestration and structural validation only** — build the
  * prompt, invoke the injected {@link TextGenerator}, parse and validate the response.
  * It does not classify, deduplicate, merge, score, retry, fall back, or otherwise
  * interpret the findings beyond validating the contract (the frozen Extractor
  * Invariant); those responsibilities are downstream (M4 / SPEC-004).
+ *
+ * The Extractor Invariant is **unchanged** by the notes amendment (EOS-D10/EOS-410): the
+ * extractor is a **courier**. It carries `sessionNotes` into the prompt and never reads
+ * them — they are never inspected, parsed, trimmed, branched on, or acted upon. All
+ * interpretation of the notes is the model's, behind the port, which is exactly where
+ * SPEC-003 already puts every interpretive act.
  */
 export interface KnowledgeExtractor {
-  extract(changeSet: ChangeSet): Promise<KnowledgeExtraction>;
+  /**
+   * @param changeSet    The session's collected changes.
+   * @param sessionNotes The engineer's own account of the session (`SessionContext.
+   *                     sessionNotes`), when supplied. Carries what a diff cannot — intent,
+   *                     dead ends, decisions. Omit it and the prompt is byte-for-byte what
+   *                     it was before the amendment.
+   */
+  extract(
+    changeSet: ChangeSet,
+    sessionNotes?: string,
+  ): Promise<KnowledgeExtraction>;
 }
