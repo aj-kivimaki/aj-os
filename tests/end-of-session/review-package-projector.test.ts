@@ -250,6 +250,18 @@ describe("EOS-403 — the empty session", () => {
     expect(() => parseReviewPackage(pkg)).not.toThrow();
   });
 
+  it("terminates the markdown with a newline", () => {
+    // The store writes `markdown` byte-for-byte and must not edit the projection, so a
+    // well-formed text file is this stage's responsibility — otherwise every
+    // `review-package.md` in the vault ends mid-line.
+    expect(projector.project([], SESSION, GENERATED_AT).markdown.endsWith("\n")).toBe(
+      true,
+    );
+    expect(
+      projector.project([candidate(1)], SESSION, GENERATED_AT).markdown.endsWith("\n"),
+    ).toBe(true);
+  });
+
   it("tells the reviewer plainly that nothing needs review", () => {
     const pkg = projector.project([], SESSION, GENERATED_AT);
 

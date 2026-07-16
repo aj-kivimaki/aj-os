@@ -206,7 +206,10 @@ function renderMarkdown(
     );
   }
 
-  return sections.join("\n");
+  // Terminated with a newline: the store persists `markdown` byte-for-byte (it must not
+  // edit the projection), so if this file is to end the way a text file should, the
+  // projector is the stage that has to say so.
+  return `${sections.join("\n")}\n`;
 }
 
 /**
