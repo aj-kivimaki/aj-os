@@ -4,7 +4,7 @@
 >
 > **Related Specification:** _None._ Non-specification quality package; see [README § Why this package has no SPEC](README.md#why-this-package-has-no-spec) and [REX-D0](decisions/REX-D0.md).
 >
-> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on **2026-07-17**. The Review Findings Inventory, this roadmap, the governing scope guard, the sequencing, and the package-level decisions are frozen. **This freeze is package-level and is deliberately separate from each milestone's own Planning → Planning Review → Planning Freeze.** **Milestone 1 Planning FROZEN by the reviewer (AJ) on 2026-07-17** — REX-101..106 ratified; **REX-D1 accepted as recommended** (REX declines to amend frozen architecture; it documents and recommends). M1 implementation in progress.
+> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on **2026-07-17**. **Milestone 1 (Documentation Truth & SPEC-003 Lifecycle Closure) COMPLETE and FROZEN** (reviewer: AJ, 2026-07-17) — REX-101..106 delivered; 20 findings closed; assertion inventory 13/13; **no executable source modified**; SPEC-003's AJS-007 debt discharged. **REX-D0, REX-D1 accepted; REX-D9 accepted (the package's first FPCP).** M1 retrospective complete. **Next: M2 — Automated Quality Gates.** ⚠️ **Reviewer requirement for M2:** *before the M2 Planning Freeze, the planning must be reviewed explicitly for the ownership-boundary defects identified during M1.*
 
 ---
 
@@ -52,7 +52,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 
 | Milestone | Name | Goal | Status |
 | --------- | ---- | ---- | ------ |
-| M1 | Documentation Truth & SPEC-003 Lifecycle Closure | Every document describes the repository that exists today; SPEC-003's two outstanding AJS-007 deliverables discharged | 🔨 **Implementation complete — awaiting the Freeze Review** |
+| M1 | Documentation Truth & SPEC-003 Lifecycle Closure | Every document describes the repository that exists today; SPEC-003's two outstanding AJS-007 deliverables discharged | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | ⬜ |
 | M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ⬜ |
 | M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ⬜ |
@@ -224,9 +224,10 @@ ordering stay explicit: **repository review → recommendation; architecture →
 - [x] REX-101..106 complete.
 - [x] Assertion inventory recorded and re-runnable. **13/13 passing.**
 - [x] No document hard-codes a live test count.
-- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**. _(Evidence below.)_
-- [ ] Retrospective created (§4.7 stage 7). _(Follows the freeze — §4.7 stage 7 comes **after**
-      stage 6. Writing it before would repeat SPEC-003's inversion in the opposite direction.)_
+- [x] Freeze Review completed; **Milestone Freeze declared by the reviewer (AJ) on 2026-07-17.**
+      _(All five reservations in §8 weighed and ruled on; the freeze granted on the milestone's
+      purpose rather than the absence of every remaining repository defect.)_
+- [x] Retrospective created (§4.7 stage 7) — [retrospectives/RETROSPECTIVE-M1.md](retrospectives/RETROSPECTIVE-M1.md).
 
 ---
 
@@ -745,6 +746,7 @@ each out of scope. **Recording them is what stops them leaking in.**
 
 | Date | Version | Description |
 | ---------- | ------- | ---------------------- |
+| 2026-07-17 | 1.3 | ✅ **MILESTONE 1 FREEZE DECLARED by the reviewer (AJ).** The Freeze Review passed: the milestone's objective — *improve repository truth without changing implementation behaviour* — is met on evidence. All five §8 reservations were weighed and ruled: the planning defects are *"an input to future Planning Reviews"*, not a freeze blocker; leaving the known-false checkbox was **the correct outcome** because *"the review derives much of its value from respecting its own governance even when doing so is inconvenient"*; F-022 *"cannot simultaneously be a deferred finding and a freeze blocker without changing the governing decision"* (REX-D1 stands); `SourceConnectorError`'s implementation ownership is outside M1; and the retrospective correctly follows the freeze — *"the failure of SPEC-003 to consistently produce retrospectives is itself evidence supporting that ordering."* **The reviewer's conclusion: the principal engineering contribution of M1 is not the twenty closed findings but the three complementary validation layers** — evidence-based findings, repeatable assertion validation, and end-to-end execution — *"each layer has demonstrated defects that the others could not detect."* **M1 is frozen; changes now follow the AJS-007 FPCP process.** |
 | 2026-07-17 | 1.2 | **M1 implementation complete (REX-101..106) — Freeze Review evidence assembled; awaiting the reviewer.** 20 findings closed; the assertion inventory is **13/13**; **no `.ts` file modified by any M1 commit** (verified able to fail); 713 tests green; 488 links, 0 broken; no frozen artifact touched and no ADR authored. SPEC-003's two outstanding AJS-007 deliverables discharged — the reconstructed Retrospective (REX-101) and the closed hygiene backlog (REX-102). **[REX-D9](decisions/REX-D9.md), the package's first FPCP**, was raised by REX-105 before any edit and accepted, amending M1's Objective and Validation from a path-based claim to an intent-based one. **M1 stays 🔨 in every progress table — a freeze is a reviewer decision, not a consequence of the author finishing the work (§5.3/§5.4).** |
 | 2026-07-17 | 1.1 | **Milestone 1 Planning FROZEN** by the reviewer (AJ). REX-101..106 ratified; M1 scope approved as documentation truth + lifecycle closure with **no source changes**. **REX-D1 accepted as recommended** — REX documents at README/CONTRIBUTING using the lifetime taxonomy and **recommends** a future ADR rather than authoring one; no architecture document is amended. Reviewer required the authority ordering stay explicit: *repository review → recommendation; architecture → ADR*. Reviewer also commended the re-verification of `FINDINGS.md` over transcription — specifically the CHANGELOG correction, where evidence overturned an assumption made during planning — and directed that standard to carry through the rest of the review. |
 | 2026-07-17 | 1.0 | Roadmap created and **FROZEN at package level** by the reviewer (AJ). Four reviewer-required refinements were incorporated **before** the freeze: (1) the **governing scope guard**, stated to outrank every recommendation, with a narrow exception for work preserving an already-frozen invariant; (2) **M3 split into M3-A (contractual) and M3-B (readability)** with independent acceptance criteria — a rename and an export change are indistinguishable in a barrel diff, so the split is the control, not careful review; (3) **REX-D3 reframed as neutral investigation** against explicit shared-ownership criteria, decoupling *"should these be shared?"* from *"has one drifted into a defect?"*; (4) **fixed counts replaced with behavioural assertions** throughout, and hard-coded metrics promoted to their own finding class. Reviewer also confirmed the **Measurable vs. Judgement** classification is treated as an experiment, not elevated to AJS-007 until it survives repeated use. |
