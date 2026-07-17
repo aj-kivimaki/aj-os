@@ -116,7 +116,7 @@ outstanding AJS-007 deliverables. **No source file changes** — this milestone'
 | Task | Description | Status |
 |------|-------------|--------|
 | REX-101 | SPEC-003 Retrospective (reconstructed; F-018) | ✅ |
-| REX-102 | Apply the SPEC-003 specification-hygiene backlog (F-019) | ⬜ |
+| REX-102 | Apply the SPEC-003 specification-hygiene backlog (F-019) | ✅ |
 | REX-103 | Root documentation truth pass — README, ROADMAP, CHANGELOG (F-001, F-008, F-009, F-010) | ⬜ |
 | REX-104 | Guides truth pass — installation, configuration, development (F-002, F-013..F-017) | ⬜ |
 | REX-105 | Module & package README truth pass (F-005, F-006, F-007, F-011, F-012, F-021, F-024) | ⬜ |
@@ -407,6 +407,36 @@ Ruled at the package Planning Review, or scheduled for their milestone's Plannin
 | **REX-D6** | The rule separating a load-bearing comment from noise | M5 | ⬜ M5 Planning |
 | **REX-D7** | Toolchain: ESLint+Prettier vs Biome | M2 | ⬜ M2 Planning |
 | **REX-D8** | Extend `foundation.test.ts`'s public-surface enforcement beyond `end-of-session`? | M3-A | ⬜ M3-A Planning |
+
+## The REX FPCP threshold — ruled by the reviewer (AJ, 2026-07-17)
+
+Ruled at the REX-101 review, after a task-ownership correction was raised as a possible amendment.
+**This governs every remaining REX milestone.**
+
+A **Repository Excellence Frozen Plan Change Proposal is required** only for a change that alters:
+
+- **milestone scope**
+- **objectives**
+- **sequencing**
+- **acceptance criteria**
+- **reviewer decisions**
+
+**Below that threshold** — for example, correcting which task owns a finding, where the milestone
+objective, scope, and acceptance boundary are all unchanged and the finding still closes inside the
+same milestone — the correction is **ordinary planning refinement discovered during implementation,
+not a frozen-plan amendment.**
+
+The required conduct below the threshold is unchanged and non-negotiable:
+
+> **identify it · explain it · record it · never silently absorb it.**
+
+*"That preserves traceability without creating unnecessary governance overhead."* The threshold
+exists so that §7.2 keeps its force where it matters; an FPCP raised for everything is an FPCP
+raised for nothing.
+
+**Precedent:** the F-020 ownership correction (REX-101 → REX-105), ruled **not** an FPCP.
+
+---
 
 ## The shared-ownership criteria (REX-D3)
 
