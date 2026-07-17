@@ -1,27 +1,14 @@
 import { createInterface, type Interface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 
-import {
-  ConfigError,
-  ConfigService,
-} from "../../platform/config/index.js";
-import {
-  HandbookError,
-  HandbookService,
-} from "../../platform/handbook/index.js";
+import { ConfigError, ConfigService } from "../../platform/config/index.js";
+import { HandbookError, HandbookService } from "../../platform/handbook/index.js";
 import {
   RetrievalService,
   type RetrievalResult,
 } from "../../platform/retrieval/index.js";
-import {
-  PromptRenderer,
-  type RenderedPrompt,
-} from "../../platform/prompt/index.js";
-import {
-  AIClient,
-  AIError,
-  type AIResponse,
-} from "../../platform/ai/index.js";
+import { PromptRenderer, type RenderedPrompt } from "../../platform/prompt/index.js";
+import { AIClient, AIError, type AIResponse } from "../../platform/ai/index.js";
 import {
   createContextBuilder,
   createProviderRegistry,
@@ -185,14 +172,10 @@ export class KnowledgeAssistant {
         config.handbook.path,
         config.handbook.generatedWikiPath,
       );
-      const info = await measure(timings, "handbook", () =>
-        handbook.locateWiki(),
-      );
+      const info = await measure(timings, "handbook", () => handbook.locateWiki());
 
       const retrieval = new RetrievalService(info.wikiPath);
-      results = await measure(timings, "retrieval", () =>
-        retrieval.search(question),
-      );
+      results = await measure(timings, "retrieval", () => retrieval.search(question));
 
       if (results.length > 0) {
         context = await measure(timings, "context", () =>
@@ -234,13 +217,7 @@ export class KnowledgeAssistant {
     }
 
     if (debug) {
-      this.printDebugDiagnostics(
-        handbookPath,
-        results,
-        context,
-        answer.model,
-        timings,
-      );
+      this.printDebugDiagnostics(handbookPath, results, context, answer.model, timings);
     }
 
     this.printAnswer(answer);
@@ -260,9 +237,7 @@ export class KnowledgeAssistant {
     question: string,
     results: RetrievalResult[],
   ): Promise<ContextPackage> {
-    const registry = createProviderRegistry([
-      createWikiKnowledgeProvider(results),
-    ]);
+    const registry = createProviderRegistry([createWikiKnowledgeProvider(results)]);
     const builder = createContextBuilder(
       {
         profile: "documentation",

@@ -17,10 +17,7 @@
 import { z } from "zod";
 
 import type { DeepReadonly } from "../../package/types.js";
-import {
-  knowledgeItemSchema,
-  knowledgeRequestSchema,
-} from "../../providers/schema.js";
+import { knowledgeItemSchema, knowledgeRequestSchema } from "../../providers/schema.js";
 import { collectionErrorSchema } from "../errors/schema.js";
 
 import type { CollectionResult } from "./types.js";

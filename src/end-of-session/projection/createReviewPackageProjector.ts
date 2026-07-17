@@ -78,10 +78,7 @@ function countByKind(
  * regenerated from the review store could not reproduce it (EOS-D4). A structural
  * synopsis is duller and always true.
  */
-function summaryFor(
-  candidates: readonly CandidateKnowledge[],
-  session: Session,
-): string {
+function summaryFor(candidates: readonly CandidateKnowledge[], session: Session): string {
   if (candidates.length === 0) {
     return `No candidate knowledge was proposed from this session on ${session.branch}.`;
   }
@@ -96,9 +93,7 @@ function summaryFor(
 
 /** Render a bullet list, or a single "none" line when there is nothing to list. */
 function bulletsOr(items: readonly string[], fallback: string): string {
-  return items.length > 0
-    ? items.map((item) => `- ${item}`).join("\n")
-    : `- ${fallback}`;
+  return items.length > 0 ? items.map((item) => `- ${item}`).join("\n") : `- ${fallback}`;
 }
 
 /**
@@ -108,10 +103,7 @@ function bulletsOr(items: readonly string[], fallback: string): string {
  * judge whether a proposal is worth keeping, and that judgement needs the diff it came
  * from (AJS-006 §Traceability). Every field shown is the candidate's own.
  */
-function renderCandidate(
-  candidate: CandidateKnowledge,
-  position: number,
-): string {
+function renderCandidate(candidate: CandidateKnowledge, position: number): string {
   const lines = [
     `### ${position}. ${oneLine(candidate.title)}`,
     "",
@@ -188,10 +180,7 @@ function renderMarkdown(
   ];
 
   if (candidates.length === 0) {
-    sections.push(
-      "",
-      "Nothing is proposed for review. No action is needed.",
-    );
+    sections.push("", "Nothing is proposed for review. No action is needed.");
   } else {
     sections.push(
       "",

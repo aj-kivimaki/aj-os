@@ -30,17 +30,13 @@ export type ContextPackageMetadata = DeepReadonly<
 >;
 
 /** Immutable citable knowledge source. */
-export type SourceReference = DeepReadonly<
-  z.infer<typeof sourceReferenceSchema>
->;
+export type SourceReference = DeepReadonly<z.infer<typeof sourceReferenceSchema>>;
 
 /** Immutable, self-contained context section. */
 export type ContextSection = DeepReadonly<z.infer<typeof contextSectionSchema>>;
 
 /** Immutable per-reference selection rationale. */
-export type ExplainabilityEntry = DeepReadonly<
-  z.infer<typeof explainabilityEntrySchema>
->;
+export type ExplainabilityEntry = DeepReadonly<z.infer<typeof explainabilityEntrySchema>>;
 
 /** Immutable explainability structure. */
 export type ContextExplainability = DeepReadonly<

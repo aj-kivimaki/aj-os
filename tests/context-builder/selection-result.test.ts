@@ -108,12 +108,12 @@ describe("SelectionResult contract", () => {
   });
 
   it("rejects a missing required collection (selectedItems/excludedItems/metadata)", () => {
-    expect(() =>
-      parseSelectionResult({ metadata, selectedItems: [itemA] }),
-    ).toThrow(ZodError);
-    expect(() =>
-      parseSelectionResult({ selectedItems: [], excludedItems: [] }),
-    ).toThrow(ZodError);
+    expect(() => parseSelectionResult({ metadata, selectedItems: [itemA] })).toThrow(
+      ZodError,
+    );
+    expect(() => parseSelectionResult({ selectedItems: [], excludedItems: [] })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects an invalid embedded selected item (composed CB-004 contract)", () => {
@@ -147,9 +147,9 @@ describe("SelectionResult contract", () => {
   });
 
   it("rejects unknown keys — the contract is strict", () => {
-    expect(() =>
-      parseSelectionResult({ ...selectedAndExcluded, priority: 1 }),
-    ).toThrow(ZodError);
+    expect(() => parseSelectionResult({ ...selectedAndExcluded, priority: 1 })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects a leaked priority field — ordering is the only contract", () => {
@@ -174,9 +174,7 @@ describe("SelectionResult contract", () => {
       // Deliberately bypassing the type system: the point is the *runtime*
       // guarantee, and `readonly` is erased at runtime. `as unknown as` is what
       // the compiler asks for when a cast is intentional rather than a mistake.
-      (
-        result as unknown as { selectedItems: KnowledgeItem[] }
-      ).selectedItems.push(itemB);
+      (result as unknown as { selectedItems: KnowledgeItem[] }).selectedItems.push(itemB);
     }).toThrow();
   });
 
@@ -187,8 +185,6 @@ describe("SelectionResult contract", () => {
   });
 
   it("exposes the schema for composition by later tasks (CB-015/CB-016)", () => {
-    expect(selectionResultSchema.safeParse(selectedAndExcluded).success).toBe(
-      true,
-    );
+    expect(selectionResultSchema.safeParse(selectedAndExcluded).success).toBe(true);
   });
 });

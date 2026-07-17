@@ -255,19 +255,17 @@ function stubs(options: StubOptions = {}): Stubs {
 
   // `collectChanges` is a module function, not an injected stage, so it is driven through
   // the registry: the stub analyzer returns the fixture's changes.
-  const analyzers =
-    options.analyzers ??
-    [
-      {
-        id: "git",
-        name: "Git change analyzer",
-        description: "stub",
-        async analyze() {
-          trace.push("collection");
-          return (options.changeSet ?? CHANGE_SET).changes;
-        },
-      } satisfies Analyzer,
-    ];
+  const analyzers = options.analyzers ?? [
+    {
+      id: "git",
+      name: "Git change analyzer",
+      description: "stub",
+      async analyze() {
+        trace.push("collection");
+        return (options.changeSet ?? CHANGE_SET).changes;
+      },
+    } satisfies Analyzer,
+  ];
 
   return {
     trace,
@@ -478,9 +476,7 @@ describe("EOS-406 — the orchestrator is inert and additive", () => {
   });
 
   it("is deterministic with every stage stubbed and the clock pinned", async () => {
-    expect(await workflow().wf.run(CONTEXT)).toEqual(
-      await workflow().wf.run(CONTEXT),
-    );
+    expect(await workflow().wf.run(CONTEXT)).toEqual(await workflow().wf.run(CONTEXT));
   });
 
   it("absorbs a second analyzer with no change to the orchestrator", async () => {

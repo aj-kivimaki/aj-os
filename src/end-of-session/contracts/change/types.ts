@@ -30,9 +30,7 @@ export type AnalyzerError = DeepReadonly<z.infer<typeof analyzerErrorSchema>>;
 export type ChangeSet = DeepReadonly<z.infer<typeof changeSetSchema>>;
 
 /** The static identity an analyzer advertises. */
-export type AnalyzerMetadata = DeepReadonly<
-  z.infer<typeof analyzerMetadataSchema>
->;
+export type AnalyzerMetadata = DeepReadonly<z.infer<typeof analyzerMetadataSchema>>;
 
 /** The kind of change — a soft hint (see `changeKindSchema`). */
 export type ChangeKind = z.infer<typeof changeKindSchema>;

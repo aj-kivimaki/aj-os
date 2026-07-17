@@ -70,9 +70,7 @@ program
   .argument("[question]", "answer a single question and exit")
   .option(DEBUG_FLAG, DEBUG_DESCRIPTION)
   .action(async (question: string | undefined, options: AskCliOptions) => {
-    console.warn(
-      "The 'knowledge ask' command is deprecated. Use 'aj ask' instead.",
-    );
+    console.warn("The 'knowledge ask' command is deprecated. Use 'aj ask' instead.");
     await askCommand(question, { debug: options.debug === true });
   });
 

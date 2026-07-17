@@ -138,12 +138,10 @@ describe("EOS-401 — branch()", () => {
     const dir = buildFixtureRepo();
     git(dir, "checkout", "-q", "-b", "feat/spec-003-m5-composition");
 
-    expect(await createGitPort(dir).branch()).toBe(
-      "feat/spec-003-m5-composition",
-    );
+    expect(await createGitPort(dir).branch()).toBe("feat/spec-003-m5-composition");
   });
 
-  it("returns null when HEAD is detached rather than the literal \"HEAD\"", async () => {
+  it('returns null when HEAD is detached rather than the literal "HEAD"', async () => {
     const dir = buildFixtureRepo();
     // Detached HEAD is ordinary, not exotic: an interactive rebase, a bisect, or a
     // tag checkout all land here, and `aj session end` may well be run mid-rebase.
@@ -199,12 +197,7 @@ describe("EOS-401 — the seam stays read-only (ADR-002)", () => {
   it("exposes exactly the four documented reads and no mutator", () => {
     const port = createGitPort(buildFixtureRepo());
 
-    expect(Object.keys(port).sort()).toEqual([
-      "branch",
-      "changes",
-      "dirty",
-      "head",
-    ]);
+    expect(Object.keys(port).sort()).toEqual(["branch", "changes", "dirty", "head"]);
     expect(Object.isFrozen(port)).toBe(true);
   });
 });

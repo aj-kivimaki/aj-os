@@ -88,7 +88,10 @@ function buildPrompt(
   candidates: readonly ExistingPage[],
 ): RenderedPrompt {
   const list = candidates
-    .map((p, i) => `${i + 1}. path: ${p.path}\n   title: ${p.title}\n   about: ${p.description}`)
+    .map(
+      (p, i) =>
+        `${i + 1}. path: ${p.path}\n   title: ${p.title}\n   about: ${p.description}`,
+    )
     .join("\n");
   return {
     system: SYSTEM.replace("__KIND__", candidate.kind),
@@ -123,7 +126,11 @@ export function createSemanticIdentityResolver(
   ): Promise<Resolution> {
     const candidates = shortlist(candidate, existing);
     if (candidates.length === 0) {
-      return { kind: "new", confidence: 1, explanation: "no lexically similar existing pages" };
+      return {
+        kind: "new",
+        confidence: 1,
+        explanation: "no lexically similar existing pages",
+      };
     }
 
     const paths = candidates.map((p) => p.path);
@@ -144,13 +151,24 @@ export function createSemanticIdentityResolver(
     }
 
     const explanation = `considered [${paths.join(", ")}]; ${verdict.reason}`;
-    const match = verdict.match !== null && paths.includes(verdict.match) ? verdict.match : null;
+    const match =
+      verdict.match !== null && paths.includes(verdict.match) ? verdict.match : null;
 
     if (match !== null && verdict.confidence >= existingThreshold) {
-      return { kind: "existing", targetPath: match, confidence: verdict.confidence, explanation };
+      return {
+        kind: "existing",
+        targetPath: match,
+        confidence: verdict.confidence,
+        explanation,
+      };
     }
     if (match !== null && verdict.confidence >= unsureThreshold) {
-      return { kind: "unsure", targetPath: match, confidence: verdict.confidence, explanation };
+      return {
+        kind: "unsure",
+        targetPath: match,
+        confidence: verdict.confidence,
+        explanation,
+      };
     }
     return { kind: "new", confidence: verdict.confidence, explanation };
   }

@@ -25,14 +25,8 @@ import {
 import { createSlugIdentityResolver } from "../identity/index.js";
 import { GENERATED_WIKI_ARTIFACTS } from "../naming.js";
 import { createWikiRenderer } from "../renderer/index.js";
-import {
-  createFilesystemWikiStore,
-  type WikiStore,
-} from "../wiki-store/index.js";
-import {
-  createWikiGenerator,
-  type WikiGenerator,
-} from "../wiki-generator/index.js";
+import { createFilesystemWikiStore, type WikiStore } from "../wiki-store/index.js";
+import { createWikiGenerator, type WikiGenerator } from "../wiki-generator/index.js";
 
 /**
  * The Handbook source directories the connector scans, relative to the

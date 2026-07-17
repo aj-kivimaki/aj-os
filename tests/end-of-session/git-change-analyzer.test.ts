@@ -41,9 +41,7 @@ const SESSION: Session = Object.freeze({
  */
 function stateReadsMustNotBeUsed(): Pick<GitPort, "head" | "dirty" | "branch"> {
   const refuse = (read: string) => async (): Promise<never> => {
-    throw new Error(
-      `GitChangeAnalyzer must not read git state — it called ${read}().`,
-    );
+    throw new Error(`GitChangeAnalyzer must not read git state — it called ${read}().`);
   };
   return { head: refuse("head"), dirty: refuse("dirty"), branch: refuse("branch") };
 }
@@ -79,9 +77,9 @@ describe("GitChangeAnalyzer — construction & port contract", () => {
   });
 
   it("throws when no GitPort is provided", () => {
-    expect(() =>
-      createGitChangeAnalyzer(undefined as unknown as GitPort),
-    ).toThrow(/GitPort is required/);
+    expect(() => createGitChangeAnalyzer(undefined as unknown as GitPort)).toThrow(
+      /GitPort is required/,
+    );
   });
 
   it("returns a frozen handle (the module's factory convention)", () => {
@@ -201,12 +199,7 @@ describe("GitChangeAnalyzer — deterministic ordering", () => {
       { path: "m/a.ts", status: "D" },
     ]);
 
-    expect(changes.map((c) => c.path)).toEqual([
-      "a.ts",
-      "m/a.ts",
-      "m/b.ts",
-      "z.ts",
-    ]);
+    expect(changes.map((c) => c.path)).toEqual(["a.ts", "m/a.ts", "m/b.ts", "z.ts"]);
   });
 
   it("produces deep-equal output across repeated runs (same observations)", async () => {
@@ -230,8 +223,8 @@ describe("GitChangeAnalyzer — failure propagation (no swallowing)", () => {
       },
     };
 
-    await expect(
-      createGitChangeAnalyzer(failing).analyze(SESSION),
-    ).rejects.toThrow(/git unavailable/);
+    await expect(createGitChangeAnalyzer(failing).analyze(SESSION)).rejects.toThrow(
+      /git unavailable/,
+    );
   });
 });

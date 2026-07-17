@@ -1,0 +1,43 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    // 90, not Biome's default 80. The repository is the authority on its own
+    // style and no document states a width. Measured before choosing: at 80 the
+    // formatter rewrites ~1058 lines and splits imports the author deliberately
+    // kept whole; at 90 it rewrites ~504 and leaves the End-of-Session
+    // composition root byte-identical. `src` p99 is 91 columns. Choosing 80
+    // would impose a style narrower than this code has ever used — which is
+    // "choosing a new style", and out of REX-204's scope.
+    "lineWidth": 90
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  },
+  // Linting arrives in REX-205. Landing it here would make this diff
+  // unreviewable — the point of an isolated formatting commit is that every
+  // line in it is mechanical.
+  "linter": { "enabled": false },
+  "files": {
+    // `archive/` is FROZEN BY CONVENTION — docs/archive/README.md: "not
+    // maintained or updated". A formatter reaching into it would rewrite ~200
+    // files of preserved v1 history. Found by running it: the first config had
+    // comments in `biome.json`, which Biome CANNOT parse — it reported parse
+    // errors, fell back to DEFAULTS, and formatted the archive anyway.
+    "includes": [
+      "**",
+      "!archive/**",
+      "!docs/archive/**",
+      "!dist/**",
+      "!coverage/**",
+      "!infrastructure/n8n/**"
+    ]
+  }
+}

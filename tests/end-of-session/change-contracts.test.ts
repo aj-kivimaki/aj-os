@@ -73,16 +73,14 @@ describe("SessionChange contract", () => {
 
   it("accepts every declared change type", () => {
     for (const changeType of CHANGE_TYPES) {
-      expect(() =>
-        parseSessionChange({ ...validChange, changeType }),
-      ).not.toThrow();
+      expect(() => parseSessionChange({ ...validChange, changeType })).not.toThrow();
     }
   });
 
   it("rejects an unrecognized changeType — the enum is closed", () => {
-    expect(() =>
-      parseSessionChange({ ...validChange, changeType: "copied" }),
-    ).toThrow(ZodError);
+    expect(() => parseSessionChange({ ...validChange, changeType: "copied" })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects a missing required field and non-string metadata values", () => {
@@ -94,9 +92,9 @@ describe("SessionChange contract", () => {
   });
 
   it("rejects unknown keys — the contract is strict", () => {
-    expect(() =>
-      parseSessionChange({ ...validChange, blame: "someone" }),
-    ).toThrow(ZodError);
+    expect(() => parseSessionChange({ ...validChange, blame: "someone" })).toThrow(
+      ZodError,
+    );
   });
 
   it("returns a deeply-frozen change, including metadata", () => {
@@ -110,12 +108,12 @@ describe("AnalyzerError contract", () => {
   });
 
   it("rejects a missing recoverable flag and unknown keys", () => {
-    expect(() =>
-      parseAnalyzerError({ analyzer: "git", message: "boom" }),
-    ).toThrow(ZodError);
-    expect(() =>
-      parseAnalyzerError({ ...validError, stack: "at foo" }),
-    ).toThrow(ZodError);
+    expect(() => parseAnalyzerError({ analyzer: "git", message: "boom" })).toThrow(
+      ZodError,
+    );
+    expect(() => parseAnalyzerError({ ...validError, stack: "at foo" })).toThrow(
+      ZodError,
+    );
   });
 
   it("returns a frozen error", () => {

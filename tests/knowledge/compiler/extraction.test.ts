@@ -3,10 +3,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import {
-  CompilerError,
-  parseExtraction,
-} from "../../../src/knowledge/compiler/index.js";
+import { CompilerError, parseExtraction } from "../../../src/knowledge/compiler/index.js";
 
 const VALID = JSON.stringify({
   summary: { title: "T", keyPoints: ["a point"] },
@@ -28,7 +25,11 @@ describe("parseExtraction", () => {
 
   it("accepts empty entity and concept arrays", () => {
     const result = parseExtraction(
-      JSON.stringify({ summary: { title: "T", keyPoints: ["p"] }, entities: [], concepts: [] }),
+      JSON.stringify({
+        summary: { title: "T", keyPoints: ["p"] },
+        entities: [],
+        concepts: [],
+      }),
     );
     expect(result.entities).toEqual([]);
   });
@@ -39,7 +40,9 @@ describe("parseExtraction", () => {
 
   it("throws CompilerError when required fields are missing", () => {
     expect(() =>
-      parseExtraction(JSON.stringify({ summary: { title: "T" }, entities: [], concepts: [] })),
+      parseExtraction(
+        JSON.stringify({ summary: { title: "T" }, entities: [], concepts: [] }),
+      ),
     ).toThrow(CompilerError);
   });
 
@@ -57,7 +60,11 @@ describe("parseExtraction", () => {
   it("throws CompilerError when the summary has no key points", () => {
     expect(() =>
       parseExtraction(
-        JSON.stringify({ summary: { title: "T", keyPoints: [] }, entities: [], concepts: [] }),
+        JSON.stringify({
+          summary: { title: "T", keyPoints: [] },
+          entities: [],
+          concepts: [],
+        }),
       ),
     ).toThrow(CompilerError);
   });

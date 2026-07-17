@@ -24,9 +24,7 @@ export function registerAuth(app: FastifyInstance, token: string): void {
 
     const header = request.headers.authorization ?? "";
     const prefix = "Bearer ";
-    const provided = header.startsWith(prefix)
-      ? header.slice(prefix.length)
-      : "";
+    const provided = header.startsWith(prefix) ? header.slice(prefix.length) : "";
 
     if (!provided || !tokensMatch(provided, token)) {
       reply

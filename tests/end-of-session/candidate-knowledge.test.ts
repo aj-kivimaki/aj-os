@@ -73,9 +73,7 @@ describe("CandidateKnowledge contract", () => {
 
   it("accepts every declared kind in the SPEC-003 §8 taxonomy", () => {
     for (const kind of CANDIDATE_KINDS) {
-      expect(() =>
-        parseCandidateKnowledge({ ...minimalInput, kind }),
-      ).not.toThrow();
+      expect(() => parseCandidateKnowledge({ ...minimalInput, kind })).not.toThrow();
     }
   });
 
@@ -104,12 +102,12 @@ describe("CandidateKnowledge contract", () => {
   });
 
   it("rejects a non-string kind — only unknown strings fall back", () => {
-    expect(() =>
-      parseCandidateKnowledge({ ...minimalInput, kind: 42 }),
-    ).toThrow(ZodError);
-    expect(() =>
-      parseCandidateKnowledge({ ...minimalInput, kind: null }),
-    ).toThrow(ZodError);
+    expect(() => parseCandidateKnowledge({ ...minimalInput, kind: 42 })).toThrow(
+      ZodError,
+    );
+    expect(() => parseCandidateKnowledge({ ...minimalInput, kind: null })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects a governanceState other than 'candidate' — SPEC-003 only proposes", () => {
@@ -124,12 +122,12 @@ describe("CandidateKnowledge contract", () => {
   });
 
   it("rejects an empty required string", () => {
-    expect(() =>
-      parseCandidateKnowledge({ ...minimalInput, title: "" }),
-    ).toThrow(ZodError);
-    expect(() =>
-      parseCandidateKnowledge({ ...minimalInput, body: "" }),
-    ).toThrow(ZodError);
+    expect(() => parseCandidateKnowledge({ ...minimalInput, title: "" })).toThrow(
+      ZodError,
+    );
+    expect(() => parseCandidateKnowledge({ ...minimalInput, body: "" })).toThrow(
+      ZodError,
+    );
   });
 
   it("enforces provenance referential sanity — sessionId must be present", () => {
@@ -153,12 +151,12 @@ describe("CandidateKnowledge contract", () => {
   });
 
   it("rejects a confidence outside [0, 1]", () => {
-    expect(() =>
-      parseCandidateKnowledge({ ...minimalInput, confidence: 1.5 }),
-    ).toThrow(ZodError);
-    expect(() =>
-      parseCandidateKnowledge({ ...minimalInput, confidence: -0.1 }),
-    ).toThrow(ZodError);
+    expect(() => parseCandidateKnowledge({ ...minimalInput, confidence: 1.5 })).toThrow(
+      ZodError,
+    );
+    expect(() => parseCandidateKnowledge({ ...minimalInput, confidence: -0.1 })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects unknown keys — no SPEC-004 decision fields may enter the boundary", () => {
@@ -184,8 +182,6 @@ describe("CandidateKnowledge contract", () => {
   });
 
   it("exposes the schema for composition (candidate generation, M4)", () => {
-    expect(candidateKnowledgeSchema.safeParse(validCandidate).success).toBe(
-      true,
-    );
+    expect(candidateKnowledgeSchema.safeParse(validCandidate).success).toBe(true);
   });
 });

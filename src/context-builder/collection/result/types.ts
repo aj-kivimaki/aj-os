@@ -11,10 +11,7 @@ import type { z } from "zod";
 
 import type { DeepReadonly } from "../../package/types.js";
 
-import type {
-  collectionResultMetadataSchema,
-  collectionResultSchema,
-} from "./schema.js";
+import type { collectionResultMetadataSchema, collectionResultSchema } from "./schema.js";
 
 /**
  * Immutable provenance of a collection result — the `KnowledgeRequest` the
@@ -28,6 +25,4 @@ export type CollectionResultMetadata = DeepReadonly<
  * The immutable CollectionResult contract — the complete deterministic outcome of
  * knowledge collection (metadata + collected items + collected errors).
  */
-export type CollectionResult = DeepReadonly<
-  z.infer<typeof collectionResultSchema>
->;
+export type CollectionResult = DeepReadonly<z.infer<typeof collectionResultSchema>>;

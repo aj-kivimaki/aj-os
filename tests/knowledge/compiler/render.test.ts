@@ -38,9 +38,7 @@ const EXTRACTION: SourceExtraction = {
     },
     { name: "AJ Kivimäki", type: "person", description: "The builder.", related: [] },
   ],
-  concepts: [
-    { name: "LLM Wiki", description: "Compiled knowledge layer.", related: [] },
-  ],
+  concepts: [{ name: "LLM Wiki", description: "Compiled knowledge layer.", related: [] }],
 };
 
 const AT = "2026-07-12T08:00:00.000Z";
@@ -135,7 +133,12 @@ describe("renderPages", () => {
     const pages = render({
       summary: { title: "T", keyPoints: ["p"] },
       entities: [
-        { name: "AJ-OS", type: "product", description: "d", related: ["Notion", "Schema Engine", "Ghost"] },
+        {
+          name: "AJ-OS",
+          type: "product",
+          description: "d",
+          related: ["Notion", "Schema Engine", "Ghost"],
+        },
         { name: "Notion", type: "product", description: "d", related: [] },
       ],
       concepts: [{ name: "Schema Engine", description: "d", related: ["AJ-OS"] }],

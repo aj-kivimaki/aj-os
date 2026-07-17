@@ -136,9 +136,7 @@ export function createGitPort(repositoryPath: string): GitPort {
 
   return Object.freeze({
     async changes(range: string): Promise<readonly GitFileChange[]> {
-      const tracked = parseNameStatus(
-        await git("diff", "--name-status", "-M", range),
-      );
+      const tracked = parseNameStatus(await git("diff", "--name-status", "-M", range));
 
       // A commit range carries no working-tree state, so untracked files belong only to a
       // working-tree comparison — including them for `main..HEAD` would report brand-new

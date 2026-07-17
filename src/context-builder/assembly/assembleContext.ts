@@ -59,9 +59,7 @@ const SECTION_TITLES: Readonly<Record<ContextSectionKind, string>> = {
  * `risks-and-edge-cases`) are unreachable under a purely structural rule and thus
  * never populated here.
  */
-const SOURCE_TYPE_TO_SECTION_KIND: Readonly<
-  Record<ReferenceType, ContextSectionKind>
-> = {
+const SOURCE_TYPE_TO_SECTION_KIND: Readonly<Record<ReferenceType, ContextSectionKind>> = {
   architecture: "relevant-architecture",
   adr: "relevant-architecture",
   standard: "coding-standards",
@@ -140,9 +138,7 @@ export async function assembleContext(
  * Every section `referenceId` produced by {@link composeSections} appears here by
  * the same rule, so referential integrity holds by construction.
  */
-function composeReferences(
-  selectedItems: readonly KnowledgeItem[],
-): SourceReference[] {
+function composeReferences(selectedItems: readonly KnowledgeItem[]): SourceReference[] {
   const references: SourceReference[] = [];
   const seen = new Set<string>();
 

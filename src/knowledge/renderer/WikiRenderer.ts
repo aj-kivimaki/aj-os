@@ -10,10 +10,7 @@
  * consume the same extraction); it is the only stage that knows Markdown and the
  * wiki page schema.
  */
-import type {
-  CompiledPage,
-  ExtractedKnowledge,
-} from "../compiler/index.js";
+import type { CompiledPage, ExtractedKnowledge } from "../compiler/index.js";
 import type { PageKind } from "../identity/index.js";
 
 /** The canonical identity a candidate resolved to (existing or new). */

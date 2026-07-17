@@ -11,10 +11,7 @@ import { join, resolve } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import {
-  HandbookError,
-  HandbookService,
-} from "../../src/platform/handbook/index.js";
+import { HandbookError, HandbookService } from "../../src/platform/handbook/index.js";
 
 let handbook: string;
 
@@ -30,10 +27,7 @@ describe("HandbookService", () => {
   it("returns handbook and wiki paths when the wiki exists", async () => {
     await mkdir(join(handbook, "wiki-generated"));
 
-    const info = await new HandbookService(
-      handbook,
-      "wiki-generated",
-    ).locateWiki();
+    const info = await new HandbookService(handbook, "wiki-generated").locateWiki();
 
     expect(info).toEqual({
       handbookPath: resolve(handbook),
@@ -60,9 +54,7 @@ describe("HandbookService", () => {
   it("fails with a clear message when the wiki is missing", async () => {
     await expect(
       new HandbookService(handbook, "wiki-generated").locateWiki(),
-    ).rejects.toThrow(
-      "The configured handbook does not contain a generated wiki.",
-    );
+    ).rejects.toThrow("The configured handbook does not contain a generated wiki.");
     await expect(
       new HandbookService(handbook, "wiki-generated").locateWiki(),
     ).rejects.toBeInstanceOf(HandbookError);
@@ -73,8 +65,6 @@ describe("HandbookService", () => {
 
     await expect(
       new HandbookService(handbook, "wiki-generated").locateWiki(),
-    ).rejects.toThrow(
-      "The configured handbook does not contain a generated wiki.",
-    );
+    ).rejects.toThrow("The configured handbook does not contain a generated wiki.");
   });
 });

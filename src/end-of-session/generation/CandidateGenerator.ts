@@ -36,8 +36,5 @@ export interface CandidateGenerator {
    * an empty result. `extraction.sessionId` must equal `session.id` (a mismatch is an
    * orchestration error and throws).
    */
-  generate(
-    extraction: KnowledgeExtraction,
-    session: Session,
-  ): CandidateKnowledge[];
+  generate(extraction: KnowledgeExtraction, session: Session): CandidateKnowledge[];
 }

@@ -18,7 +18,10 @@ import {
   aiConfigurationHelp,
   formatSessionReport,
 } from "../../src/cli/commands/session.js";
-import { parseSessionReport, type SessionReport } from "../../src/end-of-session/index.js";
+import {
+  parseSessionReport,
+  type SessionReport,
+} from "../../src/end-of-session/index.js";
 
 const SESSION_DIR = "/vault/knowledge-review/pending/session-eos-408";
 
@@ -76,7 +79,11 @@ describe("EOS-408 — AI configuration guidance", () => {
     const transport = report({
       result: "failed",
       errors: [
-        { source: "extraction", message: "The AI request failed: 503", recoverable: false },
+        {
+          source: "extraction",
+          message: "The AI request failed: 503",
+          recoverable: false,
+        },
       ],
     });
 
@@ -89,7 +96,11 @@ describe("EOS-408 — AI configuration guidance", () => {
     const elsewhere = report({
       result: "failed",
       errors: [
-        { source: "persistence", message: `disk full near ${MISSING_KEY}`, recoverable: false },
+        {
+          source: "persistence",
+          message: `disk full near ${MISSING_KEY}`,
+          recoverable: false,
+        },
       ],
     });
 
@@ -135,9 +146,7 @@ describe("EOS-408 — the report summary", () => {
   it("lists a partial run's recoverable errors honestly", () => {
     const partial = report({
       result: "partial",
-      errors: [
-        { source: "docs", message: "The analyzer failed.", recoverable: true },
-      ],
+      errors: [{ source: "docs", message: "The analyzer failed.", recoverable: true }],
     });
 
     const output = formatSessionReport(partial, SESSION_DIR).join("\n");
@@ -155,9 +164,7 @@ describe("EOS-408 — the report summary", () => {
   });
 
   it("says nothing about errors when there were none", () => {
-    expect(formatSessionReport(report(), SESSION_DIR).join("\n")).not.toContain(
-      "Errors",
-    );
+    expect(formatSessionReport(report(), SESSION_DIR).join("\n")).not.toContain("Errors");
   });
 
   it("renders a zero-candidate run without inventing a problem", () => {

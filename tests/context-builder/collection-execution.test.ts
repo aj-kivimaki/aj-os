@@ -158,10 +158,7 @@ describe("collect — partial collection (a failure never aborts)", () => {
     ]);
     const result = await engine.collect(REQUEST);
 
-    expect(result.items.map((i) => i.id)).toEqual([
-      "handbook-item",
-      "standards-item",
-    ]);
+    expect(result.items.map((i) => i.id)).toEqual(["handbook-item", "standards-item"]);
     expect(result.errors.map((e) => e.providerId)).toEqual(["wiki"]);
   });
 
@@ -244,12 +241,8 @@ describe("collect — determinism (registry order is authoritative)", () => {
     const first = await engine.collect(REQUEST);
     const second = await engine.collect(REQUEST);
 
-    expect(second.items.map((i) => i.id)).toEqual(
-      first.items.map((i) => i.id),
-    );
-    expect(second.errors.map((e) => e.id)).toEqual(
-      first.errors.map((e) => e.id),
-    );
+    expect(second.items.map((i) => i.id)).toEqual(first.items.map((i) => i.id));
+    expect(second.errors.map((e) => e.id)).toEqual(first.errors.map((e) => e.id));
   });
 });
 

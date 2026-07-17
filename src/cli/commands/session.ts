@@ -80,10 +80,7 @@ export function aiConfigurationHelp(report: SessionReport): string[] | undefined
  * re-derive, or re-judge anything the report already states. Returns lines rather than
  * printing them, so the presentation is testable without capturing stdout.
  */
-export function formatSessionReport(
-  report: SessionReport,
-  sessionDir: string,
-): string[] {
+export function formatSessionReport(report: SessionReport, sessionDir: string): string[] {
   const lines = [
     "",
     "── Session end ───────────────────────────",
@@ -126,9 +123,7 @@ export function formatSessionReport(
  * than relying on an exception — and sets a non-zero exit code so a git hook or CI wrapper
  * can tell. A `partial` run succeeded (some analyzer contributed an error) and exits zero.
  */
-export async function sessionEndCommand(
-  options: SessionEndOptions = {},
-): Promise<void> {
+export async function sessionEndCommand(options: SessionEndOptions = {}): Promise<void> {
   let report: SessionReport;
   let sessionDir: string;
 

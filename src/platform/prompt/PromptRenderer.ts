@@ -151,8 +151,7 @@ export class PromptRenderer {
 
     const lines = references.map((reference) => {
       const label = labels.get(reference.id);
-      const locator =
-        reference.locator !== undefined ? ` — ${reference.locator}` : "";
+      const locator = reference.locator !== undefined ? ` — ${reference.locator}` : "";
       return `[${label}] ${reference.title} (${reference.type})${locator}`;
     });
 

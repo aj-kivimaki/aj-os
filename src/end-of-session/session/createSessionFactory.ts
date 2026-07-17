@@ -66,9 +66,7 @@ export interface SessionFactoryConfig {
  */
 function rangeFor(since: string | undefined): string {
   const ref = since?.trim();
-  return ref === undefined || ref.length === 0
-    ? WORKING_TREE_RANGE
-    : `${ref}..HEAD`;
+  return ref === undefined || ref.length === 0 ? WORKING_TREE_RANGE : `${ref}..HEAD`;
 }
 
 /**
@@ -98,9 +96,7 @@ function describeDetached(head: string): string {
  * const factory = createSessionFactory({ gitPort });
  * const session = await factory.create(context, { trigger: "manual", since: "main" });
  */
-export function createSessionFactory(
-  config: SessionFactoryConfig,
-): SessionFactory {
+export function createSessionFactory(config: SessionFactoryConfig): SessionFactory {
   if (config?.gitPort === null || config?.gitPort === undefined) {
     throw new Error("createSessionFactory: a GitPort is required.");
   }

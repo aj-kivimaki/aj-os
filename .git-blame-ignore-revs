@@ -1,0 +1,7 @@
+# Revisions to skip in `git blame` — mechanical, no semantic change.
+#
+# Enable locally:  git config blame.ignoreRevsFile .git-blame-ignore-revs
+# GitHub honours this file automatically.
+
+# REX-204 — the first Biome format run. Proven mechanical: re-running the
+# formatter on the pre-run tree reproduces this one exactly (REX-D10).

@@ -10,10 +10,7 @@ import type { z } from "zod";
 
 import type { DeepReadonly } from "../../package/types.js";
 
-import type {
-  selectionResultMetadataSchema,
-  selectionResultSchema,
-} from "./schema.js";
+import type { selectionResultMetadataSchema, selectionResultSchema } from "./schema.js";
 
 /**
  * Immutable provenance of a selection result — the `KnowledgeRequest` the selection

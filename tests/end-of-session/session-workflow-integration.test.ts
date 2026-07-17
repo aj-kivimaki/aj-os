@@ -127,7 +127,9 @@ describe("EOS-409 — a real run writes the whole session layout", () => {
     // The store is consumable by SPEC-004: every artifact parses with the contract SPEC-004
     // will import.
     for (const file of await readdir(join(sessionDir, "candidates"))) {
-      const raw = JSON.parse(await readFile(join(sessionDir, "candidates", file), "utf8"));
+      const raw = JSON.parse(
+        await readFile(join(sessionDir, "candidates", file), "utf8"),
+      );
       expect(() => parseCandidateKnowledge(raw)).not.toThrow();
     }
   });
@@ -165,7 +167,9 @@ describe("EOS-409 — the stages' guarantees survive composition", () => {
 
     // `commitHash` is the fixture's actual HEAD — proof the EOS-401 git read is wired all
     // the way through to a persisted candidate, rather than a value someone passed in.
-    expect(first.provenance.commitHash).toBe(git(repositoryPath, "rev-parse", "HEAD").trim());
+    expect(first.provenance.commitHash).toBe(
+      git(repositoryPath, "rev-parse", "HEAD").trim(),
+    );
     expect(first.provenance.sessionId).toBe(report.sessionId);
     expect(first.governanceState).toBe("candidate");
   });
@@ -224,7 +228,10 @@ describe("EOS-409 — determinism", () => {
     const { first, second } = await twoRunsOverOneRepo();
 
     const read = async (dir: string, id: string): Promise<string> =>
-      (await readFile(join(dir, "review-package.md"), "utf8")).replaceAll(id, "<session>");
+      (await readFile(join(dir, "review-package.md"), "utf8")).replaceAll(
+        id,
+        "<session>",
+      );
 
     expect(await read(first.sessionDir, first.report.sessionId)).toBe(
       await read(second.sessionDir, second.report.sessionId),

@@ -16,11 +16,7 @@ import { z } from "zod";
 import { sourceReferenceSchema } from "../package/schema.js";
 import type { DeepReadonly } from "../package/types.js";
 
-import type {
-  KnowledgeItem,
-  KnowledgeRequest,
-  ProviderMetadata,
-} from "./types.js";
+import type { KnowledgeItem, KnowledgeRequest, ProviderMetadata } from "./types.js";
 
 /**
  * The public input to every `KnowledgeProvider`. Carries only provider-agnostic

@@ -90,13 +90,15 @@ function stubGenerator(): TextGenerator {
   };
 }
 
-async function compose(overrides: {
-  handbook?: string;
-  reviewPath?: string;
-  repositoryPath?: string;
-  since?: string;
-  sessionNotes?: string;
-} = {}) {
+async function compose(
+  overrides: {
+    handbook?: string;
+    reviewPath?: string;
+    repositoryPath?: string;
+    since?: string;
+    sessionNotes?: string;
+  } = {},
+) {
   const handbook = overrides.handbook ?? (await vault());
   const repositoryPath = overrides.repositoryPath ?? (await fixtureRepo());
 

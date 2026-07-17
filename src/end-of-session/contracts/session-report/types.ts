@@ -19,14 +19,10 @@ import type {
 export type SessionReport = DeepReadonly<z.infer<typeof sessionReportSchema>>;
 
 /** A single diagnostic error recorded in the log. */
-export type SessionReportError = DeepReadonly<
-  z.infer<typeof sessionReportErrorSchema>
->;
+export type SessionReportError = DeepReadonly<z.infer<typeof sessionReportErrorSchema>>;
 
 /** The candidates a run produced — count plus their ids. */
-export type CandidatesProduced = DeepReadonly<
-  z.infer<typeof candidatesProducedSchema>
->;
+export type CandidatesProduced = DeepReadonly<z.infer<typeof candidatesProducedSchema>>;
 
 /** The outcome of a workflow run. */
 export type SessionResult = z.infer<typeof sessionResultSchema>;

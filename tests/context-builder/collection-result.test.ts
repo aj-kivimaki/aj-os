@@ -79,12 +79,8 @@ describe("CollectionResult contract", () => {
   });
 
   it("rejects a missing required collection (items/errors/metadata)", () => {
-    expect(() =>
-      parseCollectionResult({ metadata, items: [item] }),
-    ).toThrow(ZodError);
-    expect(() =>
-      parseCollectionResult({ items: [], errors: [] }),
-    ).toThrow(ZodError);
+    expect(() => parseCollectionResult({ metadata, items: [item] })).toThrow(ZodError);
+    expect(() => parseCollectionResult({ items: [], errors: [] })).toThrow(ZodError);
   });
 
   it("rejects an invalid embedded item (composed CB-004 contract)", () => {
@@ -118,9 +114,9 @@ describe("CollectionResult contract", () => {
   });
 
   it("rejects unknown keys — the contract is strict", () => {
-    expect(() =>
-      parseCollectionResult({ ...itemsOnly, durationMs: 42 }),
-    ).toThrow(ZodError);
+    expect(() => parseCollectionResult({ ...itemsOnly, durationMs: 42 })).toThrow(
+      ZodError,
+    );
   });
 
   it("returns a deeply frozen result (immutable after creation)", () => {
@@ -143,9 +139,7 @@ describe("CollectionResult contract", () => {
   });
 
   it("is deterministic — same input yields an equal contract", () => {
-    expect(parseCollectionResult(itemsOnly)).toEqual(
-      parseCollectionResult(itemsOnly),
-    );
+    expect(parseCollectionResult(itemsOnly)).toEqual(parseCollectionResult(itemsOnly));
   });
 
   it("exposes the schema for composition by later tasks (CB-010)", () => {

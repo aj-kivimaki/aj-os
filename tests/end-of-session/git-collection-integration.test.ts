@@ -141,9 +141,7 @@ describe("EOS-103 — end-to-end ChangeSet production (real git)", () => {
     const renamed = byPath["src/renamed-new.ts"]!;
     expect(renamed.kind).toBe("source");
     expect(renamed.metadata).toEqual({ oldPath: "src/renamed-old.ts" });
-    expect(renamed.summary).toBe(
-      "renamed src/renamed-old.ts → src/renamed-new.ts",
-    );
+    expect(renamed.summary).toBe("renamed src/renamed-old.ts → src/renamed-new.ts");
   });
 
   it("returns an empty ChangeSet for a range with no changes", async () => {

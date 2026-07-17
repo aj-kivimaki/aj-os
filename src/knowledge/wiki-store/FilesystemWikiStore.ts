@@ -106,10 +106,7 @@ export function createFilesystemWikiStore(
   }
 
   /** Assert the nearest existing ancestor of `candidate` resolves inside root. */
-  async function assertNoSymlinkEscape(
-    root: string,
-    candidate: string,
-  ): Promise<void> {
+  async function assertNoSymlinkEscape(root: string, candidate: string): Promise<void> {
     let current = candidate;
     for (;;) {
       try {

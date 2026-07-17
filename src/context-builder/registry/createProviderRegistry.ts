@@ -64,9 +64,7 @@ export function createProviderRegistry(
       );
     }
     if (byId.has(id)) {
-      throw new Error(
-        `createProviderRegistry: duplicate provider id "${id}".`,
-      );
+      throw new Error(`createProviderRegistry: duplicate provider id "${id}".`);
     }
     byId.set(id, provider);
   }

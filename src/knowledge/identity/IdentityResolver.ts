@@ -68,8 +68,5 @@ export type Resolution =
  * this port); both obey the false-split-over-false-merge bias.
  */
 export interface IdentityResolver {
-  resolve(
-    candidate: Candidate,
-    existing: readonly ExistingPage[],
-  ): Promise<Resolution>;
+  resolve(candidate: Candidate, existing: readonly ExistingPage[]): Promise<Resolution>;
 }

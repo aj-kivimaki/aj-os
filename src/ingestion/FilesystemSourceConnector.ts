@@ -61,10 +61,7 @@ async function collectFiles(
     const absChild = path.join(absDir, entry.name);
     if (entry.isDirectory()) {
       files.push(...(await collectFiles(absChild, extensions)));
-    } else if (
-      entry.isFile() &&
-      extensions.some((ext) => entry.name.endsWith(ext))
-    ) {
+    } else if (entry.isFile() && extensions.some((ext) => entry.name.endsWith(ext))) {
       files.push(absChild);
     }
   }
@@ -106,10 +103,7 @@ export function createFilesystemSourceConnector(
 
   function toRecord(absPath: string, content: string): SourceRecord {
     const normalized = content.replace(/\r\n/g, "\n");
-    const relativePath = path
-      .relative(baseAbs, absPath)
-      .split(path.sep)
-      .join("/");
+    const relativePath = path.relative(baseAbs, absPath).split(path.sep).join("/");
     return {
       id: `${kind}:${relativePath}`,
       uri: pathToFileURL(absPath).href,

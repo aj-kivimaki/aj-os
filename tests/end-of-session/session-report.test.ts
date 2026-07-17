@@ -31,14 +31,9 @@ const validReport = {
   filesAnalyzed: 12,
   candidatesProduced: {
     count: 2,
-    ids: [
-      "session:01J8Z3K7Q9WV0FB2XN4MABCDEF:1",
-      "session:01J8Z3K7Q9WV0FB2XN4MABCDEF:2",
-    ],
+    ids: ["session:01J8Z3K7Q9WV0FB2XN4MABCDEF:1", "session:01J8Z3K7Q9WV0FB2XN4MABCDEF:2"],
   },
-  errors: [
-    { source: "git", message: "A file could not be diffed.", recoverable: true },
-  ],
+  errors: [{ source: "git", message: "A file could not be diffed.", recoverable: true }],
   result: "partial",
   logEntry: "Run completed with 1 recoverable error; 2 candidates produced.",
 } as const satisfies SessionReport;
@@ -70,25 +65,23 @@ describe("SessionReport contract", () => {
 
   it("accepts every result in the closed set", () => {
     for (const result of SESSION_RESULTS) {
-      expect(() =>
-        parseSessionReport({ ...minimalInput, result }),
-      ).not.toThrow();
+      expect(() => parseSessionReport({ ...minimalInput, result })).not.toThrow();
     }
   });
 
   it("rejects a result outside the closed set — result is not lenient", () => {
-    expect(() =>
-      parseSessionReport({ ...minimalInput, result: "aborted" }),
-    ).toThrow(ZodError);
+    expect(() => parseSessionReport({ ...minimalInput, result: "aborted" })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects a negative or non-integer duration/count", () => {
-    expect(() =>
-      parseSessionReport({ ...minimalInput, durationMs: -1 }),
-    ).toThrow(ZodError);
-    expect(() =>
-      parseSessionReport({ ...minimalInput, filesAnalyzed: 1.5 }),
-    ).toThrow(ZodError);
+    expect(() => parseSessionReport({ ...minimalInput, durationMs: -1 })).toThrow(
+      ZodError,
+    );
+    expect(() => parseSessionReport({ ...minimalInput, filesAnalyzed: 1.5 })).toThrow(
+      ZodError,
+    );
     expect(() =>
       parseSessionReport({
         ...minimalInput,
@@ -98,9 +91,9 @@ describe("SessionReport contract", () => {
   });
 
   it("rejects a malformed timestamp", () => {
-    expect(() =>
-      parseSessionReport({ ...minimalInput, endedAt: "not-a-date" }),
-    ).toThrow(ZodError);
+    expect(() => parseSessionReport({ ...minimalInput, endedAt: "not-a-date" })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects a report-error missing recoverable, and stack-trace leakage", () => {
@@ -136,9 +129,7 @@ describe("SessionReport contract", () => {
   });
 
   it("is deterministic — same input yields an equal contract", () => {
-    expect(parseSessionReport(validReport)).toEqual(
-      parseSessionReport(validReport),
-    );
+    expect(parseSessionReport(validReport)).toEqual(parseSessionReport(validReport));
   });
 
   it("exposes the schema for composition (report generation, M4/M5)", () => {

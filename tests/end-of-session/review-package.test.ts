@@ -52,9 +52,7 @@ describe("ReviewPackage contract", () => {
   });
 
   it("rejects empty markdown — the projection must carry rendered content", () => {
-    expect(() =>
-      parseReviewPackage({ ...validPackage, markdown: "" }),
-    ).toThrow(ZodError);
+    expect(() => parseReviewPackage({ ...validPackage, markdown: "" })).toThrow(ZodError);
   });
 
   it("rejects a malformed generatedAt timestamp", () => {
@@ -77,9 +75,7 @@ describe("ReviewPackage contract", () => {
   });
 
   it("is deterministic — same input yields an equal contract", () => {
-    expect(parseReviewPackage(validPackage)).toEqual(
-      parseReviewPackage(validPackage),
-    );
+    expect(parseReviewPackage(validPackage)).toEqual(parseReviewPackage(validPackage));
   });
 
   it("exposes the schema for composition (the projector, M5)", () => {

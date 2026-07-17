@@ -16,19 +16,13 @@ import type {
 } from "./schema.js";
 
 /** The model's validated structured findings for one session (internal pipeline contract). */
-export type KnowledgeExtraction = DeepReadonly<
-  z.infer<typeof knowledgeExtractionSchema>
->;
+export type KnowledgeExtraction = DeepReadonly<z.infer<typeof knowledgeExtractionSchema>>;
 
 /** A single reusable-knowledge finding within an extraction. */
-export type KnowledgeFinding = DeepReadonly<
-  z.infer<typeof knowledgeFindingSchema>
->;
+export type KnowledgeFinding = DeepReadonly<z.infer<typeof knowledgeFindingSchema>>;
 
 /** The session summary carried by an extraction. */
-export type ExtractionSummary = DeepReadonly<
-  z.infer<typeof extractionSummarySchema>
->;
+export type ExtractionSummary = DeepReadonly<z.infer<typeof extractionSummarySchema>>;
 
 /** A finding's kind — a soft hint (see `extractionKindSchema`). */
 export type ExtractionKind = z.infer<typeof extractionKindSchema>;

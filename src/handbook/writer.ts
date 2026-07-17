@@ -7,11 +7,7 @@ import {
   resolveInInbox,
   toVaultRelative,
 } from "./paths.js";
-import type {
-  InboxFileInput,
-  InboxNoteInput,
-  InboxWriteResult,
-} from "./types.js";
+import type { InboxFileInput, InboxNoteInput, InboxWriteResult } from "./types.js";
 
 /**
  * Validate a caller-supplied inbox filename. Rejects (rather than silently
@@ -61,10 +57,7 @@ async function writeWithoutOverwrite(
 
   const ext = path.extname(filename);
   const stem = filename.slice(0, filename.length - ext.length);
-  const candidates = [
-    filename,
-    `${stem}-${Date.now()}${ext}`,
-  ];
+  const candidates = [filename, `${stem}-${Date.now()}${ext}`];
 
   for (const candidate of candidates) {
     const absPath = resolveInInbox(candidate);
@@ -85,9 +78,7 @@ async function writeWithoutOverwrite(
 }
 
 /** Create a Markdown note in the inbox with lightweight frontmatter. */
-export async function writeInboxNote(
-  input: InboxNoteInput,
-): Promise<InboxWriteResult> {
+export async function writeInboxNote(input: InboxNoteInput): Promise<InboxWriteResult> {
   const stem = input.filename
     ? sanitizeFilename(input.filename).replace(/\.md$/i, "")
     : slugify(input.title);
@@ -109,9 +100,7 @@ export async function writeInboxNote(
 }
 
 /** Save an arbitrary file (text or base64) to the inbox. */
-export async function saveInboxFile(
-  input: InboxFileInput,
-): Promise<InboxWriteResult> {
+export async function saveInboxFile(input: InboxFileInput): Promise<InboxWriteResult> {
   const filename = sanitizeFilename(input.filename);
   if (!filename) {
     throw new Error("A non-empty filename is required");

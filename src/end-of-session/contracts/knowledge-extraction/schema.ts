@@ -55,9 +55,7 @@ export const EXTRACTION_KINDS = [
  * `changeKindSchema`/`entityTypeSchema` precedent); downstream must not depend on a
  * precise kind, and M4 re-classifies authoritatively.
  */
-export const extractionKindSchema = z
-  .enum(EXTRACTION_KINDS)
-  .catch("handbook-entry");
+export const extractionKindSchema = z.enum(EXTRACTION_KINDS).catch("handbook-entry");
 
 /** Non-empty-string array that defaults to an empty array (compiler precedent). */
 const stringListSchema = z.array(z.string().min(1)).default([]);

@@ -139,9 +139,7 @@ describe("EOS-405 — the outcome policy", () => {
   });
 
   it("a recoverable analyzer error makes the run partial", () => {
-    const report = buildSessionReport(
-      facts({ changeSet: changeSet(2, [recoverable]) }),
-    );
+    const report = buildSessionReport(facts({ changeSet: changeSet(2, [recoverable]) }));
 
     // Partial collection: one analyzer failed, the rest continued, candidates were still
     // produced. The run succeeded — incompletely.
@@ -215,9 +213,7 @@ describe("EOS-405 — a failed run still produces a valid report", () => {
 
 describe("EOS-405 — errors", () => {
   it("maps an AnalyzerError onto the report's shape, carrying recoverable", () => {
-    const report = buildSessionReport(
-      facts({ changeSet: changeSet(1, [recoverable]) }),
-    );
+    const report = buildSessionReport(facts({ changeSet: changeSet(1, [recoverable]) }));
 
     // `source` generalizes `analyzer` (EOS-004); `recoverable` is carried, not re-decided —
     // the collection stage already judged it.
@@ -238,10 +234,7 @@ describe("EOS-405 — errors", () => {
       ),
     );
 
-    expect(report.errors.map((error) => error.source)).toEqual([
-      "docs",
-      "extraction",
-    ]);
+    expect(report.errors.map((error) => error.source)).toEqual(["docs", "extraction"]);
     expect(report.errors.map((error) => error.recoverable)).toEqual([true, false]);
   });
 });
@@ -355,15 +348,11 @@ describe("EOS-405 — logEntry", () => {
   it("agrees with the structured fields it summarizes", () => {
     // The log line is derived from the assembled report, not recomputed from the facts, so
     // the record and its summary cannot describe the same run differently.
-    const report = buildSessionReport(
-      facts({ changeSet: changeSet(3, [recoverable]) }),
-    );
+    const report = buildSessionReport(facts({ changeSet: changeSet(3, [recoverable]) }));
 
     expect(report.logEntry).toContain(`duration=${report.durationMs}ms`);
     expect(report.logEntry).toContain(`files=${report.filesAnalyzed}`);
-    expect(report.logEntry).toContain(
-      `candidates=${report.candidatesProduced.count}`,
-    );
+    expect(report.logEntry).toContain(`candidates=${report.candidatesProduced.count}`);
     expect(report.logEntry).toContain(`errors=${report.errors.length}`);
     expect(report.logEntry).toContain(`result=${report.result}`);
   });

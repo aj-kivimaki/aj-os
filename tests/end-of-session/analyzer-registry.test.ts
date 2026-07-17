@@ -56,9 +56,7 @@ describe("Analyzer Registry", () => {
 
   it("throws on an analyzer with a missing or empty id", () => {
     const bad = { ...makeAnalyzer("git"), id: "" };
-    expect(() => createAnalyzerRegistry([bad])).toThrow(
-      /non-empty string id/,
-    );
+    expect(() => createAnalyzerRegistry([bad])).toThrow(/non-empty string id/);
   });
 
   it("throws on a duplicate analyzer id", () => {

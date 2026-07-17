@@ -8,9 +8,7 @@ import type { z } from "zod";
 import type { contextBuilderConfigSchema } from "./schema.js";
 
 /** Immutable public configuration for the Context Builder. */
-export type ContextBuilderConfig = Readonly<
-  z.infer<typeof contextBuilderConfigSchema>
->;
+export type ContextBuilderConfig = Readonly<z.infer<typeof contextBuilderConfigSchema>>;
 
 /** Ranking profile applied when assembling context. */
 export type ContextProfile = ContextBuilderConfig["profile"];

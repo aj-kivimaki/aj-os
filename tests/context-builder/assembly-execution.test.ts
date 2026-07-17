@@ -93,7 +93,12 @@ const EXPECTED_SECTION_KIND: Readonly<Record<ReferenceType, string>> = {
 function item(
   id: string,
   type: ReferenceType,
-  overrides: { sourceId?: string; title?: string; content?: string; locator?: string } = {},
+  overrides: {
+    sourceId?: string;
+    title?: string;
+    content?: string;
+    locator?: string;
+  } = {},
 ): KnowledgeItem {
   const sourceId = overrides.sourceId ?? `src-${id}`;
   return {
@@ -482,11 +487,7 @@ describe("assemble — immutability of the input SelectionResult (by divergence)
     // Input order untouched; output mirrors that exact given order.
     expect(selection.selectedItems.map((i) => i.id)).toEqual(["k1", "k2", "k3"]);
     expect(Object.isFrozen(selection.selectedItems)).toBe(true);
-    expect(section(pkg, "handbook-references")?.referenceIds).toEqual([
-      "s3",
-      "s1",
-      "s2",
-    ]);
+    expect(section(pkg, "handbook-references")?.referenceIds).toEqual(["s3", "s1", "s2"]);
   });
 
   it("consumes only selectedItems — excludedItems never enter assembly", async () => {

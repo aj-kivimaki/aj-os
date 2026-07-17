@@ -54,9 +54,7 @@ const asFencedJson = (value: unknown): string =>
 
 describe("parseExtractionResponse — valid responses", () => {
   it("parses a bare-JSON response and preserves its values verbatim", () => {
-    expect(parseExtractionResponse(asJson(validExtraction))).toEqual(
-      validExtraction,
-    );
+    expect(parseExtractionResponse(asJson(validExtraction))).toEqual(validExtraction);
   });
 
   it("strips a ```json fence before parsing", () => {
@@ -107,9 +105,7 @@ describe("parseExtractionResponse — valid responses", () => {
       rationale: "Reusable.",
     }));
     const parsed = parseExtractionResponse(asJson({ ...validExtraction, findings }));
-    expect(parsed.findings.map((f) => f.title)).toEqual(
-      findings.map((f) => f.title),
-    );
+    expect(parsed.findings.map((f) => f.title)).toEqual(findings.map((f) => f.title));
   });
 });
 
@@ -129,23 +125,17 @@ describe("parseExtractionResponse — kind soft hint", () => {
       ...validExtraction,
       findings: [{ ...validExtraction.findings[0], kind: "refactor" }],
     });
-    expect(parseExtractionResponse(unknown).findings[0]?.kind).toBe(
-      "handbook-entry",
-    );
+    expect(parseExtractionResponse(unknown).findings[0]?.kind).toBe("handbook-entry");
 
     const { kind: _kind, ...withoutKind } = validExtraction.findings[0];
     const missing = asJson({ ...validExtraction, findings: [withoutKind] });
-    expect(parseExtractionResponse(missing).findings[0]?.kind).toBe(
-      "handbook-entry",
-    );
+    expect(parseExtractionResponse(missing).findings[0]?.kind).toBe("handbook-entry");
   });
 });
 
 describe("parseExtractionResponse — rejection", () => {
   it("throws ExtractionError on a non-JSON body", () => {
-    expect(() => parseExtractionResponse("not json at all")).toThrow(
-      ExtractionError,
-    );
+    expect(() => parseExtractionResponse("not json at all")).toThrow(ExtractionError);
   });
 
   it("throws ExtractionError when a required field is missing", () => {

@@ -77,9 +77,7 @@ describe("RetrievalService", () => {
     // Present on disk and a strong keyword match, but not linked by the index.
     await writeArticle("miss.md", "# Miss\n\nDependency injection injection injection.");
 
-    const results = await new RetrievalService(wiki).search(
-      "dependency injection",
-    );
+    const results = await new RetrievalService(wiki).search("dependency injection");
 
     expect(results.map((r) => r.title)).toEqual(["Match"]);
   });
@@ -123,10 +121,7 @@ describe("RetrievalService", () => {
 
   it("ranks more relevant articles first", async () => {
     await writeIndex("strong", "weak");
-    await writeArticle(
-      "strong.md",
-      "# Strong\n\nprompt prompt prompt renderer renderer",
-    );
+    await writeArticle("strong.md", "# Strong\n\nprompt prompt prompt renderer renderer");
     await writeArticle("weak.md", "# Weak\n\nprompt mentioned once here.");
 
     const results = await new RetrievalService(wiki).search("prompt renderer");

@@ -19,10 +19,7 @@
  * Learned frontmatter metadata (`aliases`) is preserved across the merge; there is
  * no semantic fact-loss detection — that is intentionally out of scope.
  */
-import type {
-  CompiledPage,
-  TextGenerator,
-} from "./KnowledgeCompiler.js";
+import type { CompiledPage, TextGenerator } from "./KnowledgeCompiler.js";
 import type { RenderedPrompt } from "../../platform/prompt/index.js";
 
 import {
@@ -96,9 +93,7 @@ function unionSources(
   existing: readonly string[],
   incoming: readonly string[],
 ): string[] {
-  return [...new Set([...existing, ...incoming])].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  return [...new Set([...existing, ...incoming])].sort((a, b) => a.localeCompare(b));
 }
 
 /**
@@ -159,10 +154,7 @@ export function createLlmMergeEngine(
   config: { generator: TextGenerator },
   now: () => Date = () => new Date(),
 ): MergeEngine {
-  async function merge(
-    existing: string,
-    incoming: CompiledPage,
-  ): Promise<MergeOutcome> {
+  async function merge(existing: string, incoming: CompiledPage): Promise<MergeOutcome> {
     const existingPage = parsePage(existing);
     const frontmatter = readFrontmatter(existingPage.frontmatter);
     const existingSources = frontmatter.sources;

@@ -108,10 +108,7 @@ function durationFor(startedAt: string, endedAt: string): number {
  * log line and the structured record can never disagree about the same run. `logEntry` is a
  * projection of the report; taking it from anywhere else would make it a second opinion.
  */
-function logEntryFor(
-  report: Omit<SessionReport, "logEntry">,
-  session: Session,
-): string {
+function logEntryFor(report: Omit<SessionReport, "logEntry">, session: Session): string {
   return (
     `${report.endedAt} session=${report.sessionId} trigger=${report.trigger} ` +
     `result=${report.result} branch=${session.branch} range=${session.gitState.range} ` +

@@ -64,9 +64,7 @@ describe("ConfigService", () => {
       }),
     );
 
-    await expect(new ConfigService(root).load()).rejects.toThrow(
-      /generatedWikiPath/,
-    );
+    await expect(new ConfigService(root).load()).rejects.toThrow(/generatedWikiPath/);
   });
 
   it("honors an explicit reviewPath", async () => {
@@ -109,9 +107,7 @@ describe("ConfigService", () => {
   });
 
   it("fails when the configuration file is missing", async () => {
-    await expect(new ConfigService(root).load()).rejects.toBeInstanceOf(
-      ConfigError,
-    );
+    await expect(new ConfigService(root).load()).rejects.toBeInstanceOf(ConfigError);
     await expect(new ConfigService(root).load()).rejects.toThrow(
       /Configuration file not found/,
     );
@@ -120,33 +116,25 @@ describe("ConfigService", () => {
   it("fails when the JSON is invalid", async () => {
     await writeConfig("{ not valid json");
 
-    await expect(new ConfigService(root).load()).rejects.toThrow(
-      /Invalid JSON/,
-    );
+    await expect(new ConfigService(root).load()).rejects.toThrow(/Invalid JSON/);
   });
 
   it("fails when handbook.path is missing", async () => {
     await writeConfig(JSON.stringify({ handbook: {} }));
 
-    await expect(new ConfigService(root).load()).rejects.toThrow(
-      /handbook\.path/,
-    );
+    await expect(new ConfigService(root).load()).rejects.toThrow(/handbook\.path/);
   });
 
   it("fails when the handbook path does not exist", async () => {
     await writeConfig(JSON.stringify({ handbook: { path: "../missing" } }));
 
-    await expect(new ConfigService(root).load()).rejects.toThrow(
-      /does not exist/,
-    );
+    await expect(new ConfigService(root).load()).rejects.toThrow(/does not exist/);
   });
 
   it("fails when the handbook path is a file, not a directory", async () => {
     await writeFile(join(root, "handbook.md"), "# not a dir", "utf8");
     await writeConfig(JSON.stringify({ handbook: { path: "./handbook.md" } }));
 
-    await expect(new ConfigService(root).load()).rejects.toThrow(
-      /not a directory/,
-    );
+    await expect(new ConfigService(root).load()).rejects.toThrow(/not a directory/);
   });
 });

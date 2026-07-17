@@ -100,10 +100,7 @@ function describeFailure(reason: unknown): string {
  * `StageFailure` as the *only* thing it can receive — there is no unattributed failure path
  * to defend against.
  */
-async function inStage<T>(
-  source: string,
-  operation: () => Promise<T> | T,
-): Promise<T> {
+async function inStage<T>(source: string, operation: () => Promise<T> | T): Promise<T> {
   try {
     return await operation();
   } catch (error) {
@@ -122,9 +119,7 @@ async function inStage<T>(
  * const report = await workflow.run(context);
  * report.result; // "completed" | "partial" | "failed"
  */
-export function createSessionWorkflow(
-  deps: SessionWorkflowDeps,
-): EndOfSessionWorkflow {
+export function createSessionWorkflow(deps: SessionWorkflowDeps): EndOfSessionWorkflow {
   const now = deps.now ?? (() => new Date());
 
   async function run(context: SessionContext): Promise<SessionReport> {

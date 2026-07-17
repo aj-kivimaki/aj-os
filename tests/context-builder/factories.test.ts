@@ -81,10 +81,7 @@ describe("createProviderRegistry()", () => {
 
   it("validates its input — a broken catalogue is rejected", () => {
     expect(() =>
-      createProviderRegistry([
-        makeProvider("handbook"),
-        makeProvider("handbook"),
-      ]),
+      createProviderRegistry([makeProvider("handbook"), makeProvider("handbook")]),
     ).toThrow();
   });
 });
