@@ -56,7 +56,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 | M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ⬜ |
+| M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M5 | Comments, Errors & Test Craft | Comments state constraints; errors share a taxonomy and a voice | ⬜ |
 
 ---
@@ -1006,8 +1006,8 @@ path code) — characterization-first is mandatory._
 - [x] `end-of-session/contracts/immutable.ts` **untouched** (EOS-005) — verified by `git diff`.
 - [x] `KnowledgeAssistant` constructible with injected dependencies, and **tested** (REX-402, 3 tests).
 - [x] The live capability is intact — full suite green throughout; auth gate on both routes characterized.
-- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
-- [ ] Retrospective created.
+- [x] Freeze Review completed; **Milestone Freeze declared by the reviewer (AJ) on 2026-07-17.** _(§7 weighed and ruled: **F-054 partial closure approved** — F-030-class, no test harness required before freeze; the **format-gate incident ruled evidence the verification layer works** — process functioning as designed, not an argument against freeze.)_
+- [x] Retrospective created (§4.7 stage 7) — [retrospectives/RETROSPECTIVE-M4.md](retrospectives/RETROSPECTIVE-M4.md).
 
 ---
 
