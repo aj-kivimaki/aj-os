@@ -10,6 +10,7 @@
  * {@link TextGenerator} (the platform AI Client implements it), so the pipeline and
  * the deterministic rendering can be tested without the network.
  */
+import { AjError } from "../../platform/AjError.js";
 import type { SourceRecord } from "../../ingestion/index.js";
 import type { AIResponse } from "../../platform/ai/index.js";
 import type { RenderedPrompt } from "../../platform/prompt/index.js";
@@ -28,12 +29,7 @@ export interface ExtractedKnowledge {
 }
 
 /** Raised when the model output cannot be parsed or validated. */
-export class CompilerError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "CompilerError";
-  }
-}
+export class CompilerError extends AjError {}
 
 export type CompiledPageKind = "source" | "entity" | "concept";
 

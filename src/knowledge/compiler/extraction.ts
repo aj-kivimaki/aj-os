@@ -55,8 +55,8 @@ export function parseExtraction(raw: string): SourceExtraction {
   let data: unknown;
   try {
     data = JSON.parse(stripCodeFence(raw));
-  } catch {
-    throw new CompilerError("The model did not return valid JSON.");
+  } catch (error) {
+    throw new CompilerError("The model did not return valid JSON.", { cause: error });
   }
   const result = sourceExtractionSchema.safeParse(data);
   if (!result.success) {

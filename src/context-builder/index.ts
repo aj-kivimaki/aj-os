@@ -28,11 +28,9 @@ export const CONTEXT_BUILDER = {
     "Assembles deterministic, explainable Context Packages from approved AJ-OS knowledge sources.",
 } as const;
 
-// Public factory and handle.
 export { createContextBuilder } from "./createContextBuilder.js";
 export type { ContextBuilder } from "./createContextBuilder.js";
 
-// Public configuration contract.
 export {
   contextBuilderConfigSchema,
   parseContextBuilderConfig,

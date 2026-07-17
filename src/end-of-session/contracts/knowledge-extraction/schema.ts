@@ -18,6 +18,7 @@
  * that is downstream (M4 / SPEC-004). This module only defines and validates shape.
  */
 
+import { AjError } from "../../../platform/AjError.js";
 import { z } from "zod";
 
 import { deepFreeze } from "../immutable.js";
@@ -25,12 +26,7 @@ import { deepFreeze } from "../immutable.js";
 import type { KnowledgeExtraction } from "./types.js";
 
 /** Raised when a model response cannot be parsed or validated (the `CompilerError` precedent). */
-export class ExtractionError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ExtractionError";
-  }
-}
+export class ExtractionError extends AjError {}
 
 /**
  * The candidate-kind hints a finding may carry. These intentionally mirror the
@@ -138,8 +134,8 @@ export function parseExtractionResponse(raw: string): KnowledgeExtraction {
   let data: unknown;
   try {
     data = JSON.parse(stripCodeFence(raw));
-  } catch {
-    throw new ExtractionError("The model did not return valid JSON.");
+  } catch (error) {
+    throw new ExtractionError("The model did not return valid JSON.", { cause: error });
   }
   const result = knowledgeExtractionSchema.safeParse(data);
   if (!result.success) {

@@ -12,11 +12,6 @@
  * `run(context: SessionContext): Promise<SessionReport>` (EOS-406), assembled at the
  * composition root. Internal stages stay private and are exposed only through this
  * barrel. Consumers import from this entry point, never from internal files.
- *
- * This file is the module's public surface. Contracts are re-exported here from
- * the `contracts/` barrel as they arrive (EOS-002 adds the session contracts);
- * services and the `run` entry point land in later M1+ tasks. The barrel exports
- * nothing that does not yet exist.
  */
 
 // Immutable workflow contracts (EOS-002+), including the published SPEC-003 →

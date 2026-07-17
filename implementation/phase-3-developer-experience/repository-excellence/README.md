@@ -4,7 +4,7 @@
 >
 > **Related Specification:** _None._ This is a **non-specification engineering quality package**. See [Why this package has no SPEC](#why-this-package-has-no-spec).
 >
-> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on 2026-07-17. The Review Findings Inventory, milestone roadmap, governing principles, sequencing, and package-level decisions are frozen. **Each milestone still runs its own Planning → Planning Review → Planning Freeze.** **M1, M2, M3-A, M3-B, and M4 COMPLETE and FROZEN** (AJ, 2026-07-17) — *M1 Repository Truth · M2 Repository Verification · M3-A Public Contract Governance · M3-B Semantic Naming & Repository Taxonomy · M4 Implementation Integrity & Testability.* M4 treated duplication as evidence (2 kept parallel, 1 consolidated in-boundary), fixed one security-guard defect **characterization-first**, gave `KnowledgeAssistant` dependency injection + its first tests, and moved the agent layer off zero coverage; 738 tests green, behaviour preserved. **Next: M5 — Comments, Errors & Test Craft (the final milestone).**
+> **Status:** ✅ **REPOSITORY EXCELLENCE COMPLETE** — all six milestones frozen by the reviewer (AJ), 2026-07-17..18. *M1 Repository Truth · M2 Repository Verification · M3-A Public Contract Governance · M3-B Semantic Naming & Repository Taxonomy · M4 Implementation Integrity & Testability · M5 Comments, Errors & Test Craft.* Every finding in the inventory actioned, deferred with reason, or ruled a recorded "keep"; 744 tests green; behaviour preserved throughout; no repository contract expanded. The programme's Definition of Done is met — see below. **Package Planning was FROZEN** at the outset (AJ, 2026-07-17): the Findings Inventory, roadmap, scope guard, sequencing, and package decisions; each milestone then ran its own Planning → Planning Review → Planning Freeze → implementation → Freeze Review → retrospective.
 
 ---
 
@@ -135,7 +135,7 @@ See [MILESTONES.md](MILESTONES.md) for the frozen roadmap.
 | M3-A | Public Surface *(contractual)* | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-B | Naming & Readability | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M4 | Structural Consistency & Genuine Duplication | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M5 | Comments, Errors & Test Craft | ⬜ |
+| M5 | Comments, Errors & Test Craft | ✅ **FROZEN** (AJ, 2026-07-18) |
 
 ---
 

@@ -15,6 +15,7 @@
  * - Read-only: the connector never mutates the filesystem.
  * - Output is deterministic: records are returned sorted by `id`.
  */
+import { AjError } from "../platform/AjError.js";
 import { createHash } from "node:crypto";
 import type { Stats } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
@@ -24,12 +25,7 @@ import { pathToFileURL } from "node:url";
 import type { SourceConnector, SourceRecord } from "./SourceConnector.js";
 
 /** Raised on connector misconfiguration (fatal). */
-export class SourceConnectorError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "SourceConnectorError";
-  }
-}
+export class SourceConnectorError extends AjError {}
 
 export interface FilesystemSourceConnectorOptions {
   /** Connector kind; namespaces record ids (e.g. `"handbook"`). No `:`. */

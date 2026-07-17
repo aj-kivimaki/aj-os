@@ -20,6 +20,7 @@
  *   mis-set review path can never point the store at canonical knowledge (SPEC-003 §17).
  * - `saveCandidates` creates parent directories as needed; an empty list writes nothing.
  */
+import { AjError } from "../../platform/AjError.js";
 import { appendFile, mkdir, realpath, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -44,12 +45,7 @@ const LOG_FILE = "log.md";
 const CANONICAL_DIRS = new Set(["foundation", "library", "wiki"]);
 
 /** Raised on misconfiguration or a guarded-path violation. */
-export class ReviewStoreError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ReviewStoreError";
-  }
-}
+export class ReviewStoreError extends AjError {}
 
 export interface FilesystemReviewStoreOptions {
   /** Directory the review area is persisted to (e.g. `<vault>/knowledge-review`). Must exist. */

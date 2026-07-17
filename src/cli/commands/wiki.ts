@@ -3,8 +3,8 @@ import {
   resetGeneratedWiki,
 } from "../../knowledge/composition/index.js";
 import type { GenerationReport } from "../../knowledge/wiki-generator/index.js";
-import { ConfigError, ConfigService } from "../../platform/config/index.js";
-import { AIError } from "../../platform/ai/index.js";
+import { AjError } from "../../platform/AjError.js";
+import { ConfigService } from "../../platform/config/index.js";
 
 /** Options parsed off the `wiki build` command line. */
 export interface WikiBuildOptions {
@@ -38,9 +38,12 @@ export async function wikiBuildCommand(options: WikiBuildOptions = {}): Promise<
     );
     report = await generator.run({ mode });
   } catch (error) {
-    // Known, user-facing problems (missing config, missing API key) print a
-    // friendly message; anything unexpected surfaces loudly.
-    if (error instanceof ConfigError || error instanceof AIError) {
+    // Every AJ-OS domain error is a known, user-facing problem (missing config,
+    // missing API key, a handbook missing `foundation/`, …): print its message
+    // friendly. Anything else surfaces loudly. Matching `AjError` rather than an
+    // enumerated list is what closes F-060 — `SourceConnectorError` used to fall
+    // through to a raw stack trace here.
+    if (error instanceof AjError) {
       console.log();
       console.log(error.message);
       console.log();
@@ -53,22 +56,35 @@ export async function wikiBuildCommand(options: WikiBuildOptions = {}): Promise<
 }
 
 /** Print a concise, human-readable summary of a generation run. */
-function printReport(report: GenerationReport): void {
-  console.log();
-  console.log("── Wiki build ────────────────────────────");
-  console.log(`  Mode              : ${report.mode}`);
-  console.log(`  Sources ingested  : ${report.ingested.length}`);
-  console.log(`  Pages updated     : ${report.updatedPages.length}`);
-  console.log(`  Pages marked stale: ${report.stalePages.length}`);
-  console.log(`  Removal proposals : ${report.removalProposals.length}`);
+/**
+ * Format the build report as lines — pure, so it is testable without stdout
+ * capture, matching `session.ts`'s `formatSessionReport` exemplar (F-065). The
+ * caller prints; this function only decides what the report says.
+ */
+export function formatWikiReport(report: GenerationReport): string[] {
+  const lines = [
+    "",
+    "── Wiki build ────────────────────────────",
+    `  Mode              : ${report.mode}`,
+    `  Sources ingested  : ${report.ingested.length}`,
+    `  Pages updated     : ${report.updatedPages.length}`,
+    `  Pages marked stale: ${report.stalePages.length}`,
+    `  Removal proposals : ${report.removalProposals.length}`,
+  ];
 
   if (report.failed.length > 0) {
-    console.log(`  Sources failed    : ${report.failed.length}`);
+    lines.push(`  Sources failed    : ${report.failed.length}`);
     for (const id of report.failed) {
-      console.log(`      • ${id}`);
+      lines.push(`      • ${id}`);
     }
   }
-  console.log("──────────────────────────────────────────");
-  console.log(report.logEntry);
-  console.log();
+
+  lines.push("──────────────────────────────────────────", report.logEntry, "");
+  return lines;
+}
+
+function printReport(report: GenerationReport): void {
+  for (const line of formatWikiReport(report)) {
+    console.log(line);
+  }
 }

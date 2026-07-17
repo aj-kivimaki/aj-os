@@ -1,3 +1,4 @@
+import { AjError } from "../AjError.js";
 import type { Stats } from "node:fs";
 import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -10,12 +11,7 @@ import type { HandbookInfo } from "./types.js";
  * The product catches this to print a friendly explanation, while letting
  * unexpected errors surface loudly.
  */
-export class HandbookError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "HandbookError";
-  }
-}
+export class HandbookError extends AjError {}
 
 /**
  * Understands the structure of a configured handbook.

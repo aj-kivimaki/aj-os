@@ -1,3 +1,4 @@
+import { AjError } from "../AjError.js";
 import { config as loadDotenv } from "dotenv";
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -27,12 +28,7 @@ const MAX_TOKENS = 1024;
  * print a friendly explanation (missing key, API failure) while letting genuinely
  * unexpected errors surface loudly.
  */
-export class AIError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "AIError";
-  }
-}
+export class AIError extends AjError {}
 
 /**
  * Generates an answer from a rendered prompt using Anthropic's API.
@@ -99,6 +95,7 @@ export class AIClient {
     } catch (error) {
       throw new AIError(
         `The AI request failed: ${error instanceof Error ? error.message : String(error)}`,
+        { cause: error },
       );
     }
 

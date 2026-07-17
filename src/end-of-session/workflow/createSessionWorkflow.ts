@@ -16,6 +16,7 @@
  * stage is missing — raise it rather than absorb it.
  */
 
+import { AjError } from "../../platform/AjError.js";
 import { collectChanges } from "../collection/index.js";
 import { buildSessionReport } from "../report/index.js";
 import type { CandidateGenerator } from "../generation/index.js";
@@ -67,13 +68,12 @@ export interface SessionWorkflowDeps {
  * (`SessionReportError.source`), and the orchestrator is the only component that knows the
  * stage names, because it is the only one that knows the sequence.
  */
-class StageFailure extends Error {
+class StageFailure extends AjError {
   constructor(
     readonly source: string,
     message: string,
   ) {
     super(message);
-    this.name = "StageFailure";
   }
 }
 

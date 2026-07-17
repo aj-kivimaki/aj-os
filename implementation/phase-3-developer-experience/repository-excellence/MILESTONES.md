@@ -57,7 +57,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 | M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M5 | Comments, Errors & Test Craft | Comments state constraints; errors share a taxonomy and a voice | ⬜ |
+| M5 | Comments, Errors & Test Craft | Comments state constraints; errors share a taxonomy and a voice | ✅ **FROZEN** (AJ, 2026-07-18) |
 
 ---
 
@@ -1097,14 +1097,62 @@ suite stays the repository's strongest asset.
 - Shared error base + `cause` chaining + message conventions
 - `printReport` made testable, matching `session.ts`'s exemplar
 
+## Evidence Review — measured against `HEAD` (`b7f528f`)
+
+**The critical safety check: the six-comment preserve-list is intact**, coordinates drifted by M3-B's
+renames and M4's refactors (refreshed in REX-501). The findings:
+
+| Finding | Disposition | Note |
+|---|---|---|
+| F-056 | delete stale comment | *"services … land in later M1+ tasks"* — they landed |
+| F-057 | correct stale comment | defends the **deleted** `NOTION_*` constraint |
+| F-058 | delete noise | section-label comments above obvious exports |
+| F-059 | thin barrel prose | ~150 lines duplicating JSDoc; keep manifest-documenting lines |
+| F-060 | **shared `AjError` base + `cause`** | **12 classes / 11 files / 0 `cause` chains** — the largest change |
+| F-061 | normalize | 3 NUL-message spellings |
+| F-062 | normalize | inconsistent terminal punctuation |
+| F-063 | add `cause` | 0 chains today |
+| F-064 | REX-D4 | `stubGenerator` ×4, `makeProvider` ×3, `stubGitPort` ×2 + contract fixtures |
+| F-065 | testable formatter | `printReport` → `console.log`; `session.ts` is the exemplar |
+| F-066 | add comments (REX-D6) | agent-layer routes near-zero comments |
+
+## Protected outcomes — one per task
+
+| Task | **Protected outcome** | Findings | Gated on |
+|------|---|---|---|
+| [REX-501](tasks/REX-501.md) | every comment is load-bearing or gone; no protected comment lost | F-056/057/058/059/066 | **REX-D6** |
+| [REX-502](tasks/REX-502.md) | errors share a base, a voice, and `cause` — no behavioural change | F-060/061/062/063 | — |
+| [REX-503](tasks/REX-503.md) | CLI output testable; helper duplication ruled | F-064/065 | **REX-D4** |
+
 ## Task Progress
 
-_Task breakdown authored at M5 Planning. Findings: F-056..F-066._
+| Task | Description | Status |
+|------|-------------|--------|
+| REX-501 | Comments state constraints (F-056/057/058/059/066); preserve-list refreshed first | ⬜ ready |
+| REX-502 | Errors share a taxonomy & voice — `AjError` base + `cause` + message consistency (F-060/061/062/063) | ⬜ ready |
+| REX-503 | Test craft — testable `wiki` formatter + REX-D4 helper ruling (F-064/065) | ⬜ ready |
+
+_Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. **REX-D6 and REX-D4 ruled;
+F-060 kept in scope (`AjError` base + voice + `cause`, no error codes); F-066 approved as scoped.** All
+evidence re-measured against `HEAD`; the preserve-list is intact, coordinates refreshed in REX-501.
+**Sequencing: REX-501 → REX-502 → REX-503** (protected comments establish the knowledge boundary;
+errors benefit from stable documentation; test infra validates the completed implementation last).
+**M5 is the final milestone.**_
+
+### Ratified at the M5 Planning Review (AJ, 2026-07-17)
+
+| # | Decision | Outcome |
+|---|---|---|
+| 1 | **[REX-D6](decisions/REX-D6.md)** — the comment rule | **Accepted.** *"When uncertain, keep"* governs deletion **and** addition; the preserve-list is a repository contract for M5 (*"absence of evidence is not evidence of obsolescence"*). |
+| 2 | **F-066** — add agent-layer comments | **Approved as scoped.** Add only where they preserve architectural knowledge code cannot express; the same evidence standard justifies addition as deletion. |
+| 3 | **[REX-D4](decisions/REX-D4.md)** — test helpers | **Accepted.** Consolidate identical cross-cutting stubs; preserve suite-specific contract fixtures (`support.ts` convention). |
+| 4 | **F-060** — error taxonomy scope | **Kept in scope.** `AjError` base + voice + `cause` + preserved `instanceof`; **error codes deferred** as future API evolution, not Repository Excellence. |
 
 ## Dependencies
 
 ### Requires
 - M4 (the code it comments is in its final shape)
+- **[REX-D6](decisions/REX-D6.md)** (comment rule) · **[REX-D4](decisions/REX-D4.md)** (test helpers)
 
 ### Enables
 - Package completion
@@ -1117,11 +1165,83 @@ _Task breakdown authored at M5 Planning. Findings: F-056..F-066._
 
 ## Definition of Done
 
-- [ ] Zero comments describing code that no longer exists.
-- [ ] `catch (e) { if (e instanceof AjError) }` is possible, or REX-D3 records why not.
-- [ ] **Every protected comment intact.**
-- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
-- [ ] Retrospective created.
+- [x] Zero comments describing code that no longer exists (F-056/057; REX-501).
+- [x] `catch (e) { if (e instanceof AjError) }` is possible (REX-502; proven by `aj-error.test.ts`).
+- [x] **Every protected comment intact** — all six verified present after REX-501 (the grep check is the falsifiable proof).
+- [x] Freeze Review completed; **Milestone Freeze declared by the reviewer (AJ) on 2026-07-18.** _(§7 weighed and ruled: F-064 keep approved; F-063 scoped `cause` approved; F-066 single comment approved; the perl/mojibake incident ruled evidence the process succeeded — corrected before the verified state, not an argument against freeze.)_ **This freeze completes the Repository Excellence programme.**
+- [x] Retrospective created (§4.7 stage 7) — [retrospectives/RETROSPECTIVE-M5.md](retrospectives/RETROSPECTIVE-M5.md), which is also the programme close.
+
+---
+
+## M5 Freeze Review — Evidence (prepared for the reviewer)
+
+> **M5 stays ⬜ until the reviewer declares the freeze** (§5.3/§5.4). Including §8 — the case
+> *against*. **This freeze completes the Repository Excellence programme.**
+
+### 1. Tasks complete
+
+REX-501, REX-502, REX-503 — all done. **Four commits** (`78c151c..6a1800f`): planning freeze, then
+one per task.
+
+### 2. Findings — 11 of 11 closed
+
+| Finding | Disposition |
+|---|---|
+| F-056/057/058 | stale/noise comments deleted or made true (REX-501) |
+| F-059 | barrel-header duplication collapsed; decision-ref prose kept |
+| F-066 | **one** genuine constraint documented (loop.ts tool-ordering); routes needed none (REX-D6) |
+| F-060 | shared `AjError` base; `instanceof AjError` proven; `wiki.ts` gap closed (REX-502) |
+| F-061/062 | one NUL spelling; terminal punctuation normalized |
+| F-063 | `cause` chaining at the 4 diagnostic wrap sites |
+| F-064 | **keep, justified** (REX-D4) — already-shared or suite-tuned |
+| F-065 | `formatWikiReport` testable, matching `session.ts`'s exemplar |
+
+### 3. The preserve-list held — M5's core safety claim
+
+**All six protected comments intact**, verified after the pass. The refresh caught that comment #1 had
+drifted to `createFilesystemReviewStore.ts:157-163` (M3-B rename) — the exact miss the refresh exists
+to prevent. **`session.ts` was deliberately NOT narrowed to a catch-all**, protecting the `AIError`-absent design.
+
+### 4. Behaviour preserved
+
+| Property | Evidence |
+|---|---|
+| Suite | **744 tests / 65 files** (738 → 744; +6, none removed or weakened) |
+| Errors | every concrete `instanceof` still holds; the base only *adds* `instanceof AjError` + `cause` |
+| Comments/report | comments don't execute; `formatWikiReport` output identical to the old `printReport` |
+| Gates | full `npm run ci` green (format · lint · typecheck · build · test) |
+
+### 5. Frozen work untouched
+
+No `docs/architecture/**`, `docs/standards/**`, `archive/**`, `decisions/EOS-*`/`CB-*`. No ADR
+authored. The REX-303 public-surface manifests stayed green (AjError is imported by path, not added to a barrel).
+
+### 6. Decisions
+
+**REX-D6** (Accepted — the comment rule) · **REX-D4** (Accepted — helper criteria).
+
+### 7. What the reviewer should weigh — the case *against* a freeze
+
+- **F-064 closed as "keep" on my measurement, not your ruling in the particular.** REX-D4 authorised
+  consolidating genuinely-identical stubs; measurement found none that both were identical *and* that
+  the `support.ts` convention didn't already keep inline. A reviewer may want to confirm the two
+  identical `makeProvider`s should stay inline rather than share — I judged the convention (REX-D4's
+  governing boundary) decisive.
+- **F-063 added `cause` to 4 wrap sites, not every wrap.** I scoped it to the diagnostic-rich sites
+  (SDK + JSON-parse errors); the filesystem realpath catches (ENOENT) were left, since their domain
+  message already states the condition. A reviewer could want it everywhere for uniformity.
+- **F-066 added exactly one comment.** Faithful to your ruling ("never for density"), but a reviewer
+  who reads "two documentation cultures" as needing more may disagree with the restraint.
+- **A `perl \x{}` escape corrupted REX-503's task-file UTF-8 mid-edit** — caught immediately, restored
+  clean from the planning commit, re-applied via the edit tool, and verified with the full `npm run ci`
+  (not a truncated tail — the M4 lesson applied). No corruption reached a gate or `main`. Same class as
+  M4's format slip: a tooling mistake intercepted before history.
+
+### 8. Definition of Done
+
+Three of five satisfied; the remaining two are the freeze itself and the retrospective that follows it.
+**On this freeze, the Repository Excellence programme reaches its Definition of Done** — see [README §
+Definition of Done](README.md#definition-of-done).
 
 ---
 
@@ -1136,9 +1256,9 @@ Ruled at the package Planning Review, or scheduled for their milestone's Plannin
 | **REX-D1** | Where does the agent layer live architecturally? ARCH-001 amendment (needs an ADR, §3) vs. README/CONTRIBUTING only? | **M1** (REX-106), M3-B, M4 | ✅ **Accepted** — ruled at the M1 Planning Review (AJ, 2026-07-17). Document + recommend; **amend no architecture**. |
 | **[REX-D2](decisions/REX-D2.md)** | File naming rule — codify the role-based convention; rule the 4 PascalCase-factory files (camelCase vs concept-name). | M3-B (REX-304) | ✅ **Accepted** — ruled at the M3-B Planning Review (AJ, 2026-07-17). Role-based rule; the 4 → **camelCase** (no exception); **F-047 a non-violation**. |
 | **[REX-D3](decisions/REX-D3.md)** | Shared-ownership criteria applied to the path guard, `deepFreeze`, and model-JSON-parse | M4 (REX-401), M5 | ✅ **Accepted** — ruled at the M4 Planning Review (AJ, 2026-07-17). **F-049 keep · F-050 fix independently · F-051 consolidate (context-builder only) · F-052 keep.** |
-| **REX-D4** | Consolidate test helpers, or reaffirm per-suite inlining? | M5 | ⬜ M5 Planning |
+| **[REX-D4](decisions/REX-D4.md)** | Consolidate test helpers, or reaffirm per-suite inlining? | M5 (REX-503) | ✅ **Accepted** — ruled at the M5 Planning Review (AJ, 2026-07-17). Consolidate identical cross-cutting stubs; preserve suite-specific contract fixtures (support.ts convention). |
 | **[REX-D5](decisions/REX-D5.md)** | Frozen-surface dead code — remove (FPCP), implement, or document? Per item (F-041/042/043). | M3-A (REX-301) | ✅ **Accepted** — ruled at the M3-A Planning Review (AJ, 2026-07-17). F-041 document-reserved; F-042 document-ADR-006-staging; F-043 document-or-FPCP-remove per SPEC-005. **No removal authorised for F-041/F-042.** |
-| **REX-D6** | The rule separating a load-bearing comment from noise | M5 | ⬜ M5 Planning |
+| **[REX-D6](decisions/REX-D6.md)** | The rule separating a load-bearing comment from noise | M5 (REX-501) | ✅ **Accepted** — ruled at the M5 Planning Review (AJ, 2026-07-17). "When uncertain, keep" governs deletion AND addition; preserve-list is a repository contract for M5. |
 | **[REX-D7](decisions/REX-D7.md)** | Toolchain: ESLint+Prettier vs Biome | M2 | ✅ **Accepted** — ruled at the M2 Planning Review (AJ, 2026-07-17). One binary, one config, nothing to migrate. |
 | **[REX-D8](decisions/REX-D8.md)** | Extend `foundation.test.ts`'s public-surface enforcement beyond `end-of-session`? | M3-A (REX-303) | ✅ **Accepted — Option A** — ruled at the M3-A Planning Review (AJ, 2026-07-17). Pin only the surfaces M3-A settles. Measured basis: no dead-export detector exists; `noUnusedLocals` cannot see exports. |
 | **[REX-D9](decisions/REX-D9.md)** | 🛑 **FPCP** — M1's Objective/Validation (*"touches no `src/` or `tests/` file"* / *"diff is **empty**"*) contradicted REX-105's frozen scope (F-005/F-011/F-012 live under `src/` and `tests/`) **and REX-105's own acceptance criterion**. Which governs? | **M1** — REX-105 **halted** | ✅ **Accepted (FPCP)** — ruled at the M1 Planning Review (AJ, 2026-07-17). **Reading B** adopted (*"no code changes — no `.ts` file anywhere"*); M1's Objective and Validation amended to be intent-based; REX-105 unhalted. **The package's first FPCP**, raised before any edit and ruled before dependent work. |

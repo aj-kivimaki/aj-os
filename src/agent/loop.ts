@@ -50,6 +50,9 @@ export async function runAgent(options: RunAgentOptions): Promise<AgentAnswer> {
         (block): block is Anthropic.ToolUseBlock => block.type === "tool_use",
       );
 
+      // The assistant turn (carrying the tool_use blocks) must be appended
+      // before the tool_result turn that answers it: the API rejects a
+      // tool_result that does not follow the tool_use it responds to.
       messages.push({ role: "assistant", content: response.content });
 
       const toolResults: Anthropic.ToolResultBlockParam[] = [];
