@@ -38,7 +38,7 @@ function source(id: string): SourceRecord {
 function extraction(title: string, description: string): SourceExtraction {
   return {
     summary: { title, keyPoints: [title] },
-    entities: [{ name: "AJ-OS", type: "product", description }],
+    entities: [{ name: "AJ-OS", type: "product", description, related: [] }],
     concepts: [],
   };
 }
@@ -46,12 +46,7 @@ function extraction(title: string, description: string): SourceExtraction {
 /** The `entities/aj-os.md` page compiled from a single source. */
 function entityPage(id: string, title: string, description: string): CompiledPage {
   const ex = extraction(title, description);
-  const pages = renderPages(
-    source(id),
-    ex,
-    buildSlugIdentities(ex),
-    AT().toISOString(),
-  );
+  const pages = renderPages(source(id), ex, buildSlugIdentities(ex), AT().toISOString());
   return pages.find((p) => p.path === "entities/aj-os.md")!;
 }
 
@@ -60,7 +55,11 @@ function stub(text: string): TextGenerator {
 }
 
 const EXISTING = entityPage("handbook:library/a.md", "Note A", "AJ-OS is an OS.").content;
-const INCOMING = entityPage("handbook:library/b.md", "Note B", "AJ-OS syncs with Notion.");
+const INCOMING = entityPage(
+  "handbook:library/b.md",
+  "Note B",
+  "AJ-OS syncs with Notion.",
+);
 const EXISTING_LINK = "[[sources/library/a|Note A]]";
 
 describe("MERGE — guarded re-synthesis", () => {
@@ -134,9 +133,9 @@ describe("MERGE — guarded re-synthesis", () => {
     const outcome = await engine.merge(withAlias, INCOMING);
 
     expect(outcome.mode).toBe("resynthesized");
-    expect(readFrontmatter(parsePage(outcome.content!).frontmatter).aliases).toEqual(
-      ["The OS"],
-    );
+    expect(readFrontmatter(parsePage(outcome.content!).frontmatter).aliases).toEqual([
+      "The OS",
+    ]);
   });
 
   it("defers with a proposal when the existing page has no frontmatter", async () => {

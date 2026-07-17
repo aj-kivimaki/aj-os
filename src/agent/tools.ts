@@ -146,10 +146,7 @@ function fail(message: string): ToolExecResult {
  * Validation and expected errors are returned as `isError` tool results so the
  * model can recover, rather than thrown.
  */
-export async function executeTool(
-  name: string,
-  input: unknown,
-): Promise<ToolExecResult> {
+export async function executeTool(name: string, input: unknown): Promise<ToolExecResult> {
   try {
     switch (name) {
       case "list_handbook": {
@@ -162,9 +159,7 @@ export async function executeTool(
       }
       case "search_handbook": {
         const { query, limit } = searchSchema.parse(input);
-        return ok(
-          await searchHandbook(query, limit === undefined ? {} : { limit }),
-        );
+        return ok(await searchHandbook(query, limit === undefined ? {} : { limit }));
       }
       case "write_inbox_note": {
         const parsed = noteSchema.parse(input);

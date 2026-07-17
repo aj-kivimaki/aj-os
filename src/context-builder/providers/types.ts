@@ -18,17 +18,13 @@ import type {
 } from "./schema.js";
 
 /** Immutable public request supplied to every provider. */
-export type KnowledgeRequest = DeepReadonly<
-  z.infer<typeof knowledgeRequestSchema>
->;
+export type KnowledgeRequest = DeepReadonly<z.infer<typeof knowledgeRequestSchema>>;
 
 /** Immutable canonical unit of knowledge returned by a provider. */
 export type KnowledgeItem = DeepReadonly<z.infer<typeof knowledgeItemSchema>>;
 
 /** Immutable static identity a provider advertises. */
-export type ProviderMetadata = DeepReadonly<
-  z.infer<typeof providerMetadataSchema>
->;
+export type ProviderMetadata = DeepReadonly<z.infer<typeof providerMetadataSchema>>;
 
 /**
  * A source capable of contributing knowledge to the Context Builder.

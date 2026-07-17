@@ -67,11 +67,7 @@ function renderRelated(
   const seen = new Set<string>();
   for (const name of related ?? []) {
     const identity = identities.get(name);
-    if (
-      identity === undefined ||
-      identity.path === selfPath ||
-      seen.has(identity.path)
-    ) {
+    if (identity === undefined || identity.path === selfPath || seen.has(identity.path)) {
       continue;
     }
     seen.add(identity.path);
@@ -183,14 +179,20 @@ export function renderPages(
   }
 
   // Source summary — links out to every entity/concept and to the origin doc.
-  const body: string[] = [
-    ...extraction.summary.keyPoints.map((point) => `- ${point}`),
-  ];
+  const body: string[] = [...extraction.summary.keyPoints.map((point) => `- ${point}`)];
   if (entities.length > 0) {
-    body.push("", "## Entities", ...entities.map(({ identity }) => `- ${linkTo(identity)}`));
+    body.push(
+      "",
+      "## Entities",
+      ...entities.map(({ identity }) => `- ${linkTo(identity)}`),
+    );
   }
   if (concepts.length > 0) {
-    body.push("", "## Concepts", ...concepts.map(({ identity }) => `- ${linkTo(identity)}`));
+    body.push(
+      "",
+      "## Concepts",
+      ...concepts.map(({ identity }) => `- ${linkTo(identity)}`),
+    );
   }
   body.push("", "## Source", `[[${relativeNoExt}|${summaryTitle}]]`);
 

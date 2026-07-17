@@ -7,16 +7,31 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { AIResponse } from "../../../src/platform/ai/index.js";
 import type { TextGenerator } from "../../../src/knowledge/compiler/index.js";
-import type {
-  Candidate,
-  ExistingPage,
-} from "../../../src/knowledge/identity/index.js";
+import type { Candidate, ExistingPage } from "../../../src/knowledge/identity/index.js";
 import { createSemanticIdentityResolver } from "../../../src/knowledge/identity/index.js";
 
 const EXISTING: ExistingPage[] = [
-  { path: "concepts/game-audio.md", kind: "concept", title: "Game audio", description: "Scoring for games.", aliases: [] },
-  { path: "concepts/game-audio-career.md", kind: "concept", title: "Game audio career", description: "A career in game audio.", aliases: [] },
-  { path: "entities/unity.md", kind: "entity", title: "Unity", description: "A game engine.", aliases: [] },
+  {
+    path: "concepts/game-audio.md",
+    kind: "concept",
+    title: "Game audio",
+    description: "Scoring for games.",
+    aliases: [],
+  },
+  {
+    path: "concepts/game-audio-career.md",
+    kind: "concept",
+    title: "Game audio career",
+    description: "A career in game audio.",
+    aliases: [],
+  },
+  {
+    path: "entities/unity.md",
+    kind: "entity",
+    title: "Unity",
+    description: "A game engine.",
+    aliases: [],
+  },
 ];
 
 const CONCEPT: Candidate = {

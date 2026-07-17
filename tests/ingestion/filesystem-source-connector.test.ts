@@ -123,18 +123,12 @@ describe("FilesystemSourceConnector", () => {
   });
 
   it("throws when a source directory does not exist", async () => {
-    await expect(connector(["nope"]).list()).rejects.toBeInstanceOf(
-      SourceConnectorError,
-    );
-    await expect(connector(["nope"]).list()).rejects.toThrow(
-      /does not exist/,
-    );
+    await expect(connector(["nope"]).list()).rejects.toBeInstanceOf(SourceConnectorError);
+    await expect(connector(["nope"]).list()).rejects.toThrow(/does not exist/);
   });
 
   it("throws when a source resolves outside baseDir", async () => {
-    await expect(connector(["../escape"]).list()).rejects.toThrow(
-      /outside baseDir/,
-    );
+    await expect(connector(["../escape"]).list()).rejects.toThrow(/outside baseDir/);
   });
 
   it("dedupes a file reached via overlapping sources (no duplicates)", async () => {
@@ -151,9 +145,7 @@ describe("FilesystemSourceConnector", () => {
   });
 
   it("rejects an invalid connector kind", () => {
-    expect(() => connector(["library"], "bad:kind")).toThrow(
-      SourceConnectorError,
-    );
+    expect(() => connector(["library"], "bad:kind")).toThrow(SourceConnectorError);
     expect(() => connector(["library"], "")).toThrow(SourceConnectorError);
   });
 });

@@ -54,8 +54,5 @@ export interface SessionFactory {
    * branch is unknown cannot be identified at all, which is fatal rather than
    * recoverable (SPEC-003 §15).
    */
-  create(
-    context: SessionContext,
-    options: SessionFactoryOptions,
-  ): Promise<Session>;
+  create(context: SessionContext, options: SessionFactoryOptions): Promise<Session>;
 }

@@ -152,9 +152,9 @@ describe("createCandidateGenerator — mapping", () => {
         findings: [],
       }),
     );
-    expect(
-      createCandidateGenerator({ now: fixedNow }).generate(empty, session),
-    ).toEqual([]);
+    expect(createCandidateGenerator({ now: fixedNow }).generate(empty, session)).toEqual(
+      [],
+    );
   });
 });
 
@@ -177,9 +177,7 @@ describe("createCandidateGenerator — determinism & immutability", () => {
   });
 
   it("returns a frozen handle", () => {
-    expect(Object.isFrozen(createCandidateGenerator({ now: fixedNow }))).toBe(
-      true,
-    );
+    expect(Object.isFrozen(createCandidateGenerator({ now: fixedNow }))).toBe(true);
   });
 
   it("defaults to the wall clock when no clock is injected", () => {
@@ -197,10 +195,7 @@ describe("createCandidateGenerator — guards", () => {
       id: "01JADIFFERENTSESSIONID000000",
     });
     expect(() =>
-      createCandidateGenerator({ now: fixedNow }).generate(
-        extraction,
-        otherSession,
-      ),
+      createCandidateGenerator({ now: fixedNow }).generate(extraction, otherSession),
     ).toThrow(/does not match session\.id/);
   });
 });

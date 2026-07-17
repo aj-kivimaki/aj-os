@@ -32,7 +32,11 @@ const EXISTING: ExistingPage[] = [
 
 function inner(): IdentityResolver & { calls: () => number } {
   const fn = vi.fn(
-    async (): Promise<Resolution> => ({ kind: "new", confidence: 0.1, explanation: "inner" }),
+    async (): Promise<Resolution> => ({
+      kind: "new",
+      confidence: 0.1,
+      explanation: "inner",
+    }),
   );
   return { resolve: fn, calls: () => fn.mock.calls.length };
 }
@@ -46,7 +50,10 @@ const cand = (name: string, kind: Candidate["kind"] = "entity"): Candidate => ({
 describe("createAliasAwareResolver", () => {
   it("matches a learned alias deterministically, without the inner resolver", async () => {
     const base = inner();
-    const result = await createAliasAwareResolver(base).resolve(cand("Fantasy Demo"), EXISTING);
+    const result = await createAliasAwareResolver(base).resolve(
+      cand("Fantasy Demo"),
+      EXISTING,
+    );
 
     expect(result.kind).toBe("existing");
     if (result.kind === "existing") {
@@ -75,7 +82,10 @@ describe("createAliasAwareResolver", () => {
   it("does not match an alias of a different kind", async () => {
     const base = inner();
     // "Fantasy Demo" is an entity alias; a concept candidate must not match it.
-    await createAliasAwareResolver(base).resolve(cand("Fantasy Demo", "concept"), EXISTING);
+    await createAliasAwareResolver(base).resolve(
+      cand("Fantasy Demo", "concept"),
+      EXISTING,
+    );
     expect(base.calls()).toBe(1);
   });
 });

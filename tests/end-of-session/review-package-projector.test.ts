@@ -102,9 +102,7 @@ describe("EOS-403 — purity and determinism", () => {
     const later = "2027-01-01T00:00:00.000Z";
 
     // If the stage read a clock, this value could not round-trip.
-    expect(projector.project([candidate(1)], SESSION, later).generatedAt).toBe(
-      later,
-    );
+    expect(projector.project([candidate(1)], SESSION, later).generatedAt).toBe(later);
   });
 
   it("leaves its inputs untouched (immutability by divergence)", () => {
@@ -228,13 +226,9 @@ describe("EOS-403 — optional candidate fields", () => {
     });
 
     const { markdown } = projector.project([awkward], SESSION, GENERATED_AT);
-    const heading = markdown
-      .split("\n")
-      .find((line) => line.startsWith("### 1."));
+    const heading = markdown.split("\n").find((line) => line.startsWith("### 1."));
 
-    expect(heading).toBe(
-      "### 1. Prefer --show-current when HEAD is detached",
-    );
+    expect(heading).toBe("### 1. Prefer --show-current when HEAD is detached");
   });
 });
 
@@ -282,11 +276,7 @@ describe("EOS-403 — the empty session", () => {
 
 describe("EOS-403 — the summary derives from canonical data only (EOS-D4)", () => {
   it("counts the candidates it was given", () => {
-    const pkg = projector.project(
-      [candidate(1), candidate(2)],
-      SESSION,
-      GENERATED_AT,
-    );
+    const pkg = projector.project([candidate(1), candidate(2)], SESSION, GENERATED_AT);
 
     expect(pkg.summary).toContain("2");
     expect(pkg.summary).toContain(SESSION.branch);

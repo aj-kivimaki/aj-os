@@ -33,16 +33,14 @@ describe("CollectionError contract", () => {
 
   it("accepts every declared failure category", () => {
     for (const category of FAILURE_CATEGORIES) {
-      expect(() =>
-        parseCollectionError({ ...validError, category }),
-      ).not.toThrow();
+      expect(() => parseCollectionError({ ...validError, category })).not.toThrow();
     }
   });
 
   it("rejects an unknown failure category — the set is closed", () => {
-    expect(() =>
-      parseCollectionError({ ...validError, category: "kaboom" }),
-    ).toThrow(ZodError);
+    expect(() => parseCollectionError({ ...validError, category: "kaboom" })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects a missing required field", () => {
@@ -56,12 +54,10 @@ describe("CollectionError contract", () => {
   });
 
   it("rejects an empty required field", () => {
-    expect(() =>
-      parseCollectionError({ ...validError, message: "" }),
-    ).toThrow(ZodError);
-    expect(() =>
-      parseCollectionError({ ...validError, providerId: "" }),
-    ).toThrow(ZodError);
+    expect(() => parseCollectionError({ ...validError, message: "" })).toThrow(ZodError);
+    expect(() => parseCollectionError({ ...validError, providerId: "" })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects unknown keys — the contract is strict", () => {
@@ -79,9 +75,7 @@ describe("CollectionError contract", () => {
   });
 
   it("is deterministic — same input yields an equal contract", () => {
-    expect(parseCollectionError(validError)).toEqual(
-      parseCollectionError(validError),
-    );
+    expect(parseCollectionError(validError)).toEqual(parseCollectionError(validError));
   });
 
   it("exposes the schema for composition by the CollectionResult (CB-009)", () => {

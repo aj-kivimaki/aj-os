@@ -39,9 +39,7 @@ export function createWikiKnowledgeProvider(
     name: "Handbook Wiki",
     description:
       "Wiki articles retrieved for the question, supplied as citable knowledge.",
-    async provide(
-      _request: KnowledgeRequest,
-    ): Promise<readonly KnowledgeItem[]> {
+    async provide(_request: KnowledgeRequest): Promise<readonly KnowledgeItem[]> {
       const items: KnowledgeItem[] = [];
       for (const result of results) {
         const content = (await readFile(result.path, "utf8")).trim();

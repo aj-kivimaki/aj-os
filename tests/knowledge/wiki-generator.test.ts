@@ -52,9 +52,12 @@ function makePage(
   sources: string[],
   body: string,
 ): CompiledPage {
-  const fm = ["type: " + kind, 'title: "T"', "sources:", ...sources.map((s) => `  - ${s}`)].join(
-    "\n",
-  );
+  const fm = [
+    `type: ${kind}`,
+    'title: "T"',
+    "sources:",
+    ...sources.map((s) => `  - ${s}`),
+  ].join("\n");
   return { path, kind, title: "T", sources, content: serializePage(fm, body) };
 }
 
@@ -105,7 +108,14 @@ function generator(
 ) {
   const connector: SourceConnector = { kind: "handbook", list: async () => records };
   return createWikiGenerator(
-    { connectors: [connector], store, compiler: compile, resolver, renderer, mergeEngine: merge },
+    {
+      connectors: [connector],
+      store,
+      compiler: compile,
+      resolver,
+      renderer,
+      mergeEngine: merge,
+    },
     CLOCK,
   );
 }

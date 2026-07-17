@@ -93,9 +93,9 @@ describe("parseContextPackage — schema & runtime validation", () => {
   });
 
   it("rejects unknown top-level keys — the contract is strict", () => {
-    expect(() =>
-      parseContextPackage({ ...validPackage(), tokens: 42 }),
-    ).toThrow(ZodError);
+    expect(() => parseContextPackage({ ...validPackage(), tokens: 42 })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects unknown metadata keys — metadata is strict", () => {
@@ -167,9 +167,7 @@ describe("parseContextPackage — structural invariants", () => {
 
   it("rejects an explainability entry referencing an unknown reference id", () => {
     const pkg = validPackage();
-    pkg.explainability.entries = [
-      { referenceId: "ref-ghost", reason: "dangling" },
-    ];
+    pkg.explainability.entries = [{ referenceId: "ref-ghost", reason: "dangling" }];
     expect(() => parseContextPackage(pkg)).toThrow(ZodError);
   });
 });

@@ -1,0 +1,67 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    // 90, not Biome's default 80. The repository is the authority on its own
+    // style and no document states a width. Measured before choosing: at 80 the
+    // formatter rewrites ~1058 lines and splits imports the author deliberately
+    // kept whole; at 90 it rewrites ~504 and leaves the End-of-Session
+    // composition root byte-identical. `src` p99 is 91 columns. Choosing 80
+    // would impose a style narrower than this code has ever used — which is
+    // "choosing a new style", and out of REX-204's scope.
+    "lineWidth": 90
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        // OFF, deliberately. REX-203 established — and the reviewer approved —
+        // that `arr[0]!` is the honest expression *after* a length assertion:
+        // the guard fails first, with a clear message, and the `!` says "the
+        // guard already proved this". Biome forbids `!` categorically. Where a
+        // rule and a reviewed decision disagree, the config states the
+        // repository's actual position rather than quietly re-opening the
+        // decision. Unguarded `!` is caught by review, not by this rule.
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        // OFF. This rule advised `!archive/` over `!archive/**` — and that form
+        // does NOT exclude the folder. Applying its advice re-enabled formatting
+        // of frozen v1 history. Verified both ways; `**` excludes, `/` does not.
+        "useBiomeIgnoreFolder": "off"
+      }
+    }
+  },
+  "files": {
+    // `archive/` is FROZEN BY CONVENTION — docs/archive/README.md: "not
+    // maintained or updated". A formatter reaching into it would rewrite ~200
+    // files of preserved v1 history. Found by running it: the first config had
+    // comments in `biome.json`, which Biome CANNOT parse — it reported parse
+    // errors, fell back to DEFAULTS, and formatted the archive anyway.
+    // `!archive/**`, NOT `!archive/`. Biome's own `useBiomeIgnoreFolder` rule
+    // advises the latter — and following that advice SILENTLY RE-ENABLED
+    // formatting of the frozen archive (36 files rewritten before it was caught).
+    // The rule is suppressed below. The linter is a discovery tool, not an
+    // authority: this form is kept because it is PROVEN to exclude, not because
+    // a rule approves of it.
+    "includes": [
+      "**",
+      "!archive/**",
+      "!docs/archive/**",
+      "!dist/**",
+      "!coverage/**",
+      "!infrastructure/n8n/**"
+    ]
+  }
+}

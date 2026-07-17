@@ -7,12 +7,7 @@ import {
   resolveInWiki,
   toWikiRelative,
 } from "./paths.js";
-import type {
-  HandbookListing,
-  HandbookPage,
-  SearchHit,
-  SearchOptions,
-} from "./types.js";
+import type { HandbookListing, HandbookPage, SearchHit, SearchOptions } from "./types.js";
 
 const DEFAULT_SEARCH_LIMIT = 30;
 
@@ -60,9 +55,7 @@ export async function listPages(subdir = ""): Promise<HandbookListing> {
     pages = await collectMarkdown(absDir);
   } catch (error) {
     if (await isNotFound(error)) {
-      throw new HandbookNotFoundError(
-        `Wiki subdirectory not found: ${subdir || "."}`,
-      );
+      throw new HandbookNotFoundError(`Wiki subdirectory not found: ${subdir || "."}`);
     }
     throw error;
   }
@@ -73,9 +66,7 @@ export async function listPages(subdir = ""): Promise<HandbookListing> {
 
 /** Read a single wiki page by its wiki-relative path. */
 export async function readPage(relativePath: string): Promise<HandbookPage> {
-  const normalized = relativePath.endsWith(".md")
-    ? relativePath
-    : `${relativePath}.md`;
+  const normalized = relativePath.endsWith(".md") ? relativePath : `${relativePath}.md`;
   const absPath = resolveInWiki(normalized);
 
   let content: string;

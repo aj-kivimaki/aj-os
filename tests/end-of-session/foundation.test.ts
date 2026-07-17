@@ -57,8 +57,7 @@ describe("module foundation — public surface", () => {
   it("exposes exactly the intended public operations", () => {
     const operations = Object.keys(endOfSession)
       .filter(
-        (key) =>
-          typeof (endOfSession as Record<string, unknown>)[key] === "function",
+        (key) => typeof (endOfSession as Record<string, unknown>)[key] === "function",
       )
       .sort();
     // A drift guard: adding or removing a public operation must be a deliberate edit
@@ -69,9 +68,7 @@ describe("module foundation — public surface", () => {
   it("re-exports every contract from the module entry point", () => {
     // Everything the narrow contracts barrel exposes must also be reachable from the
     // module entry point, so a consumer never has to guess which barrel to import.
-    const notReExported = Object.keys(contracts).filter(
-      (key) => !(key in endOfSession),
-    );
+    const notReExported = Object.keys(contracts).filter((key) => !(key in endOfSession));
     expect(notReExported).toEqual([]);
   });
 });
@@ -94,11 +91,7 @@ describe("module foundation — public-surface-only imports", () => {
       const source = readFileSync(join(testDir, file), "utf8");
       for (const match of source.matchAll(/from\s+["']([^"']+)["']/g)) {
         const specifier = match[1];
-        if (
-          specifier !== undefined &&
-          specifier.includes("end-of-session") &&
-          !allowedSpecifiers.has(specifier)
-        ) {
+        if (specifier?.includes("end-of-session") && !allowedSpecifiers.has(specifier)) {
           violations.push(`${file} → ${specifier}`);
         }
       }

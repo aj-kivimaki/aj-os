@@ -48,13 +48,9 @@ export interface CollectionEngine {
  * const engine = createCollectionEngine(registry);
  * await engine.collect(request);
  */
-export function createCollectionEngine(
-  registry: ProviderRegistry,
-): CollectionEngine {
+export function createCollectionEngine(registry: ProviderRegistry): CollectionEngine {
   if (registry === null || registry === undefined) {
-    throw new Error(
-      "createCollectionEngine: a Provider Registry is required.",
-    );
+    throw new Error("createCollectionEngine: a Provider Registry is required.");
   }
 
   return Object.freeze({

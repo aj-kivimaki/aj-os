@@ -49,9 +49,7 @@ interface StubState {
 function stubGitPort(state: StubState = {}): GitPort {
   return {
     async changes(): Promise<readonly GitFileChange[]> {
-      throw new Error(
-        "SessionFactory must not collect changes — it called changes().",
-      );
+      throw new Error("SessionFactory must not collect changes — it called changes().");
     },
     async head(): Promise<string> {
       return state.head ?? HEAD;
@@ -176,10 +174,9 @@ describe("EOS-402 — range construction", () => {
 
 describe("EOS-402 — the Branch Policy (detached HEAD)", () => {
   it("synthesizes detached@<short-head> when git reports no branch", async () => {
-    const session = await pinnedFactory({ branch: null, head: HEAD }).create(
-      CONTEXT,
-      { trigger: "manual" },
-    );
+    const session = await pinnedFactory({ branch: null, head: HEAD }).create(CONTEXT, {
+      trigger: "manual",
+    });
 
     expect(session.branch).toBe("detached@a1b2c3d");
   });
@@ -208,10 +205,9 @@ describe("EOS-402 — the Branch Policy (detached HEAD)", () => {
 
   it("derives the short head from the session's own head commit", async () => {
     const other = "0f1e2d3c4b5a69788796a5b4c3d2e1f001234567";
-    const session = await pinnedFactory({ branch: null, head: other }).create(
-      CONTEXT,
-      { trigger: "manual" },
-    );
+    const session = await pinnedFactory({ branch: null, head: other }).create(CONTEXT, {
+      trigger: "manual",
+    });
 
     expect(session.branch).toBe("detached@0f1e2d3");
   });

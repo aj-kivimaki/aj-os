@@ -66,15 +66,13 @@ describe("SessionContext contract", () => {
   });
 
   it("rejects an empty required field", () => {
-    expect(() =>
-      parseSessionContext({ ...validContext, branch: "" }),
-    ).toThrow(ZodError);
+    expect(() => parseSessionContext({ ...validContext, branch: "" })).toThrow(ZodError);
   });
 
   it("rejects unknown keys — the contract is strict", () => {
-    expect(() =>
-      parseSessionContext({ ...validContext, trigger: "manual" }),
-    ).toThrow(ZodError);
+    expect(() => parseSessionContext({ ...validContext, trigger: "manual" })).toThrow(
+      ZodError,
+    );
   });
 
   it("returns a deeply-frozen request (immutable after creation)", () => {
@@ -82,9 +80,7 @@ describe("SessionContext contract", () => {
   });
 
   it("is deterministic — same input yields an equal contract", () => {
-    expect(parseSessionContext(validContext)).toEqual(
-      parseSessionContext(validContext),
-    );
+    expect(parseSessionContext(validContext)).toEqual(parseSessionContext(validContext));
   });
 
   it("exposes the schema for composition", () => {
@@ -138,9 +134,7 @@ describe("Session contract", () => {
   });
 
   it("rejects unknown keys — the contract is strict", () => {
-    expect(() =>
-      parseSession({ ...validSession, endedAtTz: "UTC" }),
-    ).toThrow(ZodError);
+    expect(() => parseSession({ ...validSession, endedAtTz: "UTC" })).toThrow(ZodError);
   });
 
   it("returns a deeply-frozen session, including nested gitState", () => {

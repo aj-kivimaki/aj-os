@@ -121,10 +121,7 @@
       "main": [[{ "node": "Authorized?", "type": "main", "index": 0 }]]
     },
     "Authorized?": {
-      "main": [
-        [{ "node": "Is note?", "type": "main", "index": 0 }],
-        []
-      ]
+      "main": [[{ "node": "Is note?", "type": "main", "index": 0 }], []]
     },
     "Is note?": {
       "main": [

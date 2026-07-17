@@ -62,13 +62,13 @@ describe("createWikiKnowledgeProvider", () => {
     });
 
     expect(items).toHaveLength(1);
-    expect(items[0].id).toBe("about-me");
-    expect(items[0].source).toEqual({
+    expect(items[0]!.id).toBe("about-me");
+    expect(items[0]!.source).toEqual({
       id: "about-me",
       type: "wiki",
       title: "About Me",
     });
-    expect(items[0].content).toContain("Who AJ is.");
+    expect(items[0]!.content).toContain("Who AJ is.");
   });
 
   it("skips articles whose body is empty (a KnowledgeItem must carry knowledge)", async () => {

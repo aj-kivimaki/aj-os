@@ -54,10 +54,7 @@ export interface CompiledPage {
  * satisfied by the platform `AIClient`; a stub satisfies it in tests.
  */
 export interface TextGenerator {
-  complete(
-    prompt: RenderedPrompt,
-    options?: { maxTokens?: number },
-  ): Promise<AIResponse>;
+  complete(prompt: RenderedPrompt, options?: { maxTokens?: number }): Promise<AIResponse>;
 }
 
 /**

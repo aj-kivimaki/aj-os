@@ -79,9 +79,7 @@ function assertSegment(value: string, label: string): string {
     throw new ReviewStoreError(`${label} must not contain NUL bytes.`);
   }
   if (value === "." || value === ".." || path.basename(value) !== value) {
-    throw new ReviewStoreError(
-      `${label} must be a single path segment: ${value}`,
-    );
+    throw new ReviewStoreError(`${label} must be a single path segment: ${value}`);
   }
   return value;
 }
@@ -110,10 +108,7 @@ function isInside(root: string, real: string): boolean {
  * containment; if it reaches the filesystem root without finding one, the lexical guard in
  * {@link createFilesystemReviewStore}'s `resolveInRoot` has already done its job.
  */
-async function assertNoSymlinkEscape(
-  root: string,
-  candidate: string,
-): Promise<void> {
+async function assertNoSymlinkEscape(root: string, candidate: string): Promise<void> {
   let current = candidate;
   for (;;) {
     const real = await realpathIfExists(current);
@@ -193,10 +188,7 @@ export function createFilesystemReviewStore(
   }
 
   /** Absolute path to `pending/<sessionId>/<...rest>`, with `sessionId` validated. */
-  async function sessionPath(
-    sessionId: string,
-    ...rest: string[]
-  ): Promise<string> {
+  async function sessionPath(sessionId: string, ...rest: string[]): Promise<string> {
     assertSegment(sessionId, "sessionId");
     return resolveInRoot([PENDING_DIR, sessionId, ...rest]);
   }
@@ -217,10 +209,7 @@ export function createFilesystemReviewStore(
     }
   }
 
-  async function saveReport(
-    sessionId: string,
-    report: SessionReport,
-  ): Promise<void> {
+  async function saveReport(sessionId: string, report: SessionReport): Promise<void> {
     const abs = await sessionPath(sessionId, REPORT_FILE);
     await mkdir(path.dirname(abs), { recursive: true });
     await writeFile(abs, `${JSON.stringify(report, null, 2)}\n`, "utf8");

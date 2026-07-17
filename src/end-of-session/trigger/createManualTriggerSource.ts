@@ -11,10 +11,7 @@
  * CLI args) belongs to the composition root (M5).
  */
 
-import {
-  parseSessionContext,
-  type SessionContext,
-} from "../contracts/session/index.js";
+import { parseSessionContext, type SessionContext } from "../contracts/session/index.js";
 
 import type { TriggerSource } from "./TriggerSource.js";
 

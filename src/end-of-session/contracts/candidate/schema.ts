@@ -71,8 +71,7 @@ const FALLBACK_KIND = "handbook-entry" satisfies (typeof CANDIDATE_KINDS)[number
  */
 export const candidateKindSchema = z.preprocess(
   (value) =>
-    typeof value === "string" &&
-    !(CANDIDATE_KINDS as readonly string[]).includes(value)
+    typeof value === "string" && !(CANDIDATE_KINDS as readonly string[]).includes(value)
       ? FALLBACK_KIND
       : value,
   z.enum(CANDIDATE_KINDS),

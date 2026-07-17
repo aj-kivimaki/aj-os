@@ -54,9 +54,9 @@ describe("KnowledgeRequest contract", () => {
   });
 
   it("rejects an empty required field", () => {
-    expect(() =>
-      parseKnowledgeRequest({ ...validRequest, project: "" }),
-    ).toThrow(ZodError);
+    expect(() => parseKnowledgeRequest({ ...validRequest, project: "" })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects unknown keys — the contract is strict", () => {
@@ -77,9 +77,7 @@ describe("KnowledgeItem contract", () => {
   });
 
   it("requires non-empty content — an item must carry knowledge", () => {
-    expect(() => parseKnowledgeItem({ ...validItem, content: "" })).toThrow(
-      ZodError,
-    );
+    expect(() => parseKnowledgeItem({ ...validItem, content: "" })).toThrow(ZodError);
   });
 
   it("reuses the Context Package source-reference contract for `source`", () => {
@@ -92,9 +90,7 @@ describe("KnowledgeItem contract", () => {
   });
 
   it("rejects unknown keys — the contract is strict", () => {
-    expect(() =>
-      parseKnowledgeItem({ ...validItem, score: 0.9 }),
-    ).toThrow(ZodError);
+    expect(() => parseKnowledgeItem({ ...validItem, score: 0.9 })).toThrow(ZodError);
   });
 
   it("deeply freezes the parsed item, including its source", () => {
@@ -117,8 +113,7 @@ describe("provider metadata contract", () => {
 
   it("rejects metadata missing a required field", () => {
     expect(
-      providerMetadataSchema.safeParse({ id: "handbook", name: "Handbook" })
-        .success,
+      providerMetadataSchema.safeParse({ id: "handbook", name: "Handbook" }).success,
     ).toBe(false);
   });
 });

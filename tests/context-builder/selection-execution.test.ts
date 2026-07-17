@@ -85,10 +85,7 @@ describe("select — canonical deterministic ordering", () => {
     // "b" is collected first and has content that would sort before "a"'s; the id
     // tie-breaker still orders "a" before "b".
     const result = await engine.select(
-      collectionOf([
-        item("b", { content: "zzz" }),
-        item("a", { content: "aaa" }),
-      ]),
+      collectionOf([item("b", { content: "zzz" }), item("a", { content: "aaa" })]),
     );
 
     expect(result.selectedItems.map((i) => i.id)).toEqual(["a", "b"]);
@@ -257,9 +254,7 @@ describe("select — determinism", () => {
 
 describe("select — immutability", () => {
   it("returns a deeply frozen SelectionResult", async () => {
-    const result = await engine.select(
-      collectionOf([item("k1"), item("k2")]),
-    );
+    const result = await engine.select(collectionOf([item("k1"), item("k2")]));
 
     expect(Object.isFrozen(result)).toBe(true);
     expect(Object.isFrozen(result.selectedItems)).toBe(true);
@@ -271,7 +266,7 @@ describe("select — immutability", () => {
   it("rejects mutation of the returned collections at runtime", async () => {
     const result = await engine.select(collectionOf([item("k1", { content: "c1" })]));
     expect(() => {
-      (result.selectedItems as KnowledgeItem[]).push(result.selectedItems[0]);
+      (result.selectedItems as unknown as KnowledgeItem[]).push(result.selectedItems[0]!);
     }).toThrow();
   });
 

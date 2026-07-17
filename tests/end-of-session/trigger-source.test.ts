@@ -58,9 +58,7 @@ describe("ManualTriggerSource", () => {
 
     // A consumer that depends only on the port works for both implementations.
     const runTrigger = (source: TriggerSource) => source.createContext();
-    expect(await runTrigger(createManualTriggerSource(validInput))).toEqual(
-      validInput,
-    );
+    expect(await runTrigger(createManualTriggerSource(validInput))).toEqual(validInput);
     expect(await runTrigger(alternate)).toBe(prebuilt);
   });
 });

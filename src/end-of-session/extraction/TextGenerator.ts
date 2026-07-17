@@ -27,10 +27,7 @@ import type { KnowledgeExtraction } from "../contracts/knowledge-extraction/inde
  * `TextGenerator`, kept local per the module's parallel-not-shared convention.
  */
 export interface TextGenerator {
-  complete(
-    prompt: RenderedPrompt,
-    options?: { maxTokens?: number },
-  ): Promise<AIResponse>;
+  complete(prompt: RenderedPrompt, options?: { maxTokens?: number }): Promise<AIResponse>;
 }
 
 /**
@@ -58,8 +55,5 @@ export interface KnowledgeExtractor {
    *                     dead ends, decisions. Omit it and the prompt is byte-for-byte what
    *                     it was before the amendment.
    */
-  extract(
-    changeSet: ChangeSet,
-    sessionNotes?: string,
-  ): Promise<KnowledgeExtraction>;
+  extract(changeSet: ChangeSet, sessionNotes?: string): Promise<KnowledgeExtraction>;
 }

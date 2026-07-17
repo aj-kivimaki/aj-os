@@ -86,11 +86,7 @@ describe("FilesystemWikiStore", () => {
       await s.write("concepts/a.md", "a");
       await writeFile(join(dest, ".DS_Store"), "junk", "utf8");
 
-      expect(await s.list()).toEqual([
-        "concepts/a.md",
-        "concepts/b.md",
-        "index.md",
-      ]);
+      expect(await s.list()).toEqual(["concepts/a.md", "concepts/b.md", "index.md"]);
     });
 
     it("filters to a subtree by prefix on a segment boundary", async () => {
@@ -168,9 +164,7 @@ describe("FilesystemWikiStore", () => {
     });
 
     it("rejects absolute paths", async () => {
-      await expect(store().write("/etc/passwd", "x")).rejects.toThrow(
-        WikiStoreError,
-      );
+      await expect(store().write("/etc/passwd", "x")).rejects.toThrow(WikiStoreError);
     });
 
     it("rejects empty paths", async () => {
@@ -183,9 +177,7 @@ describe("FilesystemWikiStore", () => {
         await mkdir(join(dest, "real"), { recursive: true });
         await symlink(outside, join(dest, "link"), "dir");
 
-        await expect(store().write("link/evil.md", "x")).rejects.toThrow(
-          /symlink/,
-        );
+        await expect(store().write("link/evil.md", "x")).rejects.toThrow(/symlink/);
       } finally {
         await rm(outside, { recursive: true, force: true });
       }

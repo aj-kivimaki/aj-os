@@ -48,9 +48,7 @@ describe("parseContextBuilderConfig — validation", () => {
 
   it("accepts every declared profile", () => {
     for (const profile of CONTEXT_PROFILES) {
-      expect(() =>
-        parseContextBuilderConfig({ ...validConfig, profile }),
-      ).not.toThrow();
+      expect(() => parseContextBuilderConfig({ ...validConfig, profile })).not.toThrow();
     }
   });
 
@@ -82,9 +80,7 @@ describe("parseContextBuilderConfig — validation", () => {
 
   it("rejects a missing required field (no hidden defaults)", () => {
     const { explainability: _omitted, ...withoutExplainability } = validConfig;
-    expect(() => parseContextBuilderConfig(withoutExplainability)).toThrow(
-      ZodError,
-    );
+    expect(() => parseContextBuilderConfig(withoutExplainability)).toThrow(ZodError);
   });
 
   it("rejects unknown keys — the contract is strict", () => {

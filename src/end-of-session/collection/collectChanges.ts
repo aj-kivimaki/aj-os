@@ -21,10 +21,7 @@
  */
 
 import type { Session } from "../contracts/session/index.js";
-import {
-  parseAnalyzerError,
-  parseChangeSet,
-} from "../contracts/change/index.js";
+import { parseAnalyzerError, parseChangeSet } from "../contracts/change/index.js";
 import type {
   Analyzer,
   AnalyzerError,

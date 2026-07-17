@@ -48,8 +48,9 @@ export const compareById: KnowledgeItemComparator = (a, b) => {
  * The ordered Selection Policy comparator chain. Frozen so it cannot be mutated at
  * runtime; future comparators are prepended ahead of the terminal {@link compareById}.
  */
-export const selectionComparatorChain: readonly KnowledgeItemComparator[] =
-  Object.freeze([compareById]);
+export const selectionComparatorChain: readonly KnowledgeItemComparator[] = Object.freeze(
+  [compareById],
+);
 
 /**
  * Compose {@link selectionComparatorChain} into a single comparator: apply each in

@@ -24,16 +24,9 @@
 import { createHash } from "node:crypto";
 
 import type { SourceRecord } from "../../ingestion/index.js";
-import {
-  carryLearnedMetadata,
-  parsePage,
-  readFrontmatter,
-} from "../compiler/index.js";
+import { carryLearnedMetadata, parsePage, readFrontmatter } from "../compiler/index.js";
 import type { CompiledPage, SourceExtraction } from "../compiler/index.js";
-import type {
-  Candidate,
-  ExistingPage,
-} from "../identity/index.js";
+import type { Candidate, ExistingPage } from "../identity/index.js";
 import { pagePathFor } from "../naming.js";
 import type { ResolvedIdentity } from "../renderer/index.js";
 import type {
@@ -106,9 +99,7 @@ function sorted(values: Iterable<string>): string[] {
 
 /** Hash of the generator-owned body — the drift-detection signal. */
 function generatedHash(content: string): string {
-  return createHash("sha256")
-    .update(parsePage(content).body, "utf8")
-    .digest("hex");
+  return createHash("sha256").update(parsePage(content).body, "utf8").digest("hex");
 }
 
 /** A page's contributing source ids, read from its frontmatter. */
@@ -143,9 +134,18 @@ function buildIndex(
       lines.push("", `## ${title}`, ...items);
     }
   };
-  section("Sources", sources.map((p) => `- [[${p.replace(/\.md$/, "")}]]`));
-  section("Entities", entities.map((p) => `- [[${bareSlug(p)}]]`));
-  section("Concepts", concepts.map((p) => `- [[${bareSlug(p)}]]`));
+  section(
+    "Sources",
+    sources.map((p) => `- [[${p.replace(/\.md$/, "")}]]`),
+  );
+  section(
+    "Entities",
+    entities.map((p) => `- [[${bareSlug(p)}]]`),
+  );
+  section(
+    "Concepts",
+    concepts.map((p) => `- [[${bareSlug(p)}]]`),
+  );
   lines.push("");
   return lines.join("\n");
 }
@@ -154,9 +154,7 @@ function buildIndex(
 function markPageStale(content: string, reason: string, since: string): string {
   const match = FRONTMATTER_RE.exec(content);
   if (match === null) {
-    throw new WikiGeneratorError(
-      "Cannot mark a page without frontmatter as stale.",
-    );
+    throw new WikiGeneratorError("Cannot mark a page without frontmatter as stale.");
   }
   const whole = match[0] ?? "";
   const block = match[1] ?? "";
@@ -178,15 +176,11 @@ export function createWikiGenerator(
   config: WikiGeneratorConfig,
   now: () => Date = () => new Date(),
 ): WikiGenerator {
-  const { connectors, store, compiler, resolver, renderer, mergeEngine } =
-    config;
+  const { connectors, store, compiler, resolver, renderer, mergeEngine } = config;
 
   /** Snapshot of existing entity/concept pages for the resolver (live per run). */
   async function buildCatalog(): Promise<ExistingPage[]> {
-    const paths = [
-      ...(await store.list("entities")),
-      ...(await store.list("concepts")),
-    ];
+    const paths = [...(await store.list("entities")), ...(await store.list("concepts"))];
     const catalog: ExistingPage[] = [];
     for (const path of paths) {
       const content = await store.read(path);
@@ -334,10 +328,7 @@ export function createWikiGenerator(
     }
   }
 
-  async function ingestRecord(
-    ctx: RunContext,
-    record: SourceRecord,
-  ): Promise<void> {
+  async function ingestRecord(ctx: RunContext, record: SourceRecord): Promise<void> {
     // extract → resolve → render.
     const extracted = await compiler.compile(record);
     const catalog = await buildCatalog();
@@ -370,11 +361,7 @@ export function createWikiGenerator(
       const prov = provenanceOf(existing);
       const live = prov.filter((s) => ctx.currentIds.has(s));
       if (live.length === 0) {
-        await writePage(
-          ctx,
-          path,
-          markPageStale(existing, "orphaned", ctx.generatedAt),
-        );
+        await writePage(ctx, path, markPageStale(existing, "orphaned", ctx.generatedAt));
         ctx.stale.add(path);
         ctx.removalProposals.push({
           path,

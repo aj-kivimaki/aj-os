@@ -1,3 +1,4 @@
+import type { Stats } from "node:fs";
 import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -65,7 +66,7 @@ export class HandbookService {
 
   /** Assert that `path` exists and is a directory, or throw `message`. */
   private async requireDirectory(path: string, message: string): Promise<void> {
-    let stats;
+    let stats: Stats;
     try {
       stats = await stat(path);
     } catch (error) {

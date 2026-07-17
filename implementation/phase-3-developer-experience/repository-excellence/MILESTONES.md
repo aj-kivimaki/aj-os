@@ -4,7 +4,7 @@
 >
 > **Related Specification:** _None._ Non-specification quality package; see [README § Why this package has no SPEC](README.md#why-this-package-has-no-spec) and [REX-D0](decisions/REX-D0.md).
 >
-> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on **2026-07-17**. **Milestone 1 (Documentation Truth & SPEC-003 Lifecycle Closure) COMPLETE and FROZEN** (reviewer: AJ, 2026-07-17) — REX-101..106 delivered; 20 findings closed; assertion inventory 13/13; **no executable source modified**; SPEC-003's AJS-007 debt discharged. **REX-D0, REX-D1 accepted; REX-D9 accepted (the package's first FPCP).** M1 retrospective complete. **Next: M2 — Automated Quality Gates.** ⚠️ **Reviewer requirement for M2:** *before the M2 Planning Freeze, the planning must be reviewed explicitly for the ownership-boundary defects identified during M1.*
+> **Status:** **Package Planning FROZEN** (AJ, 2026-07-17). **M1 (Documentation Truth) and M2 (Automated Quality Gates) COMPLETE and FROZEN** (AJ, 2026-07-17) — *M1 established repository truth; M2 established repository verification.* **Next: M3-A — Public Surface.** ⚠️ **Start M3 from these artefacts, not from conversational context** — reviewer's direction. **M1 (Documentation Truth & SPEC-003 Lifecycle Closure) COMPLETE and FROZEN** (reviewer: AJ, 2026-07-17) — REX-101..106 delivered; 20 findings closed; assertion inventory 13/13; **no executable source modified**; SPEC-003's AJS-007 debt discharged. **REX-D0, REX-D1 accepted; REX-D9 accepted (the package's first FPCP).** M1 retrospective complete. **Next: M2 — Automated Quality Gates.** ⚠️ **Reviewer requirement for M2:** *before the M2 Planning Freeze, the planning must be reviewed explicitly for the ownership-boundary defects identified during M1.*
 
 ---
 
@@ -53,7 +53,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 | Milestone | Name | Goal | Status |
 | --------- | ---- | ---- | ------ |
 | M1 | Documentation Truth & SPEC-003 Lifecycle Closure | Every document describes the repository that exists today; SPEC-003's two outstanding AJS-007 deliverables discharged | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | ⬜ |
+| M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ⬜ |
 | M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ⬜ |
 | M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ⬜ |
@@ -319,8 +319,29 @@ it.
 
 ## Objective
 
-Make every objectively measurable property machine-verified on every PR, and non-regressible.
-**No runtime behaviour changes.** This is the ratchet the rest of the review depends on.
+Make the repository **machine-verifiable on every PR**, and non-regressible. This is the ratchet the
+rest of the review depends on.
+
+> **Wording tightened at the M2 Freeze Review (AJ, 2026-07-17).** The original — *"every objectively
+> measurable property machine-verified"* — **overclaimed**, and the milestone's own evidence proved
+> it: repository-wide coverage is **not** measurable with supported Vitest 4 tooling (F-030), and
+> `noPropertyAccessFromIndexSignature` is deliberately deferred (F-031). **The demonstrated
+> boundary** is five gates — format, lint, typecheck (incl. `tests/`), build, test — plus coverage
+> **reported within a documented limit**. Per the reviewer: *"Repository Excellence should always
+> describe the property actually established, not the one originally hoped for."*
+
+**Runtime behaviour is intentionally unchanged.** Unlike M1, executable source **legitimately
+changes** — so the protected property is an **outcome**, not a path:
+
+- **production source changes are mechanical only** — formatter output, or diagnostics-driven
+  corrections;
+- **no test is removed, skipped, or weakened**;
+- **behaviour preservation is demonstrated by the existing validation suite**, not asserted.
+
+> *Amended by **[REX-D10](decisions/REX-D10.md)** (FPCP, accepted by the reviewer 2026-07-17,
+> **during Planning — before any implementation**). The original wording — *"No runtime behaviour
+> changes"* — was correct in intent but **not falsifiable** after a diff that touches nearly every
+> file. **Protect the outcome, not the path.***
 
 ## Deliverables
 
@@ -334,30 +355,253 @@ Make every objectively measurable property machine-verified on every PR, and non
 
 ## Task Progress
 
-_Task breakdown authored at M2 Planning. Findings: F-025..F-036._
+**Allocated by protected outcome, not by filesystem path** — applying M1's principal planning lesson
+at the reviewer's requirement, *before* the Planning Freeze.
+
+| Task | **Protected outcome** | Description | Findings | Status |
+|------|---|-------------|---|--------|
+| REX-201 | governance — **enforcement** | CI runs typecheck + build + test on push and PR | F-025 | ✅ |
+| REX-202 | governance — **visibility** | `tsconfig.test.json` so typecheck reaches `tests/`. **Makes the errors visible; does not fix them.** | F-026 | ✅ |
+| REX-203 | ⚠️ **executable behaviour boundary** | Resolve the **40** hidden errors. **The only M2 task changing executable source for non-mechanical reasons.** | F-027 | ✅ |
+| REX-204 | **mechanical** (provable) | Formatter + `.editorconfig`. Isolated commit; proven by re-running the formatter on the pre-M2 tree. | F-029 | ✅ |
+| REX-205 | **configuration truth** (behaviour risk) | Linter + **five of six** dormant flags + the dead `jsx` config | F-028, **F-031 (partial — reviewer-ruled)**, F-034 | ✅ |
+| REX-206 | **documentation** | `package.json` metadata, `engines`, `.nvmrc`, `SECURITY.md`, `CODE_OF_CONDUCT.md` | F-032, F-033, F-035 | ✅ |
+| REX-207 | governance — **process** | PR template, `dependabot.yml`, `CODEOWNERS` | F-036 | ✅ |
+| REX-208 | governance — **measurement** | Coverage **measured, not gated** | **F-030 (partial — reviewer-ruled)** | ✅ ~~🛑 BLOCKED — acceptance criterion not met.** v8 reports only *loaded* files, so `KnowledgeAssistant.ts` (410 lines, 0 tests — the largest known hole) is **absent from the report**, and the headline number flatters by omission. `coverage.all = true` had no effect under Vitest 4. **A coverage report that cannot show bad news is not measuring.** Needs a reviewer decision — see below. |
+
+_Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. The M2 Planning Review passed:
+the outcome-based allocation was ruled *"a materially stronger planning model because each task has a
+single invariant it is responsible for protecting and validating"* — and *"a direct application of
+M1's retrospective rather than a redesign of the milestone."* **REX-D7** (Biome) and **REX-D10**
+(protected outcome, FPCP) accepted._
+
+### Ratified at the M2 Planning Review (AJ, 2026-07-17)
+
+| # | Decision | Outcome |
+|---|---|---|
+| 1 | **REX-202 + REX-203 ship together** | **Approved as proposed.** *"Working Increment applies at the **merge boundary**, not necessarily at the task boundary."* They stay **separate tasks**, are **reviewed separately**, and **merge in one PR** — preserving both clean ownership and a healthy repository state. |
+| 2 | **[REX-D7](decisions/REX-D7.md)** — Biome | **Accepted.** One binary, one config, nothing to migrate. |
+| 3 | **[REX-D10](decisions/REX-D10.md)** — protected outcome as an outcome, not a path | **Accepted (FPCP).** The formatter proof singled out: *"Mechanical changes should be demonstrably mechanical."* |
+| 4 | **REX-208 — no coverage threshold** | **Approved.** *"Repository Excellence should establish facts before establishing policy."* And: *"The report is the canonical measurement. The documentation should describe the process, not today's number."* |
+| 5 | Planning corrections (40 not 46; no M3-A coupling; `rootDir` constraint) | **Approved** as *"planning-quality improvements, not milestone changes."* |
+
+### ✅ REX-208 — resolved: investigated, then Option 2 approved (AJ, 2026-07-17)
+
+**The reviewer required investigation before accepting the limitation** — *"The repository should not
+accept a tooling limitation until we've verified it is actually a tooling limitation."* It was, and
+the investigation established it:
+
+| Question | Answer |
+|---|---|
+| Vitest 4 `coverage.all`? | **Removed** — absent from the shipped types; passing it changes nothing |
+| `coverage.include` restores it? | **No** — it *is* the v4 replacement and **does** take effect (the headline moves), but the report still lists only loaded files |
+| **istanbul** provider differs? | **No** — installed and tested: identical behaviour, same figure, same omission |
+
+**Author correction, accepted by the reviewer as the stronger description:** the report is **not**
+incapable of showing bad news — `src/agent/`, `src/api/`, `src/config/` all show **0%** correctly.
+**Its limitation is that a module graph nothing imports vanishes rather than reading zero.**
+`KnowledgeAssistant.ts` (410 lines, 0 tests) is absent because *nothing imports it*. **46 of 167
+files are reported.**
+
+**Option 2 approved:** keep the measurement, document the limitation, **F-030 partially closed** as
+*"baseline established with known tooling limitation."* The boundary is documented in
+[`docs/project/coverage.md`](../../../docs/project/coverage.md), and **the headline must never be
+quoted as repository coverage** — it is coverage *of the files in the report*, a different claim.
+
+> *"A measured value is only meaningful when its measurement boundary is understood. Without that
+> boundary, precision can easily be mistaken for completeness."* — reviewer
+
+**The measurement gap and the testing gap are the same gap:** coverage becomes repository-wide when
+the unreachable graphs get tests, and `KnowledgeAssistant.ts` is **M4's** (F-053).
+
+---
+
+### ~~🛑 REX-208 — blocked~~ (superseded above)
+
+**REX-208's acceptance criterion is not met and the task is not complete.** The criterion:
+*"Report **shows the known holes** (`KnowledgeAssistant.ts` near-zero) — proving it can report bad
+news."*
+
+**It does not.** `@vitest/coverage-v8` reports only files the suite **loaded**. `KnowledgeAssistant.ts`
+has **zero tests** (F-053), so nothing imports it, so it **vanishes from the report entirely** rather
+than appearing at 0%. `coverage.all = true` produced **no change** — the option appears to have
+changed or been removed in Vitest 4.
+
+**Consequence:** the headline figure measures *the files the suite happens to touch*, not *the code
+that ships*. It is **flattering by omission**, which is the precise failure the task was written to
+avoid. The report *does* show 24 files at 0% (`src/agent/`, `src/api/`, `src/config/`, `server.ts`),
+so it is not useless — but it cannot show the hole that matters most.
+
+**Not resolved by the author**, because the options are a reviewer's call:
+
+| Option | Cost |
+|---|---|
+| **Find the Vitest 4 mechanism** for including untouched files | Unknown; may not exist in v4 |
+| **Ship the report with the limitation documented** | The baseline is not a repository figure and must never be quoted as one |
+| **Defer REX-208 entirely** | F-030 stays open; M2 ships without measurement |
+
+**The limitation is recorded in `vitest.config.ts` itself** rather than papered over.
+
+---
+
+### ⚠️ Reviewer expectation carried into implementation — REX-203
+
+> **When reviewing fixes, optimise for preserving intent over minimising diagnostics. If resolving
+> one diagnostic exposes a deeper design question, prefer surfacing that question over forcing the
+> repository back to zero warnings as quickly as possible. Repository Excellence exists to improve
+> repository quality, not merely repository metrics.**
+
+The reviewer also ruled on what success looks like there: *"If one of those casts turns out to hide a
+genuine behavioural defect, **discovering that is success, not failure**."* **REX-203's objective is
+not "make TypeScript happy" — it is to determine, per diagnostic, whether it represents a typing
+deficiency or a behavioural defect.**
+
+### The ownership-boundary re-read (reviewer requirement, 2026-07-17)
+
+Required before this Planning Freeze, per the M1 lesson. **It found the defect it was looking for**,
+plus two evidence corrections:
+
+**The defect — three paths, each carrying multiple protected outcomes:**
+
+| Path | Findings | Outcomes tangled |
+|---|---|---|
+| `tsconfig.json` | F-026, F-031, F-034 | **governance** (what is checked) + **behaviour risk** (flags surface real issues) + **hygiene** (dead config) |
+| `.github/` | F-025, F-036 | **enforcement** (CI gates) + **process** (templates) — and **F-035 is the same outcome as F-036 but lives at root**, so path-allocation orphaned it |
+| `package.json` | F-032, F-033 | co-owned; genuinely fine |
+
+**Resolved** by the allocation above: each task now protects exactly one property.
+
+**Correction 1 — the hidden-error count is 40, not 46** *(below the FPCP threshold: no scope,
+sequencing, or acceptance change)*. The frozen inventory's **46** came from ad-hoc flags
+(`--target es2022` without the matching `lib`), inventing six false errors in
+`src/platform/retrieval/RetrievalService.ts` because `toSorted` is es2023. **The real `tsconfig`
+sets `target: esnext`.** Verified honest count: **40 errors, all in `tests/`, zero in `src/`.** The
+original exploration said 40; the author introduced the error while "verifying" it.
+
+**Correction 2 — F-031 has no coupling to M3-A.** The frozen plan warns `noUnusedLocals` *"may fail
+on the two orphaned identity resolvers"* (F-042). **Verified false** — exported symbols are not
+unused locals. Actual damage: **one** unused type, `ProviderMetadata` at
+`src/context-builder/providers/schema.ts:22`. **A cross-milestone dependency the plan assumed does
+not exist.**
+
+**Design constraint the plan omitted:** `tsconfig.test.json` **must widen `rootDir`**. Inheriting
+`rootDir: ./src` yields **58× TS6059** and never reaches typechecking at all.
 
 ## Dependencies
 
 ### Requires
 - M1 (gates are documented truthfully; CONTRIBUTING's stated policy becomes enforceable)
+- **[REX-D7](decisions/REX-D7.md)** — Biome (accepted) · **[REX-D10](decisions/REX-D10.md)** — the
+  protected outcome (accepted FPCP)
 
 ### Enables
 - M3-A, M3-B, M4, M5 — every subsequent large diff is verified rather than trusted
 
 ## Validation
 
-- **`tsc --listFiles | grep -c '/tests/'` > 0** — the direct falsifier of F-026.
-- Each gate is demonstrated **failing** on a deliberate violation, then passing. *A gate never
-  seen red is not known to work* — the standard SPEC-003 set with its canonical-unchanged proof.
-- All existing tests pass, with **no test removed, skipped, or weakened** to make a gate green.
+Per **[REX-D10](decisions/REX-D10.md)** — each clause carries a falsifier:
+
+| Clause | Falsifier |
+|---|---|
+| Typecheck reaches tests | **`tsc --listFiles \| grep -c '/tests/'` > 0** — the direct falsifier of F-026 |
+| **Formatting is mechanical** | **`format(pre-M2 tree) == post-M2 tree`.** A formatter is deterministic, so a formatting commit containing a semantic edit **fails this check**. |
+| **No test removed, skipped, or weakened** | test count does not fall; no `.skip`/`.only`/`todo` introduced; `expect` count does not fall |
+| Every non-mechanical `src/` change is **diagnostics-driven** | each traceable to the compiler or linter diagnostic that demanded it |
+| Gates work | each demonstrated **failing** on a deliberate violation, then passing. *A gate never seen red is not known to work.* |
+| Behaviour preserved | all existing tests pass |
 
 ## Definition of Done
 
-- [ ] Every measurable property in the README table green in CI.
-- [ ] Any of the 46 that prove to be **real test defects** are recorded as findings and fixed
-      failing-test-first — **not silently `!`-ed away**.
-- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
-- [ ] Retrospective created.
+- [x] Every measurable property green in CI — **five gates on the runner**.
+- [x] Any of the **40** that prove to be **real test defects** recorded and fixed failing-test-first.
+      *(Result: **zero** behavioural defects; **two design questions** surfaced instead.)*
+- [x] Every clause of the protected outcome demonstrated **and shown able to fail**.
+- [x] Freeze Review completed; **Milestone Freeze declared by the reviewer (AJ) on 2026-07-17.** _(All five §8 reservations weighed and ruled; the freeze granted on the milestone's protected outcome.)_
+- [x] Retrospective created (§4.7 stage 7) — [retrospectives/RETROSPECTIVE-M2.md](retrospectives/RETROSPECTIVE-M2.md).
+
+---
+
+## M2 Freeze Review — Evidence (prepared for the reviewer)
+
+> **M2 stays 🔨 in every progress table.** A freeze is a **reviewer decision, not a consequence of
+> the author finishing the work** (§5.3/§5.4). Including §8 — the case *against*.
+
+### 1. Tasks complete
+
+REX-201..208, all ✅. **11 commits** (`0c6c873..HEAD`), 138 files.
+
+### 2. The repository can now verify itself — five gates, on a clean runner
+
+`format:check` · `lint` · `typecheck` (**incl. `tests/`**) · `build` · `test`, plus **coverage
+reported, never blocking**. CI runs on every push and PR. **Before M2, `.github/` had never existed
+in the repository's history.**
+
+### 3. Every gate demonstrated **failing** under the condition it exists to detect
+
+*A gate is defined by the condition under which it fails.*
+
+| Gate | Probe | Result |
+|---|---|---|
+| typecheck | bad type annotation | ❌ → ✅ |
+| build | same | ❌ → ✅ |
+| test | `expect(1).toBe(2)` | ❌ → ✅ |
+| format:check | mis-formatted line | ❌ → ✅ |
+| **lint** | unused `const` | **passed at first — the gate was vacuous.** `biome lint` exits 0 on warnings. Fixed with `--error-on-warnings`; ❌ → ✅ |
+
+### 4. The protected outcome (REX-D10) — verified, not asserted
+
+| Clause | Evidence |
+|---|---|
+| Formatting is **mechanical** | **`format(pre-tree) == post-tree` across all 104 files**, and **proven able to fail** by smuggling a *validly-formatted* semantic edit |
+| **No test removed, skipped, or weakened** | no `.skip`/`.only`/`todo`; **`expect()` rose 1097 → 1105 (+8)** |
+| Behaviour preserved | **713 tests green** |
+| `src/` changes **diagnostics-driven** | each traceable to the compiler/linter diagnostic that demanded it |
+
+### 5. Frozen work untouched
+
+VISION · ARCH · ADR-001..006 · AJS-007 · EOS/CB decisions and tasks · **`archive/`** — all clean.
+
+### 6. Findings
+
+**Closed:** F-025 (file level), F-026, F-027, F-028, F-029, F-032, F-033, F-034, F-035, F-036.
+**Partial, reviewer-ruled:** F-031 (5 of 6 flags), F-030 (baseline + documented tooling limit).
+**Surfaced, recorded not resolved:** **DQ-1**, **DQ-2**.
+
+### 7. Decisions
+
+**REX-D7** (Biome) · **REX-D10** (FPCP — protected outcome as outcome, **raised during Planning**,
+the first REX plan defect caught *before* implementation).
+
+### 8. What the reviewer should weigh — the case *against* a freeze
+
+**Three gates were built wrong before they were built right, and all three were mine.** The lint gate
+**exited 0 on warnings** and enforced nothing. The formatter **rewrote 36 files of frozen archive**
+because `biome.json` cannot hold comments and Biome **silently fell back to defaults**. `npm run ci`
+reported **green while no longer running the format gate at all**, after `git checkout -- .` reverted
+`package.json`. **Each was caught by testing the gate — none by building it.** A reviewer may
+reasonably ask what that says about the ones I did *not* think to test.
+
+**Two findings close only partially, both by reviewer ruling.** F-031 (`noPropertyAccessFromIndexSignature`
+deferred) and F-030 (coverage cannot see unreachable module graphs). **M2's headline claim —
+*"every objectively measurable property machine-verified"* — is therefore not literally true**:
+repository-wide coverage is not measurable with this tooling, and one strictness flag is off.
+
+**The coverage report is partially honest, which is arguably worse than uniformly dishonest.** It
+reports **46 of 167 files** and *looks* complete. It is mitigated by documentation
+(`docs/project/coverage.md`), not by tooling — and documentation is exactly what M1 proved drifts.
+
+**F-025 is half-open by construction.** CI runs; **nothing requires it to pass before a merge.**
+Branch protection is a repository setting REX cannot make. **A gate that can be merged past is a
+suggestion** — and every claim above about CI protecting the repository is, until then, a claim
+about a gate that can be bypassed.
+
+**Planning was measurably wrong twice.** The "46 errors" was **40**; the six-flag risk assessment
+covered **two** flags. Both were caught by the re-read or by implementation — **neither by planning
+review.**
+
+### 9. Definition of Done
+
+Three of five satisfied; the remaining two are the freeze itself and the retrospective that follows.
 
 ---
 

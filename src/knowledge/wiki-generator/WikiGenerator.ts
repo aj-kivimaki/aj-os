@@ -18,10 +18,7 @@
  */
 
 import type { SourceConnector } from "../../ingestion/index.js";
-import type {
-  KnowledgeCompiler,
-  MergeEngine,
-} from "../compiler/index.js";
+import type { KnowledgeCompiler, MergeEngine } from "../compiler/index.js";
 import type { IdentityResolver } from "../identity/index.js";
 import type { WikiRenderer } from "../renderer/index.js";
 import type { WikiStore } from "../wiki-store/index.js";
@@ -70,11 +67,7 @@ export interface RemovalProposal {
   readonly orphanedSources: readonly string[];
 }
 
-export type LintKind =
-  | "contradiction"
-  | "orphan"
-  | "stale"
-  | "hash-drift";
+export type LintKind = "contradiction" | "orphan" | "stale" | "hash-drift";
 
 export interface LintFinding {
   readonly kind: LintKind;

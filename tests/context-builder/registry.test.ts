@@ -55,10 +55,7 @@ describe("createProviderRegistry — construction & lookup", () => {
 describe("createProviderRegistry — validation", () => {
   it("rejects duplicate provider ids", () => {
     expect(() =>
-      createProviderRegistry([
-        makeProvider("handbook"),
-        makeProvider("handbook"),
-      ]),
+      createProviderRegistry([makeProvider("handbook"), makeProvider("handbook")]),
     ).toThrow(/duplicate/i);
   });
 
@@ -69,11 +66,7 @@ describe("createProviderRegistry — validation", () => {
 
 describe("createProviderRegistry — determinism", () => {
   it("produces the same order for the same input", () => {
-    const providers = [
-      makeProvider("a"),
-      makeProvider("b"),
-      makeProvider("c"),
-    ];
+    const providers = [makeProvider("a"), makeProvider("b"), makeProvider("c")];
     const first = createProviderRegistry(providers).providers.map((p) => p.id);
     const second = createProviderRegistry(providers).providers.map((p) => p.id);
     expect(first).toEqual(second);

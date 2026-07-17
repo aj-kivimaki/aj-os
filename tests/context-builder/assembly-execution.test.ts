@@ -93,7 +93,12 @@ const EXPECTED_SECTION_KIND: Readonly<Record<ReferenceType, string>> = {
 function item(
   id: string,
   type: ReferenceType,
-  overrides: { sourceId?: string; title?: string; content?: string; locator?: string } = {},
+  overrides: {
+    sourceId?: string;
+    title?: string;
+    content?: string;
+    locator?: string;
+  } = {},
 ): KnowledgeItem {
   const sourceId = overrides.sourceId ?? `src-${id}`;
   return {
@@ -231,7 +236,7 @@ describe("assemble — merging multiple source types into shared section kinds",
 
     const merged = pkg.sections.filter((s) => s.kind === "relevant-architecture");
     expect(merged).toHaveLength(1);
-    expect(merged[0].referenceIds).toEqual([arch.source.id, adr.source.id]);
+    expect(merged[0]!.referenceIds).toEqual([arch.source.id, adr.source.id]);
   });
 
   it("merges specification and project-documentation into one related-documentation section", async () => {
@@ -241,7 +246,7 @@ describe("assemble — merging multiple source types into shared section kinds",
 
     const merged = pkg.sections.filter((s) => s.kind === "related-documentation");
     expect(merged).toHaveLength(1);
-    expect(merged[0].referenceIds).toEqual([spec.source.id, doc.source.id]);
+    expect(merged[0]!.referenceIds).toEqual([spec.source.id, doc.source.id]);
   });
 
   it("merges source-code and git-history into one existing-implementation-patterns section", async () => {
@@ -253,7 +258,7 @@ describe("assemble — merging multiple source types into shared section kinds",
       (s) => s.kind === "existing-implementation-patterns",
     );
     expect(merged).toHaveLength(1);
-    expect(merged[0].referenceIds).toEqual([code.source.id, history.source.id]);
+    expect(merged[0]!.referenceIds).toEqual([code.source.id, history.source.id]);
   });
 });
 
@@ -482,11 +487,7 @@ describe("assemble — immutability of the input SelectionResult (by divergence)
     // Input order untouched; output mirrors that exact given order.
     expect(selection.selectedItems.map((i) => i.id)).toEqual(["k1", "k2", "k3"]);
     expect(Object.isFrozen(selection.selectedItems)).toBe(true);
-    expect(section(pkg, "handbook-references")?.referenceIds).toEqual([
-      "s3",
-      "s1",
-      "s2",
-    ]);
+    expect(section(pkg, "handbook-references")?.referenceIds).toEqual(["s3", "s1", "s2"]);
   });
 
   it("consumes only selectedItems — excludedItems never enter assembly", async () => {

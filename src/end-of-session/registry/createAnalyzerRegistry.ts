@@ -56,9 +56,7 @@ export interface AnalyzerRegistry {
  * registry.get("git"); // gitAnalyzer | undefined
  * registry.analyzers;  // readonly [gitAnalyzer]
  */
-export function createAnalyzerRegistry(
-  analyzers: readonly Analyzer[],
-): AnalyzerRegistry {
+export function createAnalyzerRegistry(analyzers: readonly Analyzer[]): AnalyzerRegistry {
   const byId = new Map<string, Analyzer>();
 
   for (const analyzer of analyzers) {

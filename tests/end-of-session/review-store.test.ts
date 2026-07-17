@@ -9,7 +9,15 @@
  * escape). The store is persistence-only: it exposes exactly five operations and
  * understands nothing about the artifacts beyond where they go.
  */
-import { mkdtemp, mkdir, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  readdir,
+  realpath,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -57,7 +65,10 @@ const report: SessionReport = parseSessionReport({
   durationMs: 3_600_000,
   analyzersRun: ["git-change-analyzer"],
   filesAnalyzed: 2,
-  candidatesProduced: { count: 2, ids: [`session:${sessionId}:1`, `session:${sessionId}:2`] },
+  candidatesProduced: {
+    count: 2,
+    ids: [`session:${sessionId}:1`, `session:${sessionId}:2`],
+  },
   errors: [],
   result: "completed",
   logEntry: "Captured 2 candidates.",
@@ -69,7 +80,9 @@ const report: SessionReport = parseSessionReport({
  * inert as far as the store is concerned: it persists the rendered body and reads
  * nothing else.
  */
-function reviewPackage(markdown = "# Session review package\n\nOne candidate.\n"): ReviewPackage {
+function reviewPackage(
+  markdown = "# Session review package\n\nOne candidate.\n",
+): ReviewPackage {
   return parseReviewPackage({
     sessionId,
     generatedAt: "2026-07-16T12:00:00.000Z",
@@ -237,9 +250,7 @@ describe("FilesystemReviewStore", () => {
     it("rejects a sessionId that is not a single safe path segment", async () => {
       const s = store();
       for (const bad of ["../escape", "a/b", "..", ""]) {
-        await expect(s.appendLog(bad, "x")).rejects.toBeInstanceOf(
-          ReviewStoreError,
-        );
+        await expect(s.appendLog(bad, "x")).rejects.toBeInstanceOf(ReviewStoreError);
       }
     });
 
@@ -249,9 +260,9 @@ describe("FilesystemReviewStore", () => {
         ...JSON.parse(JSON.stringify(candidate(1))),
         id: "../evil",
       });
-      await expect(
-        store().saveCandidates(sessionId, [escaping]),
-      ).rejects.toBeInstanceOf(ReviewStoreError);
+      await expect(store().saveCandidates(sessionId, [escaping])).rejects.toBeInstanceOf(
+        ReviewStoreError,
+      );
     });
   });
 

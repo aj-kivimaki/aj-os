@@ -68,14 +68,11 @@ export async function selectKnowledge(
   // `Array.prototype.sort` orders in place.
   const ordered = [...retained].sort(compareKnowledgeItems);
 
-  const { retained: selectedItems, duplicates } =
-    partitionExactDuplicates(ordered);
+  const { retained: selectedItems, duplicates } = partitionExactDuplicates(ordered);
 
   // Order the excluded set with the same comparator so the output is fully
   // deterministic, even though `excludedItems` has no contractual ordering.
-  const excludedItems = [...filteredOut, ...duplicates].sort(
-    compareKnowledgeItems,
-  );
+  const excludedItems = [...filteredOut, ...duplicates].sort(compareKnowledgeItems);
 
   return parseSelectionResult({
     metadata: collectionResult.metadata,

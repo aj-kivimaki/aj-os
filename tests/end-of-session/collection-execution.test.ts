@@ -167,10 +167,7 @@ describe("collectChanges — partial collection (a failure never aborts)", () =>
       changeAnalyzer("config", "tsconfig.json"),
     ]);
 
-    expect(result.changes.map((c) => c.id)).toEqual([
-      "git:a.ts",
-      "config:tsconfig.json",
-    ]);
+    expect(result.changes.map((c) => c.id)).toEqual(["git:a.ts", "config:tsconfig.json"]);
     expect(result.errors.map((e) => e.analyzer)).toEqual(["docs"]);
   });
 
@@ -195,9 +192,7 @@ describe("collectChanges — partial collection (a failure never aborts)", () =>
     };
     const result = await collectFor([weird]);
 
-    expect(result.errors[0].message).toBe(
-      "The analyzer failed to contribute changes.",
-    );
+    expect(result.errors[0]!.message).toBe("The analyzer failed to contribute changes.");
   });
 
   it("uses a string rejection reason verbatim", async () => {
@@ -211,7 +206,7 @@ describe("collectChanges — partial collection (a failure never aborts)", () =>
     };
     const result = await collectFor([stringy]);
 
-    expect(result.errors[0].message).toBe("plain string failure");
+    expect(result.errors[0]!.message).toBe("plain string failure");
   });
 });
 
@@ -245,7 +240,10 @@ describe("collectChanges — determinism (registry order is authoritative)", () 
       delayedFailingAnalyzer("e-slow", 30),
     ]);
 
-    expect(result.changes.map((c) => c.id)).toEqual(["c-slow:c-slow.ts", "c-fast:c-fast.ts"]);
+    expect(result.changes.map((c) => c.id)).toEqual([
+      "c-slow:c-slow.ts",
+      "c-fast:c-fast.ts",
+    ]);
     expect(result.errors.map((e) => e.analyzer)).toEqual(["e-fast", "e-slow"]);
   });
 
@@ -279,7 +277,7 @@ describe("collectChanges — immutable output", () => {
     const result = await collectFor([changeAnalyzer("git", "a.ts")]);
 
     expect(() => {
-      (result.changes as SessionChange[]).push(result.changes[0]);
+      (result.changes as unknown as SessionChange[]).push(result.changes[0]!);
     }).toThrow();
   });
 });

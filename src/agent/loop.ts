@@ -76,8 +76,7 @@ export async function runAgent(options: RunAgentOptions): Promise<AgentAnswer> {
     const answer = collectText(response.content);
     if (response.stop_reason === "refusal") {
       return {
-        answer:
-          answer || "The request was declined by the model's safety system.",
+        answer: answer || "The request was declined by the model's safety system.",
         toolCalls,
         stopReason,
         iterations: iteration,

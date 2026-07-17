@@ -53,9 +53,7 @@ function toChangeType(status: string): ChangeType {
     case "T":
       return "modified";
     default:
-      throw new Error(
-        `GitChangeAnalyzer: unrecognized git status "${status}".`,
-      );
+      throw new Error(`GitChangeAnalyzer: unrecognized git status "${status}".`);
   }
 }
 
@@ -91,10 +89,7 @@ function toChangeKind(path: string): ChangeKind {
  * Build a deterministic, human-readable summary. A rename with a known former path
  * reads `renamed <old> → <new>`; everything else reads `<changeType> <path>`.
  */
-function toSummary(
-  changeType: ChangeType,
-  change: GitFileChange,
-): string {
+function toSummary(changeType: ChangeType, change: GitFileChange): string {
   if (changeType === "renamed" && change.oldPath !== undefined) {
     return `renamed ${change.oldPath} → ${change.path}`;
   }
@@ -114,8 +109,7 @@ function toSessionChange(change: GitFileChange): SessionChange {
     path: change.path,
     changeType,
     summary: toSummary(changeType, change),
-    metadata:
-      change.oldPath !== undefined ? { oldPath: change.oldPath } : {},
+    metadata: change.oldPath !== undefined ? { oldPath: change.oldPath } : {},
   };
 }
 

@@ -1,0 +1,68 @@
+# The gates CONTRIBUTING.md and docs/guides/development.md have always required.
+#
+# Both documents state that `typecheck`, `build`, and `test` must pass before a
+# pull request. Until this workflow existed, nothing checked — eleven PRs merged
+# with the policy stated twice and enforced zero times (REX F-025).
+#
+# Deliberately boring: no matrix, no cache tuning, no reusable workflows. The
+# finding was "nothing runs", not "what runs is unsophisticated". Each gate is
+# a separate step so a failure names itself in the UI without opening the log.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+# A new push to the same branch makes the previous run irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: typecheck · build · test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Pinned to the major the project develops against. REX-206 makes this
+          # authoritative via `engines` + `.nvmrc`; until then this is the only
+          # place a version is declared, so it is declared explicitly rather than
+          # inherited from the runner's default.
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      # Several suites create real git repositories in temp dirs. They configure
+      # their own `user.email`/`user.name` per repo, so no global git identity is
+      # needed here — verified across all four (REX-201).
+      - name: Test
+        run: npm test
+
+      # Measured, NOT gated — no thresholds, and this step cannot fail the build.
+      # The report's boundary is documented in docs/project/coverage.md: it lists
+      # only loaded module graphs, so the headline is NOT repository coverage.
+      - name: Coverage (measured, not gated)
+        run: npm run test:coverage
+        continue-on-error: true

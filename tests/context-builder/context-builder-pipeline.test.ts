@@ -82,7 +82,11 @@ function failingProvider(id: string): KnowledgeProvider {
   };
 }
 
-const STANDARD = { id: "AJS-001", type: "standard", title: "Engineering Standard" } as const;
+const STANDARD = {
+  id: "AJS-001",
+  type: "standard",
+  title: "Engineering Standard",
+} as const;
 
 function item(id: string, content: string): KnowledgeItem {
   return { id, source: STANDARD, content };

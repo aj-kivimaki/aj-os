@@ -66,9 +66,9 @@ describe("RetrievalService", () => {
     const results = await new RetrievalService(wiki).search("context builder");
 
     expect(results).toHaveLength(1);
-    expect(results[0].title).toBe("Context Builder");
-    expect(results[0].path).toBe(join(wiki, "context-builder.md"));
-    expect(results[0].score).toBeGreaterThan(0);
+    expect(results[0]!.title).toBe("Context Builder");
+    expect(results[0]!.path).toBe(join(wiki, "context-builder.md"));
+    expect(results[0]!.score).toBeGreaterThan(0);
   });
 
   it("only considers articles the index links", async () => {
@@ -77,9 +77,7 @@ describe("RetrievalService", () => {
     // Present on disk and a strong keyword match, but not linked by the index.
     await writeArticle("miss.md", "# Miss\n\nDependency injection injection injection.");
 
-    const results = await new RetrievalService(wiki).search(
-      "dependency injection",
-    );
+    const results = await new RetrievalService(wiki).search("dependency injection");
 
     expect(results.map((r) => r.title)).toEqual(["Match"]);
   });
@@ -123,16 +121,14 @@ describe("RetrievalService", () => {
 
   it("ranks more relevant articles first", async () => {
     await writeIndex("strong", "weak");
-    await writeArticle(
-      "strong.md",
-      "# Strong\n\nprompt prompt prompt renderer renderer",
-    );
+    await writeArticle("strong.md", "# Strong\n\nprompt prompt prompt renderer renderer");
     await writeArticle("weak.md", "# Weak\n\nprompt mentioned once here.");
 
     const results = await new RetrievalService(wiki).search("prompt renderer");
 
     expect(results.map((r) => r.title)).toEqual(["Strong", "Weak"]);
-    expect(results[0].score).toBeGreaterThan(results[1].score);
+    expect(results.length).toBeGreaterThanOrEqual(2);
+    expect(results[0]!.score).toBeGreaterThan(results[1]!.score);
   });
 
   it("returns at most five articles", async () => {
@@ -153,6 +149,7 @@ describe("RetrievalService", () => {
 
     const results = await new RetrievalService(wiki).search("widgets");
 
-    expect(results[0].title).toBe("no-heading");
+    expect(results).toHaveLength(1);
+    expect(results[0]!.title).toBe("no-heading");
   });
 });

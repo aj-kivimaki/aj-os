@@ -20,9 +20,7 @@ export interface WikiBuildOptions {
  * `createKnowledgePipeline`; all generation logic lives in the platform. This
  * command performs no git — orchestration and commits are handled elsewhere.
  */
-export async function wikiBuildCommand(
-  options: WikiBuildOptions = {},
-): Promise<void> {
+export async function wikiBuildCommand(options: WikiBuildOptions = {}): Promise<void> {
   const mode = options.rebuild === true ? "rebuild" : "incremental";
 
   let report: GenerationReport;

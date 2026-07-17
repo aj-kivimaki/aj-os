@@ -14,18 +14,10 @@ loadDotenv();
  * message when one is missing.
  */
 const appEnvSchema = z.object({
-  NODE_ENV: z
-    .enum(["development", "test", "production"])
-    .default("development"),
-  ANTHROPIC_API_KEY: z
-    .string()
-    .min(1, "ANTHROPIC_API_KEY must not be empty")
-    .optional(),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  ANTHROPIC_API_KEY: z.string().min(1, "ANTHROPIC_API_KEY must not be empty").optional(),
   ANTHROPIC_MODEL: z.string().min(1).default("claude-sonnet-5"),
-  HANDBOOK_PATH: z
-    .string()
-    .min(1, "HANDBOOK_PATH must not be empty")
-    .optional(),
+  HANDBOOK_PATH: z.string().min(1, "HANDBOOK_PATH must not be empty").optional(),
   API_PORT: z.coerce.number().int().positive().default(3000),
   API_HOST: z.string().min(1).default("0.0.0.0"),
   API_AUTH_TOKEN: z

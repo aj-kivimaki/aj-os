@@ -55,9 +55,9 @@ describe("createCollectionEngine — construction & registry injection", () => {
     expect(() =>
       createCollectionEngine(undefined as unknown as ProviderRegistry),
     ).toThrow(/registry/i);
-    expect(() =>
-      createCollectionEngine(null as unknown as ProviderRegistry),
-    ).toThrow(/registry/i);
+    expect(() => createCollectionEngine(null as unknown as ProviderRegistry)).toThrow(
+      /registry/i,
+    );
   });
 });
 

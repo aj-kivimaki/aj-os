@@ -18,7 +18,6 @@ import {
   parseChangeSet,
   ExtractionError,
   type ChangeSet,
-  type KnowledgeExtractor,
   type TextGenerator,
 } from "../../src/end-of-session/index.js";
 
@@ -60,9 +59,7 @@ const validResponse = JSON.stringify({
       title: "Isolate model non-determinism behind a port",
       body: "Depend on a `TextGenerator` port so the stage is stub-testable.",
       rationale: "Keeps every surrounding stage deterministic.",
-      relatedChangeIds: [
-        "git:src/end-of-session/extraction/createKnowledgeExtractor.ts",
-      ],
+      relatedChangeIds: ["git:src/end-of-session/extraction/createKnowledgeExtractor.ts"],
       relatedPaths: ["src/end-of-session/extraction/createKnowledgeExtractor.ts"],
       tags: ["architecture"],
       confidence: 0.9,
@@ -72,16 +69,24 @@ const validResponse = JSON.stringify({
 
 interface GeneratorCall {
   readonly prompt: { readonly system: string; readonly user: string };
-  readonly options?: { readonly maxTokens?: number };
+  /**
+   * Always recorded, possibly `undefined` — `TextGenerator.complete` takes an
+   * optional `options`, and a call that omitted it *did* happen with `options`
+   * undefined. Declaring `options?:` instead would record "no such property",
+   * which under `exactOptionalPropertyTypes` is a different claim than the one
+   * this stub can honestly make.
+   */
+  readonly options: { readonly maxTokens?: number } | undefined;
 }
 
 /**
  * A stub `TextGenerator` that records its calls and returns a canned text (or throws
  * a canned rejection). No network, no provider — the extractor's only dependency.
  */
-function stubGenerator(
-  text: string | (() => never),
-): { generator: TextGenerator; calls: GeneratorCall[] } {
+function stubGenerator(text: string | (() => never)): {
+  generator: TextGenerator;
+  calls: GeneratorCall[];
+} {
   const calls: GeneratorCall[] = [];
   const generator: TextGenerator = {
     async complete(prompt, options) {
@@ -113,9 +118,7 @@ describe("createKnowledgeExtractor — construction", () => {
 describe("createKnowledgeExtractor — extraction", () => {
   it("parses a valid response into the expected immutable extraction", async () => {
     const { generator } = stubGenerator(validResponse);
-    const extraction = await createKnowledgeExtractor({ generator }).extract(
-      changeSet,
-    );
+    const extraction = await createKnowledgeExtractor({ generator }).extract(changeSet);
     expect(extraction).toEqual(JSON.parse(validResponse));
     expect(Object.isFrozen(extraction)).toBe(true);
     expect(Object.isFrozen(extraction.findings[0])).toBe(true);
@@ -123,9 +126,7 @@ describe("createKnowledgeExtractor — extraction", () => {
 
   it("passes sessionId straight through from the model response", async () => {
     const { generator } = stubGenerator(validResponse);
-    const extraction = await createKnowledgeExtractor({ generator }).extract(
-      changeSet,
-    );
+    const extraction = await createKnowledgeExtractor({ generator }).extract(changeSet);
     expect(extraction.sessionId).toBe(sessionId);
   });
 
@@ -156,9 +157,7 @@ describe("createKnowledgeExtractor — extraction", () => {
       errors: [{ analyzer: "git", message: "one file failed", recoverable: true }],
     });
     const { generator } = stubGenerator(validResponse);
-    const extraction = await createKnowledgeExtractor({ generator }).extract(
-      partial,
-    );
+    const extraction = await createKnowledgeExtractor({ generator }).extract(partial);
     expect(extraction.findings).toHaveLength(1);
   });
 });
@@ -177,16 +176,10 @@ describe("createKnowledgeExtractor — Extractor Invariant (no interpretation)",
       ],
     });
     const { generator } = stubGenerator(response);
-    const extraction = await createKnowledgeExtractor({ generator }).extract(
-      changeSet,
-    );
+    const extraction = await createKnowledgeExtractor({ generator }).extract(changeSet);
     // Order preserved, duplicates kept, kinds untouched save the schema's soft-hint
     // fallback (validation, not interpretation by the extractor).
-    expect(extraction.findings.map((f) => f.title)).toEqual([
-      "Zeta",
-      "Alpha",
-      "Zeta",
-    ]);
+    expect(extraction.findings.map((f) => f.title)).toEqual(["Zeta", "Alpha", "Zeta"]);
     expect(extraction.findings.map((f) => f.kind)).toEqual([
       "playbook",
       "handbook-entry",
@@ -207,9 +200,7 @@ describe("createKnowledgeExtractor — determinism", () => {
   });
 
   it("builds an identical prompt for the same ChangeSet, including each change", () => {
-    expect(buildExtractionPrompt(changeSet)).toEqual(
-      buildExtractionPrompt(changeSet),
-    );
+    expect(buildExtractionPrompt(changeSet)).toEqual(buildExtractionPrompt(changeSet));
     const { user } = buildExtractionPrompt(changeSet);
     expect(user).toContain(sessionId);
     for (const change of changeSet.changes) {

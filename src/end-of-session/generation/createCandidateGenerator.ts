@@ -77,9 +77,7 @@ function toCandidate(
     tags: finding.tags,
     related: [],
     // Carried verbatim; omitted (not sent as `undefined`) when the model gave none.
-    ...(finding.confidence !== undefined
-      ? { confidence: finding.confidence }
-      : {}),
+    ...(finding.confidence !== undefined ? { confidence: finding.confidence } : {}),
   });
 }
 

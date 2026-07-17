@@ -75,10 +75,7 @@ export interface ReviewStore {
    * validated it, and consistency is guaranteed by construction because the package is
    * derived from the candidates each run.
    */
-  saveReviewPackage(
-    sessionId: string,
-    reviewPackage: ReviewPackage,
-  ): Promise<void>;
+  saveReviewPackage(sessionId: string, reviewPackage: ReviewPackage): Promise<void>;
 
   /**
    * Append a line to the session's `pending/<sessionId>/log.md`. Intentionally minimal —
