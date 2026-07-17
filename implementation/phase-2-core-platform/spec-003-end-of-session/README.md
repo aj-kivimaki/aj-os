@@ -2,7 +2,7 @@
 
 > **Implementation Package:** SPEC-003
 >
-> **Status:** M1–M4 **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). **M5 is implementation-complete (EOS-401..411) and awaiting its Freeze Review** — the v1 vertical slice runs end to end via `aj session end` and is proven by an acceptance suite mapped to SPEC-003 §19 (713 tests / 58 files).
+> **Status:** ✅ **SPEC-003 COMPLETE** — all five milestones **frozen** by the reviewer (AJ): M1 2026-07-15; M2–M4 2026-07-16; **M5 2026-07-17**. The v1 vertical slice is operational: `aj session end` turns a finished session into candidate knowledge and a review package, proven against SPEC-003 §19 (**713 tests / 58 files**). No further implementation work is required.
 >
 > **Phase:** Phase 2 — Core Knowledge Platform
 >
@@ -184,7 +184,7 @@ decisions.
 | M2 | Session Change Collection | ✅ |
 | M3 | Knowledge Extraction | ✅ |
 | M4 | Candidate Generation & Review Store | ✅ |
-| M5 | Review Package Projection, Orchestration & CLI | ⬜ (implementation complete; awaiting Freeze Review) |
+| M5 | Review Package Projection, Orchestration & CLI | ✅ |
 
 See: [MILESTONES.md](MILESTONES.md)
 
@@ -221,8 +221,8 @@ spec-003-end-of-session/
   2026-07-16): EOS-301 Candidate Generator, EOS-302 Review Store, EOS-303
   `reviewPath` config — implemented, reviewed, and committed. **EOS-D6 Accepted**
   (domain-aware Review Store API).
-- ⬜ M5 (Projection, Orchestration & CLI) — **implementation-complete
-  (EOS-401..411); awaiting the Freeze Review.** Five decisions accepted:
+- ✅ M5 (Projection, Orchestration & CLI) — **COMPLETE and FROZEN** (AJ, 2026-07-17).
+  Five decisions accepted:
   **EOS-D7** (extend the existing `GitPort` — closing the gap that left no
   `Session` constructible), **EOS-D8** (the Review Store gains
   `saveReviewPackage`, so it owns every file in the session directory),
@@ -232,8 +232,11 @@ spec-003-end-of-session/
   byte-identical when absent) and **EOS-D11** (untracked files reach the change
   stream, adapter-only). Reviewer-required invariants recorded: the
   **Orchestrator Invariant** (EOS-406) and the **Report Builder Invariant**
-  (EOS-405). The slice runs end to end and is proven against SPEC-003 §19. See
+  (EOS-405). The Freeze Review confirmed every M1–M4 boundary preserved and both
+  FPCP amendments incorporated without architectural drift. See
   [MILESTONES.md](MILESTONES.md#milestone-m5--review-package-projection-orchestration--cli).
+- ✅ **SPEC-003 is complete.** The knowledge loop's capture half is operational and
+  hands off to SPEC-004 through `knowledge-review/pending/<session-id>/`.
 
 > **Frozen-plan discipline (AJS-007).** From the freeze onward, changes to the
 > frozen plan — contracts, milestone structure, or scope — follow the AJS-007
@@ -317,13 +320,17 @@ This implementation succeeds when:
 
 # Definition of Done
 
-- [ ] All planned milestones completed and frozen.
-- [ ] All implementation tasks completed.
-- [ ] Tests passing (unit, integration, acceptance).
-- [ ] Documentation updated and synchronized at each freeze.
-- [ ] SPEC-003 acceptance criteria satisfied for v1 scope.
-- [ ] Code reviewed.
-- [ ] Merged into main.
+- [x] All planned milestones completed and frozen. _(M1–M5; each frozen by the reviewer's
+      deliberate decision at a Freeze Review.)_
+- [x] All implementation tasks completed. _(26 tasks: EOS-001..007, 101..103, 201..202,
+      301..303, 401..411.)_
+- [x] Tests passing (unit, integration, acceptance). _(**713 / 58**, green across three
+      consecutive runs.)_
+- [x] Documentation updated and synchronized at each freeze.
+- [x] SPEC-003 acceptance criteria satisfied for v1 scope. _(§19 mapped test-by-test.)_
+- [x] Code reviewed. _(Every task independently reviewed at high effort, with findings
+      addressed before commit.)_
+- [ ] Merged into main. _(M5 pull request open — the last step.)_
 
 ---
 

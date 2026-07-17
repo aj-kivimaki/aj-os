@@ -4,7 +4,7 @@
 >
 > **Related Specification:** SPEC-003
 >
-> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 4 (Candidate Generation & Review Store) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — EOS-301..303 implemented, reviewed, and committed; EOS-D6 accepted (domain-aware Review Store API). Milestone 5 (Review Package Projection, Orchestration & CLI) — **task breakdown PLANNING-FROZEN by the reviewer (AJ) on 2026-07-16** (EOS-401..409, plus **EOS-410** added by the approved EOS-D10 FPCP). EOS-D7, EOS-D8, EOS-D9, and EOS-D10 accepted; the **Orchestrator Invariant** (EOS-406) and **Report Builder Invariant** (EOS-405) recorded at the reviewer's requirement. **ALL M5 TASKS COMPLETE (EOS-401..411). The v1 vertical slice is implemented and proven end to end — 713 tests / 58 files, green. EOS-D7..D11 all accepted. M5 is implementation-complete and ready for the Freeze Review; no further architectural changes are to be introduced** — see [Milestone M5](#milestone-m5--review-package-projection-orchestration--cli).
+> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 4 (Candidate Generation & Review Store) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — EOS-301..303 implemented, reviewed, and committed; EOS-D6 accepted (domain-aware Review Store API). Milestone 5 (Review Package Projection, Orchestration & CLI) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-17) — EOS-401..411 implemented, reviewed, and committed; EOS-D7..D11 accepted (including two Frozen Plan Change Proposals); the **Orchestrator Invariant** (EOS-406) and **Report Builder Invariant** (EOS-405) recorded at the reviewer's requirement. **SPEC-003 is COMPLETE: all five milestones are frozen and the v1 vertical slice is operational and proven (713 tests / 58 files).** No further implementation work is required for SPEC-003 — see [Milestone M5](#milestone-m5--review-package-projection-orchestration--cli).
 
 ---
 
@@ -32,7 +32,7 @@ established in M1 so later capabilities are additive.
 | M2 | Session Change Collection | Git changes collected deterministically behind the analyzer registry | ✅ |
 | M3 | Knowledge Extraction | Reusable knowledge extracted from changes via the injected text-generation port | ✅ |
 | M4 | Candidate Generation & Review Store | Canonical `CandidateKnowledge` generated and persisted to the review store | ✅ |
-| M5 | Review Package Projection, Orchestration & CLI | Human-readable projection + `createEndOfSessionWorkflow` + `aj session end` | ⬜ |
+| M5 | Review Package Projection, Orchestration & CLI | Human-readable projection + `createEndOfSessionWorkflow` + `aj session end` | ✅ |
 
 ---
 
@@ -562,7 +562,7 @@ Nothing is hidden; these are recorded in full and are the author's honest reserv
 - [x] Projection deterministic from canonical candidates.
 - [x] Composition root + `aj session end` operational.
 - [x] Integration + acceptance tests passing.
-- [ ] **Freeze Review completed; v1 vertical slice complete** — _the reviewer's decision._
+- [x] **Freeze Review completed; v1 vertical slice complete** — **Milestone 5 Freeze declared by the reviewer (AJ) on 2026-07-17.**
 
 ## Dependencies
 
@@ -581,10 +581,17 @@ Nothing is hidden; these are recorded in full and are the author's honest reserv
 
 ## Definition of Done
 
-- [ ] Projection deterministic from canonical candidates.
-- [ ] Composition root + `aj session end` operational.
-- [ ] Integration + acceptance tests passing.
-- [ ] Freeze Review completed; **v1 vertical slice complete**.
+- [x] Projection deterministic from canonical candidates.
+- [x] Composition root + `aj session end` operational.
+- [x] Integration + acceptance tests passing.
+- [x] Freeze Review completed; **v1 vertical slice complete**. _(**Milestone 5 Freeze
+      declared by the reviewer (AJ) on 2026-07-17.** Objectives satisfied — the complete
+      End-of-Session workflow is operational; every architectural boundary established in
+      M1–M4 preserved; the orchestrator remains a sequencing component rather than a policy
+      owner; `CandidateKnowledge` remains the canonical cross-specification boundary; the
+      Review Store remains a persistence adapter; the `ReviewPackage` remains a pure
+      projection; the approved EOS-D10 and EOS-D11 amendments were incorporated without
+      architectural drift; SPEC-003 §19 satisfied. DoD met.)_
 
 ---
 
@@ -627,12 +634,21 @@ beyond the graceful `AnalyzerError` fallback).
 
 ---
 
-# Completion Criteria (v1)
+# Completion Criteria (v1) — **SATISFIED**
 
-- [ ] M1–M5 completed and frozen.
-- [ ] Every M1 task (EOS-001..EOS-007) and each later milestone's tasks completed.
-- [ ] SPEC-003 acceptance criteria satisfied for the v1 scope.
-- [ ] The review store is consumable by SPEC-004.
+- [x] M1–M5 completed and frozen. _(M1 2026-07-15; M2, M3, M4 2026-07-16; **M5 2026-07-17** —
+      each by the reviewer's deliberate decision at a Freeze Review.)_
+- [x] Every M1 task (EOS-001..EOS-007) and each later milestone's tasks completed.
+      _(EOS-001..007, 101..103, 201..202, 301..303, 401..411 — 26 tasks.)_
+- [x] SPEC-003 acceptance criteria satisfied for the v1 scope. _(§19 mapped test-by-test in
+      `session-acceptance.test.ts`; canonical knowledge proven byte-identical.)_
+- [x] The review store is consumable by SPEC-004. _(Every artifact under
+      `knowledge-review/pending/<session-id>/` round-trips through the contracts SPEC-003
+      publishes — proven by a real composed run.)_
+
+**SPEC-003 is complete.** The v1 vertical slice is operational: `aj session end` turns a
+finished coding session into candidate knowledge and a review package, writes only to the
+non-canonical review area, commits nothing, and proposes without ever approving.
 
 ---
 
@@ -640,6 +656,7 @@ beyond the graceful `AnalyzerError` fallback).
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-17 | 1.33 | **MILESTONE 5 FREEZE DECLARED by the reviewer (AJ) — and with it, SPEC-003 is COMPLETE.** The Freeze Review passed: the complete End-of-Session workflow is operational; **every architectural boundary established in M1–M4 is preserved**; the orchestrator remains a **sequencing component rather than a policy owner**; **`CandidateKnowledge` remains the canonical cross-specification boundary**; the **Review Store remains a persistence adapter**; the **`ReviewPackage` remains a pure projection**; the approved **EOS-D10** and **EOS-D11** amendments were incorporated **without architectural drift**; and the **SPEC-003 §19 acceptance criteria are satisfied**. M5's Definition of Done and the v1 Completion Criteria are fully met. Delivered across EOS-401..411: the git state seam (EOS-D7), the Session factory (with the ratified detached-HEAD Branch Policy), the Review Package projector, `saveReviewPackage` (EOS-D8), the Session Report builder, session notes into extraction (EOS-D10, FPCP), the workflow orchestrator, the composition root (EOS-D9), `aj session end`, the integration + acceptance suites, and untracked files in the git observation (EOS-D11, FPCP). Final state: **713 tests / 58 files** green across three consecutive runs; **26 public operations**, each a deliberate drift-guard edit; no git write and no wiki generation anywhere in the module (verified by grep *and* at runtime); canonical knowledge proven byte-identical by a snapshot that was itself verified able to fail. **M5 is frozen; changes now follow the AJS-007 Frozen Plan Change Proposal process.** **No further implementation work is required for SPEC-003.** Next: the Milestone 5 pull request to `main`. SPEC-004 is **not** to be started. |
 | 2026-07-17 | 1.32 | **M5 Freeze Review prepared — evidence assembled for the reviewer; M5 is implementation-complete (EOS-401..411).** Documentation synchronized per AJS-007 §7.4 (PIPELINE-ARCHITECTURE's status rewritten — it still claimed session creation, projection, report assembly, orchestration and the CLI were unimplemented; README deliverables checked off; directory structure corrected to EOS-401..411 / EOS-D1..D11). A **Freeze Review Evidence** section now records, with each claim verified rather than asserted: all twelve tasks `Complete`; the **Integration Check** (no git-write command anywhere in `src/end-of-session/` and no wiki reference — verified by grep, and proven at runtime by a real run leaving HEAD/index/worktree byte-identical); **canonical knowledge unchanged**, proven by a snapshot that was itself checked to be able to fail; SPEC-003 §19 mapped test-by-test; **26 public operations**, each a deliberate manifest edit; **713 tests / 58 files** green across three consecutive runs; and the five decisions (EOS-D7..D11) plus two reviewer-required invariants. The evidence also states plainly what the reviewer should weigh **against** a freeze: four frozen-plan gaps needed five amendments during M5; two accepted representation costs (`"detached"` vs `detached@<short-head>`; duplicated `SHORT_HEAD_LENGTH`); `SessionContext` remains nearly inert; two pre-existing future-hardening items; and the `tests/`-typecheck gap that hid three real defects. **M5 stays ⬜ in every progress table — a freeze is a reviewer decision, not a consequence of the author finishing the work (AJS-007 §5.3/§5.4).** |
 | 2026-07-17 | 1.31 | **EOS-411 complete — the [EOS-D11](decisions/EOS-D11-untracked-files-in-collection.md) FPCP is implemented, and M5 is implementation-complete (EOS-401..411).** Approved by the reviewer (AJ, 2026-07-17) as restoring "consistency with the already-approved semantics of the default working range rather than introducing new functionality". Delivered **exactly as proposed**: `createGitPort.changes` also runs `git ls-files --others --exclude-standard` for **working-tree ranges only** (told from commit ranges by git's own `..` — invocation strategy, which EOS-102 assigns to the adapter), mapping each untracked path to an ordinary `{ path, status: "A" }`. **Verified adapter-only by diff: one file changed; `createGitChangeAnalyzer` and `GitPort` are byte-untouched, and M2's 38 analyzer/collection tests pass unmodified** — the proof the change is confined. The analyzer remains a pure translator that cannot distinguish an untracked file from a staged one; ordering stays deterministic because it already sorts. 8 new real-git tests (untracked reported as `added`; tracked and untracked together; **no duplication** of a staged-new file; **`.gitignore` respected**; **excluded for a commit range**, included for a bare ref; deterministic; no git write). **Acceptance suite extended and re-validated per the reviewer's direction**: the fixture session now ends with a file never `git add`ed *and* an ignored one, and the new §19 scenario asserts on **the prompt the model was actually shown** — not on a stubbed finding, which would only prove the stub cited the path. `filesAnalyzed` is now **7** (6 tracked + 1 untracked; `build.log` correctly excluded), and the workflow no longer contradicts its own `dirty` flag. **Full M5 acceptance re-validation: 713 tests / 58 files, green, run three consecutive times.** High-effort review: 2 findings, **neither EOS-411's to fix** — **non-ASCII path quoting** (git quotes `café.ts` as `"caf\303\251.ts"` in *both* reads; **pre-existing in M2's frozen parser since EOS-103**, inherited identically rather than introduced) → recorded under **Future Hardening**; and two sequential git spawns for a working-tree range, deliberately left (parallelising would spawn `ls-files` needlessly for every `--since` run). **NEXT: the M5 Freeze Review.** |
 | 2026-07-17 | 1.30 | **EOS-409 (Integration & Acceptance) complete — the v1 vertical slice is PROVEN. All M5 tasks are now implemented.** Three files, **no product code**: shared fixtures (a vault **seeded with real canonical content**; a repo touching source/test/doc/config; a stub generator returning **fenced** JSON as a real model does; content-hash snapshots), 16 integration tests, and 8 acceptance tests — one per SPEC-003 §19 criterion, named in the specification's own words. Every stage is real (real `createGitPort` over a disposable repo, real `FilesystemReviewStore` over a disposable vault, assembled by the real composition root); only the model is stubbed; the suite runs **offline with no API key**. **The canonical-unchanged proof was itself verified to be able to fail** — the snapshot detects modified, added, *and* deleted canonical files, and the seeded vault has genuine content — because SPEC-003's permanent promise deserves a test that can break, not a green tick over two empty directories. Proven end to end: the complete session layout; the returned report byte-equal to the persisted `report.json`; store/generator/report agreeing on candidate identity; the **1:1 Candidate Generation Invariant surviving composition**; provenance carrying the fixture's **actual HEAD** (EOS-401's read reaching a persisted candidate); `--since` measuring a commit range; **partial collection** (a failing co-analyzer ⇒ `partial`, candidates still produced); **no git write** (HEAD/index/worktree byte-identical — the ADR-002 promise); no wiki generation; every write beneath `knowledge-review/`. Suite **702 / 58** green, run **three consecutive times**. High-effort review: 4 findings, 3 fixed — a **circular** acceptance test that could not fail for its stated reason, an **`as never`** cast past the `Session` contract, and a **vacuous** `.strict()`-guaranteed assertion. **My own determinism tests were flaky**: they compared two *fresh* fixture repos, but git bakes the commit timestamp into the hash, so they passed only when both landed in the same second — they were comparing two different repositories and calling it determinism. Fixed to run twice over **one** repo. **Acceptance behaviour for untracked files is deliberately left open** — the fixture stages everything and no test asserts on untracked files, so the suites need **no change whichever way EOS-D11 is decided**. **NEXT: settle [EOS-D11](decisions/EOS-D11-untracked-files-in-collection.md) (approve ⇒ EOS-411, then re-run acceptance; reject ⇒ document the limitation), then the M5 Freeze Review.** |
