@@ -57,7 +57,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 | M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M5 | Comments, Errors & Test Craft | Comments state constraints; errors share a taxonomy and a voice | ⬜ |
+| M5 | Comments, Errors & Test Craft | Comments state constraints; errors share a taxonomy and a voice | ✅ **FROZEN** (AJ, 2026-07-18) |
 
 ---
 
@@ -1168,8 +1168,8 @@ errors benefit from stable documentation; test infra validates the completed imp
 - [x] Zero comments describing code that no longer exists (F-056/057; REX-501).
 - [x] `catch (e) { if (e instanceof AjError) }` is possible (REX-502; proven by `aj-error.test.ts`).
 - [x] **Every protected comment intact** — all six verified present after REX-501 (the grep check is the falsifiable proof).
-- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
-- [ ] Retrospective created.
+- [x] Freeze Review completed; **Milestone Freeze declared by the reviewer (AJ) on 2026-07-18.** _(§7 weighed and ruled: F-064 keep approved; F-063 scoped `cause` approved; F-066 single comment approved; the perl/mojibake incident ruled evidence the process succeeded — corrected before the verified state, not an argument against freeze.)_ **This freeze completes the Repository Excellence programme.**
+- [x] Retrospective created (§4.7 stage 7) — [retrospectives/RETROSPECTIVE-M5.md](retrospectives/RETROSPECTIVE-M5.md), which is also the programme close.
 
 ---
 
