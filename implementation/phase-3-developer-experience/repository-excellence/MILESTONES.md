@@ -938,15 +938,58 @@ standard the rest of the repository already meets.
 - `KnowledgeAssistant` composition root + tests
 - Agent-layer and handbook test suites
 
+## Evidence Review — the duplication findings split cleanly (measured against `HEAD`, `c7f59e1`)
+
+| Finding | Disposition | Why |
+|---|---|---|
+| **F-049** path-guard ×3 | **keep parallel** (REX-D3) | three different roots, **opposite canonicality** (wiki *writes* canonical; review *rejects* canonical per SPEC-003 §17; handbook guards read-only subtrees) — fails responsibility + lifecycle |
+| **F-050** WikiStore catch-in-loop | **fix, regardless** | confirmed divergence: WikiStore must re-throw `WikiStoreError` in-loop; ReviewStore factored out `realpathIfExists` — a defect, decoupled from F-049 |
+| **F-051** `deepFreeze` ×6 | **consolidate the 5 in context-builder** | all four criteria hold in-module; `immutable.ts` **excluded (EOS-005)** |
+| **F-052** JSON-parse ×2 | **keep parallel** (EOS-005) | the code itself says it "reuses… **adapted** to the module convention" |
+| **F-053** `KnowledgeAssistant` | **inject deps + test** | hard-wires `new ConfigService/PromptRenderer/AIClient`; **no test constructs it** |
+| **F-054** agent layer | **add suites** | `tests/{agent,api,handbook}/` all **0 files**; live via n8n |
+| **F-055** two config systems | **document/bound** (scope guard) | two transports; merging is a redesign, deferred |
+
+**Two of four duplication findings are "keep parallel"** — the expected shape when duplication is
+treated as evidence. The one defect (F-050) is decoupled and fixed regardless.
+
+## Protected outcomes — one per task
+
+| Task | **Protected outcome** | Findings | Gated on |
+|------|---|---|---|
+| [REX-401](tasks/REX-401.md) | duplication evaluated against the criteria; genuine drift fixed | F-049, F-050, F-051, F-052 | **REX-D3** |
+| [REX-402](tasks/REX-402.md) | `KnowledgeAssistant` constructible with injected deps, and tested | F-053 | — |
+| [REX-403](tasks/REX-403.md) | the live agent layer & handbook writer have suites | F-054 | — |
+| [REX-404](tasks/REX-404.md) | the two config systems documented and bounded, not merged | F-055 | — |
+
 ## Task Progress
 
-_Task breakdown authored at M4 Planning. Findings: F-049..F-055._
+| Task | Description | Status |
+|------|-------------|--------|
+| REX-401 | Duplication adjudicated (F-049/052 keep, F-051 consolidate in-module) & F-050 drift fixed | ⬜ ready |
+| REX-402 | KnowledgeAssistant DI + tests (F-053) | ⬜ ready |
+| REX-403 | Agent-layer & handbook test suites (F-054) | ⬜ ready |
+| REX-404 | Config-system boundary documented (F-055) | ⬜ ready |
+
+_Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. **REX-D3 ruled** — F-049 keep,
+F-050 fix independently, F-051 consolidate (context-builder boundary only), F-052 keep. All evidence
+re-measured against `HEAD`. **REX-401 first** (later tasks benefit from its decisions), then REX-402 ∥
+REX-403, then REX-404 concludes. **REX-401 is the highest-risk task in the package** (security-relevant
+path code) — characterization-first is mandatory._
+
+### Ratified at the M4 Planning Review (AJ, 2026-07-17)
+
+| # | Decision | Outcome |
+|---|---|---|
+| 1 | **[REX-D3](decisions/REX-D3.md)** — shared-ownership criteria per item | **Accepted.** F-049 keep · F-050 fix independently · F-051 consolidate (context-builder boundary only) · F-052 keep. |
+| 2 | Outcome-based decomposition (401 duplication/drift · 402 constructibility · 403 verification of untested paths · 404 config documentation) | **Approved.** Independent outcomes, kept separate. |
+| 3 | Characterization-first for REX-401 + live n8n paths before/after | **Approved** — *"the strongest validation strategy proposed so far."* |
 
 ## Dependencies
 
 ### Requires
 - M2 (a safety net for the highest-risk code changes in the package)
-- REX-D1 (the agent layer's status), REX-D3
+- REX-D1 (the agent layer's status), **[REX-D3](decisions/REX-D3.md)**
 
 ### Enables
 - M5
@@ -1020,7 +1063,7 @@ Ruled at the package Planning Review, or scheduled for their milestone's Plannin
 | **REX-D0** | Findings Inventory substitutes for §4.2 Specification Decomposition; §7.7 Tailoring applied deliberately and its result recorded | all | ✅ **Accepted** — ratified by the package Planning Freeze (AJ, 2026-07-17) |
 | **REX-D1** | Where does the agent layer live architecturally? ARCH-001 amendment (needs an ADR, §3) vs. README/CONTRIBUTING only? | **M1** (REX-106), M3-B, M4 | ✅ **Accepted** — ruled at the M1 Planning Review (AJ, 2026-07-17). Document + recommend; **amend no architecture**. |
 | **[REX-D2](decisions/REX-D2.md)** | File naming rule — codify the role-based convention; rule the 4 PascalCase-factory files (camelCase vs concept-name). | M3-B (REX-304) | ✅ **Accepted** — ruled at the M3-B Planning Review (AJ, 2026-07-17). Role-based rule; the 4 → **camelCase** (no exception); **F-047 a non-violation**. |
-| **REX-D3** | Shared-ownership criteria applied to the path guard, model-JSON-parse, and the error base | M4, M5 | ⬜ M4 Planning |
+| **[REX-D3](decisions/REX-D3.md)** | Shared-ownership criteria applied to the path guard, `deepFreeze`, and model-JSON-parse | M4 (REX-401), M5 | ✅ **Accepted** — ruled at the M4 Planning Review (AJ, 2026-07-17). **F-049 keep · F-050 fix independently · F-051 consolidate (context-builder only) · F-052 keep.** |
 | **REX-D4** | Consolidate test helpers, or reaffirm per-suite inlining? | M5 | ⬜ M5 Planning |
 | **[REX-D5](decisions/REX-D5.md)** | Frozen-surface dead code — remove (FPCP), implement, or document? Per item (F-041/042/043). | M3-A (REX-301) | ✅ **Accepted** — ruled at the M3-A Planning Review (AJ, 2026-07-17). F-041 document-reserved; F-042 document-ADR-006-staging; F-043 document-or-FPCP-remove per SPEC-005. **No removal authorised for F-041/F-042.** |
 | **REX-D6** | The rule separating a load-bearing comment from noise | M5 | ⬜ M5 Planning |
