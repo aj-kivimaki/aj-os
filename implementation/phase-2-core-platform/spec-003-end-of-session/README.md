@@ -2,7 +2,7 @@
 
 > **Implementation Package:** SPEC-003
 >
-> **Status:** M1–M4 **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — Milestone 5 (Review Package Projection, Orchestration & CLI) is the next target
+> **Status:** ✅ **SPEC-003 COMPLETE** — all five milestones **frozen** by the reviewer (AJ): M1 2026-07-15; M2–M4 2026-07-16; **M5 2026-07-17**. The v1 vertical slice is operational: `aj session end` turns a finished session into candidate knowledge and a review package, proven against SPEC-003 §19 (**713 tests / 58 files**). No further implementation work is required.
 >
 > **Phase:** Phase 2 — Core Knowledge Platform
 >
@@ -151,13 +151,13 @@ See:
 
 This implementation is complete (for its planned milestones) when the following exist:
 
-- [ ] End-of-Session module with immutable contracts and contract tests
-- [ ] Git change collection behind the analyzer registry
-- [ ] Deterministic-structure knowledge extraction (content behind the injected port)
-- [ ] Canonical `CandidateKnowledge` generation persisted to the review store
-- [ ] `ReviewPackage` projection + `SessionReport`
-- [ ] `createEndOfSessionWorkflow` composition root and `aj session end` command
-- [ ] Automated tests (unit, integration, acceptance) green
+- [x] End-of-Session module with immutable contracts and contract tests
+- [x] Git change collection behind the analyzer registry
+- [x] Deterministic-structure knowledge extraction (content behind the injected port)
+- [x] Canonical `CandidateKnowledge` generation persisted to the review store
+- [x] `ReviewPackage` projection + `SessionReport`
+- [x] `createEndOfSessionWorkflow` composition root and `aj session end` command
+- [x] Automated tests (unit, integration, acceptance) green — **713 / 58**
 
 ---
 
@@ -184,7 +184,7 @@ decisions.
 | M2 | Session Change Collection | ✅ |
 | M3 | Knowledge Extraction | ✅ |
 | M4 | Candidate Generation & Review Store | ✅ |
-| M5 | Review Package Projection, Orchestration & CLI | ⬜ |
+| M5 | Review Package Projection, Orchestration & CLI | ✅ |
 
 See: [MILESTONES.md](MILESTONES.md)
 
@@ -197,8 +197,9 @@ spec-003-end-of-session/
   README.md
   MILESTONES.md
   architecture/PIPELINE-ARCHITECTURE.md
-  decisions/          EOS-D1..EOS-D6 (planning-review decisions)
-  tasks/              EOS-001..007 (M1), EOS-101..103 (M2), EOS-201..202 (M3), EOS-301..303 (M4)
+  decisions/          EOS-D1..EOS-D11 (planning-review decisions + 2 approved FPCPs)
+  tasks/              EOS-001..007 (M1), EOS-101..103 (M2), EOS-201..202 (M3), EOS-301..303 (M4),
+                      EOS-401..411 (M5, complete)
   retrospectives/     (added at each Milestone Freeze)
 ```
 
@@ -219,7 +220,23 @@ spec-003-end-of-session/
 - ✅ M4 (Candidate Generation & Review Store) **COMPLETE and FROZEN** (AJ,
   2026-07-16): EOS-301 Candidate Generator, EOS-302 Review Store, EOS-303
   `reviewPath` config — implemented, reviewed, and committed. **EOS-D6 Accepted**
-  (domain-aware Review Store API). Next: **M5** (Projection, Orchestration & CLI).
+  (domain-aware Review Store API).
+- ✅ M5 (Projection, Orchestration & CLI) — **COMPLETE and FROZEN** (AJ, 2026-07-17).
+  Five decisions accepted:
+  **EOS-D7** (extend the existing `GitPort` — closing the gap that left no
+  `Session` constructible), **EOS-D8** (the Review Store gains
+  `saveReviewPackage`, so it owns every file in the session directory),
+  **EOS-D9** (the composition root exposes the `TriggerSource`; session
+  construction and git stay out of the CLI), and **two approved Frozen Plan
+  Change Proposals** — **EOS-D10** (session notes reach the extraction prompt,
+  byte-identical when absent) and **EOS-D11** (untracked files reach the change
+  stream, adapter-only). Reviewer-required invariants recorded: the
+  **Orchestrator Invariant** (EOS-406) and the **Report Builder Invariant**
+  (EOS-405). The Freeze Review confirmed every M1–M4 boundary preserved and both
+  FPCP amendments incorporated without architectural drift. See
+  [MILESTONES.md](MILESTONES.md#milestone-m5--review-package-projection-orchestration--cli).
+- ✅ **SPEC-003 is complete.** The knowledge loop's capture half is operational and
+  hands off to SPEC-004 through `knowledge-review/pending/<session-id>/`.
 
 > **Frozen-plan discipline (AJS-007).** From the freeze onward, changes to the
 > frozen plan — contracts, milestone structure, or scope — follow the AJS-007
@@ -261,8 +278,16 @@ Resolved during planning review (recorded in `decisions/`):
 
 Remaining (to resolve within the milestone that needs them):
 
-- **Session change range** — working-tree vs. staged vs. commit range; default
-  proposal in EOS-002/M2: uncommitted + staged, `--since <ref>` for a range.
+- **Session change range** — working-tree vs. staged vs. commit range. Proposed
+  resolution in **EOS-402** (M5): `range = "HEAD"` by default (which makes
+  `git diff … HEAD` report uncommitted + staged, the EOS-002/M2 proposal) and
+  `range = "<ref>..HEAD"` with `--since <ref>`. Range construction sits in the
+  Session factory, where EOS-102 deferred it. _Pending the M5 Planning Review._
+- **`Session.startedAt` when session start is unobservable** — new at M5
+  planning. A manual trigger observes only that the session *ended*. Proposed in
+  **EOS-402**: `startedAt = endedAt =` the trigger instant for v1, documented
+  explicitly; deriving it from the range's base commit is recorded as a future
+  enhancement. _Pending the M5 Planning Review._
 - **Candidate id scheme** — ✅ Resolved: `session:<id>:<n>` (documented in the EOS-003
   contract; generation in EOS-301).
 - **Review-store layout** — ✅ Resolved (M4 Planning Freeze): one directory per session,
@@ -295,13 +320,17 @@ This implementation succeeds when:
 
 # Definition of Done
 
-- [ ] All planned milestones completed and frozen.
-- [ ] All implementation tasks completed.
-- [ ] Tests passing (unit, integration, acceptance).
-- [ ] Documentation updated and synchronized at each freeze.
-- [ ] SPEC-003 acceptance criteria satisfied for v1 scope.
-- [ ] Code reviewed.
-- [ ] Merged into main.
+- [x] All planned milestones completed and frozen. _(M1–M5; each frozen by the reviewer's
+      deliberate decision at a Freeze Review.)_
+- [x] All implementation tasks completed. _(26 tasks: EOS-001..007, 101..103, 201..202,
+      301..303, 401..411.)_
+- [x] Tests passing (unit, integration, acceptance). _(**713 / 58**, green across three
+      consecutive runs.)_
+- [x] Documentation updated and synchronized at each freeze.
+- [x] SPEC-003 acceptance criteria satisfied for v1 scope. _(§19 mapped test-by-test.)_
+- [x] Code reviewed. _(Every task independently reviewed at high effort, with findings
+      addressed before commit.)_
+- [ ] Merged into main. _(M5 pull request open — the last step.)_
 
 ---
 

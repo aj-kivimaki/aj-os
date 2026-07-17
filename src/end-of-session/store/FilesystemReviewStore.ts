@@ -7,6 +7,7 @@
  *   <destination>/pending/<session-id>/
  *       candidates/<candidate-id>.json    one canonical CandidateKnowledge per file
  *       report.json                       the SessionReport for the run
+ *       review-package.md                 the rendered ReviewPackage (EOS-D8)
  *       log.md                            append-only session log
  *
  * Guarantees (mirroring FilesystemWikiStore, specialized to the review layout):
@@ -23,6 +24,7 @@ import { appendFile, mkdir, realpath, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { CandidateKnowledge } from "../contracts/candidate/index.js";
+import type { ReviewPackage } from "../contracts/review-package/index.js";
 import type { SessionReport } from "../contracts/session-report/index.js";
 
 import type { ReviewLocation, ReviewStore } from "./ReviewStore.js";
@@ -30,6 +32,7 @@ import type { ReviewLocation, ReviewStore } from "./ReviewStore.js";
 const PENDING_DIR = "pending";
 const CANDIDATES_DIR = "candidates";
 const REPORT_FILE = "report.json";
+const REVIEW_PACKAGE_FILE = "review-package.md";
 const LOG_FILE = "log.md";
 
 /**
@@ -223,6 +226,19 @@ export function createFilesystemReviewStore(
     await writeFile(abs, `${JSON.stringify(report, null, 2)}\n`, "utf8");
   }
 
+  async function saveReviewPackage(
+    sessionId: string,
+    reviewPackage: ReviewPackage,
+  ): Promise<void> {
+    const abs = await sessionPath(sessionId, REVIEW_PACKAGE_FILE);
+    await mkdir(path.dirname(abs), { recursive: true });
+    // Verbatim — and unlike the JSON artifacts, not even a trailing newline is added.
+    // `markdown` is already the file's content: the package *is* a markdown projection
+    // (EOS-D4), so serializing it is the identity, and anything else would be the store
+    // editing what the projector rendered. The projector owns the projection.
+    await writeFile(abs, reviewPackage.markdown, "utf8");
+  }
+
   async function appendLog(sessionId: string, entry: string): Promise<void> {
     const abs = await sessionPath(sessionId, LOG_FILE);
     await mkdir(path.dirname(abs), { recursive: true });
@@ -230,5 +246,11 @@ export function createFilesystemReviewStore(
     await appendFile(abs, line, "utf8");
   }
 
-  return Object.freeze({ locate, saveCandidates, saveReport, appendLog });
+  return Object.freeze({
+    locate,
+    saveCandidates,
+    saveReport,
+    saveReviewPackage,
+    appendLog,
+  });
 }

@@ -3,10 +3,11 @@
  *
  * Each test builds an isolated review destination in a temp directory and drives the
  * store through its public factory — no real vault. Covers the per-session layout,
- * canonical-JSON round trips (candidates + report), the intentionally-minimal append-only
- * log, the non-canonical destination guard, and the path guards (single-segment
- * `sessionId` / candidate `id`, no escape). The store is persistence-only: it exposes
- * exactly four operations and understands nothing about the artifacts beyond where they go.
+ * canonical-JSON round trips (candidates + report), the verbatim markdown review package
+ * (EOS-404/EOS-D8), the intentionally-minimal append-only log, the non-canonical
+ * destination guard, and the path guards (single-segment `sessionId` / candidate `id`, no
+ * escape). The store is persistence-only: it exposes exactly five operations and
+ * understands nothing about the artifacts beyond where they go.
  */
 import { mkdtemp, mkdir, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -17,9 +18,11 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createFilesystemReviewStore,
   parseCandidateKnowledge,
+  parseReviewPackage,
   parseSessionReport,
   ReviewStoreError,
   type CandidateKnowledge,
+  type ReviewPackage,
   type SessionReport,
 } from "../../src/end-of-session/index.js";
 
@@ -59,6 +62,22 @@ const report: SessionReport = parseSessionReport({
   result: "completed",
   logEntry: "Captured 2 candidates.",
 });
+
+/**
+ * A review package fixture, built through the real contract. Only `markdown` is under
+ * test here — `summary` and `candidateIds` are required by `parseReviewPackage` and are
+ * inert as far as the store is concerned: it persists the rendered body and reads
+ * nothing else.
+ */
+function reviewPackage(markdown = "# Session review package\n\nOne candidate.\n"): ReviewPackage {
+  return parseReviewPackage({
+    sessionId,
+    generatedAt: "2026-07-16T12:00:00.000Z",
+    summary: "1 candidate proposed from this session on main.",
+    candidateIds: [`session:${sessionId}:1`],
+    markdown,
+  });
+}
 
 let dest: string;
 
@@ -137,6 +156,64 @@ describe("FilesystemReviewStore", () => {
     });
   });
 
+  describe("saveReviewPackage", () => {
+    it("writes review-package.md with the rendered markdown verbatim", async () => {
+      const pkg = reviewPackage();
+      await store().saveReviewPackage(sessionId, pkg);
+
+      const raw = await readFile(join(sessionDir(), "review-package.md"), "utf8");
+      // Byte-for-byte: the package *is* markdown (EOS-D4), so persisting it is the
+      // identity. The store adds nothing — not even a trailing newline, which would be
+      // the store editing what the projector rendered.
+      expect(raw).toBe(pkg.markdown);
+    });
+
+    it("overwrites rather than appends — the package is single-valued per session", async () => {
+      const s = store();
+      await s.saveReviewPackage(sessionId, reviewPackage("# First render"));
+      await s.saveReviewPackage(sessionId, reviewPackage("# Second render"));
+
+      // Contrast with log.md, which is append-only: the package is regenerable from the
+      // canonical candidates, so the latest render simply replaces the last.
+      const raw = await readFile(join(sessionDir(), "review-package.md"), "utf8");
+      expect(raw).toBe("# Second render");
+    });
+
+    it("lands beside the other artifacts in the same session directory", async () => {
+      const s = store();
+      await s.saveCandidates(sessionId, [candidate(1)]);
+      await s.saveReport(sessionId, report);
+      await s.saveReviewPackage(sessionId, reviewPackage());
+      await s.appendLog(sessionId, "Captured 1 candidate.");
+
+      // The store owns every file in the session directory (EOS-D8) — this is the whole
+      // layout SPEC-004 will read.
+      expect((await readdir(sessionDir())).sort()).toEqual([
+        "candidates",
+        "log.md",
+        "report.json",
+        "review-package.md",
+      ]);
+    });
+
+    it("does not interpret the package — arbitrary markdown is stored as given", async () => {
+      // The store neither parses nor validates the prose, and never cross-checks it
+      // against the candidates: consistency is guaranteed by construction upstream.
+      const odd = reviewPackage("Not even a heading — just text, `code`, and ---\n");
+      await store().saveReviewPackage(sessionId, odd);
+
+      expect(await readFile(join(sessionDir(), "review-package.md"), "utf8")).toBe(
+        odd.markdown,
+      );
+    });
+
+    it("rejects a sessionId that is not a single path segment", async () => {
+      await expect(
+        store().saveReviewPackage("../escape", reviewPackage()),
+      ).rejects.toBeInstanceOf(ReviewStoreError);
+    });
+  });
+
   describe("saveReport", () => {
     it("writes report.json round-tripping to a deep-equal SessionReport", async () => {
       await store().saveReport(sessionId, report);
@@ -186,6 +263,7 @@ describe("FilesystemReviewStore", () => {
         "locate",
         "saveCandidates",
         "saveReport",
+        "saveReviewPackage",
       ]);
       expect(Object.isFrozen(s)).toBe(true);
     });

@@ -2,11 +2,16 @@
  * Review Store contract — the SPEC-003 → SPEC-004 **filesystem boundary**.
  *
  * A persistence-only adapter that writes a finished session's canonical
- * `CandidateKnowledge[]` and its `SessionReport` to the non-canonical review area
- * (`<destination>/pending/<session-id>/`), plus an append-only session log. It is
- * **domain-aware** (EOS-D6): its operations are named for the SPEC-003 artifacts and it
- * owns the per-session layout and serialization — but "domain-aware" means it knows the
- * *artifacts and layout*, not that it reasons about the knowledge.
+ * `CandidateKnowledge[]`, its `SessionReport`, and its rendered `ReviewPackage` to the
+ * non-canonical review area (`<destination>/pending/<session-id>/`), plus an append-only
+ * session log. It is **domain-aware** (EOS-D6): its operations are named for the SPEC-003
+ * artifacts and it owns the per-session layout and serialization — but "domain-aware" means
+ * it knows the *artifacts and layout*, not that it reasons about the knowledge.
+ *
+ * The store owns **every** file in the session directory (EOS-D8) — or it would own none of
+ * them: a writer that composed its own path would duplicate the layout and skip the guards
+ * below. Callers name a session and hand over contracts; they never compose paths or
+ * serialize.
  *
  * Invariants (the frozen Persistence Invariant):
  * - **Persistence only** — the store never performs version control (ADR-002 §4,
@@ -22,6 +27,7 @@
  */
 
 import type { CandidateKnowledge } from "../contracts/candidate/index.js";
+import type { ReviewPackage } from "../contracts/review-package/index.js";
 import type { SessionReport } from "../contracts/session-report/index.js";
 
 /** A validated handle to the review destination. */
@@ -54,6 +60,25 @@ export interface ReviewStore {
 
   /** Persist the session's execution log at `pending/<sessionId>/report.json`. */
   saveReport(sessionId: string, report: SessionReport): Promise<void>;
+
+  /**
+   * Persist the session's rendered review package at
+   * `pending/<sessionId>/review-package.md` (EOS-D8). Overwrites: the package is
+   * single-valued per session and regenerable from the canonical candidates (EOS-D4),
+   * unlike the append-only `log.md`.
+   *
+   * Writes `reviewPackage.markdown` **verbatim**. Markdown rather than JSON because the
+   * store knows its *artifacts*, and a `ReviewPackage` **is** a markdown projection by
+   * contract — serializing it as JSON would produce a file no human could read, defeating
+   * the artifact's only purpose. The store does not render, re-render, validate, or
+   * reconcile the package against the candidates: the projector already produced and
+   * validated it, and consistency is guaranteed by construction because the package is
+   * derived from the candidates each run.
+   */
+  saveReviewPackage(
+    sessionId: string,
+    reviewPackage: ReviewPackage,
+  ): Promise<void>;
 
   /**
    * Append a line to the session's `pending/<sessionId>/log.md`. Intentionally minimal —

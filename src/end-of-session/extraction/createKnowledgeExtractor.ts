@@ -57,8 +57,14 @@ export function createKnowledgeExtractor(
     throw new Error("createKnowledgeExtractor: a TextGenerator is required.");
   }
 
-  async function extract(changeSet: ChangeSet): Promise<KnowledgeExtraction> {
-    const prompt = buildExtractionPrompt(changeSet);
+  async function extract(
+    changeSet: ChangeSet,
+    sessionNotes?: string,
+  ): Promise<KnowledgeExtraction> {
+    // `sessionNotes` is carried, never read: it goes straight into the prompt and appears
+    // nowhere else — no inspection, no branching, no preprocessing (EOS-D10/EOS-410). The
+    // three steps below are still the whole of this stage.
+    const prompt = buildExtractionPrompt(changeSet, sessionNotes);
     const response = await config.generator.complete(prompt, {
       maxTokens: EXTRACT_MAX_TOKENS,
     });

@@ -7,24 +7,32 @@ milestones are planned and implemented. It does not replace ADRs or the
 architecture-review decisions in `decisions/`, which explain *why* individual
 choices were made.
 
-**Implementation status.** Milestones **M1–M4 are complete**. M1 (Foundation &
-Contracts) established the immutable contracts (`SessionContext`, `Session`,
-`CandidateKnowledge`, `ReviewPackage`, `SessionReport`, `SessionChange`,
-`AnalyzerError`, `ChangeSet`) and the extensibility seams (`Analyzer` port +
-registry, `TriggerSource`, `NotificationPort`). M2 (Session Change Collection)
-implemented the **Collection** stage — `collectChanges` execution + the
-`GitChangeAnalyzer` behind a read-only `GitPort` — producing a `ChangeSet`. M3
-(Knowledge Extraction) implemented the **Extraction** stage: the
-`KnowledgeExtraction` contract (`parseExtractionResponse`) and the
-`KnowledgeExtractor` behind the injected `TextGenerator` port (the pipeline's one
-non-deterministic seam). M4 (Candidate Generation & Review Store) implemented the
-**Candidate Generation** stage (`createCandidateGenerator` — the deterministic,
-one-to-one map from `KnowledgeExtraction` to canonical `CandidateKnowledge[]`) and
-the **Persistence** stage (`createFilesystemReviewStore` — the domain-aware,
-persistence-only Review Store writing to `knowledge-review/pending/<session-id>/`;
-EOS-D6), plus the `AjConfig.handbook.reviewPath` config. The remaining stage
-*behaviors* (review-package projection, composition root, CLI) are **not yet
-implemented** — they arrive in M5.
+**Implementation status.** **All five milestones are implemented (M1–M5); the v1 vertical
+slice is complete and proven end to end.** M1 (Foundation & Contracts) established the
+immutable contracts (`SessionContext`, `Session`, `CandidateKnowledge`, `ReviewPackage`,
+`SessionReport`, `SessionChange`, `AnalyzerError`, `ChangeSet`) and the extensibility seams
+(`Analyzer` port + registry, `TriggerSource`, `NotificationPort`). M2 implemented
+**Collection** — `collectChanges` + the `GitChangeAnalyzer` behind a read-only `GitPort`. M3
+implemented **Extraction** — the `KnowledgeExtraction` contract and the `KnowledgeExtractor`
+behind the injected `TextGenerator` (the pipeline's one non-deterministic seam). M4
+implemented **Candidate Generation** (`createCandidateGenerator`) and **Persistence**
+(`createFilesystemReviewStore`; EOS-D6), plus `AjConfig.handbook.reviewPath`.
+
+**M5 completed the pipeline** (EOS-401..411): the **Session** stage
+(`createSessionFactory`, over the git seam extended by EOS-D7), the **Projection** stage
+(`createReviewPackageProjector`), the **Observability** stage (`buildSessionReport`), the
+**Orchestrator** (`createSessionWorkflow` — the frozen `run(context)` entry point), the
+**composition root** (`createEndOfSessionWorkflow`, returning `{ workflow, store, trigger }`;
+EOS-D9), and the `aj session end` command. Two approved FPCPs landed within it: **EOS-D10**
+routes the engineer's session notes into the extraction prompt, and **EOS-D11** brings
+untracked files into the change stream. `saveReviewPackage` (**EOS-D8**) completed the store's
+ownership of the session directory.
+
+M5 planning and implementation surfaced four gaps between this document's target design and
+the delivered code, each closed by a ratified decision rather than absorbed silently: no
+`Session` was constructible (**EOS-D7**); the `ReviewPackage` had nowhere to be written
+(**EOS-D8**); `run(context)` had no upstream producer of its input (**EOS-D9**); session notes
+and untracked files never reached capture (**EOS-D10**, **EOS-D11**).
 
 ## Overview
 
@@ -91,6 +99,13 @@ and metadata (`startedAt`, `endedAt`, `trigger`, `gitState`, `branch`). Identity
 is independent of the trigger source (EOS-D3), so provenance stays stable as new
 triggers appear.
 
+`gitState` (`head`, `dirty`) and `branch` are **observed** through the read-only
+git seam (EOS-D7), never asserted by the caller — provenance must record facts, not
+claims. `gitState.range` is **constructed** here: `HEAD` by default (uncommitted +
+staged) or `<ref>..HEAD` with `--since <ref>`. A failure to read the session's git
+state is **fatal** (SPEC-003 §15): a session whose head or branch is unknown cannot
+be identified.
+
 ## Collection (Analyzers)
 
 Determines *what changed* in the session. The `Analyzer` registry runs every
@@ -104,13 +119,20 @@ registered analyzer and aggregates results into a `ChangeSet`.
 
 ## Extraction
 
-Identifies *reusable knowledge* in the `ChangeSet` using the injected
-`TextGenerator` port and a Zod-validated schema.
+Identifies *reusable knowledge* in the `ChangeSet` — and, when the engineer
+supplied them, the session's **notes** — using the injected `TextGenerator`
+port and a Zod-validated schema.
 
+- Consumes: the `ChangeSet`, plus optional `sessionNotes` (EOS-D10). Notes carry
+  what a diff cannot — intent, dead ends, why an approach was abandoned — and are
+  rendered into the prompt **verbatim**, as context for interpreting the changes
+  rather than as instructions. The stage is inert when they are absent.
 - Produces: `KnowledgeExtraction` (validated structured findings).
 - The **only** non-deterministic stage; content comes from the model, structure
   is validated and deterministic.
-- Does not: decide candidate identity, compare against the Handbook, or persist.
+- Does not: **read the notes** (it carries them to the model and never inspects
+  them — the Extractor Invariant), decide candidate identity, compare against the
+  Handbook, or persist.
 
 ## Candidate Generation
 
@@ -124,12 +146,16 @@ complete, immutable, governance state `candidate` (AJS-006).
 
 ## Persistence (Review Store)
 
-Writes the canonical candidates and the `SessionReport` to
-`<vault>/knowledge-review/pending/<session-id>/`.
+Writes the canonical candidates, the `SessionReport`, and the rendered
+`ReviewPackage` to `<vault>/knowledge-review/pending/<session-id>/`.
 
 - Persistence-only; **never calls git** (ADR-002 §4, AJS-005 §7).
 - Destination validated non-canonical (`∉ foundation/, library/, wiki/`) and
   path-escape guarded.
+- **Domain-aware** (EOS-D6): `saveCandidates` / `saveReport` /
+  **`saveReviewPackage`** (EOS-D8) / `appendLog` / `locate`. The store **owns every
+  file in the session directory** — callers name a session and hand over contracts;
+  they never compose paths or serialize, and no write bypasses the guards.
 - Exposes `appendLog` for the execution log (WikiStore precedent).
 
 ## Projection (Review Package)
@@ -165,9 +191,18 @@ EndOfSessionWorkflow
 
 Everything is assembled in one place — the composition root
 `createEndOfSessionWorkflow(config, deps)` (modeled on
-`createKnowledgePipeline`). It returns `{ workflow, store }`. The workflow's
-single public entry point is `run(context)` returning a `SessionReport`. Stages
-are internal; only `run` is public.
+`createKnowledgePipeline`). It returns `{ workflow, store, trigger }` (EOS-D9).
+The workflow's single public entry point is `run(context)` returning a
+`SessionReport`. Stages are internal; only `run` is public.
+
+**The workflow owns the trigger's *kind*, but never invokes a trigger** (EOS-D9).
+Producing the `SessionContext` is upstream of the run: the composition root builds
+the `TriggerSource` and exposes it, so an entry point calls
+`trigger.createContext()` and then `workflow.run(context)` — and therefore needs
+no git and no knowledge of how a session is identified. `trigger.trigger` is
+stamped onto the `Session` (EOS-D3). Future triggers (git-hook, scheduled, IDE,
+n8n) are built at the composition root; the CLI, `run`, and every downstream stage
+are unchanged.
 
 ## Public Entry Point
 
@@ -177,6 +212,12 @@ run(context: SessionContext) : Promise<SessionReport>
 
 `run` always executes the highest-level implemented pipeline. Adding a later
 stage or analyzer does not change the entry point — callers always invoke `run`.
+
+The orchestrator behind `run` **owns sequencing only** (the frozen Orchestrator
+Invariant, EOS-406): it may invoke stages, propagate their results unmodified, and
+coordinate execution; it must not transform contracts in flight, duplicate stage
+logic, introduce business rules, or bypass the adapters. If a rule wants to live in
+the orchestrator, a stage is missing.
 
 ---
 

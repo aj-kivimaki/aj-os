@@ -4,7 +4,7 @@
 >
 > **Related Specification:** SPEC-003
 >
-> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 4 (Candidate Generation & Review Store) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — EOS-301..303 implemented, reviewed, and committed; EOS-D6 accepted (domain-aware Review Store API). Next target: **Milestone 5 (Review Package Projection, Orchestration & CLI)**, beginning with M5 planning (EOS-4xx decomposition → Planning Review → Planning Freeze) per AJS-007.
+> **Status:** Milestone 1 (Foundation & Contracts) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-15). Milestone 2 (Session Change Collection) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 3 (Knowledge Extraction) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16). Milestone 4 (Candidate Generation & Review Store) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-16) — EOS-301..303 implemented, reviewed, and committed; EOS-D6 accepted (domain-aware Review Store API). Milestone 5 (Review Package Projection, Orchestration & CLI) **COMPLETE and FROZEN** (reviewer: AJ, 2026-07-17) — EOS-401..411 implemented, reviewed, and committed; EOS-D7..D11 accepted (including two Frozen Plan Change Proposals); the **Orchestrator Invariant** (EOS-406) and **Report Builder Invariant** (EOS-405) recorded at the reviewer's requirement. **SPEC-003 is COMPLETE: all five milestones are frozen and the v1 vertical slice is operational and proven (713 tests / 58 files).** No further implementation work is required for SPEC-003 — see [Milestone M5](#milestone-m5--review-package-projection-orchestration--cli).
 
 ---
 
@@ -32,7 +32,7 @@ established in M1 so later capabilities are additive.
 | M2 | Session Change Collection | Git changes collected deterministically behind the analyzer registry | ✅ |
 | M3 | Knowledge Extraction | Reusable knowledge extracted from changes via the injected text-generation port | ✅ |
 | M4 | Candidate Generation & Review Store | Canonical `CandidateKnowledge` generated and persisted to the review store | ✅ |
-| M5 | Review Package Projection, Orchestration & CLI | Human-readable projection + `createEndOfSessionWorkflow` + `aj session end` | ⬜ |
+| M5 | Review Package Projection, Orchestration & CLI | Human-readable projection + `createEndOfSessionWorkflow` + `aj session end` | ✅ |
 
 ---
 
@@ -355,7 +355,214 @@ trigger only; notification is a no-op. **No git commit, no wiki generation.**
 
 | Task | Description | Status |
 |------|-------------|--------|
-| EOS-401 | (defined at M5 planning) | ⬜ |
+| EOS-401 | Git state seam (`GitPort` gains read-only `head`/`dirty`/`branch` + adapter) — **extends the M2-frozen port** | ✅ |
+| EOS-402 | Session Factory (`SessionContext` → identified `Session`: opaque id, `gitState`, range construction) | ✅ |
+| EOS-403 | Review Package Projector (canonical candidates + `Session` → `ReviewPackage`; pure, deterministic) | ✅ |
+| EOS-404 | Review Store `saveReviewPackage` (`pending/<id>/review-package.md`) — **extends the M4-frozen EOS-D6 surface** | ✅ |
+| EOS-405 | Session Report Builder (run facts → `SessionReport`; outcome policy, `logEntry`) | ✅ |
+| EOS-410 | Session notes → extraction prompt (**[EOS-D10](decisions/EOS-D10-session-notes-into-extraction.md) FPCP, approved**) — **ran before EOS-406** | ✅ |
+| EOS-411 | Untracked files in the git observation (**[EOS-D11](decisions/EOS-D11-untracked-files-in-collection.md) FPCP, approved**) — adapter only | ✅ |
+| EOS-406 | Workflow Orchestrator (`createSessionWorkflow` → the frozen `run(context)` entry point) | ✅ |
+| EOS-407 | Composition Root (`createEndOfSessionWorkflow(config, deps)`, mirroring `createKnowledgePipeline`) | ✅ |
+| EOS-408 | `aj session end` command (`--since <ref>`, `--notes`), modeled on `wiki build` | ✅ |
+| EOS-409 | Integration & Acceptance tests (fixture repo + fixture vault + stub generator; SPEC-003 §19) | ✅ |
+
+_Task breakdown **PLANNING-FROZEN by the reviewer (AJ) on 2026-07-16**, following the same
+per-milestone planning used for M1–M4. Nine low-coupling, independently reviewable tasks
+composing the frozen M1–M4 stages rather than redesigning them. Sequencing: EOS-401 → EOS-402; EOS-403,
+EOS-404, EOS-405 independent; EOS-406 requires 402–405; EOS-407 requires 406; EOS-408
+requires 407; EOS-409 last. A dedicated integration/acceptance task **is** warranted here
+(unlike M3/M4): M5 introduces the pipeline's first end-to-end path and owns the SPEC-003
+§18/§19 acceptance proof — the deferral M4 planning recorded ("end-to-end integration is
+M5's acceptance test")._
+
+### Two frozen-plan gaps found at M5 planning — both resolved (AJS-007 §7.2)
+
+M5 planning surfaced **two gaps between the frozen plan and the delivered code**. Both were
+additive, both were required for M5 to exist at all, and both were **ratified by the reviewer
+(AJ) at the M5 Planning Review on 2026-07-16**:
+
+1. **The git state seam was missing (EOS-401).** `Session.gitState` requires `head`/`dirty`
+   and `Session.branch` is required, but M2's `GitPort` exposes only `changes(range)` —
+   EOS-002 recorded this git access as M2's job, and M2 delivered only what the analyzer
+   needed. **No `Session` was constructible**, and none was constructed in production.
+   **Resolved: [EOS-D7](decisions/EOS-D7-git-port-extension.md)** — extend the existing
+   read-only seam; no second git abstraction.
+2. **The `ReviewPackage` had nowhere to be written (EOS-404).** EOS-302 anticipated
+   `review-package.md` in the session directory, but EOS-D6 froze the store at four
+   operations, and the anticipated mechanism ("the projector writes it") contradicted EOS-D6's
+   store-owns-the-layout holding, bypassed the store's path guards, and would have cost the
+   projector its purity. **Resolved:
+   [EOS-D8](decisions/EOS-D8-review-store-save-review-package.md)** — add
+   `saveReviewPackage`; the store owns every file in the session directory. Extends EOS-D6
+   rather than revising it.
+
+### Decisions ratified at the M5 Planning Review (AJ, 2026-07-16)
+
+| # | Decision | Task | Outcome |
+|---|----------|------|---------|
+| 1 | Extend `GitPort` vs. a separate `GitStatePort` (**frozen M2 contract**) | EOS-401 | **Ratified: extend** — one seam for read-only git access → **[EOS-D7](decisions/EOS-D7-git-port-extension.md)** |
+| 2 | `ReviewStore.saveReviewPackage` vs. the projector writing the file (**frozen M4 surface**) | EOS-404 | **Ratified: store operation** — EOS-D6 consistency → **[EOS-D8](decisions/EOS-D8-review-store-save-review-package.md)** (extends EOS-D6) |
+| 3 | Who invokes the `TriggerSource`; the composition root's return shape | EOS-407 | **Ratified: expose the trigger** — `{ workflow, store, trigger }`; session construction stays out of the CLI → **[EOS-D9](decisions/EOS-D9-trigger-exposed-from-composition-root.md)** |
+| 4 | `Session.startedAt` semantics when session start is unobservable | EOS-402 | Ratified as proposed — `startedAt = endedAt =` trigger instant for v1; documented |
+| 5 | Fatal stage failure ⇒ persisted `failed` report vs. a throw | EOS-406 | Ratified as proposed — persisted `failed` report (§19 "Logs recorded"); reject only if the store is unwritable |
+| 6 | `ReviewPackage.summary` derivation | EOS-403 | **Explicitly ratified** — must remain derivable from **canonical persisted data**, never from transient `KnowledgeExtraction` output (EOS-D4) |
+| 7 | Session id generator (EOS-D3 deferred it to M5) | EOS-402 | Ratified as proposed — `randomUUID` |
+| 8 | Report times the **run**, not the session (same field names, different windows) | EOS-405 | Ratified as proposed — split confirmed; documented in both contracts |
+| 9 | `project`/`repository` resolution (no config key exists) | EOS-407 | Ratified as proposed — `repositoryPath` + basename; no speculative `AjConfig` key |
+| 10 | Exit code on a `failed` run | EOS-408 | Ratified as proposed — `exitCode = 1` on `failed`; `partial` stays 0 |
+
+**Reviewer-required before freeze — the Orchestrator Invariant (EOS-406).** The reviewer
+required an explicit, frozen **[Orchestrator Invariant](tasks/EOS-406.md#orchestrator-invariant)**
+as a condition of the Planning Freeze. Recorded in EOS-406 v1.1: the orchestrator **owns
+sequencing only** — it **may** invoke stages, propagate results unmodified, and coordinate
+execution; it **must not** perform transformations, duplicate stage logic, introduce business
+rules, or bypass the existing adapters. If a rule wants to live in the orchestrator, a stage
+is missing. It joins the module's other frozen invariants (Extractor — EOS-202; Candidate
+Generation — EOS-301; Persistence — EOS-302), is enforced by shape where possible, and is an
+explicit acceptance criterion verified at code review.
+
+**The reviewer also explicitly ratified** that `ReviewPackage.summary` must remain derivable
+from canonical persisted data (never transient extraction output) and that the **projector
+must remain a pure projection** — the property EOS-D8 exists to protect.
+
+### Open during M5 implementation
+
+- **[EOS-D11](decisions/EOS-D11-untracked-files-in-collection.md) — PROPOSED, awaiting
+  review.** The project's **second FPCP** (AJS-007 §7.2), raised at the reviewer's request
+  after EOS-408's real run reported `Files analyzed : 1` for a two-file session. The workflow
+  contradicts itself: `Session.gitState.dirty` is `true` (from `git status`, which sees
+  untracked files) while the `ChangeSet` omits them (from `git diff HEAD`, which does not) —
+  so a session that creates a new file and ends before `git add` **captures nothing about
+  it**, and new files are where new knowledge most often lives. The reviewer confirmed
+  untracked files are within EOS-402's ratified range semantics ("the complete uncommitted
+  working state"), making this a gap between intent and implementation. Proposes **one change
+  to one adapter method**: `createGitPort.changes` also runs `git ls-files --others
+  --exclude-standard` for working-tree ranges. **`GitPort`, the analyzer, and every contract
+  are untouched**; the analyzer stays a pure translator. Implemented by proposed **EOS-411**,
+  which must land **before EOS-409 finalizes acceptance**. **Not implemented; no dependent
+  work may begin until it is approved.** If rejected, the limitation must be *documented* in
+  EOS-409's acceptance suite and the README.
+
+### Resolved during M5 implementation
+
+- **[EOS-D10](decisions/EOS-D10-session-notes-into-extraction.md) — APPROVED (reviewer: AJ,
+  2026-07-16).** A **Frozen Plan Change Proposal** (AJS-007 §7.2) raised after EOS-402
+  confirmed that `SessionContext.sessionNotes` reaches no consumer, so EOS-408's `--notes`
+  would have silently discarded the engineer's notes — the one input a diff cannot convey.
+  Approved on the grounds that it "restores an intended input to knowledge extraction without
+  introducing new architectural concepts or changing existing boundaries". Authorizes one
+  optional `sessionNotes?: string` on `KnowledgeExtractor.extract` / `buildExtractionPrompt`
+  (verbatim; inert when absent), implemented by **[EOS-410](tasks/EOS-410.md)** — **sequenced
+  before EOS-406**. **`--notes` stays** in EOS-408. Two reviewer conditions are acceptance
+  criteria in EOS-410: **byte-identical when absent** (existing M3 tests must pass
+  *unmodified*) and the **Extractor Invariant unchanged** (not reworded, not relaxed — the
+  extractor stays a courier and never reads the notes' content). This is the project's **first
+  FPCP**, and the mechanism worked as designed: the gap was found in implementation, raised
+  rather than absorbed, scoped narrowly, and approved before any dependent work began.
+- **The Review Store's duplicated write logic — reviewer-ruled: leave unchanged for
+  SPEC-003.** EOS-404 raised that three write operations now repeat `sessionPath` → `mkdir` →
+  `writeFile`, and that a `writeSessionFile` helper would make the store's symmetry structural
+  rather than conventional. The reviewer (AJ, 2026-07-16) ruled that **modifying the
+  already-frozen M4 implementation is not justified by the current milestone** — a Frozen
+  Milestone is built upon, not modified (AJS-007 §4.7). The duplication stands; the helper is
+  not applied. No action during M5.
+- **The shared git seam's location — reviewer-ruled: leave unchanged for SPEC-003.** EOS-402
+  raised that `GitPort` lives at `src/end-of-session/analyzers/git/` while serving both the
+  analyzer and the Session factory, which reads against EOS-D7's "the seam is not any one
+  consumer's reads". The reviewer (AJ, 2026-07-16) ruled the physical location **stays as-is
+  for SPEC-003** and is reconsidered **after the specification is complete**, if it still
+  appears to violate the architecture. No action during M5.
+
+_Possible task-merge candidates, noted for the reviewer: EOS-401+402 (both serve "produce an
+identified Session"; kept apart because the frozen-contract change deserves isolated review
+and the two have different test strategies — fixture repo vs. stub port), and EOS-403+404
+(render + persist; kept apart on single-responsibility grounds and because EOS-404 touches a
+frozen surface)._
+
+
+---
+
+## M5 Freeze Review — Evidence (prepared for the reviewer)
+
+_Prepared by the author, 2026-07-17. **A freeze is a reviewer decision, not a consequence of
+the work being finished** (AJS-007 §5.3/§5.4) — this section presents the evidence; the
+decision is AJ's._
+
+### 1. Tasks complete
+
+All twelve M5 tasks are `Complete`: **EOS-401..409** as planned, plus **EOS-410** and
+**EOS-411** added by two approved FPCPs. Each was implemented, code-reviewed at high effort,
+had its findings addressed, was validated, and was committed under the AJS-007 cycle.
+
+### 2. The Integration Check (PIPELINE-ARCHITECTURE)
+
+| Property | Evidence |
+| --- | --- |
+| Each new stage has exactly one responsibility | Session (identity), Projection (rendering), Observability (the log), Orchestration (sequencing), Composition (assembly) — each with a recorded invariant |
+| Stages communicate only through immutable contracts | Every stage's output goes through its `parse*` validator and is deep-frozen |
+| Previous stages require no modification | M1–M4 changed only where an approved FPCP authorized it (EOS-D7 adapter, EOS-D8 store, EOS-D10 prompt, EOS-D11 adapter) — each verified by diff, with the frozen suites passing **unmodified** |
+| The public `run(context)` entry point does not change | Delivered exactly as frozen in M1; EOS-D9 kept it intact by exposing the trigger instead |
+| **No git or wiki side effect enters the pipeline** | **Verified by grep**: no `commit`/`add`/`push`/`checkout`/`reset` command anywhere in `src/end-of-session/`; no reference to the wiki generator. **Proven at runtime**: EOS-409 asserts HEAD, index, and working tree are byte-identical after a real run |
+
+### 3. Canonical knowledge unchanged (SPEC-003 §17)
+
+**Proven, not asserted** — and the proof was itself verified to be able to fail (it detects a
+modified, added, *and* deleted canonical file, over a vault seeded with real content). A real
+composed run leaves `foundation/`, `library/`, and `wiki/` **byte-identical**, and every write
+lands beneath `knowledge-review/`.
+
+### 4. SPEC-003 §19 acceptance
+
+Each criterion is a named test in `session-acceptance.test.ts`, in the specification's own
+words: session summary generated · candidate handbook entries generated · candidate wiki
+publications prepared · review package created · **canonical knowledge unchanged** · logs
+recorded.
+
+### 5. Public API minimal and intentional
+
+**26 operations**, each a deliberate edit to the EOS-007 drift-guard manifest. The module's
+single public entry point remains `run(context)`; every stage is reachable only for
+composition and testing.
+
+### 6. Validation
+
+`npm run typecheck`, `npm run build`, and the explicit test typecheck are clean. Full suite:
+**713 tests / 58 files**, green, **run three consecutive times** (a flaky determinism test was
+found and fixed during EOS-409 — repetition is how that was confirmed gone).
+
+### 7. Decisions recorded
+
+**EOS-D7** (extend the git seam) · **EOS-D8** (the store owns the review package) · **EOS-D9**
+(the root exposes the trigger) · **EOS-D10** (session notes → extraction, FPCP) · **EOS-D11**
+(untracked files → collection, FPCP). Two reviewer-required invariants are frozen: the
+**Orchestrator Invariant** (EOS-406) and the **Report Builder Invariant** (EOS-405).
+
+### 8. What the reviewer should weigh
+
+Nothing is hidden; these are recorded in full and are the author's honest reservations:
+
+- **Four gaps between the frozen plan and the delivered code** surfaced during M5 — no
+  `Session` was constructible, the `ReviewPackage` had nowhere to be written, `run(context)`
+  had no upstream producer, and notes/untracked files never reached capture. Each was raised
+  rather than absorbed, and each is now closed by a ratified decision. That the plan needed
+  five amendments is itself worth reflecting on at the Retrospective.
+- **Two accepted representation costs**: `SessionContext.branch` reads `"detached"` while
+  `Session.branch` reads `detached@<short-head>` (the request and the session disagree about
+  one fact), and `SHORT_HEAD_LENGTH` is duplicated across two stages.
+- **`SessionContext` is nearly inert**: only `sessionNotes` is consumed. `taskId`,
+  `contextPackageRef`, and `commitMessage` still reach nothing.
+- **Future hardening** (not defects, recorded above): `execFile` `maxBuffer`, and non-ASCII
+  path quoting — both pre-existing in M2's frozen adapter.
+- **The tooling gap**: `npm run typecheck` cannot see `tests/`, which hid three real defects
+  this milestone. Worth closing after SPEC-003.
+
+### 9. Definition of Done
+
+- [x] Projection deterministic from canonical candidates.
+- [x] Composition root + `aj session end` operational.
+- [x] Integration + acceptance tests passing.
+- [x] **Freeze Review completed; v1 vertical slice complete** — **Milestone 5 Freeze declared by the reviewer (AJ) on 2026-07-17.**
 
 ## Dependencies
 
@@ -374,10 +581,17 @@ trigger only; notification is a no-op. **No git commit, no wiki generation.**
 
 ## Definition of Done
 
-- [ ] Projection deterministic from canonical candidates.
-- [ ] Composition root + `aj session end` operational.
-- [ ] Integration + acceptance tests passing.
-- [ ] Freeze Review completed; **v1 vertical slice complete**.
+- [x] Projection deterministic from canonical candidates.
+- [x] Composition root + `aj session end` operational.
+- [x] Integration + acceptance tests passing.
+- [x] Freeze Review completed; **v1 vertical slice complete**. _(**Milestone 5 Freeze
+      declared by the reviewer (AJ) on 2026-07-17.** Objectives satisfied — the complete
+      End-of-Session workflow is operational; every architectural boundary established in
+      M1–M4 preserved; the orchestrator remains a sequencing component rather than a policy
+      owner; `CandidateKnowledge` remains the canonical cross-specification boundary; the
+      Review Store remains a persistence adapter; the `ReviewPackage` remains a pure
+      projection; the approved EOS-D10 and EOS-D11 amendments were incorporated without
+      architectural drift; SPEC-003 §19 satisfied. DoD met.)_
 
 ---
 
@@ -393,6 +607,22 @@ trigger only; notification is a no-op. **No git commit, no wiki generation.**
 
 ---
 
+# Future Hardening (reviewer-accepted deferrals)
+
+- **`createGitPort` `execFile` `maxBuffer`** — accepted at the M2 Freeze (see Milestone M2).
+- **Non-ASCII path quoting (found at the EOS-411 review, 2026-07-17).** Git's `core.quotePath`
+  defaults to true, so a file named `café.ts` is reported as the literal `"caf\303\251.ts"`
+  by **both** `git diff --name-status` and `git ls-files --others` — verified directly. The
+  adapter's parsers do not unquote, so such a path would flow into `SessionChange.path`, a
+  candidate id, and provenance `sourcePaths` carrying quotes and octal escapes, leaving a
+  reviewer unable to trace the claim to the real file. **Not introduced by EOS-411** — the
+  M2-frozen `parseNameStatus` has had this exposure since EOS-103, and the new untracked read
+  inherits it *identically*, which is the consistent outcome. Fixing it means unquoting in the
+  frozen parser (or passing `-c core.quotePath=false`), which is beyond EOS-411's authorized
+  scope and beyond M5, now closed to architectural change. Recorded for post-v1.
+
+---
+
 # Deferred (post-v1)
 
 Documentation & Lessons-Learned analyzers · additional triggers (git hook /
@@ -404,12 +634,21 @@ beyond the graceful `AnalyzerError` fallback).
 
 ---
 
-# Completion Criteria (v1)
+# Completion Criteria (v1) — **SATISFIED**
 
-- [ ] M1–M5 completed and frozen.
-- [ ] Every M1 task (EOS-001..EOS-007) and each later milestone's tasks completed.
-- [ ] SPEC-003 acceptance criteria satisfied for the v1 scope.
-- [ ] The review store is consumable by SPEC-004.
+- [x] M1–M5 completed and frozen. _(M1 2026-07-15; M2, M3, M4 2026-07-16; **M5 2026-07-17** —
+      each by the reviewer's deliberate decision at a Freeze Review.)_
+- [x] Every M1 task (EOS-001..EOS-007) and each later milestone's tasks completed.
+      _(EOS-001..007, 101..103, 201..202, 301..303, 401..411 — 26 tasks.)_
+- [x] SPEC-003 acceptance criteria satisfied for the v1 scope. _(§19 mapped test-by-test in
+      `session-acceptance.test.ts`; canonical knowledge proven byte-identical.)_
+- [x] The review store is consumable by SPEC-004. _(Every artifact under
+      `knowledge-review/pending/<session-id>/` round-trips through the contracts SPEC-003
+      publishes — proven by a real composed run.)_
+
+**SPEC-003 is complete.** The v1 vertical slice is operational: `aj session end` turns a
+finished coding session into candidate knowledge and a review package, writes only to the
+non-canonical review area, commits nothing, and proposes without ever approving.
 
 ---
 
@@ -417,6 +656,24 @@ beyond the graceful `AnalyzerError` fallback).
 
 | Date | Version | Description |
 | ---- | ------- | ----------- |
+| 2026-07-17 | 1.33 | **MILESTONE 5 FREEZE DECLARED by the reviewer (AJ) — and with it, SPEC-003 is COMPLETE.** The Freeze Review passed: the complete End-of-Session workflow is operational; **every architectural boundary established in M1–M4 is preserved**; the orchestrator remains a **sequencing component rather than a policy owner**; **`CandidateKnowledge` remains the canonical cross-specification boundary**; the **Review Store remains a persistence adapter**; the **`ReviewPackage` remains a pure projection**; the approved **EOS-D10** and **EOS-D11** amendments were incorporated **without architectural drift**; and the **SPEC-003 §19 acceptance criteria are satisfied**. M5's Definition of Done and the v1 Completion Criteria are fully met. Delivered across EOS-401..411: the git state seam (EOS-D7), the Session factory (with the ratified detached-HEAD Branch Policy), the Review Package projector, `saveReviewPackage` (EOS-D8), the Session Report builder, session notes into extraction (EOS-D10, FPCP), the workflow orchestrator, the composition root (EOS-D9), `aj session end`, the integration + acceptance suites, and untracked files in the git observation (EOS-D11, FPCP). Final state: **713 tests / 58 files** green across three consecutive runs; **26 public operations**, each a deliberate drift-guard edit; no git write and no wiki generation anywhere in the module (verified by grep *and* at runtime); canonical knowledge proven byte-identical by a snapshot that was itself verified able to fail. **M5 is frozen; changes now follow the AJS-007 Frozen Plan Change Proposal process.** **No further implementation work is required for SPEC-003.** Next: the Milestone 5 pull request to `main`. SPEC-004 is **not** to be started. |
+| 2026-07-17 | 1.32 | **M5 Freeze Review prepared — evidence assembled for the reviewer; M5 is implementation-complete (EOS-401..411).** Documentation synchronized per AJS-007 §7.4 (PIPELINE-ARCHITECTURE's status rewritten — it still claimed session creation, projection, report assembly, orchestration and the CLI were unimplemented; README deliverables checked off; directory structure corrected to EOS-401..411 / EOS-D1..D11). A **Freeze Review Evidence** section now records, with each claim verified rather than asserted: all twelve tasks `Complete`; the **Integration Check** (no git-write command anywhere in `src/end-of-session/` and no wiki reference — verified by grep, and proven at runtime by a real run leaving HEAD/index/worktree byte-identical); **canonical knowledge unchanged**, proven by a snapshot that was itself checked to be able to fail; SPEC-003 §19 mapped test-by-test; **26 public operations**, each a deliberate manifest edit; **713 tests / 58 files** green across three consecutive runs; and the five decisions (EOS-D7..D11) plus two reviewer-required invariants. The evidence also states plainly what the reviewer should weigh **against** a freeze: four frozen-plan gaps needed five amendments during M5; two accepted representation costs (`"detached"` vs `detached@<short-head>`; duplicated `SHORT_HEAD_LENGTH`); `SessionContext` remains nearly inert; two pre-existing future-hardening items; and the `tests/`-typecheck gap that hid three real defects. **M5 stays ⬜ in every progress table — a freeze is a reviewer decision, not a consequence of the author finishing the work (AJS-007 §5.3/§5.4).** |
+| 2026-07-17 | 1.31 | **EOS-411 complete — the [EOS-D11](decisions/EOS-D11-untracked-files-in-collection.md) FPCP is implemented, and M5 is implementation-complete (EOS-401..411).** Approved by the reviewer (AJ, 2026-07-17) as restoring "consistency with the already-approved semantics of the default working range rather than introducing new functionality". Delivered **exactly as proposed**: `createGitPort.changes` also runs `git ls-files --others --exclude-standard` for **working-tree ranges only** (told from commit ranges by git's own `..` — invocation strategy, which EOS-102 assigns to the adapter), mapping each untracked path to an ordinary `{ path, status: "A" }`. **Verified adapter-only by diff: one file changed; `createGitChangeAnalyzer` and `GitPort` are byte-untouched, and M2's 38 analyzer/collection tests pass unmodified** — the proof the change is confined. The analyzer remains a pure translator that cannot distinguish an untracked file from a staged one; ordering stays deterministic because it already sorts. 8 new real-git tests (untracked reported as `added`; tracked and untracked together; **no duplication** of a staged-new file; **`.gitignore` respected**; **excluded for a commit range**, included for a bare ref; deterministic; no git write). **Acceptance suite extended and re-validated per the reviewer's direction**: the fixture session now ends with a file never `git add`ed *and* an ignored one, and the new §19 scenario asserts on **the prompt the model was actually shown** — not on a stubbed finding, which would only prove the stub cited the path. `filesAnalyzed` is now **7** (6 tracked + 1 untracked; `build.log` correctly excluded), and the workflow no longer contradicts its own `dirty` flag. **Full M5 acceptance re-validation: 713 tests / 58 files, green, run three consecutive times.** High-effort review: 2 findings, **neither EOS-411's to fix** — **non-ASCII path quoting** (git quotes `café.ts` as `"caf\303\251.ts"` in *both* reads; **pre-existing in M2's frozen parser since EOS-103**, inherited identically rather than introduced) → recorded under **Future Hardening**; and two sequential git spawns for a working-tree range, deliberately left (parallelising would spawn `ls-files` needlessly for every `--since` run). **NEXT: the M5 Freeze Review.** |
+| 2026-07-17 | 1.30 | **EOS-409 (Integration & Acceptance) complete — the v1 vertical slice is PROVEN. All M5 tasks are now implemented.** Three files, **no product code**: shared fixtures (a vault **seeded with real canonical content**; a repo touching source/test/doc/config; a stub generator returning **fenced** JSON as a real model does; content-hash snapshots), 16 integration tests, and 8 acceptance tests — one per SPEC-003 §19 criterion, named in the specification's own words. Every stage is real (real `createGitPort` over a disposable repo, real `FilesystemReviewStore` over a disposable vault, assembled by the real composition root); only the model is stubbed; the suite runs **offline with no API key**. **The canonical-unchanged proof was itself verified to be able to fail** — the snapshot detects modified, added, *and* deleted canonical files, and the seeded vault has genuine content — because SPEC-003's permanent promise deserves a test that can break, not a green tick over two empty directories. Proven end to end: the complete session layout; the returned report byte-equal to the persisted `report.json`; store/generator/report agreeing on candidate identity; the **1:1 Candidate Generation Invariant surviving composition**; provenance carrying the fixture's **actual HEAD** (EOS-401's read reaching a persisted candidate); `--since` measuring a commit range; **partial collection** (a failing co-analyzer ⇒ `partial`, candidates still produced); **no git write** (HEAD/index/worktree byte-identical — the ADR-002 promise); no wiki generation; every write beneath `knowledge-review/`. Suite **702 / 58** green, run **three consecutive times**. High-effort review: 4 findings, 3 fixed — a **circular** acceptance test that could not fail for its stated reason, an **`as never`** cast past the `Session` contract, and a **vacuous** `.strict()`-guaranteed assertion. **My own determinism tests were flaky**: they compared two *fresh* fixture repos, but git bakes the commit timestamp into the hash, so they passed only when both landed in the same second — they were comparing two different repositories and calling it determinism. Fixed to run twice over **one** repo. **Acceptance behaviour for untracked files is deliberately left open** — the fixture stages everything and no test asserts on untracked files, so the suites need **no change whichever way EOS-D11 is decided**. **NEXT: settle [EOS-D11](decisions/EOS-D11-untracked-files-in-collection.md) (approve ⇒ EOS-411, then re-run acceptance; reject ⇒ document the limitation), then the M5 Freeze Review.** |
+| 2026-07-17 | 1.29 | **[EOS-D11](decisions/EOS-D11-untracked-files-in-collection.md) authored and PROPOSED — the project's second Frozen Plan Change Proposal.** Raised at the reviewer's request after EOS-408's real run exposed a self-contradiction inside a single `Session`: `gitState.dirty` reports `true` (from `git status --porcelain`, which sees `?? untracked.md`) while the `ChangeSet` omits those files (from `git diff --name-status -M HEAD`, which does not). The reviewer confirmed untracked files fall within **EOS-402's ratified range semantics** ("the default range represents the complete uncommitted working state"), so this is a gap between intent and implementation rather than a new requirement. Proposes **one change to one adapter method** — `createGitPort.changes` also runs `git ls-files --others --exclude-standard` for **working-tree ranges**, distinguished from commit ranges by git's own `..` vocabulary (invocation strategy, which EOS-102 explicitly assigns to the adapter). Each untracked path becomes an ordinary `{ path, status: "A" }`, which the analyzer already knows how to translate — so **`GitPort`, `createGitChangeAnalyzer`, and every contract are literally untouched**, the analyzer stays a pure translator that cannot distinguish an untracked file from a staged one, and deterministic path ordering is preserved. Verified before proposing: `ls-files` lists files not directories, respects `.gitignore` (so build output and logs never enter the stream), is **disjoint** from the diff (no dedupe needed), and is sorted. Alternatives rejected and recorded: `git status --porcelain` (rewrites the frozen parser; cannot express a commit range), a new `untracked()` port read (adds a port *and* makes the analyzer hold policy — both forbidden), untracked-for-every-range (incoherent for `--since`, which excludes unstaged edits), and do-nothing (then the limitation must be documented in EOS-409 + README). Implemented by proposed **EOS-411**, sequenced **before EOS-409 finalizes acceptance**. **Not implemented; awaiting review.** EOS-409 proceeds in parallel. |
+| 2026-07-16 | 1.28 | **EOS-408 (`aj session end`) complete — the pipeline has a human entry point.** Thin command (`--since <ref>`, `--notes <text>`), nested like `aj wiki build`: load config → compose → `trigger.createContext()` → `run` → print. **Thin CLI Invariant verified by grep** — no git, no filesystem, no stage construction. **AI guidance implemented per the reviewer's ruling**: no pre-flight key validation anywhere; the workflow runs, records a `failed` report, and persists it, and the **CLI inspects the finished report** — printing help only when an *extraction-stage* error names `ANTHROPIC_API_KEY`. Deliberately narrow: a 503 transport failure and a `persistence` error that merely quotes the variable both stay quiet. Exit `1` on `failed`/known errors; `partial` exits `0`. **Testing deviation recorded**: this task planned a stubbed-workflow test, but the repo has no CLI test precedent and the command has no generator seam — testing it directly would have needed a real API key and the developer's own vault, so the command's only real logic (presentation) was extracted into two pure functions and tested directly (13 tests), with the glue covered by EOS-409. Suite **678 / 55** green; both help screens and both output paths **driven for real** against a temp vault + fixture repo with a stubbed generator. High-effort review: 3 findings, 2 fixed — an **unreachable `AIError` catch branch that contradicted its own comment**, and assertions **pinning exact column alignment**. **⚠️ RAISED — untracked files never reach capture (v1 gap, not this task's scope).** `Session.gitState.dirty` comes from `git status --porcelain` (which reports `?? untracked.md`), but the analyzer reads `git diff --name-status -M HEAD` (which does not). Verified directly. So a session that creates a brand-new file and ends before `git add` reports `dirty: true` while that file is **invisible to extraction** — no finding can cite it, no candidate can come from it. New files are where new knowledge most often lives. This belongs to **EOS-402's ratified range semantics** (`HEAD` = "uncommitted + staged" — an untracked file *is* uncommitted) and the **M2-frozen analyzer**, so it needs a reviewer decision (accept and document as a v1 limitation, or an FPCP to include untracked files) **before EOS-409 pins acceptance behaviour**. **NEXT: EOS-409 (Integration & Acceptance) — the last M5 task.** |
+| 2026-07-16 | 1.27 | **EOS-407 (Composition Root) complete — the workflow now assembles from configuration.** `createEndOfSessionWorkflow(config, deps?)` → **`{ workflow, store, trigger }`** (EOS-D9): resolves `<handbook>/<reviewPath>` + `mkdir -p`, builds the guarded store and **fails fast via `locate()`**, then constructs the git port, single-analyzer registry, session factory, extractor over `AIClient`, candidate generator, projector, and no-op notifier. **Constructs, never orchestrates** — verified by grep: the only stage invocation is the `locate()` precondition the frozen invariant carves out, and the only filesystem work is the `mkdir -p` the guarded store requires in order to exist (the `createKnowledgePipeline` precedent the reviewer's "beyond constructing the approved adapters" phrasing permits). 14 tests over **real temp vaults + real disposable git repos**, generator always stubbed (composing must never need a network call); public surface +1; drift-guard **25**; suite **665 / 55** green. **The stub-drift check caught a real defect at once**: the suite imported `type AIResponse`, which the barrel does not export — invisible to Vitest (types stripped) *and* to `npm run typecheck` (scoped to `src`). That gap has now hidden **three** distinct defects this milestone (EOS-401 stub breakage, EOS-405 exact-optional, EOS-407 invalid import) — an argument for widening the compiler to `tests/` once SPEC-003 closes. High-effort review: 5 findings, 1 fixed, 4 recorded — most importantly **a missing API key never reaches the CLI's friendly-error path** (`new AIClient()` doesn't throw, so the `AIError` fires in extraction and EOS-406 converts it into a *persisted `failed` report*; every keyless `aj session end` would write a session directory recording a config problem) — **raised into EOS-408's Design Notes with options and a recommendation, for the reviewer to settle before the CLI is written**. Also recorded: `mkdir -p` necessarily precedes the store's guard; **`NO_BRANCH = "detached"`** is a second representation of detached HEAD distinct from the factory's `detached@<short-head>` (every alternative was worse — duplicate the frozen Branch Policy, export it for a field nothing reads, or FPCP the contract); and `branch()` is read twice per run, inherent to EOS-D9 + EOS-402. **NEXT: EOS-408 (`aj session end`).** |
+| 2026-07-16 | 1.26 | **EOS-406 (Workflow Orchestrator) complete — the pipeline runs end to end.** `createSessionWorkflow(deps)` delivers the module's promised `run(context) → SessionReport` entry point, sequencing session → collection → extraction → generation → saveCandidates → projection → saveReviewPackage → report → saveReport → appendLog → notify. **The Orchestrator Invariant is verified by shape**: the module has exactly **two value imports** (`collectChanges`, `buildSessionReport` — both pure stage functions), everything else is a type, and there is no port, adapter, store, `node:` module, `process`, config, or clock beyond the injected `now`. With comments stripped, `run` is a flat sequence of delegating calls and nothing else. `inStage()` adds failure **attribution only** — the report needs `source`, and the orchestrator alone knows the sequence. 20 stub-driven tests; drift-guard **24**; suite **651 / 54** green. **Reviewer-requested stub-drift check run over every EOS suite**: EOS-406's seven doubles are clean (the first task to stub `ReviewStore` — EOS-404's addition caused no drift); **two pre-existing errors surfaced and confirmed on HEAD** by stashing (`collection-execution` TS2345; `knowledge-extractor:88` TS2379) — raised, not fixed, per the frozen-internals rulings. High-effort review: 4 findings, 3 fixed — a **documented-but-untested** notifier-failure policy (one try/catch from silently violating the invariant), an **unreachable** error branch, a dead test fallback; `describeFailure` duplication left alone (sharing widens frozen M2). **Two deviations flagged for the reviewer**: (1) **session-creation failure rejects rather than producing a `failed` report** — the frozen text asked for the impossible, since `SessionRunFacts.session` and `SessionReport.sessionId` are required and there is no `pending/<id>/` to write under; (2) **persistence occurs at two points, not one** — EOS-D4 requires canonical candidates to be stored *before* the projection renders a view of them, so a projector failure still leaves the candidates durable (pinned by a test). **NEXT: EOS-407 (Composition Root).** |
+| 2026-07-16 | 1.25 | **EOS-410 (session notes → extraction prompt) complete** — the approved **EOS-D10** amendment, implemented as a narrowly scoped compatibility change: one optional `sessionNotes?: string` on `buildExtractionPrompt` and `KnowledgeExtractor.extract`, rendered **verbatim** in a labelled section under a **conditional** system rule framing notes as context rather than instructions. `--notes` now reaches the model. **The byte-identical guarantee was PROVEN, not asserted**: the pre-amendment prompt was rendered from the built module and hashed *before* any edit (`07bda1107e3159c0…`), and the post-change render produced the **identical SHA-256** for both `system` and `user` — re-proven after the review refactor touched that path. The reviewer's corroborating proof holds too: **every existing M3 test passes unmodified** (additions-only diff). Present-notes case verified: system = original + rule only, and removing the section restores the user prompt byte-for-byte. **Extractor Invariant unchanged** — `sessionNotes` appears only in the parameter list and the prompt string, and a test proves the parsed extraction is identical with and without notes. **Conflict resolved and recorded:** EOS-410's own frozen text said blank/whitespace notes are treated as *absent*, which the reviewer's criterion ("no interpretation, branching, preprocessing, or heuristics based on note content") rules out — a blank check is `trim()` plus a length test. Implemented **presence = value-supplied**; the task text is struck through and annotated, and the case is nearly unreachable anyway (`sessionNotes` is `.min(1)`). 12 tests added; suite **631 / 53** green; no public-surface growth (drift-guard **23**). High-effort review: presence was **decided twice** (renderer vs. system rule), risking a section with no rule framing it — fixed with a single `notesParts()` deriving both halves from one decision. **That is the third instance of one shape in three consecutive stages** (`summaryFor` → `durationFor` → presence): *one decision derived twice*. Worth watching in EOS-406, which handles every stage's output at once. **NEXT: EOS-406 (Workflow Orchestrator).** |
+| 2026-07-16 | 1.24 | **EOS-405 (Session Report Builder) complete** — `buildSessionReport(facts)` assembles the SPEC-003 §16 execution log: a plain function owning no dependency, with the run window as an input rather than a clock read. **Reviewer-required Report Builder Invariant recorded and frozen before implementation** — *a pure projection over existing pipeline outputs*: no new observation, no git, no filesystem, no regenerated information, no logic duplicated from an earlier stage. **Verified by shape**, not vigilance: the module's only non-type import is `parseSessionReport`, and nothing else in the codebase computes `durationMs`/`filesAnalyzed`/`candidatesProduced`. Outcome policy as ratified (fatal ⇒ `failed`; any error ⇒ `partial`; else `completed`; **zero candidates + no errors ⇒ `completed`**), and a **failed run still yields a valid report** — the report is how a failure stays observable. **Clarification recorded:** EOS-405's planning text described `partial` as requiring produced candidates, leaving errors-with-zero-candidates undefined; the **M1-frozen contract** defines it on errors alone and governs — implemented accordingly, pinned by a test. 23 tests; drift-guard **23**; suite **619 / 53** green. High-effort review: 3 findings, all fixed — most notably **`durationFor` computed twice** (structured field vs. `logEntry`), *the same defect EOS-403 hit with `summaryFor`* one stage earlier: fixed structurally by deriving `logEntry` from the assembled fields so divergence is unrepresentable. Also: the explicit test typecheck caught an `exactOptionalPropertyTypes` error **invisible to `npm run typecheck`** (tests are outside its scope). **NEXT: EOS-410** (session notes → prompt, per the approved EOS-D10), then EOS-406. |
+| 2026-07-16 | 1.23 | **EOS-404 (`saveReviewPackage`) complete** — the Review Store gains its fifth operation (**EOS-D8**), in the same shape as `saveReport` and reusing every EOS-302 guard unchanged; the session directory is now **wholly store-owned**: `candidates/<id>.json` + `report.json` + `review-package.md` + `log.md`. `reviewPackage.markdown` is written **verbatim** — the *symmetric* choice rather than an exception to the store's JSON convention, since the store renders each artifact into the form its contract defines, and a `ReviewPackage` **is** markdown (EOS-D4), making serialization the identity. Per the reviewer's direction the projector owns projection and the store owns persistence; neither takes the other's job. The four existing operations and their tests are **untouched** (the additivity proof); the exact-surface test is deliberately re-pinned to five; drift-guard manifest unchanged at **22** (no new public operation). Projector → store driven end-to-end against a temp destination. Suite **596 / 52** green. High-effort review: 3 findings — `review-package.md` lacked a trailing newline, **fixed in the projector** rather than the store (adding one here would make persistence responsible for content — the boundary held where it was inconvenient); a `writeSessionFile` DRY helper **declined** because it would modify **frozen M4 internals** beyond what EOS-D8 authorized (raised for the reviewer); a test fixture's inert fields clarified. No `ReviewStore` stubs exist today — **EOS-406 will be the first to stub it** and must re-run the EOS-401 stub-drift check (`npm run typecheck` cannot see `tests/`). **NEXT: EOS-405 (Session Report Builder).** |
+| 2026-07-16 | 1.22 | **EOS-D10 APPROVED by the reviewer (AJ) — the project's first Frozen Plan Change Proposal, and EOS-403 approved.** The FPCP passed on the grounds that it "restores an intended input to knowledge extraction without introducing new architectural concepts or changing existing boundaries". **[EOS-410](tasks/EOS-410.md) authored and Planning-Frozen**, added to the M5 task table **before EOS-406**: threads one optional `sessionNotes?: string` from `extract` into the prompt, rendered verbatim under a system rule framing notes as context rather than instructions. **`--notes` stays in EOS-408.** Both reviewer conditions are recorded as EOS-410 acceptance criteria: **byte-identical when absent** (existing M3 tests must pass **unmodified** — a test needing an edit means the change is wrong) and the **Extractor Invariant unchanged** (not reworded, not relaxed; `sessionNotes` may appear only in prompt construction, never in parsing or control flow). EOS-410's one sharp edge is recorded: the system rule must be **conditional**, since an unconditional rule would change `system` for every call and break the byte-identical criterion. EOS-403 approved — the regenerability guarantee holds and the `ReviewPackage` derives exclusively from canonical persisted artifacts. Docs synchronized (EOS-202, PIPELINE-ARCHITECTURE, EOS-406/408). **NEXT: EOS-404**, then EOS-405 → EOS-410 → EOS-406 → EOS-408 → EOS-409. |
+| 2026-07-16 | 1.21 | **EOS-403 (Review Package Projector) complete** — `createReviewPackageProjector()` renders the human-readable `ReviewPackage` from canonical candidates + `Session`: a pure, dependency-free stage with `generatedAt` as an input rather than a clock read. **`summary` derives from canonical data only** (the reviewer's explicit ratification): the model's prose summary on the unpersisted `KnowledgeExtraction` is never touched, and a test proves EOS-D4's regenerability by rebuilding a deep-equal package from re-parsed candidates. Every candidate renders in canonical order with its provenance; the empty session is a valid review, not an error. 22 tests asserting **presence, order, and derivation — never prose** (the layout stays free; nothing parses it), plus a by-eye read of the rendered artifact. Public surface +1; drift-guard **22**; suite **590 / 52** green. High-effort review: 6 findings, 4 fixed — `summaryFor` computed twice (field/body could diverge); a newline in a model-authored `title` broke its `###` heading (flattened in the heading only — presentation, not interpretation); a vacuous `toContain("no")` assertion ("no" hides inside "knowledge"); and a no-op spread in a test. 2 accepted with notes (`SHORT_HEAD_LENGTH` duplicated across two stages; factory-vs-function convention now documented — the projector is *injected* as a replaceable stage per EOS-D4, `buildSessionReport` is called directly). **NEXT: EOS-404 (`saveReviewPackage`).** |
+| 2026-07-16 | 1.20 | **EOS-402 approved by the reviewer (AJ)** — the detached-HEAD split is as intended: the port reports reality, the factory applies domain policy, the `Session` stays complete. Two EOS-402 findings ruled on: (1) the **`--notes` gap warrants a focused FPCP** — the reviewer confirmed SPEC-003's intent that session notes are an input to knowledge extraction carrying information git cannot convey, and directed that they must **not** be silently discarded in v1; **[EOS-D10](decisions/EOS-D10-session-notes-into-extraction.md) authored and PROPOSED** (narrow: one optional `sessionNotes?: string` on `extract`/`buildExtractionPrompt`, verbatim, inert when absent; one new task **EOS-410 before EOS-406**; no new stage/contract/port/field; Extractor Invariant preserved) — **awaiting review; not implemented**. (2) The **git seam's location stays unchanged for SPEC-003**, reconsidered after the specification is complete if it still appears to violate the architecture. EOS-403 proceeds — it is independent of both. |
+| 2026-07-16 | 1.19 | **EOS-402 (Session Factory) complete** — `createSessionFactory` mints the opaque id (`randomUUID`), observes `head`/`dirty`/`branch` through the EOS-D7 seam in one `Promise.all`, constructs the range (`HEAD` default / `<ref>..HEAD`), records the trigger instant once (`startedAt === endedAt`), and validates through `parseSession`. **Branch Policy ratified and implemented** (reviewer: AJ): a detached HEAD is **captured, not refused** — `branch` becomes `detached@<short-head>` from the already-observed head, `Session.branch` stays **required and non-empty**, and nullable branch handling **stops at this stage** rather than propagating into candidates, projection, report, or SPEC-004. The reviewer also approved EOS-401's `Promise<string \| null>` port signature (the port reports git's actual state; the factory applies the policy). Public surface +1; drift-guard manifest **21**; suite **568 / 51** green. High-effort review: 5 findings — 2 fixed, 1 accepted with a note, **2 raised**: (a) **`SessionContext`'s request fields reach no consumer** — `sessionNotes`/`taskId`/`contextPackageRef`/`commitMessage` have no reader anywhere (the M3 extractor takes only `ChangeSet`), so **EOS-408's planned `--notes` would silently drop the engineer's notes** — lands on EOS-406/408 and would need an FPCP to reach the model; (b) the shared git seam still lives under `analyzers/`, contradicting EOS-D7's "the seam is not any one consumer's" (a move touches M2-frozen paths — deliberate decision, not a drive-by). **NEXT: EOS-403 (Review Package Projector).** |
+| 2026-07-16 | 1.18 | **EOS-401 (Git state seam) complete** — the first M5 task, implemented and reviewed under the AJS-007 cycle. `GitPort` gained read-only `head`/`dirty`/`branch` (EOS-D7), implemented in `createGitPort`; `changes(range)`, the analyzer, and collection untouched (M2 suites green unmodified — the proof the extension is additive). **A `Session` is now constructible for the first time.** New suite (14 tests, real git over disposable fixture repos) incl. an explicit read-only proof; no public-surface growth; full suite **548 / 50** green. High-effort review found **2 real defects, both fixed**: the extension had silently broken two M2 `GitPort` stubs into type errors that no check could see (`tsconfig` scopes typechecking to `src`), fixed by giving the stubs throwing state reads — which converts EOS-D7's accepted interface-segregation cost into an enforced guarantee; and `branch()` returned the literal `"HEAD"` when detached, a non-empty value that would satisfy `Session.branch`'s `.min(1)` and record a non-existent branch, fixed via `git branch --show-current` and a **`Promise<string \| null>`** signature. **Deviation recorded for ratification** (EOS-D7 v1.1): the decision documented `branch(): Promise<string>`; substance unchanged, but **EOS-402 must now decide what a detached session's required non-empty `branch` records**. |
+| 2026-07-16 | 1.17 | **M5 Planning Freeze ratified by the reviewer (AJ).** M5 Planning Review passed; the EOS-401..409 breakdown is approved. Reviewer ratified three architectural decisions, all now recorded: **[EOS-D7](decisions/EOS-D7-git-port-extension.md)** — extend the existing `GitPort` rather than introduce a second git abstraction (closing the "no `Session` is constructible" gap; `changes(range)` and every M2 guarantee untouched); **[EOS-D8](decisions/EOS-D8-review-store-save-review-package.md)** — extend the Review Store with a domain-level `saveReviewPackage`, so the store owns every file in the session directory (extends EOS-D6 rather than revising it; keeps the projector pure and every write path-guarded); **[EOS-D9](decisions/EOS-D9-trigger-exposed-from-composition-root.md)** — the composition root exposes the `TriggerSource` (`{ workflow, store, trigger }`), keeping session construction and git access out of the CLI while `run(context)` stays frozen. The reviewer also explicitly ratified that **`ReviewPackage.summary` must remain derivable from canonical persisted data** (never transient `KnowledgeExtraction` output) and that the **projector must remain a pure projection**. Per the reviewer's requirement before freeze, an explicit **Orchestrator Invariant** was recorded in EOS-406: the orchestrator **owns sequencing only** — it may invoke stages, propagate results unmodified, and coordinate execution; it must **not** perform transformations, duplicate stage logic, introduce business rules, or bypass the existing adapters (if a rule wants to live there, a stage is missing). It joins the Extractor, Candidate Generation, and Persistence Invariants, and is an acceptance criterion verified at code review. The seven remaining tabled decisions are ratified as proposed. PIPELINE-ARCHITECTURE updated for the EOS-D9 return shape. The M5 breakdown is frozen; **EOS-401 may begin under the AJS-007 implementation cycle.** |
+| 2026-07-16 | 1.16 | **M5 (Review Package Projection, Orchestration & CLI) task breakdown authored** — decomposed into **EOS-401..409**: EOS-401 (git state seam — `GitPort` gains read-only `head`/`dirty`/`branch`), EOS-402 (Session Factory — opaque id, `gitState`, range construction), EOS-403 (Review Package Projector — pure, deterministic, canonical-derived), EOS-404 (Review Store `saveReviewPackage`), EOS-405 (Session Report Builder — outcome policy + `logEntry`), EOS-406 (Workflow Orchestrator — the frozen `run(context)` entry point), EOS-407 (Composition Root, mirroring `createKnowledgePipeline`), EOS-408 (`aj session end`), EOS-409 (Integration & Acceptance — the v1 vertical-slice proof incl. the canonical-unchanged byte-identical snapshot). Nine low-coupling, independently reviewable tasks **composing** the frozen M1–M4 stages; M5 objective/deliverables unchanged (within the frozen plan). **Planning surfaced two frozen-plan gaps requiring AJS-007 §7.2 ratification**: (1) **no `Session` is constructible today** — M2's `GitPort` exposes only `changes(range)`, though `Session.gitState.head`/`dirty` and `branch` are required and EOS-002 recorded that access as M2's (→ EOS-401, possible **EOS-D7**); (2) the **`ReviewPackage` has nowhere to be written** — EOS-302 anticipated `review-package.md` but EOS-D6 froze the store at four operations, and "the projector writes it" contradicts EOS-D6's store-owns-the-layout holding and bypasses the path guards (→ EOS-404, possible **EOS-D8**). A third decision — who invokes the `TriggerSource`, and whether the composition root's frozen `{ workflow, store }` return extends to include it (→ EOS-407, possible **EOS-D9**) — plus seven smaller decisions are tabled for the review. **Pending M5 Planning Review + Planning Freeze** before EOS-401 implementation. |
 | 2026-07-16 | 1.15 | **Milestone 4 (Candidate Generation & Review Store) Freeze declared by the reviewer (AJ).** Freeze Review passed: candidate generation deterministic and provenance-complete, preserving the one-to-one mapping invariant (each finding → exactly one candidate; no merge/split/reorder/invent/remove); `CandidateKnowledge` remains the canonical SPEC-003 → SPEC-004 boundary; the Review Store persists artifacts (one JSON file per candidate + `SessionReport` + `log.md`) without introducing workflow logic and writes only beneath the approved `knowledge-review/pending/<session-id>/` location; configuration extended consistently with the `generatedWikiPath` pattern; no architectural drift — M4 Definition of Done fully satisfied. M4 is frozen; changes now follow the AJS-007 Frozen Plan Change Proposal process. Next: **M5 (Review Package Projection, Orchestration & CLI)**, beginning with M5 planning (EOS-4xx decomposition → Planning Review → Planning Freeze). |
 | 2026-07-16 | 1.14 | **M4 implementation complete — EOS-301..303 all done**, each independently code-reviewed and committed. EOS-301 (Candidate Generator: deterministic `KnowledgeExtraction` → canonical `CandidateKnowledge[]`, one-to-one order-preserving mapping via `parseCandidateKnowledge`, authoritative kind, `session:<id>:<n>` identity, complete provenance behind an injected clock, frozen output). EOS-302 (Review Store: `ReviewStore` + `createFilesystemReviewStore`, persistence-only + path-guarded + non-canonical-destination guard, per-session layout `candidates/<id>.json` + `report.json` + `log.md`, no git, no interpretation). EOS-303 (`AjConfig.handbook.reviewPath` default `knowledge-review`, mirroring `generatedWikiPath`). Public surface grew by 4 operations (`createCandidateGenerator`, `createFilesystemReviewStore`, `ReviewStoreError`; config unchanged surface). End-of-Session suite **17 files / 190 tests**; full platform suite **533 / 49**, all green. M4 Integration Check satisfied — both new stages deterministic, immutable contracts, no git/wiki side effect, `run` entry point unchanged. **Pending the M4 Freeze Review.** |
 | 2026-07-16 | 1.13 | **M4 Planning Freeze ratified by the reviewer (AJ).** M4 Planning Review passed; the EOS-301/302/303 breakdown and its decisions are approved. Reviewer ratified: the **domain-aware Review Store API** (recorded as **EOS-D6** — the long-term SPEC-003→004 filesystem boundary), **one canonical JSON file per candidate**, **kind classification as a validated pass-through** (v1), **`related` initialized empty** (v1), and the **non-canonical destination guard at store construction**. Per the reviewer's requirement, the **Candidate Generation Invariant** was strengthened before freeze to state the property explicitly — candidate generation is a **deterministic one-to-one structural mapping**: each finding produces exactly one candidate; no merge/split/reorder/invent/remove (`candidates.length === findings.length`, order-preserving). The M4 breakdown is frozen; EOS-301 may begin under the AJS-007 implementation cycle. |

@@ -30,12 +30,31 @@ const SESSION: Session = Object.freeze({
   branch: "feat/spec-003-m2-change-collection",
 }) as Session;
 
+/**
+ * The session-state reads of the `GitPort` seam (EOS-401/EOS-D7), stubbed to throw.
+ *
+ * The analyzer shares one read-only git seam with the Session factory but consumes
+ * only `changes` — the interface-segregation cost EOS-D7 accepted deliberately.
+ * Making these throw turns that cost into a *guarantee*: if the analyzer ever
+ * reaches for the session's git state, these tests fail loudly instead of silently
+ * passing on a plausible dummy value.
+ */
+function stateReadsMustNotBeUsed(): Pick<GitPort, "head" | "dirty" | "branch"> {
+  const refuse = (read: string) => async (): Promise<never> => {
+    throw new Error(
+      `GitChangeAnalyzer must not read git state — it called ${read}().`,
+    );
+  };
+  return { head: refuse("head"), dirty: refuse("dirty"), branch: refuse("branch") };
+}
+
 /** A stub GitPort returning fixed observations; records the range it was asked for. */
 function stubGitPort(
   observed: readonly GitFileChange[],
 ): GitPort & { askedFor: string[] } {
   const askedFor: string[] = [];
   return {
+    ...stateReadsMustNotBeUsed(),
     askedFor,
     async changes(range: string): Promise<readonly GitFileChange[]> {
       askedFor.push(range);
@@ -202,6 +221,7 @@ describe("GitChangeAnalyzer — deterministic ordering", () => {
 describe("GitChangeAnalyzer — failure propagation (no swallowing)", () => {
   it("lets a rejecting port surface out of analyze (EOS-101 turns it into an error)", async () => {
     const failing: GitPort = {
+      ...stateReadsMustNotBeUsed(),
       async changes(): Promise<readonly GitFileChange[]> {
         throw new Error("git unavailable");
       },
