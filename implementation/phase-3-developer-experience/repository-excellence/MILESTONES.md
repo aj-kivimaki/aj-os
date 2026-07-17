@@ -53,7 +53,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 | Milestone | Name | Goal | Status |
 | --------- | ---- | ---- | ------ |
 | M1 | Documentation Truth & SPEC-003 Lifecycle Closure | Every document describes the repository that exists today; SPEC-003's two outstanding AJS-007 deliverables discharged | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | 🔨 **Planning FROZEN** (AJ, 2026-07-17) — in progress |
+| M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | 🔨 **Implementation complete — awaiting the Freeze Review** |
 | M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ⬜ |
 | M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ⬜ |
 | M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ⬜ |
@@ -504,12 +504,96 @@ Per **[REX-D10](decisions/REX-D10.md)** — each clause carries a falsifier:
 
 ## Definition of Done
 
-- [ ] Every measurable property in the README table green in CI.
-- [ ] Any of the **40** that prove to be **real test defects** are recorded as findings and fixed
-      failing-test-first — **not silently `!`-ed away**.
-- [ ] Every clause of the protected outcome demonstrated **and shown able to fail**.
-- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
-- [ ] Retrospective created.
+- [x] Every measurable property green in CI — **five gates on the runner**.
+- [x] Any of the **40** that prove to be **real test defects** recorded and fixed failing-test-first.
+      *(Result: **zero** behavioural defects; **two design questions** surfaced instead.)*
+- [x] Every clause of the protected outcome demonstrated **and shown able to fail**.
+- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**. _(Evidence below.)_
+- [ ] Retrospective created (§4.7 stage 7 — follows the freeze).
+
+---
+
+## M2 Freeze Review — Evidence (prepared for the reviewer)
+
+> **M2 stays 🔨 in every progress table.** A freeze is a **reviewer decision, not a consequence of
+> the author finishing the work** (§5.3/§5.4). Including §8 — the case *against*.
+
+### 1. Tasks complete
+
+REX-201..208, all ✅. **11 commits** (`0c6c873..HEAD`), 138 files.
+
+### 2. The repository can now verify itself — five gates, on a clean runner
+
+`format:check` · `lint` · `typecheck` (**incl. `tests/`**) · `build` · `test`, plus **coverage
+reported, never blocking**. CI runs on every push and PR. **Before M2, `.github/` had never existed
+in the repository's history.**
+
+### 3. Every gate demonstrated **failing** under the condition it exists to detect
+
+*A gate is defined by the condition under which it fails.*
+
+| Gate | Probe | Result |
+|---|---|---|
+| typecheck | bad type annotation | ❌ → ✅ |
+| build | same | ❌ → ✅ |
+| test | `expect(1).toBe(2)` | ❌ → ✅ |
+| format:check | mis-formatted line | ❌ → ✅ |
+| **lint** | unused `const` | **passed at first — the gate was vacuous.** `biome lint` exits 0 on warnings. Fixed with `--error-on-warnings`; ❌ → ✅ |
+
+### 4. The protected outcome (REX-D10) — verified, not asserted
+
+| Clause | Evidence |
+|---|---|
+| Formatting is **mechanical** | **`format(pre-tree) == post-tree` across all 104 files**, and **proven able to fail** by smuggling a *validly-formatted* semantic edit |
+| **No test removed, skipped, or weakened** | no `.skip`/`.only`/`todo`; **`expect()` rose 1097 → 1105 (+8)** |
+| Behaviour preserved | **713 tests green** |
+| `src/` changes **diagnostics-driven** | each traceable to the compiler/linter diagnostic that demanded it |
+
+### 5. Frozen work untouched
+
+VISION · ARCH · ADR-001..006 · AJS-007 · EOS/CB decisions and tasks · **`archive/`** — all clean.
+
+### 6. Findings
+
+**Closed:** F-025 (file level), F-026, F-027, F-028, F-029, F-032, F-033, F-034, F-035, F-036.
+**Partial, reviewer-ruled:** F-031 (5 of 6 flags), F-030 (baseline + documented tooling limit).
+**Surfaced, recorded not resolved:** **DQ-1**, **DQ-2**.
+
+### 7. Decisions
+
+**REX-D7** (Biome) · **REX-D10** (FPCP — protected outcome as outcome, **raised during Planning**,
+the first REX plan defect caught *before* implementation).
+
+### 8. What the reviewer should weigh — the case *against* a freeze
+
+**Three gates were built wrong before they were built right, and all three were mine.** The lint gate
+**exited 0 on warnings** and enforced nothing. The formatter **rewrote 36 files of frozen archive**
+because `biome.json` cannot hold comments and Biome **silently fell back to defaults**. `npm run ci`
+reported **green while no longer running the format gate at all**, after `git checkout -- .` reverted
+`package.json`. **Each was caught by testing the gate — none by building it.** A reviewer may
+reasonably ask what that says about the ones I did *not* think to test.
+
+**Two findings close only partially, both by reviewer ruling.** F-031 (`noPropertyAccessFromIndexSignature`
+deferred) and F-030 (coverage cannot see unreachable module graphs). **M2's headline claim —
+*"every objectively measurable property machine-verified"* — is therefore not literally true**:
+repository-wide coverage is not measurable with this tooling, and one strictness flag is off.
+
+**The coverage report is partially honest, which is arguably worse than uniformly dishonest.** It
+reports **46 of 167 files** and *looks* complete. It is mitigated by documentation
+(`docs/project/coverage.md`), not by tooling — and documentation is exactly what M1 proved drifts.
+
+**F-025 is half-open by construction.** CI runs; **nothing requires it to pass before a merge.**
+Branch protection is a repository setting REX cannot make. **A gate that can be merged past is a
+suggestion** — and every claim above about CI protecting the repository is, until then, a claim
+about a gate that can be bypassed.
+
+**Planning was measurably wrong twice.** The "46 errors" was **40**; the six-flag risk assessment
+covered **two** flags. Both were caught by the re-read or by implementation — **neither by planning
+review.**
+
+### 9. Definition of Done
+
+Three of five satisfied; the remaining two are the freeze itself and the retrospective that follows.
 
 ---
 
