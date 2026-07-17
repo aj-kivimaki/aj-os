@@ -76,6 +76,16 @@ export interface LintFinding {
   readonly detail: string;
 }
 
+/**
+ * LINT results for a run.
+ *
+ * LINT is a declared SPEC-005 operation (§8: contradictions, orphans, stale
+ * claims, hash-drift) and part of this contract by design. It is **specified
+ * but not yet implemented** — the generator currently returns an empty
+ * `findings` list (see the `noLint` placeholder in `createWikiGenerator`), so an
+ * empty report means "LINT has not run", not "the wiki is clean". The field is
+ * a reserved SPEC-005 contract, not speculative surface (REX-D5, F-043).
+ */
 export interface LintReport {
   readonly findings: readonly LintFinding[];
 }

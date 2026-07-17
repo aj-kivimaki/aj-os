@@ -24,13 +24,27 @@ export const CONTEXT_PROFILES = [
 /** Primary Context Package renderings. */
 export const OUTPUT_FORMATS = ["markdown", "json"] as const;
 
-/** Runtime schema for the Context Builder public configuration contract. */
+/**
+ * Runtime schema for the Context Builder public configuration contract.
+ *
+ * All three fields are **reserved surface (CB-002): accepted and validated, but
+ * not yet consumed** by the current assembly implementation. Assembly emits
+ * fixed, structurally valid placeholders regardless of their values
+ * (`assembleContext.ts` — empty explainability, empty summary), so today
+ * `outputFormat: "json"` produces output identical to `"markdown"`, and
+ * `explainability` and `profile` do not alter the result. This is documented,
+ * not removed: they are an intentional forward contract, and implementing them
+ * (profile-weighted ranking, an explainability report, format dispatch) is
+ * platform evolution deferred to a specification, not Repository Excellence work
+ * (REX-D5, F-041).
+ */
 export const contextBuilderConfigSchema = z
   .object({
-    /** Ranking profile applied when assembling context. */
+    /** Reserved: intended ranking profile; not yet applied during assembly. */
     profile: z.enum(CONTEXT_PROFILES),
-    /** Whether an explainability report is produced. */
+    /** Reserved: intended explainability toggle; no report is produced yet. */
     explainability: z.boolean(),
+    /** Reserved: intended output rendering; assembly emits one format today. */
     outputFormat: z.enum(OUTPUT_FORMATS),
   })
   .strict();
