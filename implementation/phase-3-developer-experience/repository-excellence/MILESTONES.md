@@ -357,9 +357,9 @@ at the reviewer's requirement, *before* the Planning Freeze.
 | REX-203 | ⚠️ **executable behaviour boundary** | Resolve the **40** hidden errors. **The only M2 task changing executable source for non-mechanical reasons.** | F-027 | ✅ |
 | REX-204 | **mechanical** (provable) | Formatter + `.editorconfig`. Isolated commit; proven by re-running the formatter on the pre-M2 tree. | F-029 | ✅ |
 | REX-205 | **configuration truth** (behaviour risk) | Linter + **five of six** dormant flags + the dead `jsx` config | F-028, **F-031 (partial — reviewer-ruled)**, F-034 | ✅ |
-| REX-206 | **documentation** | `package.json` metadata, `engines`, `.nvmrc`, `SECURITY.md`, `CODE_OF_CONDUCT.md` | F-032, F-033, F-035 | ⬜ |
-| REX-207 | governance — **process** | PR template, `dependabot.yml`, `CODEOWNERS` | F-036 | ⬜ |
-| REX-208 | governance — **measurement** | Coverage **measured, not gated** | F-030 | ⬜ |
+| REX-206 | **documentation** | `package.json` metadata, `engines`, `.nvmrc`, `SECURITY.md`, `CODE_OF_CONDUCT.md` | F-032, F-033, F-035 | ✅ |
+| REX-207 | governance — **process** | PR template, `dependabot.yml`, `CODEOWNERS` | F-036 | ✅ |
+| REX-208 | governance — **measurement** | Coverage **measured, not gated** | F-030 | 🛑 **BLOCKED — acceptance criterion not met.** v8 reports only *loaded* files, so `KnowledgeAssistant.ts` (410 lines, 0 tests — the largest known hole) is **absent from the report**, and the headline number flatters by omission. `coverage.all = true` had no effect under Vitest 4. **A coverage report that cannot show bad news is not measuring.** Needs a reviewer decision — see below. |
 
 _Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. The M2 Planning Review passed:
 the outcome-based allocation was ruled *"a materially stronger planning model because each task has a
@@ -376,6 +376,34 @@ M1's retrospective rather than a redesign of the milestone."* **REX-D7** (Biome)
 | 3 | **[REX-D10](decisions/REX-D10.md)** — protected outcome as an outcome, not a path | **Accepted (FPCP).** The formatter proof singled out: *"Mechanical changes should be demonstrably mechanical."* |
 | 4 | **REX-208 — no coverage threshold** | **Approved.** *"Repository Excellence should establish facts before establishing policy."* And: *"The report is the canonical measurement. The documentation should describe the process, not today's number."* |
 | 5 | Planning corrections (40 not 46; no M3-A coupling; `rootDir` constraint) | **Approved** as *"planning-quality improvements, not milestone changes."* |
+
+### 🛑 REX-208 — blocked, needs a reviewer decision (2026-07-17)
+
+**REX-208's acceptance criterion is not met and the task is not complete.** The criterion:
+*"Report **shows the known holes** (`KnowledgeAssistant.ts` near-zero) — proving it can report bad
+news."*
+
+**It does not.** `@vitest/coverage-v8` reports only files the suite **loaded**. `KnowledgeAssistant.ts`
+has **zero tests** (F-053), so nothing imports it, so it **vanishes from the report entirely** rather
+than appearing at 0%. `coverage.all = true` produced **no change** — the option appears to have
+changed or been removed in Vitest 4.
+
+**Consequence:** the headline figure measures *the files the suite happens to touch*, not *the code
+that ships*. It is **flattering by omission**, which is the precise failure the task was written to
+avoid. The report *does* show 24 files at 0% (`src/agent/`, `src/api/`, `src/config/`, `server.ts`),
+so it is not useless — but it cannot show the hole that matters most.
+
+**Not resolved by the author**, because the options are a reviewer's call:
+
+| Option | Cost |
+|---|---|
+| **Find the Vitest 4 mechanism** for including untouched files | Unknown; may not exist in v4 |
+| **Ship the report with the limitation documented** | The baseline is not a repository figure and must never be quoted as one |
+| **Defer REX-208 entirely** | F-030 stays open; M2 ships without measurement |
+
+**The limitation is recorded in `vitest.config.ts` itself** rather than papered over.
+
+---
 
 ### ⚠️ Reviewer expectation carried into implementation — REX-203
 
