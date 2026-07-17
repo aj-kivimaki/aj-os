@@ -69,6 +69,21 @@ aj ask "How does the Context Builder work?"
 > `wiki-generated/`). The first build calls the model once per source, so it takes
 > a few minutes; `aj wiki build --rebuild` regenerates from scratch.
 
+Then, when a coding session ends:
+
+```bash
+aj session end --notes "what the diff cannot show"
+```
+
+> **Capture, not publication.** `aj session end` reads the session's git changes,
+> extracts the reusable knowledge, and writes candidates for you to review at
+> `<handbook>/knowledge-review/pending/<session-id>/`. It **never commits, never
+> generates the wiki, and never touches canonical knowledge** — every write lands
+> in the non-canonical review area. `--since <ref>` measures from a commit instead
+> of the working tree. Deciding what becomes durable is a human step, and the
+> workflow that governs it (SPEC-004) is still to come — so for now the candidates
+> wait for you.
+
 Full instructions: the
 [Knowledge Assistant docs](implementation/products/knowledge-assistant/README.md)
 and its [usage guide](implementation/products/knowledge-assistant/usage.md).
@@ -87,8 +102,14 @@ platform, delivered with its first product, **Knowledge Assistant v1.0.0**.
   engine — is now runnable end to end via `aj wiki build`, which generates the
   wiki (and its `index.md` corpus catalog) that `aj ask` reads. This closes the
   first loop: **AJ-OS generates and consumes its own knowledge.**
-- **Next:** the workflows that keep the context evolving automatically —
-  End-of-Session (SPEC-003) and Knowledge Review (SPEC-004).
+- **Captured:** the End-of-Session workflow (SPEC-003) — `aj session end` turns a
+  finished session into candidate knowledge for review, written only to the
+  non-canonical review area. A capture-only v1: it never commits and never
+  generates the wiki.
+- **Next:** Knowledge Review (SPEC-004) — the governance half of the loop, which
+  decides what actually becomes durable knowledge. Automation proposes;
+  **humans approve**. Before it starts, a Repository Excellence Review is under
+  way (see the [ROADMAP](ROADMAP.md)).
 
 The full itemized history is in the [CHANGELOG](CHANGELOG.md); what to do next is
 in the [ROADMAP](ROADMAP.md) under **Resume Here**. Platform and products are

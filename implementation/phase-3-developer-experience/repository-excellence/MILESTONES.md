@@ -117,7 +117,7 @@ outstanding AJS-007 deliverables. **No source file changes** — this milestone'
 |------|-------------|--------|
 | REX-101 | SPEC-003 Retrospective (reconstructed; F-018) | ✅ |
 | REX-102 | Apply the SPEC-003 specification-hygiene backlog (F-019) | ✅ |
-| REX-103 | Root documentation truth pass — README, ROADMAP, CHANGELOG (F-001, F-008, F-009, F-010) | ⬜ |
+| REX-103 | Root documentation truth pass — README, ROADMAP, CHANGELOG (F-001, F-008, F-009, F-010) + the assertion inventory | ✅ |
 | REX-104 | Guides truth pass — installation, configuration, development (F-002, F-013..F-017) | ⬜ |
 | REX-105 | Module & package README truth pass (F-005, F-006, F-007, F-011, F-012, F-021, F-024) | ⬜ |
 | REX-106 | The "owns git commits" contradiction + agent-layer representation (F-003, F-004, F-022) | ⬜ |
@@ -144,6 +144,21 @@ ordering stay explicit: **repository review → recommendation; architecture →
   true — it was added **once, late**. **Not an FPCP**: no scope, objective, or acceptance boundary
   moved, and the finding still closes within M1. Recorded per `implementation/CLAUDE.md` — *"Do not
   silently choose."*
+
+- **F-004 and F-008 occupied the same two lines** — a second boundary collision of the same class,
+  found by REX-103. The M1 plan assigned *"REX-103 edits Resume Here; REX-106 edits `ROADMAP.md:26`"*
+  — but line 26 **is** Resume Here item 1: *"**End-of-Session Workflow (SPEC-003)** — the
+  orchestration layer that decides when to run the generator and **owns git commits**."* The split
+  was **not physically possible**.
+  **Resolved:** REX-103 removed the stale item (F-008), which removed the false claim with it.
+  **F-004 is not thereby closed** — per the reviewer's intent-preservation principle, *deletion
+  removes the error but not the omission*, so **REX-106 still owns positively recording** that the
+  commit role is deferred (ADR-002 / AJS-005 §7) and that **no component owns it**. REX-106's ruling
+  and authority-citation requirement are untouched; only the location moved.
+  **Not an FPCP** — same reasoning as F-020, below the threshold ruled at the REX-101 review.
+  *Pattern worth noting at the M1 retrospective: **two** of six M1 tasks had boundary errors, both
+  found by validation rather than review, and both because the plan assigned findings by ID without
+  checking whether two IDs shared a line.*
 
 ## Dependencies
 
@@ -407,6 +422,33 @@ Ruled at the package Planning Review, or scheduled for their milestone's Plannin
 | **REX-D6** | The rule separating a load-bearing comment from noise | M5 | ⬜ M5 Planning |
 | **REX-D7** | Toolchain: ESLint+Prettier vs Biome | M2 | ⬜ M2 Planning |
 | **REX-D8** | Extend `foundation.test.ts`'s public-surface enforcement beyond `end-of-session`? | M3-A | ⬜ M3-A Planning |
+
+## Documentation preserves intent, not just implementation — ruled by the reviewer (AJ, 2026-07-17)
+
+Recorded at the REX-102 review, after the §8 canonical-vs-projection omission proved more valuable
+to correct than any factual error in the same document.
+
+> **Documentation should not merely describe the implementation. It should preserve the
+> architectural intent that future implementations depend upon. Correcting those omissions is every
+> bit as valuable as correcting factual inaccuracies.**
+
+**Why it matters for the remaining milestones.** M1's findings are framed as *false claims* —
+statements that are wrong and can be grepped. This principle widens the lens to **true statements
+that omit what matters**, which no grep finds. SPEC-003 §8 was the case in point: it listed both
+outputs accurately and never said which was authoritative, so a correct reader implementing SPEC-004
+would reasonably have parsed the markdown — the exact coupling EOS-D4 exists to prevent. **The
+implementation was right; the document would have made the next implementation wrong.**
+
+**How it applies:** when correcting a document, ask not only *"is this true?"* but *"does this
+preserve the decision a future implementer depends on?"* An omission that would mislead a competent
+reader is a defect of the same severity as an error.
+
+**The scope guard still binds.** *Recording* an existing architectural decision in the document that
+should always have carried it is documentation truth — **in scope**. *Making* an architectural
+decision because the document lacks one is platform evolution — **defer**. REX-102 stayed on the
+right side of that line: every clarification it added cited an already-ratified decision (EOS-D1..D6).
+
+---
 
 ## The REX FPCP threshold — ruled by the reviewer (AJ, 2026-07-17)
 

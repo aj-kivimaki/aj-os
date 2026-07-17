@@ -55,6 +55,51 @@ dependent work begins (AJS-007 §7.2).
 
 ---
 
+# The Assertion Inventory
+
+> **Established by REX-103.** Extended by REX-104 (guides), REX-105 (module READMEs), REX-106.
+
+**This is the artifact that makes "the documentation is accurate" re-runnable.** Without it, M1 is a
+tidy-up that decays; with it, drift is detectable.
+
+Each row is **a falsifiable assertion about the code**, with the command that proves or disproves
+it. This is the reframing that moves *"docs are accurate"* from **Judgement** to **Measurable**, and
+it is the load-bearing move of the whole classification — so it is worth being precise about what it
+does and does not cover.
+
+**What it covers:** claims a document makes about what the code *is* or *does*. Those are
+mechanically checkable, and a machine should check them.
+
+**What it does not cover, and must not pretend to:** whether the README is *welcoming*, whether an
+explanation is *clear*, whether the ROADMAP's priorities are *right*. Those are Judgement, and no
+command settles them. **A claim that resists mechanical checking is evidence about the
+classification's boundary** and belongs in the retrospective — not a row to be forced into this
+table.
+
+**Not automated in M1.** These are commands a reviewer runs. Automating them is a quality gate, and
+**M2 owns quality gates** — noted there rather than built here.
+
+| ID | Assertion | Documented in | Command | Expect |
+|---|---|---|---|---|
+| A-01 | SPEC-003 is shipped, not "next" | `README.md` | `grep -q '\*\*Next:\*\* the workflows.*SPEC-003' README.md` | **no match** |
+| A-02 | `aj session end` is documented | `README.md` | `grep -q 'aj session end' README.md` | **match** |
+| A-03 | "Resume Here" does not point at completed SPEC-003 work | `ROADMAP.md` | `sed -n '/^# Resume Here/,/^# Phases/p' ROADMAP.md \| grep -qE '^1\. \*\*End-of-Session'` | **no match** |
+| A-04a | SPEC-003 is recorded as shipped | `CHANGELOG.md` | `sed -n '/^### Added/,/^### Planned/p' CHANGELOG.md \| grep -q 'SPEC-003'` | **match** |
+| A-04b | SPEC-003 is no longer listed as Planned | `CHANGELOG.md` | `sed -n '/^### Planned/,/^---/p' CHANGELOG.md \| grep -q 'SPEC-003'` | **no match** |
+| A-05 | No **live** hard-coded test count | root docs | `grep -nE '\*\*[0-9]{2,4} tests\*\*' README.md ROADMAP.md CHANGELOG.md` | **only** matches under a released `## [x.y.z]` heading — those are history, not drift |
+| A-06 | No document credits SPEC-003 with owning git commits | `docs/README.md`, `ROADMAP.md` | `grep -rn "owns commits\|owns git commits" docs/README.md ROADMAP.md` | **no match** — ⬜ **REX-106**; ROADMAP half already clear |
+| A-07 | The wiki generator is not described as unwired | `docs/guides/installation.md` | `grep -rn "not yet wired\|known limitation" docs/guides/` | **no match** — ⬜ **REX-104** |
+| A-08 | Every shipped `handbook` config key is documented | `docs/guides/configuration.md` | each of `path`, `generatedWikiPath`, `reviewPath` appears; cross-check `src/platform/config/ConfigService.ts` | **all three** — ⬜ **REX-104** |
+| A-09 | No module README understates its module's status | `src/*/README.md` | `grep -rn "No behavior\|pending Freeze Review" src/` | **no match** — ⬜ **REX-105** |
+| A-10 | Documented CLI flags match the code | guides, specs | compare against `src/cli/index.ts` | **exact** — REX-102 ✅ (spec), ⬜ REX-104 (guides) |
+
+**Status at REX-103:** A-01..A-05 **pass**. A-06 correctly **fails** — it is REX-106's, and its
+ROADMAP occurrence was removed as a consequence of A-03 (see the recorded boundary correction in
+[MILESTONES.md](MILESTONES.md#recorded-during-m1-implementation)). A-07..A-10 are their tasks' to
+turn green.
+
+---
+
 # M1 — Documentation Truth & SPEC-003 Lifecycle Closure
 
 ## Falsifiable false claims
@@ -64,15 +109,15 @@ Judgement — the reframing that makes "docs are accurate" testable.
 
 | ID | class | sev | frozen? | Finding | Evidence |
 |---|---|---|---|---|---|
-| F-001 | M | Blocking | No | `README.md:90-91` — *"**Next:** … End-of-Session (SPEC-003) and Knowledge Review (SPEC-004)"*. SPEC-003 shipped. | `grep -n "Next:" README.md`; `git log --oneline 9bd051d` |
+| F-001 | M | Blocking | No | ✅ **CLOSED** (REX-103) — README now records SPEC-003 as **Captured** and names SPEC-004 as Next. — `README.md:90-91` — *"**Next:** … End-of-Session (SPEC-003) and Knowledge Review (SPEC-004)"*. SPEC-003 shipped. | `grep -n "Next:" README.md`; `git log --oneline 9bd051d` |
 | F-002 | M | Blocking | No | `docs/guides/installation.md:51-56` — the wiki generator is *"implemented but **not yet wired to a runnable command**"*, and *"no generated wiki" is a "**known limitation**"*. **README:58 documents `aj wiki build`. The two docs contradict each other.** | `grep -n "not yet wired\|known limitation" docs/guides/installation.md`; `src/cli/commands/wiki.ts` |
 | F-003 | M | Blocking | No | `docs/README.md:74` — *"SPEC-003 \| End-of-Session (**owns commits**)"*. **Contradicts a frozen decision**: ADR-002 / AJS-005 §7 exclude git writes from v1, verified absent at the M5 freeze. | `grep -n "owns commits" docs/README.md`; ADR-002 |
-| F-004 | M | Blocking | No | `ROADMAP.md:26` — *"**owns git commits** (the engine never commits)"*. Same contradiction. | `grep -n "owns git commits" ROADMAP.md` |
+| F-004 | M | Blocking | No | 🔨 **Falsehood removed** (REX-103) — the claim lived *inside* "Resume Here" item 1, which F-008 deleted as stale. **Not yet closed:** deletion removes the error but not the omission. **REX-106 must positively record** that the commit role is deferred (ADR-002 / AJS-005 §7) and that **no component owns it**, per the reviewer's intent-preservation principle. — `ROADMAP.md:26` — *"**owns git commits** (the engine never commits)"*. | `grep -n "owns git commits" ROADMAP.md` → now no match |
 | F-005 | M | Blocking | No | `src/end-of-session/README.md:5,7,54` — *"Status: Milestone M1 … **No behavior yet** — collection, extraction, generation, persistence, projection, and the `aj session end` CLI arrive in M2–M5."* All five milestones are frozen; `aj session end` ships. | `grep -n "No behavior" src/end-of-session/README.md` |
 | F-006 | M | Blocking | No | `implementation/phase-2-core-platform/README.md` — *"**no CLI command or service currently invokes `WikiGenerator.run()`**"*. False. | `src/cli/commands/wiki.ts` |
 | F-007 | M | Blocking | No | `implementation/phase-2-core-platform/README.md` — *"SPEC-003 … **Planning frozen; Milestone 1 ready to implement**"*. SPEC-003 is complete and merged. | `MILESTONES.md` v1.33 |
-| F-008 | M | Blocking | No | `ROADMAP.md` — the single **"Resume Here"** pointer aims at completed SPEC-003 work. The one place a reader looks to find the next task is wrong. | `ROADMAP.md` §Resume Here |
-| F-009 | M | Blocking | No | `CHANGELOG.md:9` `[Unreleased] → Planned:` still lists SPEC-003. **SPEC-003 appears nowhere as `Added`** despite 26 tasks, 5 milestones, 11 decisions and a shipped command across PRs #6–#11. | `grep -n "^## \[" CHANGELOG.md` |
+| F-008 | M | Blocking | No | ✅ **CLOSED** (REX-103) — "Resume Here" now leads with REX (in progress), then SPEC-004; Phase 2's End-of-Session marker flipped to ✅. — `ROADMAP.md` — the single **"Resume Here"** pointer aims at completed SPEC-003 work. The one place a reader looks to find the next task is wrong. | `ROADMAP.md` §Resume Here |
+| F-009 | M | Blocking | No | ✅ **CLOSED** (REX-103) — SPEC-003 recorded under `[Unreleased] → Added` describing capabilities, not counts; removed from `Planned`. — `CHANGELOG.md:9` `[Unreleased] → Planned:` still lists SPEC-003. **SPEC-003 appears nowhere as `Added`** despite 26 tasks, 5 milestones, 11 decisions and a shipped command across PRs #6–#11. | `grep -n "^## \[" CHANGELOG.md` |
 | F-024 | M | Minor | No | `implementation/review/SPEC-FREEZE-REVIEW.md:142` — *"there is **no separate ROADMAP document**"*. A top-level `ROADMAP.md` exists. Likely means "per implementation package", but reads as a flat contradiction. | `ls ROADMAP.md` |
 
 ## Hard-coded metrics that drift by construction
@@ -88,7 +133,7 @@ and are **out of scope**. `CHANGELOG.md:106,113,120` (*"the suite grew from 63 �
 
 | ID | class | sev | frozen? | Finding | Evidence |
 |---|---|---|---|---|---|
-| F-010 | M | Major | No | `CHANGELOG.md:55` — *"the test suite grew to **340 tests**"* sits under **`[Unreleased]`** (line 9), not a released heading. It is a live claim and it has drifted. | `awk 'NR<=55 && /^## /{h=$0;n=NR} END{print n": "h}' CHANGELOG.md` → `9: ## [Unreleased]` |
+| F-010 | M | Major | No | ✅ **CLOSED** (REX-103) — the count was **removed, not updated**; replaced with the guarantee it was trying to convey. — `CHANGELOG.md:55` — *"the test suite grew to **340 tests**"* sits under **`[Unreleased]`** (line 9), not a released heading. It is a live claim and it has drifted. | `awk 'NR<=55 && /^## /{h=$0;n=NR} END{print n": "h}' CHANGELOG.md` → `9: ## [Unreleased]` |
 | F-011 | M | Major | No | `tests/context-builder/README.md:19` — *"**Current** size: **205 tests across 15 files**"*. The word *Current* makes it a live claim. **Actual: 207 across 15.** | `npx vitest run tests/context-builder` → `Tests 207 passed` |
 
 ## Missing documentation for things that exist
