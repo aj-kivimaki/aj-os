@@ -3,9 +3,10 @@ import { env } from "./appEnv.js";
 /**
  * Configuration required by the agent + API server.
  *
- * The base {@link env} keeps these fields optional so the Notion sync CLI can
- * boot without them. The server calls {@link requireAgentEnv} at startup to
- * assert their presence and fail fast with a clear message.
+ * The base {@link env} keeps these fields optional so any entry point can import
+ * environment config without every variable set. The server calls
+ * {@link requireAgentEnv} at startup to assert the ones it needs and fail fast
+ * with a clear message.
  */
 export interface AgentEnv {
   readonly anthropicApiKey: string;

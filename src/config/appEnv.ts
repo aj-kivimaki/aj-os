@@ -7,11 +7,10 @@ loadDotenv();
  * Runtime environment for the active v2 stack — the Knowledge Assistant's
  * Handbook Agent and API server.
  *
- * This module is intentionally independent of the legacy Notion sync
- * configuration: importing it never requires `NOTION_*` variables. Fields are
- * optional so the process can boot; the API server asserts the ones it needs
- * via {@link requireAgentEnv} (see `agent-env.ts`), failing fast with a clear
- * message when one is missing.
+ * Fields are optional so any process can import this module without every
+ * variable set; the API server asserts the ones it needs via
+ * {@link requireAgentEnv} (see `agentEnv.ts`), failing fast with a clear message
+ * when one is missing.
  */
 const appEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
