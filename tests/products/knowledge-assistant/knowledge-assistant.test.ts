@@ -16,7 +16,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { AjConfig, ConfigService } from "../../../src/platform/config/index.js";
 import type { HandbookService } from "../../../src/platform/handbook/index.js";
-import type { RetrievalService, RetrievalResult } from "../../../src/platform/retrieval/index.js";
+import type {
+  RetrievalService,
+  RetrievalResult,
+} from "../../../src/platform/retrieval/index.js";
 import type { AIClient, AIResponse } from "../../../src/platform/ai/index.js";
 import {
   KnowledgeAssistant,
@@ -27,7 +30,9 @@ import {
 function fakeConfig(): ConfigService {
   return {
     load: async () =>
-      ({ handbook: { path: "/fake/vault", generatedWikiPath: "/fake/wiki" } }) as AjConfig,
+      ({
+        handbook: { path: "/fake/vault", generatedWikiPath: "/fake/wiki" },
+      }) as AjConfig,
   } as unknown as ConfigService;
 }
 
@@ -40,8 +45,7 @@ function fakeHandbook(wikiPath: string): KnowledgeAssistantDeps["createHandbook"
 function fakeRetrieval(
   results: readonly RetrievalResult[],
 ): KnowledgeAssistantDeps["createRetrieval"] {
-  return () =>
-    ({ search: async () => [...results] }) as unknown as RetrievalService;
+  return () => ({ search: async () => [...results] }) as unknown as RetrievalService;
 }
 
 describe("KnowledgeAssistant — constructible with injected dependencies (F-053)", () => {

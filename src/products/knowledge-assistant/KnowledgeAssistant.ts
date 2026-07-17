@@ -100,7 +100,10 @@ export class KnowledgeAssistant {
   private readonly config: ConfigService;
   private readonly promptRenderer: PromptRenderer;
   private readonly ai: AIClient;
-  private readonly createHandbook: (path: string, generatedWikiPath: string) => HandbookService;
+  private readonly createHandbook: (
+    path: string,
+    generatedWikiPath: string,
+  ) => HandbookService;
   private readonly createRetrieval: (wikiPath: string) => RetrievalService;
 
   constructor(deps: Partial<KnowledgeAssistantDeps> = {}) {
