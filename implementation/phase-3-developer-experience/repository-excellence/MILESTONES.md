@@ -682,14 +682,93 @@ in parallel; REX-303 follows once the surface is settled.**_
 
 ## Definition of Done
 
-- [ ] `context-builder/index.ts:5-6`'s privacy claim is **either true or deleted**.
-- [ ] Every FPCP ruled **before** its dependent change (§7.2); an **all-document** REX-D5 outcome
-      (zero frozen-surface code change) is a **valid result**, per REX-D3.
-- [ ] Zero `export *` in `src/`; every dead export removed or **justified in writing**.
-- [ ] Every module M3-A settled is **pinned** by a manifest proven able to fail (REX-D8 Option A), or
-      REX-D8 recorded the reasoned decision not to.
+- [x] `context-builder/index.ts`'s privacy claim is **made true** (REX-302, F-039).
+- [x] Every FPCP ruled **before** its dependent change (§7.2). **Result: no removal — all three
+      frozen items documented (REX-D5), so no FPCP was required.** The all-document outcome the
+      reviewer named as a valid REX-D3 result.
+- [x] Zero `export *` in `src/`; every retained export **justified in writing** (REX-302; F-038's
+      breadth measured as pinned-intentional).
+- [x] Every surface M3-A settled is **pinned** by a manifest proven able to fail (REX-303, REX-D8
+      Option A); untouched modules deliberately not pinned.
 - [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
 - [ ] Retrospective created.
+
+---
+
+## M3-A Freeze Review — Evidence (prepared for the reviewer)
+
+> **M3-A stays ⬜ until the reviewer declares the freeze** (§5.3/§5.4). Including §8 — the case
+> *against*.
+
+### 1. Tasks complete
+
+REX-301, REX-302, REX-303 — all ✅. **Four commits** (`65f6851..636e496`): planning freeze, then
+one commit per task.
+
+### 2. Findings — 8 of 8 closed, by disposition
+
+| Finding | Disposition | Evidence |
+|---|---|---|
+| F-037 | 4 barrels → explicit named re-exports | `grep -rl 'export \*' src/` → **empty**, proven able to fail |
+| F-038 | **keep, justified** (REX-D3 result) | 87/100 exports pinned by EOS-007; the 9 unconsumed are all public-operation signature types |
+| F-039 | claim **made true** | doc-comment describes the real surface; engines are tested public boundaries (7 suites) |
+| F-040 | dead file **deleted** | `types.ts` absent |
+| F-041 | **documented as reserved** (no removal) | `schema.ts` reserved-surface note, CB-002 |
+| F-042 | **documented as ADR-006 Phase 1 staging** (no removal) | both resolver doc-comments |
+| F-043 | **documented as declared** (no removal) | SPEC-005 §8 supports the declaration; `LintReport` + `noLint` |
+| F-044 | **enforcement extended** | `tests/architecture/public-surface.test.ts`, 9 tests, each proven able to fail |
+
+### 3. Behaviour unchanged — the milestone's core claim
+
+| Property | Evidence |
+|---|---|
+| Suite green | **722 tests / 59 files** (713 + 9 new enforcement tests; none removed, skipped, or weakened) |
+| Runtime behaviour | **unchanged** — every source edit is a comment, a compile-time re-export change, or a 0-byte-file deletion; no logic touched |
+| Gates | format · lint · typecheck (incl. tests) · build — all green |
+
+### 4. FPCP discipline
+
+**No frozen-surface removal occurred**, so no FPCP was required — REX-D5 ruled all three frozen items
+*document*. REX-D5 was ruled **before** REX-301 began. The frozen decisions themselves (CB-002,
+ADR-006, SPEC-005) were **documented around, never edited**.
+
+### 5. Frozen work untouched
+
+`git diff --name-only 65f6851^..HEAD` touches no `docs/architecture/**`, no `docs/standards/**`, no
+`decisions/EOS-*` or `CB-*`, no `MILESTONES.md` under phase-2, no `archive/**`. **No ADR authored.**
+
+### 6. Enforcement proven able to fail
+
+The no-wildcard guard went red on a re-added `export *`; a barrel manifest went red on a stray
+export — both restored to green. *A pin never seen red is not known to pin anything.*
+
+### 7. Decisions
+
+**REX-D5** (Accepted — document/document/document) · **REX-D8** (Accepted — Option A).
+
+### 8. What the reviewer should weigh — the case *against* a freeze
+
+- **F-038 was closed as "keep, justified" inside the task — a Judgement call I made, not one you
+  ratified.** The measurement is strong (9 unconsumed types are all public-operation signature
+  types), but REX-D3-class "keep" outcomes have previously been reviewer-ruled. **You may want to
+  confirm the judgement rather than inherit it.**
+- **F-039 was resolved by rewording, not by making the engines private.** The architecture calls
+  `build()` *"the single public entry point"*; a reader could argue the engines *should* be private
+  and their suites should import internally. I ruled making-them-private a **contract change out of a
+  truth pass's scope** — defensible, but it is a judgement about architectural intent, and a reviewer
+  could reasonably want it surfaced as a recommendation rather than settled in a doc-comment.
+- **The context-builder pin is a presence check, not an exact manifest** — weaker than the EOS-007
+  exemplar. Scoped that way because M3-A clarified but did not re-decide context-builder's full
+  surface. A reviewer might want the exact manifest, accepting the larger pin.
+- **Two self-inflicted process incidents, both caught by validation, both mine.** An explanatory
+  comment first contained the literal `export *` and tripped the F-037 grep (same class as M2's
+  "gate built wrong" incidents); and a `git checkout` used to revert a "prove-able-to-fail" probe
+  **reverted uncommitted task work** on one barrel, which I reconstructed. Neither reached a commit,
+  but both are honest evidence that the probes need care.
+
+### 9. Definition of Done
+
+Four of six satisfied; the remaining two are the freeze itself and the retrospective that follows it.
 
 ---
 
