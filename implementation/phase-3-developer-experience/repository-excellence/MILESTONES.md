@@ -55,7 +55,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 | M1 | Documentation Truth & SPEC-003 Lifecycle Closure | Every document describes the repository that exists today; SPEC-003's two outstanding AJS-007 deliverables discharged | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ⬜ |
+| M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ⬜ |
 | M5 | Comments, Errors & Test Craft | Comments state constraints; errors share a taxonomy and a voice | ⬜ |
 
@@ -850,8 +850,8 @@ M2's formatter. **REX-304 and REX-305 are independent protected outcomes; ordera
       zero kebab-case in `src/` (REX-304).
 - [x] CONTRIBUTING names every top-level `src/` module with its expected lifetime, **enforced by a
       test proven able to fail** (REX-305).
-- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
-- [ ] Retrospective created.
+- [x] Freeze Review completed; **Milestone Freeze declared by the reviewer (AJ) on 2026-07-17.** _(All §7 judgements ratified: the kebab→camelCase de-kebab, the presence-not-completeness taxonomy test, and the `config/` row documenting F-055 without consuming M4 scope.)_
+- [x] Retrospective created (§4.7 stage 7) — [retrospectives/RETROSPECTIVE-M3-B.md](retrospectives/RETROSPECTIVE-M3-B.md).
 
 ---
 
