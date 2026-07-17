@@ -118,7 +118,7 @@ outstanding AJS-007 deliverables. **No source file changes** — this milestone'
 | REX-101 | SPEC-003 Retrospective (reconstructed; F-018) | ✅ |
 | REX-102 | Apply the SPEC-003 specification-hygiene backlog (F-019) | ✅ |
 | REX-103 | Root documentation truth pass — README, ROADMAP, CHANGELOG (F-001, F-008, F-009, F-010) + the assertion inventory | ✅ |
-| REX-104 | Guides truth pass — installation, configuration, development (F-002, F-013..F-017) | ⬜ |
+| REX-104 | Guides truth pass — installation, configuration, development (F-002, F-013..F-017) | ✅ |
 | REX-105 | Module & package README truth pass (F-005, F-006, F-007, F-011, F-012, F-021, F-024) | ⬜ |
 | REX-106 | The "owns git commits" contradiction + agent-layer representation (F-003, F-004, F-022) | ⬜ |
 
@@ -156,9 +156,21 @@ ordering stay explicit: **repository review → recommendation; architecture →
   commit role is deferred (ADR-002 / AJS-005 §7) and that **no component owns it**. REX-106's ruling
   and authority-citation requirement are untouched; only the location moved.
   **Not an FPCP** — same reasoning as F-020, below the threshold ruled at the REX-101 review.
-  *Pattern worth noting at the M1 retrospective: **two** of six M1 tasks had boundary errors, both
-  found by validation rather than review, and both because the plan assigned findings by ID without
-  checking whether two IDs shared a line.*
+
+- **📌 For the M1 retrospective — the planning lesson behind both collisions.** Ruled by the
+  reviewer (AJ) at the REX-103 review to be *"a planning observation, not an implementation
+  problem"*, and to be recorded here rather than to trigger any change during implementation. In the
+  reviewer's words:
+
+  > **Repository findings are not guaranteed to partition the repository. Future review planning
+  > should allocate ownership by intended outcome rather than assuming each finding maps cleanly
+  > onto an isolated section of text.**
+
+  Both M1 collisions (F-020, F-004/F-008) share this one cause: **the plan allocated findings by
+  identifier**, and implementation revealed that **one edit can legitimately affect multiple
+  findings**. Two of six M1 tasks hit it, and **both were caught by validation rather than review** —
+  each surfaced as an acceptance criterion that could not be met honestly. Carries forward to
+  M2–M5 planning.
 
 ## Dependencies
 

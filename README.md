@@ -59,6 +59,10 @@ aj wiki build                               # compile your handbook into a wiki
 aj ask "How does the Context Builder work?"
 ```
 
+> Your handbook needs a `foundation/` and a `library/` directory — those are the
+> two source folders `aj wiki build` reads. See the
+> [installation guide](docs/guides/installation.md#what-the-handbook-must-look-like).
+
 > Run `npm run build && npm link` once to install the `aj` command, or use
 > `npm run dev -- wiki build` and `npm run dev -- ask "…"` to run from source.
 

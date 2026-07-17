@@ -7,8 +7,26 @@ AJ-OS _is_, see [VISION](../VISION.md); for every setting, see the
 ## Requirements
 
 - **Node.js 22+** and npm
-- An **[Anthropic API key](https://console.anthropic.com/)** — the Assistant uses it to generate answers
-- A **handbook with a generated `wiki/`** (see the prerequisite note below)
+- An **[Anthropic API key](https://console.anthropic.com/)** — used to generate the
+  wiki and to answer questions
+- A **handbook** — a directory with `foundation/` and `library/` inside it (see
+  below). You do **not** need to bring a pre-generated wiki; AJ-OS builds it.
+
+### What the handbook must look like
+
+`aj wiki build` reads its sources from two directories, and **both must exist**:
+
+```text
+<handbook.path>/
+├── foundation/        your durable notes — read as sources
+├── library/           reference material — read as sources
+└── wiki-generated/    created by `aj wiki build`; do not hand-edit
+```
+
+Put your markdown notes in `foundation/` and/or `library/`. **If either directory
+is missing, `aj wiki build` fails** with `Source directory does not exist` — so
+create both, even if one starts empty. Anything else in the handbook is left
+alone: AJ-OS only reads those two directories and only writes the generated wiki.
 
 ## Install
 
@@ -33,32 +51,69 @@ cp .env.example .env                        # set ANTHROPIC_API_KEY
 
 ## Run
 
-Install the `aj` command once, then ask a question:
+Install the `aj` command once, then build the wiki and ask a question:
 
 ```bash
 npm run build && npm link
+aj wiki build                               # compile your handbook into a wiki
 aj ask "How does the Context Builder work?"
 ```
 
 Or run straight from source, without linking:
 
 ```bash
+npm run dev -- wiki build
 npm run dev -- ask "How does the Context Builder work?"
 ```
 
-> **Prerequisite — a generated wiki.** The Assistant reads a handbook's generated
-> `wiki/`, not raw notes. Producing that wiki is the Knowledge Platform's job,
-> which is implemented but not yet wired to a runnable command (see the
-> [ROADMAP](../../ROADMAP.md)). Until then a pre-generated wiki is required — if
-> you see "no generated wiki," that is a known limitation, not a setup mistake.
+> **`aj wiki build` comes first.** The Assistant answers from a **generated wiki**,
+> not from raw notes — so the wiki must exist before `aj ask` can cite anything.
+> `aj wiki build` compiles your handbook's sources into it, including the
+> `index.md` catalog the Assistant retrieves from. Producer and consumer meet
+> through one setting, `handbook.generatedWikiPath` (default `wiki-generated`);
+> neither knows about the other. **The first build calls the model once per
+> source, so it takes a few minutes and costs money.** It is incremental
+> afterwards — unchanged sources are skipped. `aj wiki build --rebuild`
+> regenerates from scratch, clearing only the generator's own outputs.
+
+## Capture a session
+
+Once you are working in a repository, `aj session end` turns the session into
+candidate knowledge for review:
+
+```bash
+aj session end --notes "what the diff cannot show"
+```
+
+It reads the session's git changes, extracts the reusable knowledge, and writes
+candidates to `<handbook>/knowledge-review/pending/<session-id>/`.
+
+| Flag | Purpose |
+| ---- | ------- |
+| `--notes <text>` | Your account of the session — what the diff cannot show. Reaches the model verbatim, as context rather than instruction. |
+| `--since <ref>` | Measure from `<ref>` instead of the working tree. Absent, the range is the complete uncommitted working state. |
+
+**It never commits, never generates the wiki, and never modifies canonical
+knowledge** — every write lands in the non-canonical review area.
+
+Reviewing those candidates is a human step today; the workflow that will govern
+it is [SPEC-004](../specifications/SPEC-004-Knowledge-Review-Workflow.md).
 
 ## Troubleshooting
 
-- **"No generated wiki."** Expected until the wiki generator is wired (see above).
-- **Missing or invalid API key.** The Assistant needs a valid `ANTHROPIC_API_KEY`
-  in `.env` and reports this clearly.
-- **Wrong handbook path.** Ensure `aj.config.json` → `handbook.path` points at a
-  handbook that contains a `wiki/` directory.
+- **"No generated wiki."** Run `aj wiki build`. The Assistant reads the generated
+  wiki, and on a fresh install it does not exist yet.
+- **Missing or invalid API key.** Both `aj wiki build` and `aj ask` need a valid
+  `ANTHROPIC_API_KEY` in `.env`, and report this clearly.
+- **`Source directory does not exist: foundation`** — or `library`. `aj wiki build`
+  requires **both** directories inside `handbook.path`. Create them and re-run;
+  an empty one is fine. This currently surfaces as an uncaught stack trace rather
+  than a friendly message, which is a known rough edge, not a broken install.
+- **Wrong handbook path.** Ensure `aj.config.json` → `handbook.path` points at
+  your handbook directory. AJ-OS creates the generated wiki inside it, at
+  `handbook.generatedWikiPath` (default `wiki-generated`).
+- **`aj: command not found`.** Run `npm run build && npm link`. `npm link` points
+  at the compiled output, so a build must come first.
 
 ## Next steps
 

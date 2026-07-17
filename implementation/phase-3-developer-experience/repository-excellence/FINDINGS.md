@@ -88,15 +88,20 @@ table.
 | A-04b | SPEC-003 is no longer listed as Planned | `CHANGELOG.md` | `sed -n '/^### Planned/,/^---/p' CHANGELOG.md \| grep -q 'SPEC-003'` | **no match** |
 | A-05 | No **live** hard-coded test count | root docs | `grep -nE '\*\*[0-9]{2,4} tests\*\*' README.md ROADMAP.md CHANGELOG.md` | **only** matches under a released `## [x.y.z]` heading — those are history, not drift |
 | A-06 | No document credits SPEC-003 with owning git commits | `docs/README.md`, `ROADMAP.md` | `grep -rn "owns commits\|owns git commits" docs/README.md ROADMAP.md` | **no match** — ⬜ **REX-106**; ROADMAP half already clear |
-| A-07 | The wiki generator is not described as unwired | `docs/guides/installation.md` | `grep -rn "not yet wired\|known limitation" docs/guides/` | **no match** — ⬜ **REX-104** |
-| A-08 | Every shipped `handbook` config key is documented | `docs/guides/configuration.md` | each of `path`, `generatedWikiPath`, `reviewPath` appears; cross-check `src/platform/config/ConfigService.ts` | **all three** — ⬜ **REX-104** |
+| A-07 | The wiki generator is not described as unwired | `docs/guides/installation.md` | `grep -rn "not yet wired\|known limitation" docs/guides/` | **no match** — ✅ **REX-104** |
+| A-08 | Every shipped `handbook` config key is documented | `docs/guides/configuration.md` | each of `path`, `generatedWikiPath`, `reviewPath` appears; cross-check `src/platform/config/ConfigService.ts` | **all three** — ✅ **REX-104** |
 | A-09 | No module README understates its module's status | `src/*/README.md` | `grep -rn "No behavior\|pending Freeze Review" src/` | **no match** — ⬜ **REX-105** |
-| A-10 | Documented CLI flags match the code | guides, specs | compare against `src/cli/index.ts` | **exact** — REX-102 ✅ (spec), ⬜ REX-104 (guides) |
+| A-10 | Documented CLI flags match the code | guides, specs | compare against `src/cli/index.ts` | **exact** — ✅ REX-102 (spec), ✅ REX-104 (guides) |
+| **A-11** | **The handbook layout `aj wiki build` requires is documented** | `docs/guides/installation.md`, `README.md` | both `foundation` and `library` named as required; cross-check `HANDBOOK_SOURCES` at `src/knowledge/composition/createKnowledgePipeline.ts:41` | **match** — ✅ **REX-104**. *Added by REX-104: the guide described "a directory of notes" and `aj wiki build` crashed on one. **No assertion existed for a prerequisite nobody had written down.*** |
 
-**Status at REX-103:** A-01..A-05 **pass**. A-06 correctly **fails** — it is REX-106's, and its
-ROADMAP occurrence was removed as a consequence of A-03 (see the recorded boundary correction in
-[MILESTONES.md](MILESTONES.md#recorded-during-m1-implementation)). A-07..A-10 are their tasks' to
-turn green.
+**Status at REX-104:** A-01..A-05, A-07, A-08, A-10, A-11 **pass**. A-06 correctly **fails** —
+REX-106's. A-09 is REX-105's.
+
+**A-11 is the inventory's first self-correction, and the more interesting kind.** A-01..A-10 all
+assert against claims a document *makes*. A-11 asserts a prerequisite **no document made** — found
+only by running the guide end to end. **An inventory built by reading documents can only ever check
+the claims those documents chose to make**; it is blind to the ones they should have made. That is a
+real limit of the artifact and belongs in the M1 retrospective.
 
 ---
 
@@ -110,7 +115,7 @@ Judgement — the reframing that makes "docs are accurate" testable.
 | ID | class | sev | frozen? | Finding | Evidence |
 |---|---|---|---|---|---|
 | F-001 | M | Blocking | No | ✅ **CLOSED** (REX-103) — README now records SPEC-003 as **Captured** and names SPEC-004 as Next. — `README.md:90-91` — *"**Next:** … End-of-Session (SPEC-003) and Knowledge Review (SPEC-004)"*. SPEC-003 shipped. | `grep -n "Next:" README.md`; `git log --oneline 9bd051d` |
-| F-002 | M | Blocking | No | `docs/guides/installation.md:51-56` — the wiki generator is *"implemented but **not yet wired to a runnable command**"*, and *"no generated wiki" is a "**known limitation**"*. **README:58 documents `aj wiki build`. The two docs contradict each other.** | `grep -n "not yet wired\|known limitation" docs/guides/installation.md`; `src/cli/commands/wiki.ts` |
+| F-002 | M | Blocking | No | ✅ **CLOSED** (REX-104) — limitation text and Troubleshooting entry removed; `aj wiki build` documented as the answer. Verified by running it. — `docs/guides/installation.md:51-56` — the wiki generator is *"implemented but **not yet wired to a runnable command**"*, and *"no generated wiki" is a "**known limitation**"*. **README:58 documents `aj wiki build`. The two docs contradict each other.** | `grep -n "not yet wired\|known limitation" docs/guides/installation.md`; `src/cli/commands/wiki.ts` |
 | F-003 | M | Blocking | No | `docs/README.md:74` — *"SPEC-003 \| End-of-Session (**owns commits**)"*. **Contradicts a frozen decision**: ADR-002 / AJS-005 §7 exclude git writes from v1, verified absent at the M5 freeze. | `grep -n "owns commits" docs/README.md`; ADR-002 |
 | F-004 | M | Blocking | No | 🔨 **Falsehood removed** (REX-103) — the claim lived *inside* "Resume Here" item 1, which F-008 deleted as stale. **Not yet closed:** deletion removes the error but not the omission. **REX-106 must positively record** that the commit role is deferred (ADR-002 / AJS-005 §7) and that **no component owns it**, per the reviewer's intent-preservation principle. — `ROADMAP.md:26` — *"**owns git commits** (the engine never commits)"*. | `grep -n "owns git commits" ROADMAP.md` → now no match |
 | F-005 | M | Blocking | No | `src/end-of-session/README.md:5,7,54` — *"Status: Milestone M1 … **No behavior yet** — collection, extraction, generation, persistence, projection, and the `aj session end` CLI arrive in M2–M5."* All five milestones are frozen; `aj session end` ships. | `grep -n "No behavior" src/end-of-session/README.md` |
@@ -140,11 +145,11 @@ and are **out of scope**. `CHANGELOG.md:106,113,120` (*"the suite grew from 63 �
 
 | ID | class | sev | frozen? | Finding | Evidence |
 |---|---|---|---|---|---|
-| F-013 | M | Major | No | `docs/guides/configuration.md` omits **`handbook.generatedWikiPath`** — shipped, and README:68 calls it *"one configuration contract"*. | `src/platform/config/ConfigService.ts:107,118` |
-| F-014 | M | Major | No | `docs/guides/configuration.md` omits **`handbook.reviewPath`** — shipped by EOS-303. | `src/platform/config/ConfigService.ts:108,138` |
-| F-015 | M | Major | No | **`aj session end` is documented nowhere outside `implementation/`** — not in README, installation, configuration, or development. | `grep -rn "session end" README.md docs/guides/` |
-| F-016 | M | Major | No | `aj wiki build` absent from the guides. | `grep -rn "wiki build" docs/guides/` |
-| F-017 | M | Minor | No | `docs/guides/installation.md:60` — *"a handbook that contains a **`wiki/`** directory"*. The contract is `handbook.generatedWikiPath`, default **`wiki-generated`**. | `aj.config.example.json` |
+| F-013 | M | Major | No | ✅ **CLOSED** (REX-104) — documented, with the default cross-checked against `ConfigService.ts:13`. — `docs/guides/configuration.md` omits **`handbook.generatedWikiPath`** — shipped, and README:68 calls it *"one configuration contract"*. | `src/platform/config/ConfigService.ts:107,118` |
+| F-014 | M | Major | No | ✅ **CLOSED** (REX-104) — documented, with the default cross-checked against `ConfigService.ts:20`. — `docs/guides/configuration.md` omits **`handbook.reviewPath`** — shipped by EOS-303. | `src/platform/config/ConfigService.ts:108,138` |
+| F-015 | M | Major | No | ✅ **CLOSED** (REX-104) — `aj session end` documented in `installation.md` with a flag table and its three guarantees, each proven by an end-to-end run. — **`aj session end` is documented nowhere outside `implementation/`** — not in README, installation, configuration, or development. | `grep -rn "session end" README.md docs/guides/` |
+| F-016 | M | Major | No | ✅ **CLOSED** (REX-104) — `aj wiki build` documented, including the handbook layout it requires. — `aj wiki build` absent from the guides. | `grep -rn "wiki build" docs/guides/` |
+| F-017 | M | Minor | No | ✅ **CLOSED** (REX-104) — corrected to `generatedWikiPath` (default `wiki-generated`). — `docs/guides/installation.md:60` — *"a handbook that contains a **`wiki/`** directory"*. The contract is `handbook.generatedWikiPath`, default **`wiki-generated`**. | `aj.config.example.json` |
 
 ## AJS-007 compliance failures
 
@@ -238,7 +243,7 @@ outcome, recorded as a result rather than a deferral.**
 | F-057 | M | Major | No | `src/config/app-env.ts:6-13` and `agent-env.ts:6-9` defend against a `NOTION_*` constraint **deleted in `16e66da`** (*"so the Notion sync CLI can boot without them"*). The comments defend a constraint that no longer exists. | `git show 16e66da --stat \| grep -i notion` |
 | F-058 | J | Minor | No | Pure section-label noise: `src/context-builder/index.ts:20` `// Public factory and handle.` above `export { createContextBuilder }`; `:24` `// Public configuration contract.` above `export { contextBuilderConfigSchema }`. | `sed -n '20,25p' src/context-builder/index.ts` |
 | F-059 | J | Major | No | `src/end-of-session/index.ts` is **215 lines, ~150 of them prose duplicating JSDoc already present at each definition** (e.g. `:161-168` re-describes the Orchestrator Invariant that `createSessionWorkflow.ts` already documents). **Two copies that will drift — and F-056 proves they already have.** | `wc -l src/end-of-session/index.ts` |
-| F-060 | M | Major | No | **12 custom error classes, no shared base.** Each is an identical 4-line `extends Error` + `this.name`. No `cause`, no codes. `catch (e) { if (e instanceof AjError) }` is impossible, so every call site enumerates: `session.ts:157` (`ConfigError \|\| ReviewStoreError`), `wiki.ts:45` (`ConfigError \|\| AIError`). **A new user-facing error silently breaks the friendly-message path in both.** | `grep -rn "extends Error" src/` → 12 |
+| F-060 | M | **Major** | No | **12 custom error classes, no shared base.** Each is an identical 4-line `extends Error` + `this.name`. No `cause`, no codes. `catch (e) { if (e instanceof AjError) }` is impossible, so every call site enumerates: `session.ts:157` (`ConfigError \|\| ReviewStoreError`), `wiki.ts:45` (`ConfigError \|\| AIError`). **A new user-facing error silently breaks the friendly-message path in both.** — ⚠️ **LIVE REPRODUCTION, found by REX-104 (2026-07-17): the enumeration is not merely fragile, it is already incomplete.** `SourceConnectorError` is **not** in `wiki.ts:45`'s list, so a first-time user whose handbook lacks `foundation/` gets a **raw stack trace** where the code has a friendly-message path sitting right there. Reproduced by following `installation.md` end to end on a scratch vault. **Not fixed by REX-104 — M1 changes no source.** **M5 owns it; the doc-side mitigation shipped in `installation.md` Troubleshooting.** | `grep -rn "extends Error" src/` → 12; `sed -n '45p' src/cli/commands/wiki.ts`; reproduction in [REX-104](tasks/REX-104.md) |
 | F-061 | M | Minor | No | **Three spellings of one message.** `FilesystemReviewStore.ts:79` *"must not contain NUL bytes."* · `FilesystemWikiStore.ts:118` *"Path must not contain null bytes."* · `handbook/paths.ts:67` *"Path must not contain NUL bytes"* (no period). | the three files |
 | F-062 | M | Minor | No | Inconsistent terminal punctuation: platform errors end with `.`; `handbook/paths.ts:67,70,75,80` and `api/errors.ts:12,43` do not. | same |
 | F-063 | J | Minor | No | No `cause` chaining anywhere — underlying errors are discarded when wrapped. | `grep -rn "cause:" src/` |
