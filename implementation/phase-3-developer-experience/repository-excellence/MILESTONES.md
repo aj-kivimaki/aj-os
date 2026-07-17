@@ -792,9 +792,10 @@ Ruled at the package Planning Review, or scheduled for their milestone's Plannin
 | **REX-D4** | Consolidate test helpers, or reaffirm per-suite inlining? | M5 | ⬜ M5 Planning |
 | **REX-D5** | Frozen-surface dead code — remove (FPCP), implement, or document? Per item. | M3-A | ⬜ M3-A Planning |
 | **REX-D6** | The rule separating a load-bearing comment from noise | M5 | ⬜ M5 Planning |
-| **REX-D7** | Toolchain: ESLint+Prettier vs Biome | M2 | ⬜ M2 Planning |
+| **[REX-D7](decisions/REX-D7.md)** | Toolchain: ESLint+Prettier vs Biome | M2 | ✅ **Accepted** — ruled at the M2 Planning Review (AJ, 2026-07-17). One binary, one config, nothing to migrate. |
 | **REX-D8** | Extend `foundation.test.ts`'s public-surface enforcement beyond `end-of-session`? | M3-A | ⬜ M3-A Planning |
-| **[REX-D9](decisions/REX-D9.md)** | 🛑 **FPCP** — M1's Objective/Validation (*"touches no `src/` or `tests/` file"* / *"diff is **empty**"*) contradicts REX-105's frozen scope (F-005/F-011/F-012 live under `src/` and `tests/`) **and REX-105's own acceptance criterion** (*"README files only, no `.ts` file"*). Both frozen at the same review, same layer — §3 offers no resolution. Which governs? | **M1** — REX-105 **halted** | ⬜ **PROPOSED — awaiting the reviewer.** Proposes **Reading B**: *"No **code** changes — no `.ts` file anywhere"*. Reading A would defer three findings, one **Blocking** (F-005: a shipped, frozen module's README still says it has *"no behavior"*). **The first REX FPCP** — clears the threshold on two counts: **objective** and **acceptance criteria**. |
+| **[REX-D9](decisions/REX-D9.md)** | 🛑 **FPCP** — M1's Objective/Validation (*"touches no `src/` or `tests/` file"* / *"diff is **empty**"*) contradicted REX-105's frozen scope (F-005/F-011/F-012 live under `src/` and `tests/`) **and REX-105's own acceptance criterion**. Which governs? | **M1** — REX-105 **halted** | ✅ **Accepted (FPCP)** — ruled at the M1 Planning Review (AJ, 2026-07-17). **Reading B** adopted (*"no code changes — no `.ts` file anywhere"*); M1's Objective and Validation amended to be intent-based; REX-105 unhalted. **The package's first FPCP**, raised before any edit and ruled before dependent work. |
+| **[REX-D10](decisions/REX-D10.md)** | 🛑 **FPCP** — M2 legitimately changes executable source, so M1's path-based invariant does not transfer; M2's *"no runtime behaviour changes"* is the right intent but **not falsifiable** after a diff touching nearly every file. How is the protected property expressed and proven? | **M2** (all tasks; REX-203/205 carry the weight) | ✅ **Accepted (FPCP)** — ruled at the M2 Planning Re-read (AJ, 2026-07-17), **during Planning, before any implementation**. Protected property re-expressed as an **outcome** (mechanical-only source changes; no test weakened; behaviour preserved by the existing suite), each clause given a falsifier — chiefly the **formatter proof**. **The first REX plan defect caught before implementation rather than during it.** *(Added by the register reconciliation, 2026-07-17 — the decision was ratified in the M2 freeze but never entered this register.)* |
 
 ## Three complementary validation mechanisms — recorded by the reviewer (AJ, 2026-07-17)
 
@@ -965,8 +966,11 @@ records why. **A decision not to consolidate is a result, not a deferral.**
 
 # Deferred (post-REX)
 
-See [FINDINGS.md § Deferred](FINDINGS.md#deferred--recorded-not-actioned) — 14 items, each real,
-each out of scope. **Recording them is what stops them leaking in.**
+See [FINDINGS.md § Deferred](FINDINGS.md#deferred--recorded-not-actioned) — each real, each out of
+scope. **Recording them is what stops them leaking in.** *(The count is deliberately not stated here:
+the closed-inventory rule **appends** to that list by design, so any number written here is drift
+waiting to happen — the F-010 lesson, applied to this document. The list is the record; its length is
+derived from it.)*
 
 ---
 
