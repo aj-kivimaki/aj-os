@@ -3,6 +3,29 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
+  "description": "A personal operating system that maintains an accurate, evolving working context for its user's work.",
+  "license": "MIT",
+  "author": "Atte Kivim\u00e4ki",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aj-kivimaki/aj-os.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aj-kivimaki/aj-os/issues"
+  },
+  "homepage": "https://github.com/aj-kivimaki/aj-os#readme",
+  "keywords": [
+    "knowledge-management",
+    "working-context",
+    "cli",
+    "ai",
+    "anthropic",
+    "wiki",
+    "personal-operating-system"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "bin": {
     "aj": "dist/cli/index.js"
   },
@@ -17,6 +40,7 @@
     "lint": "biome lint --error-on-warnings .",
     "ci": "npm run format:check && npm run lint && npm run typecheck && npm run build && npm test",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "infra:up": "cd infrastructure && docker compose up -d",
     "infra:down": "cd infrastructure && docker compose down",
@@ -34,6 +58,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.4",
     "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
     "vitest": "^4.1.10"

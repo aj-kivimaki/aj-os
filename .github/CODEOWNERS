@@ -1,0 +1,5 @@
+# Review ownership, made explicit rather than assumed.
+#
+# One owner today, so this is nearly a no-op — and worth one line anyway: it
+# states who reviews, instead of leaving it implied.
+* @aj-kivimaki
