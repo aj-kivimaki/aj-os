@@ -359,7 +359,7 @@ at the reviewer's requirement, *before* the Planning Freeze.
 | REX-205 | **configuration truth** (behaviour risk) | Linter + **five of six** dormant flags + the dead `jsx` config | F-028, **F-031 (partial — reviewer-ruled)**, F-034 | ✅ |
 | REX-206 | **documentation** | `package.json` metadata, `engines`, `.nvmrc`, `SECURITY.md`, `CODE_OF_CONDUCT.md` | F-032, F-033, F-035 | ✅ |
 | REX-207 | governance — **process** | PR template, `dependabot.yml`, `CODEOWNERS` | F-036 | ✅ |
-| REX-208 | governance — **measurement** | Coverage **measured, not gated** | F-030 | 🛑 **BLOCKED — acceptance criterion not met.** v8 reports only *loaded* files, so `KnowledgeAssistant.ts` (410 lines, 0 tests — the largest known hole) is **absent from the report**, and the headline number flatters by omission. `coverage.all = true` had no effect under Vitest 4. **A coverage report that cannot show bad news is not measuring.** Needs a reviewer decision — see below. |
+| REX-208 | governance — **measurement** | Coverage **measured, not gated** | **F-030 (partial — reviewer-ruled)** | ✅ ~~🛑 BLOCKED — acceptance criterion not met.** v8 reports only *loaded* files, so `KnowledgeAssistant.ts` (410 lines, 0 tests — the largest known hole) is **absent from the report**, and the headline number flatters by omission. `coverage.all = true` had no effect under Vitest 4. **A coverage report that cannot show bad news is not measuring.** Needs a reviewer decision — see below. |
 
 _Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. The M2 Planning Review passed:
 the outcome-based allocation was ruled *"a materially stronger planning model because each task has a
@@ -377,7 +377,38 @@ M1's retrospective rather than a redesign of the milestone."* **REX-D7** (Biome)
 | 4 | **REX-208 — no coverage threshold** | **Approved.** *"Repository Excellence should establish facts before establishing policy."* And: *"The report is the canonical measurement. The documentation should describe the process, not today's number."* |
 | 5 | Planning corrections (40 not 46; no M3-A coupling; `rootDir` constraint) | **Approved** as *"planning-quality improvements, not milestone changes."* |
 
-### 🛑 REX-208 — blocked, needs a reviewer decision (2026-07-17)
+### ✅ REX-208 — resolved: investigated, then Option 2 approved (AJ, 2026-07-17)
+
+**The reviewer required investigation before accepting the limitation** — *"The repository should not
+accept a tooling limitation until we've verified it is actually a tooling limitation."* It was, and
+the investigation established it:
+
+| Question | Answer |
+|---|---|
+| Vitest 4 `coverage.all`? | **Removed** — absent from the shipped types; passing it changes nothing |
+| `coverage.include` restores it? | **No** — it *is* the v4 replacement and **does** take effect (the headline moves), but the report still lists only loaded files |
+| **istanbul** provider differs? | **No** — installed and tested: identical behaviour, same figure, same omission |
+
+**Author correction, accepted by the reviewer as the stronger description:** the report is **not**
+incapable of showing bad news — `src/agent/`, `src/api/`, `src/config/` all show **0%** correctly.
+**Its limitation is that a module graph nothing imports vanishes rather than reading zero.**
+`KnowledgeAssistant.ts` (410 lines, 0 tests) is absent because *nothing imports it*. **46 of 167
+files are reported.**
+
+**Option 2 approved:** keep the measurement, document the limitation, **F-030 partially closed** as
+*"baseline established with known tooling limitation."* The boundary is documented in
+[`docs/project/coverage.md`](../../../docs/project/coverage.md), and **the headline must never be
+quoted as repository coverage** — it is coverage *of the files in the report*, a different claim.
+
+> *"A measured value is only meaningful when its measurement boundary is understood. Without that
+> boundary, precision can easily be mistaken for completeness."* — reviewer
+
+**The measurement gap and the testing gap are the same gap:** coverage becomes repository-wide when
+the unreachable graphs get tests, and `KnowledgeAssistant.ts` is **M4's** (F-053).
+
+---
+
+### ~~🛑 REX-208 — blocked~~ (superseded above)
 
 **REX-208's acceptance criterion is not met and the task is not complete.** The criterion:
 *"Report **shows the known holes** (`KnowledgeAssistant.ts` near-zero) — proving it can report bad

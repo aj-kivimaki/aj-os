@@ -59,3 +59,10 @@ jobs:
       # needed here — verified across all four (REX-201).
       - name: Test
         run: npm test
+
+      # Measured, NOT gated — no thresholds, and this step cannot fail the build.
+      # The report's boundary is documented in docs/project/coverage.md: it lists
+      # only loaded module graphs, so the headline is NOT repository coverage.
+      - name: Coverage (measured, not gated)
+        run: npm run test:coverage
+        continue-on-error: true

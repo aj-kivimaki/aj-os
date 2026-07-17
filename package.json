@@ -5,7 +5,7 @@
   "type": "module",
   "description": "A personal operating system that maintains an accurate, evolving working context for its user's work.",
   "license": "MIT",
-  "author": "Atte Kivim\u00e4ki",
+  "author": "Atte Kivimäki",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aj-kivimaki/aj-os.git"
