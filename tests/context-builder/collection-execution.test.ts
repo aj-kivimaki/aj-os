@@ -188,7 +188,7 @@ describe("collect — partial collection (a failure never aborts)", () => {
     const engine = engineFor([weird]);
     const result = await engine.collect(REQUEST);
 
-    expect(result.errors[0].message).toBe(
+    expect(result.errors[0]!.message).toBe(
       "The provider failed to contribute knowledge.",
     );
   });
@@ -272,8 +272,9 @@ describe("collect — immutable output", () => {
     const engine = engineFor([itemProvider("handbook")]);
     const result = await engine.collect(REQUEST);
 
+    expect(result.items).not.toHaveLength(0);
     expect(() => {
-      (result.items as KnowledgeItem[]).push(result.items[0]);
+      (result.items as unknown as KnowledgeItem[]).push(result.items[0]!);
     }).toThrow();
   });
 });

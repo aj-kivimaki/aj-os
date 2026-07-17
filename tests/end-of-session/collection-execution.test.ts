@@ -195,7 +195,7 @@ describe("collectChanges — partial collection (a failure never aborts)", () =>
     };
     const result = await collectFor([weird]);
 
-    expect(result.errors[0].message).toBe(
+    expect(result.errors[0]!.message).toBe(
       "The analyzer failed to contribute changes.",
     );
   });
@@ -211,7 +211,7 @@ describe("collectChanges — partial collection (a failure never aborts)", () =>
     };
     const result = await collectFor([stringy]);
 
-    expect(result.errors[0].message).toBe("plain string failure");
+    expect(result.errors[0]!.message).toBe("plain string failure");
   });
 });
 
@@ -279,7 +279,7 @@ describe("collectChanges — immutable output", () => {
     const result = await collectFor([changeAnalyzer("git", "a.ts")]);
 
     expect(() => {
-      (result.changes as SessionChange[]).push(result.changes[0]);
+      (result.changes as unknown as SessionChange[]).push(result.changes[0]!);
     }).toThrow();
   });
 });

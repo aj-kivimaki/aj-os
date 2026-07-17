@@ -11,7 +11,7 @@
     "serve": "tsx src/server.ts",
     "serve:prod": "node dist/server.js",
     "build": "tsc",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
     "ci": "npm run typecheck && npm run build && npm test",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -130,10 +130,15 @@ describe("EOS-103 — end-to-end ChangeSet production (real git)", () => {
       result.changes.map((c: SessionChange) => [c.path, c]),
     );
 
-    expect(byPath["docs/new.md"].id).toBe("git:docs/new.md");
-    expect(byPath["docs/new.md"].kind).toBe("documentation");
+    // The presence of each path is part of what this test asserts — reading it
+    // through `!` would report a missing change as "cannot read properties of
+    // undefined" rather than as the collection defect it would be.
+    expect(byPath).toHaveProperty(["docs/new.md"]);
+    expect(byPath["docs/new.md"]!.id).toBe("git:docs/new.md");
+    expect(byPath["docs/new.md"]!.kind).toBe("documentation");
 
-    const renamed = byPath["src/renamed-new.ts"];
+    expect(byPath).toHaveProperty(["src/renamed-new.ts"]);
+    const renamed = byPath["src/renamed-new.ts"]!;
     expect(renamed.kind).toBe("source");
     expect(renamed.metadata).toEqual({ oldPath: "src/renamed-old.ts" });
     expect(renamed.summary).toBe(
@@ -212,7 +217,7 @@ describe("EOS-103 — partial collection behaviour", () => {
 
     expect(result.changes).toEqual([]);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].analyzer).toBe("git");
-    expect(result.errors[0].recoverable).toBe(true);
+    expect(result.errors[0]!.analyzer).toBe("git");
+    expect(result.errors[0]!.recoverable).toBe(true);
   });
 });

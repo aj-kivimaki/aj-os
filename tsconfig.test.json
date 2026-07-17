@@ -1,0 +1,20 @@
+// Type-checks the tests. `tsconfig.json` deliberately scopes itself to `src` so
+// that `npm run build` emits only shipped code to `dist/` — that decision is
+// correct and is documented at tsconfig.json:38-41. It was extended to
+// `typecheck` for free, and `--noEmit` has no `rootDir` problem to solve, so
+// ~11k lines of test code went unchecked for months and hid three real defects
+// during SPEC-003 (REX F-026/F-027).
+//
+// Two configs, two jobs: `tsconfig.json` describes what ships; this describes
+// what is verified.
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Nothing is emitted, so `rootDir` has no output layout to protect. It MUST
+    // be widened: inheriting `./src` makes every test file "not under rootDir"
+    // (TS6059) and the compiler never reaches typechecking at all.
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": ["src", "tests"]
+}

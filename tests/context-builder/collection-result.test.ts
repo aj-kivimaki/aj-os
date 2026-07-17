@@ -135,7 +135,10 @@ describe("CollectionResult contract", () => {
     expect(Object.isFrozen(result.errors[0])).toBe(true);
     expect(Object.isFrozen(result.metadata)).toBe(true);
     expect(() => {
-      (result as { items: KnowledgeItem[] }).items.push(item);
+      // Deliberately bypassing the type system: the point is the *runtime*
+      // guarantee, and `readonly` is erased at runtime. `as unknown as` is what
+      // the compiler asks for when a cast is intentional rather than a mistake.
+      (result as unknown as { items: KnowledgeItem[] }).items.push(item);
     }).toThrow();
   });
 

@@ -271,7 +271,9 @@ describe("select — immutability", () => {
   it("rejects mutation of the returned collections at runtime", async () => {
     const result = await engine.select(collectionOf([item("k1", { content: "c1" })]));
     expect(() => {
-      (result.selectedItems as KnowledgeItem[]).push(result.selectedItems[0]);
+      (result.selectedItems as unknown as KnowledgeItem[]).push(
+        result.selectedItems[0]!,
+      );
     }).toThrow();
   });
 

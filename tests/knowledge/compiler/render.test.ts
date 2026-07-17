@@ -22,13 +22,25 @@ const SOURCE: SourceRecord = {
   metadata: { relativePath: "foundation/04-aj-os/vision.md", bytes: 22 },
 };
 
+// `related` is spelled out on every entity and concept because a parsed
+// `SourceExtraction` always carries it — `relatedSchema` has `.default([])`, so
+// the parser fills it in. A fixture that omits it models parser *input* while
+// claiming to be parser *output*, which is what let the renderer grow a guard
+// for a case production cannot produce (REX-203, DQ-1).
 const EXTRACTION: SourceExtraction = {
   summary: { title: "AJ-OS Vision", keyPoints: ["Code-first OS", "Handbook is truth"] },
   entities: [
-    { name: "AJ-OS", type: "product", description: "A developer operating system." },
-    { name: "AJ Kivimäki", type: "person", description: "The builder." },
+    {
+      name: "AJ-OS",
+      type: "product",
+      description: "A developer operating system.",
+      related: [],
+    },
+    { name: "AJ Kivimäki", type: "person", description: "The builder.", related: [] },
   ],
-  concepts: [{ name: "LLM Wiki", description: "Compiled knowledge layer." }],
+  concepts: [
+    { name: "LLM Wiki", description: "Compiled knowledge layer.", related: [] },
+  ],
 };
 
 const AT = "2026-07-12T08:00:00.000Z";
@@ -145,8 +157,8 @@ describe("renderPages", () => {
     const pages = render({
       summary: { title: "T", keyPoints: ["p"] },
       entities: [
-        { name: "AJ-OS", type: "product", description: "first" },
-        { name: "AJ OS", type: "product", description: "dup" },
+        { name: "AJ-OS", type: "product", description: "first", related: [] },
+        { name: "AJ OS", type: "product", description: "dup", related: [] },
       ],
       concepts: [],
     });

@@ -169,7 +169,8 @@ describe("GitChangeAnalyzer — id, summary & rename metadata", () => {
       { path: "src/new.ts", status: "R", oldPath: "src/old.ts" },
     ]);
 
-    expect(changes[0].id).toBe("git:src/new.ts");
+    expect(changes).toHaveLength(1);
+    expect(changes[0]!.id).toBe("git:src/new.ts");
   });
 
   it("carries a rename's former path in metadata and its summary", async () => {
@@ -177,15 +178,17 @@ describe("GitChangeAnalyzer — id, summary & rename metadata", () => {
       { path: "src/new.ts", status: "R", oldPath: "src/old.ts" },
     ]);
 
-    expect(changes[0].metadata).toEqual({ oldPath: "src/old.ts" });
-    expect(changes[0].summary).toBe("renamed src/old.ts → src/new.ts");
+    expect(changes).toHaveLength(1);
+    expect(changes[0]!.metadata).toEqual({ oldPath: "src/old.ts" });
+    expect(changes[0]!.summary).toBe("renamed src/old.ts → src/new.ts");
   });
 
   it("uses an empty metadata map and a plain summary for a non-rename", async () => {
     const changes = await analyze([{ path: "src/foo.ts", status: "M" }]);
 
-    expect(changes[0].metadata).toEqual({});
-    expect(changes[0].summary).toBe("modified src/foo.ts");
+    expect(changes).toHaveLength(1);
+    expect(changes[0]!.metadata).toEqual({});
+    expect(changes[0]!.summary).toBe("modified src/foo.ts");
   });
 });
 

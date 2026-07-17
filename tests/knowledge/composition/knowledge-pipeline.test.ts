@@ -51,7 +51,12 @@ afterEach(async () => {
 });
 
 function config(generatedWikiPath: string): AjConfig {
-  return { handbook: { path: handbook, generatedWikiPath } };
+  // `reviewPath` is required by AjConfig and unused by this pipeline — SPEC-003
+  // added it (EOS-303) and every AjConfig caller must now satisfy it. Recorded
+  // as REX-203 DQ-2; supplied here as the contract's own default.
+  return {
+    handbook: { path: handbook, generatedWikiPath, reviewPath: "knowledge-review" },
+  };
 }
 
 describe("createKnowledgePipeline", () => {

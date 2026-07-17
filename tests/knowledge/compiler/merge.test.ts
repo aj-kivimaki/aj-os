@@ -38,7 +38,7 @@ function source(id: string): SourceRecord {
 function extraction(title: string, description: string): SourceExtraction {
   return {
     summary: { title, keyPoints: [title] },
-    entities: [{ name: "AJ-OS", type: "product", description }],
+    entities: [{ name: "AJ-OS", type: "product", description, related: [] }],
     concepts: [],
   };
 }

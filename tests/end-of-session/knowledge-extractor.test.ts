@@ -72,7 +72,14 @@ const validResponse = JSON.stringify({
 
 interface GeneratorCall {
   readonly prompt: { readonly system: string; readonly user: string };
-  readonly options?: { readonly maxTokens?: number };
+  /**
+   * Always recorded, possibly `undefined` — `TextGenerator.complete` takes an
+   * optional `options`, and a call that omitted it *did* happen with `options`
+   * undefined. Declaring `options?:` instead would record "no such property",
+   * which under `exactOptionalPropertyTypes` is a different claim than the one
+   * this stub can honestly make.
+   */
+  readonly options: { readonly maxTokens?: number } | undefined;
 }
 
 /**

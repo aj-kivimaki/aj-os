@@ -231,7 +231,7 @@ describe("assemble — merging multiple source types into shared section kinds",
 
     const merged = pkg.sections.filter((s) => s.kind === "relevant-architecture");
     expect(merged).toHaveLength(1);
-    expect(merged[0].referenceIds).toEqual([arch.source.id, adr.source.id]);
+    expect(merged[0]!.referenceIds).toEqual([arch.source.id, adr.source.id]);
   });
 
   it("merges specification and project-documentation into one related-documentation section", async () => {
@@ -241,7 +241,7 @@ describe("assemble — merging multiple source types into shared section kinds",
 
     const merged = pkg.sections.filter((s) => s.kind === "related-documentation");
     expect(merged).toHaveLength(1);
-    expect(merged[0].referenceIds).toEqual([spec.source.id, doc.source.id]);
+    expect(merged[0]!.referenceIds).toEqual([spec.source.id, doc.source.id]);
   });
 
   it("merges source-code and git-history into one existing-implementation-patterns section", async () => {
@@ -253,7 +253,7 @@ describe("assemble — merging multiple source types into shared section kinds",
       (s) => s.kind === "existing-implementation-patterns",
     );
     expect(merged).toHaveLength(1);
-    expect(merged[0].referenceIds).toEqual([code.source.id, history.source.id]);
+    expect(merged[0]!.referenceIds).toEqual([code.source.id, history.source.id]);
   });
 });
 
