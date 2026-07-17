@@ -5,27 +5,58 @@ Reference for AJ-OS settings. To get running quickly, follow the
 
 AJ-OS reads configuration from two places:
 
-- **`aj.config.json`** — the Knowledge Assistant's handbook location.
+- **`aj.config.json`** — where the handbook is, and where AJ-OS writes inside it.
+  Used by every `aj` command.
 - **`.env`** — secrets and service settings (API keys, the Agent/API server).
 
-## Knowledge Assistant (`aj ask`)
+## The `aj` CLI (`aj ask`, `aj wiki build`, `aj session end`)
 
 `aj.config.json`:
 
 ```json
 {
-  "handbook": { "path": "/path/to/your/handbook" }
+  "handbook": {
+    "path": "/path/to/your/handbook",
+    "generatedWikiPath": "wiki-generated",
+    "reviewPath": "knowledge-review"
+  }
 }
 ```
+
+| Setting | Required | Purpose |
+| ------- | -------- | ------- |
+| `handbook.path` | yes | The handbook directory. Must exist. |
+| `handbook.generatedWikiPath` | no | Where the generated wiki lives, **relative to `handbook.path`**. Default **`wiki-generated`**. |
+| `handbook.reviewPath` | no | Where candidate knowledge awaits review, **relative to `handbook.path`**. Default **`knowledge-review`**. |
+
+Only `handbook.path` is required — `aj.config.example.json` shows the minimum.
+The other two have working defaults, and you only set them if your vault is laid
+out differently.
+
+**The two optional settings are contracts, not preferences.**
+
+- **`generatedWikiPath` is the producer → consumer seam.** `aj wiki build` writes
+  the wiki there; `aj ask` reads it from there. Neither knows about the other —
+  they meet only through this setting. Change it and both follow.
+- **`reviewPath` is the capture → review seam.** `aj session end` writes
+  candidates to `<handbook>/<reviewPath>/pending/<session-id>/`, and the Knowledge
+  Review workflow ([SPEC-004](../specifications/SPEC-004-Knowledge-Review-Workflow.md))
+  will read them from there.
+
+Both resolve **inside** the handbook, so AJ-OS remains the sole producer of what
+it generates. `aj session end` refuses to write to a canonical knowledge area, and
+that refusal is enforced at the boundary rather than by convention.
 
 `.env`:
 
 | Variable            | Required | Purpose                                       |
 | ------------------- | -------- | --------------------------------------------- |
-| `ANTHROPIC_API_KEY` | yes      | Anthropic key used to generate answers        |
+| `ANTHROPIC_API_KEY` | yes      | Anthropic key used to generate the wiki, answer questions, and extract session knowledge |
 | `ANTHROPIC_MODEL`   | no       | Model id; a built-in default is used if unset |
 
-The Assistant locates its handbook via `aj.config.json` — **not** `HANDBOOK_PATH`.
+The CLI locates its handbook via `aj.config.json` — **not** `HANDBOOK_PATH`. That
+variable belongs to the Handbook Agent / API server below, which is a separate
+subsystem with its own configuration.
 
 ## Handbook Agent / API server (`npm run serve`)
 

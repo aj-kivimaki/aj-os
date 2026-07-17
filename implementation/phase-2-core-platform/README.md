@@ -26,10 +26,11 @@ Knowledge Compiler, Identity Resolvers (ADR-005/006), Wiki Renderer, and Merge
 Engine.
 
 - Code: `src/ingestion/` and `src/knowledge/`.
-- Status: **implemented at the library level and covered by tests, but not yet
-  wired to a runnable orchestration entry point** — no CLI command or service
-  currently invokes `WikiGenerator.run()`. Wiring it up is the top item in the
-  [ROADMAP](../../ROADMAP.md).
+- Status: **implemented, tested, and wired end to end** via **`aj wiki build`**
+  (`src/cli/commands/wiki.ts`), which composes the pipeline through the Knowledge
+  Platform composition root (`src/knowledge/composition/`) and runs
+  `WikiGenerator.run()`. The generator writes the `index.md` corpus catalog that
+  `aj ask` retrieves from, closing the producer → consumer loop.
 - This pipeline does not have a task-by-task folder here; its authoritative
   record is SPEC-005/006/007, ADR-002–006, the [CHANGELOG](../../CHANGELOG.md),
   and git history.
@@ -44,13 +45,19 @@ Handbook, Retrieval, Prompt Renderer, and AI Client.
 
 ---
 
+## Completed Phase 2 work
+
+- **Knowledge Platform pipeline wired** to `aj wiki build` (see above).
+- **End-of-Session Workflow (SPEC-003)** — **complete; all five milestones frozen**
+  (reviewer: AJ, 2026-07-15 → 2026-07-17) and merged. `aj session end` captures
+  candidate knowledge for review. Detailed record:
+  [spec-003-end-of-session/](spec-003-end-of-session/). v1 is **capture-only**:
+  git-commit ownership is deferred beyond v1 per **ADR-002** — version control
+  belongs to orchestration, and that layer does not exist yet, so **no component
+  performs it**.
+
 ## Remaining Phase 2 work
 
-- Wire the Knowledge Platform pipeline to an orchestration entry point.
-- End-of-Session Workflow (SPEC-003) — captures candidate knowledge for review.
-  Planning frozen; Milestone 1 ready to implement. Detailed record:
-  [spec-003-end-of-session/](spec-003-end-of-session/). (Git-commit ownership is
-  deferred to a later milestone — v1 is capture-only.)
 - Knowledge Review Workflow (SPEC-004).
 - Further Context Builder capabilities — Explainability & Profiles (M5),
   Optimization (M6).

@@ -71,13 +71,20 @@ docs/
 | [SPEC-000](specifications/SPEC-000-Specification-Writing-Standard.md) | How to write specifications |
 | [SPEC-001](specifications/SPEC-001-Project-Kickoff-Workflow.md) | Project Kickoff |
 | [SPEC-002](specifications/SPEC-002-Context-Builder-Agent.md) | Context Builder |
-| [SPEC-003](specifications/SPEC-003-End-of-Session-Workflow.md) | End-of-Session (owns commits) |
+| [SPEC-003](specifications/SPEC-003-End-of-Session-Workflow.md) | End-of-Session (captures candidate knowledge; **never commits** — see below) |
 | [SPEC-004](specifications/SPEC-004-Knowledge-Review-Workflow.md) | Knowledge Review |
 | [SPEC-005](specifications/SPEC-005-Wiki-Generator-Agent.md) | Wiki Generator |
 | [SPEC-006](specifications/SPEC-006-Source-Connector.md) | Source Connector |
 | [SPEC-007](specifications/SPEC-007-Wiki-Store.md) | Wiki Store |
 
 Product specifications live under [specifications/products/](specifications/products/).
+
+> **Nothing in AJ-OS commits, and that is deliberate.** **ADR-002** holds that *version control
+> belongs to orchestration* — so the Wiki Generator never commits, and the End-of-Session Workflow
+> never commits either. **The orchestration layer that would own it does not exist yet, so no
+> component performs it.** SPEC-003 v1 is capture-only: it writes candidates to a non-canonical
+> review area and stops. This is a **deliberate gap**, recorded rather than filled — see ADR-002 and
+> AJS-005 §7.
 
 # Guides · API · Governance
 

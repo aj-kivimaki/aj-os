@@ -2,11 +2,11 @@
 
 > **Specification:** SPEC-003 — End-of-Session Workflow
 > **Standards:** AJS-004, AJS-007
-> **Status:** Milestone M1 — Foundation & Contracts **complete** (EOS-001..EOS-007).
-> The module's immutable contracts and its analyzer/trigger/notification seams are
-> in place and tested through the public surface. No behavior yet — collection,
-> extraction, generation, persistence, projection, and the `aj session end` CLI
-> arrive in M2–M5.
+> **Status:** **COMPLETE — all five milestones frozen** (reviewer: AJ; M1 2026-07-15,
+> M2–M4 2026-07-16, M5 2026-07-17). The v1 vertical slice is operational: `aj session
+> end` collects a session's git changes, extracts reusable knowledge, generates
+> canonical candidates, persists them, renders the review package, and reports.
+> **Changes now follow the AJS-007 Frozen Plan Change Proposal process (§7.2).**
 
 The End-of-Session Workflow is a **capture pipeline**: it turns a finished coding
 session into candidate knowledge for human review. Each stage has a single
@@ -51,8 +51,9 @@ can import it without pulling in services.
 
 ## Status
 
-**Milestone M1 (Foundation & Contracts) is complete.** The module exposes its
-immutable, deep-frozen, Zod-validated contracts and its extensibility seams through
+**SPEC-003 is complete. All five milestones are frozen** and the v1 capture pipeline
+runs end to end via `aj session end`. The module exposes its immutable, deep-frozen,
+Zod-validated contracts, its extensibility seams, and every pipeline stage through
 the public surface:
 
 - **Session** (EOS-002) — `SessionContext` (input) and first-class `Session`
@@ -71,21 +72,38 @@ the public surface:
   module-wide foundation guarding the public API surface and public-surface-only
   imports.
 
-No behavior exists yet — no git access, LLM calls, persistence, projection
-rendering, or CLI. Functionality arrives incrementally through the SPEC-003
-milestones:
+Beyond the contracts above, every stage is implemented and frozen:
 
-| Milestone | Focus                                                          |
-| --------- | -------------------------------------------------------------- |
-| M1        | Foundation & contracts; analyzer/trigger/notification seams    |
-| M2        | Session change collection (Git analyzer → `ChangeSet`)         |
-| M3        | Knowledge extraction (injected `TextGenerator` port)           |
-| M4        | Candidate generation & review store                            |
-| M5        | Review package projection, orchestration & `aj session end`    |
+- **Collection** (EOS-101..103, M2) — `collectChanges` and the `GitChangeAnalyzer`
+  behind a read-only `GitPort`. Partial by design: one analyzer failing never aborts
+  the run — it contributes either changes or an `AnalyzerError`.
+- **Extraction** (EOS-201..202, M3) — `createKnowledgeExtractor` over an injected
+  `TextGenerator`. **The one non-deterministic seam**, isolated behind a port so
+  every other stage stays deterministic and stub-testable.
+- **Generation & persistence** (EOS-301..303, M4) — `createCandidateGenerator`
+  (deterministic 1:1 mapping) and `createFilesystemReviewStore` (EOS-D6).
+- **Projection, orchestration & CLI** (EOS-401..411, M5) —
+  `createReviewPackageProjector`, `buildSessionReport`, `createSessionWorkflow`,
+  `createEndOfSessionWorkflow` (EOS-D9), and `aj session end`.
 
-Subfolders (e.g. `analyzers/`, `extraction/`, `store/`, `projection/`) are created
-by the tasks that introduce their code, rather than pre-created as empty
-placeholders.
+| Milestone | Focus                                                          | Status |
+| --------- | -------------------------------------------------------------- | ------ |
+| M1        | Foundation & contracts; analyzer/trigger/notification seams    | ✅ Frozen 2026-07-15 |
+| M2        | Session change collection (Git analyzer → `ChangeSet`)         | ✅ Frozen 2026-07-16 |
+| M3        | Knowledge extraction (injected `TextGenerator` port)           | ✅ Frozen 2026-07-16 |
+| M4        | Candidate generation & review store                            | ✅ Frozen 2026-07-16 |
+| M5        | Review package projection, orchestration & `aj session end`    | ✅ Frozen 2026-07-17 |
+
+## What this module does not do — permanently, not yet
+
+- **No git write.** Version control belongs to orchestration (**ADR-002**, AJS-005
+  §7), and that layer does not exist yet — so **no component commits**. Verified by
+  grep and at runtime.
+- **No wiki generation.** Deferred; the capture pipeline never invokes the
+  generator.
+- **Never modifies canonical knowledge.** Every write lands beneath
+  `<handbook>/<reviewPath>/pending/<session-id>/`, enforced at the store's boundary
+  rather than by convention. **This one is permanent.**
 
 ## References
 

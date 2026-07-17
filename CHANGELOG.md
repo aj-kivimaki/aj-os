@@ -10,6 +10,34 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
 
 ### Added
 
+- **End-of-Session Workflow (SPEC-003) — AJ-OS can now capture what a session
+  taught it.** Complete and frozen 2026-07-17 across five milestones
+  (EOS-001..007, 101..103, 201..202, 301..303, 401..411).
+  - **`aj session end` command** — `[--since <ref>] [--notes <text>]`. Observes
+    the session's git changes, extracts reusable knowledge through an injected
+    model port, generates canonical candidates, persists them, renders a
+    human-readable review package, and reports. A thin entry point: it performs no
+    git access and constructs no stage.
+  - **Capture only, by design.** The workflow **never commits, never generates the
+    wiki, and never modifies canonical knowledge** — every write lands beneath
+    `<handbook>/knowledge-review/pending/<session-id>/`. Commits remain an
+    orchestration concern (ADR-002); that orchestration layer does not exist yet,
+    so **no component performs them**.
+  - **`CandidateKnowledge` is the canonical output; the review package is a
+    projection** rendered from it (EOS-D4). SPEC-004 will consume the structured
+    candidates, never the markdown. The boundary contract is published in
+    [CONTRACTS.md](docs/architecture/CONTRACTS.md) and is producer-owned by
+    SPEC-003 (EOS-D1, EOS-D5).
+  - **A Session is first-class** (EOS-D3) — a stable opaque id; trigger, branch,
+    and git state are metadata, never identity.
+  - **Review Store** (`src/end-of-session/store/`) — a domain-aware persistence
+    adapter (EOS-D6, EOS-D8) that owns the session directory's layout and
+    serialization, refuses non-canonical destinations at construction, and guards
+    every write against symlink and traversal escape.
+  - **Configuration** — `handbook.reviewPath` (default `knowledge-review`),
+    mirroring the `generatedWikiPath` pattern.
+  - **Automation proposes; humans approve** — every candidate is persisted as a
+    candidate, awaiting the review workflow that SPEC-004 will provide.
 - **Closed the first loop — AJ-OS generates and consumes its own knowledge.**
   The Knowledge Platform is no longer just a library; a thin entry point now runs
   it end to end.
@@ -52,12 +80,15 @@ The format is based on **Keep a Changelog**, and this project follows **Semantic
     canonical identities and enrich existing pages without rewriting human-owned
     regions (`src/knowledge/renderer/`, `src/knowledge/compiler/merge.ts`).
 - Architecture and decisions for the pipeline: **ARCH-002**, **ADR-002**–**ADR-006**.
-- The automated test suite grew to **340 tests** across the platform, the
-  knowledge pipeline, the composition root, and the product.
+- The automated test suite covers the platform, the knowledge pipeline, the
+  End-of-Session workflow, the composition roots, and the product — validated
+  through each module's public surface, with the model stubbed so the suite runs
+  offline and deterministically.
 
 ### Planned
 
-- End-of-Session Workflow (SPEC-003) and Knowledge Review Workflow (SPEC-004)
+- Knowledge Review Workflow (SPEC-004) — human governance of what becomes durable
+  knowledge, consuming the candidates `aj session end` produces
 - Repository integration and Notion-backed business endpoints (Projects, Portfolio, CRM, Dashboard, Business Health)
 - Additional Business Rules
 - Morning Brief

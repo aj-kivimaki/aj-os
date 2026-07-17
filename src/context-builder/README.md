@@ -2,9 +2,9 @@
 
 > **Specification:** SPEC-002 — Context Builder Agent
 > **Standards:** AJS-001, AJS-002, AJS-003, AJS-004
-> **Status:** Milestone M3 — Knowledge Selection **complete** (M1, M2 also
-> complete). Milestone M4 — Context Assembly — **implementation complete, pending
-> Freeze Review**: CB-019
+> **Status:** Milestones **M1–M4 complete and frozen** — shipped in Platform
+> v2.0.0. **M5 (Explainability & Profiles) and M6 (Optimization) remain.** Milestone
+> M4 — Context Assembly — is **frozen**: CB-019
 > establishes the Assembly Engine service boundary (`createAssemblyEngine()`);
 > CB-020/CB-021 fix the frozen section-composition and metadata-composition
 > strategies; CB-022 implements the deterministic
@@ -1071,7 +1071,7 @@ guarantees (no rendering, no computed explainability, no phantom sections). The
 end-to-end pipeline remains owned by `context-builder-pipeline.test.ts` (CB-018/
 CB-023) and is not re-tested here. CB-024 introduced **no** platform behaviour and
 **no** contract change; it only exercises the frozen CB-019…CB-023 surfaces.
-**Milestone 4 implementation complete — pending Freeze Review.**
+**Milestone 4 is complete and frozen.**
 
 ## Status
 
@@ -1101,7 +1101,7 @@ through the single public entry point `build(request)`, which supersedes the
 Milestone 2 era `collect(request)`. This selection pipeline is now protected by the
 permanent Selection Engine, execution and `build(request)` behaviour tests (task
 **CB-018**), which completes **Milestone M3**. **Milestone M4** (Context Assembly)
-implementation is complete (pending Freeze Review): the Assembly Engine service
+is **complete and frozen**: the Assembly Engine service
 boundary — `createAssemblyEngine()`
 (task **CB-019**) — was followed by the frozen section-composition strategy (task
 **CB-020**) and the frozen assembly inputs & metadata composition (task
@@ -1114,8 +1114,8 @@ pipeline — the Context Builder now composes and owns all three engines and
 `ContextPackage` (with the `generatedAt` supplied by a construction-time injected
 timestamp source) through the single public entry point (task **CB-023**). This
 assembly pipeline is now protected by the permanent Assembly Engine boundary and
-`assemble()` behaviour tests (task **CB-024**), completing **Milestone 4**
-implementation — pending Freeze Review. Explainability and profiles arrive in M5.
+`assemble()` behaviour tests (task **CB-024**), completing **Milestone 4**, which is
+**frozen** and shipped in Platform v2.0.0. Explainability and profiles arrive in M5.
 
 Functionality arrives incrementally through the SPEC-002 milestones:
 

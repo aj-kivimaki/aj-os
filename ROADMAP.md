@@ -20,14 +20,34 @@ serve the [loop](docs/VISION.md) — it does not restate the vision behind them.
 > Platform from config and runs a generation cycle, producing a wiki — with its
 > `index.md` corpus catalog — that `aj ask` reads through the shared
 > `handbook.generatedWikiPath` contract. AJ-OS now generates and consumes its own
-> knowledge. What remains is to make that context *evolve automatically*.
+> knowledge.
 
-1. **End-of-Session Workflow (SPEC-003)** — the orchestration layer that decides
-   when to run the generator and owns git commits (the engine never commits).
+> ✅ **Sessions are captured.** `aj session end` turns a finished session into
+> reviewed-knowledge candidates in `knowledge-review/pending/<session-id>/`
+> (SPEC-003, complete and frozen 2026-07-17). The capture half of "evolve
+> automatically" exists; **the governance half — deciding what becomes durable —
+> does not yet.** That is SPEC-004, and it is why the loop is not closed twice.
+
+> ⬜ **Nobody owns git commits — deliberately, and this is a known gap.**
+> **ADR-002** holds that *version control belongs to orchestration*. The Wiki
+> Generator never commits; the End-of-Session Workflow never commits. **The
+> orchestration layer that would own it does not exist**, so today AJ-OS writes
+> files and a human commits them. This is recorded rather than assigned: no
+> specification currently claims the role, and one should not acquire it by
+> default. See ADR-002 and AJS-005 §7.
+
+1. **Repository Excellence Review (REX)** — **in progress**, and deliberately
+   before SPEC-004. A non-specification engineering-quality milestone: the
+   documentation is brought in line with what actually ships, and quality is made
+   machine-enforced rather than asserted (there is no CI, no linter, and
+   `npm run typecheck` does not reach `tests/`). See
+   `implementation/phase-3-developer-experience/repository-excellence/`.
 2. **Knowledge Review Workflow (SPEC-004)** — human governance of what enters the
-   Handbook.
-3. **Acceptance Review & dogfooding — after SPEC-003 and SPEC-004.** Only once the
-   loop *maintains* the context automatically can we honestly evaluate what the
+   Handbook. It consumes the `CandidateKnowledge` that `aj session end` already
+   produces; the boundary contract is published in
+   [CONTRACTS.md](docs/architecture/CONTRACTS.md).
+3. **Acceptance Review & dogfooding — after SPEC-004.** Only once the loop
+   *maintains* the context automatically can we honestly evaluate what the
    VISION asks — *"is AJ-OS helping maintain an accurate, evolving working
    context?"* Evaluating a single subsystem earlier would answer a smaller
    question. Capture friction (retrieval quality, citations, identity dedup,
@@ -52,8 +72,13 @@ Architecture (ARCH-001), Standards (AJS-001–007), and the core Specifications
   tested, and **wired end to end** via `aj wiki build`. The generator produces the
   `index.md` corpus catalog the Knowledge Assistant retrieves from, closing the
   producer → consumer loop.
-- ⬜ **End-of-Session** (SPEC-003) and **Knowledge Review** (SPEC-004) — the
-  workflows that keep the context evolving automatically (Resume Here #1–2).
+- ✅ **End-of-Session** (SPEC-003) — `aj session end` captures a finished session
+  as candidate knowledge for review. Complete and frozen 2026-07-17; a
+  capture-only v1 vertical slice (one git analyzer, manual trigger, no-op
+  notification).
+- ⬜ **Knowledge Review** (SPEC-004) — human governance of what becomes durable
+  knowledge, and the other half of keeping the context evolving automatically
+  (Resume Here #2).
 
 Project Kickoff (SPEC-001) is intentionally postponed until more of the platform
 is operational, so it can be built as an early workflow on top of it.

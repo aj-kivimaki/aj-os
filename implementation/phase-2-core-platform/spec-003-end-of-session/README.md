@@ -200,7 +200,7 @@ spec-003-end-of-session/
   decisions/          EOS-D1..EOS-D11 (planning-review decisions + 2 approved FPCPs)
   tasks/              EOS-001..007 (M1), EOS-101..103 (M2), EOS-201..202 (M3), EOS-301..303 (M4),
                       EOS-401..411 (M5, complete)
-  retrospectives/     (added at each Milestone Freeze)
+  retrospectives/     RETROSPECTIVE.md — M1–M5, reconstructed (see below)
 ```
 
 ---
@@ -330,7 +330,8 @@ This implementation succeeds when:
 - [x] SPEC-003 acceptance criteria satisfied for v1 scope. _(§19 mapped test-by-test.)_
 - [x] Code reviewed. _(Every task independently reviewed at high effort, with findings
       addressed before commit.)_
-- [ ] Merged into main. _(M5 pull request open — the last step.)_
+- [x] Merged into main. _(M5 merged as `9bd051d` (PR #11) on 2026-07-17. **SPEC-003 is
+      complete and merged.**)_
 
 ---
 
