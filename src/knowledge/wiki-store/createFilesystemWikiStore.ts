@@ -53,6 +53,24 @@ function isErrno(error: unknown, code: string): boolean {
   );
 }
 
+/** Realpath `p`, returning `null` when it does not exist (any other error propagates). */
+async function realpathIfExists(p: string): Promise<string | null> {
+  try {
+    return await realpath(p);
+  } catch (error) {
+    if (isErrno(error, "ENOENT")) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/** True when `real` is `root` itself or nested within it. */
+function isInside(root: string, real: string): boolean {
+  const rel = path.relative(root, real);
+  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+}
+
 /** Recursively collect absolute file paths, skipping dotfiles and symlinks. */
 async function collectFiles(absDir: string): Promise<string[]> {
   const entries = await readdir(absDir, { withFileTypes: true });
@@ -105,33 +123,30 @@ export function createFilesystemWikiStore(
     return real;
   }
 
-  /** Assert the nearest existing ancestor of `candidate` resolves inside root. */
+  /**
+   * Assert the nearest existing ancestor of `candidate` resolves inside `root`, defeating a
+   * symlink that points out of the destination. Walks up until a path exists, then checks
+   * containment; if it reaches the filesystem root without finding one, the lexical guard has
+   * already done its job. Uses `realpathIfExists` so the escape error is thrown outside any
+   * catch — the store's own error can never be swallowed by the loop (REX-401, F-050).
+   */
   async function assertNoSymlinkEscape(root: string, candidate: string): Promise<void> {
     let current = candidate;
     for (;;) {
-      try {
-        const real = await realpath(current);
-        const rel = path.relative(root, real);
-        if (rel !== "" && (rel.startsWith("..") || path.isAbsolute(rel))) {
+      const real = await realpathIfExists(current);
+      if (real !== null) {
+        if (!isInside(root, real)) {
           throw new WikiStoreError(
             `Path escapes the wiki destination via a symlink: ${path.relative(root, candidate)}`,
           );
         }
         return;
-      } catch (error) {
-        if (error instanceof WikiStoreError) {
-          throw error;
-        }
-        if (isErrno(error, "ENOENT")) {
-          const parent = path.dirname(current);
-          if (parent === current) {
-            return; // reached filesystem root; lexical guard already applied
-          }
-          current = parent;
-          continue;
-        }
-        throw error;
       }
+      const parent = path.dirname(current);
+      if (parent === current) {
+        return; // reached filesystem root; lexical guard already applied
+      }
+      current = parent;
     }
   }
 

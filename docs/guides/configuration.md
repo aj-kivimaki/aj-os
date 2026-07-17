@@ -74,6 +74,27 @@ these. The agent itself is documented in [api/agent.md](../api/agent.md).
 
 The server fails fast with a clear message if a required variable is missing.
 
+## Why there are two configuration systems
+
+AJ-OS has **two configuration mechanisms on purpose**, one per transport:
+
+| System | Governs | Source | Code |
+| --- | --- | --- | --- |
+| `aj.config.json` service | the **CLI / platform** (`aj ask`, `aj wiki build`, `aj session end`) | a committed `aj.config.json` (`handbook.path`, `handbook.generatedWikiPath`, `handbook.reviewPath`) | `src/platform/config` (`ConfigService`) |
+| dotenv / env | the **Agent + HTTP API transport** (`npm run serve`) | `.env` process variables (`HANDBOOK_PATH`, `API_AUTH_TOKEN`, …) | `src/config` (`appEnv`, `agentEnv`) |
+
+They are **separate because they serve separate transports** — a locally-run CLI
+configured by a project file, and a long-running server configured by its
+environment (Docker/n8n). Each has its own handbook-path variable
+(`handbook.path` vs `HANDBOOK_PATH`) and its own validation style.
+
+**Unifying them is deliberately deferred**, not overlooked: merging two working
+config systems is platform evolution, not a quality cleanup (Repository
+Excellence scope guard), and the split is most likely to resolve naturally when
+the API transport is replaced by an MCP transport. Until then, use `aj.config.json`
+for the CLI and `.env` for the server; they do not share state.
+*(Recorded by REX-404; see also the `src/config` row in [CONTRIBUTING § module map](../../CONTRIBUTING.md#where-every-module-lives).)*
+
 ## Security
 
 - Never commit `.env`, API keys, or tokens; ensure `.env` is in `.gitignore`.

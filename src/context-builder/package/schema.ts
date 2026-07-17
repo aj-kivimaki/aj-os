@@ -13,7 +13,8 @@
 
 import { z } from "zod";
 
-import type { ContextPackage, DeepReadonly } from "./types.js";
+import type { ContextPackage } from "./types.js";
+import { deepFreeze } from "./deepFreeze.js";
 
 /**
  * Canonical Context Package section identifiers. The `kind` labels a section's
@@ -193,16 +194,6 @@ export const contextPackageSchema = z
  * Recursively freeze a value, returning it typed as deeply immutable. Used to
  * make a parsed Context Package immutable at runtime as well as in the types.
  */
-function deepFreeze<T>(value: T): DeepReadonly<T> {
-  if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
-    Object.freeze(value);
-    for (const key of Object.keys(value)) {
-      deepFreeze((value as Record<string, unknown>)[key]);
-    }
-  }
-  return value as DeepReadonly<T>;
-}
-
 /**
  * Validate an unknown value against the Context Package contract and return a
  * deeply-immutable package.

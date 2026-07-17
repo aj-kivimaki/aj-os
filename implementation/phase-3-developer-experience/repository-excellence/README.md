@@ -4,7 +4,7 @@
 >
 > **Related Specification:** _None._ This is a **non-specification engineering quality package**. See [Why this package has no SPEC](#why-this-package-has-no-spec).
 >
-> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on 2026-07-17. The Review Findings Inventory, milestone roadmap, governing principles, sequencing, and package-level decisions are frozen. **Each milestone still runs its own Planning → Planning Review → Planning Freeze.** **M1, M2, M3-A, and M3-B COMPLETE and FROZEN** (AJ, 2026-07-17) — *M1 Repository Truth · M2 Repository Verification · M3-A Public Contract Governance · M3-B Semantic Naming & Repository Taxonomy.* M3-B closed 6 findings via a **role-based naming rule** (7 pure renames, no surface change) and a **module taxonomy covering 11/11 modules** (test-enforced); 723 tests green. **Next: M4 — Structural Consistency & Genuine Duplication.**
+> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on 2026-07-17. The Review Findings Inventory, milestone roadmap, governing principles, sequencing, and package-level decisions are frozen. **Each milestone still runs its own Planning → Planning Review → Planning Freeze.** **M1, M2, M3-A, M3-B, and M4 COMPLETE and FROZEN** (AJ, 2026-07-17) — *M1 Repository Truth · M2 Repository Verification · M3-A Public Contract Governance · M3-B Semantic Naming & Repository Taxonomy · M4 Implementation Integrity & Testability.* M4 treated duplication as evidence (2 kept parallel, 1 consolidated in-boundary), fixed one security-guard defect **characterization-first**, gave `KnowledgeAssistant` dependency injection + its first tests, and moved the agent layer off zero coverage; 738 tests green, behaviour preserved. **Next: M5 — Comments, Errors & Test Craft (the final milestone).**
 
 ---
 
@@ -134,7 +134,7 @@ See [MILESTONES.md](MILESTONES.md) for the frozen roadmap.
 | M2 | Automated Quality Gates | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-A | Public Surface *(contractual)* | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-B | Naming & Readability | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M4 | Structural Consistency & Genuine Duplication | ⬜ |
+| M4 | Structural Consistency & Genuine Duplication | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M5 | Comments, Errors & Test Craft | ⬜ |
 
 ---

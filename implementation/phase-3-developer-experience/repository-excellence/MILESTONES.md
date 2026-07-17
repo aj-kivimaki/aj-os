@@ -56,7 +56,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 | M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ⬜ |
+| M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M5 | Comments, Errors & Test Craft | Comments state constraints; errors share a taxonomy and a voice | ⬜ |
 
 ---
@@ -938,15 +938,58 @@ standard the rest of the repository already meets.
 - `KnowledgeAssistant` composition root + tests
 - Agent-layer and handbook test suites
 
+## Evidence Review — the duplication findings split cleanly (measured against `HEAD`, `c7f59e1`)
+
+| Finding | Disposition | Why |
+|---|---|---|
+| **F-049** path-guard ×3 | **keep parallel** (REX-D3) | three different roots, **opposite canonicality** (wiki *writes* canonical; review *rejects* canonical per SPEC-003 §17; handbook guards read-only subtrees) — fails responsibility + lifecycle |
+| **F-050** WikiStore catch-in-loop | **fix, regardless** | confirmed divergence: WikiStore must re-throw `WikiStoreError` in-loop; ReviewStore factored out `realpathIfExists` — a defect, decoupled from F-049 |
+| **F-051** `deepFreeze` ×6 | **consolidate the 5 in context-builder** | all four criteria hold in-module; `immutable.ts` **excluded (EOS-005)** |
+| **F-052** JSON-parse ×2 | **keep parallel** (EOS-005) | the code itself says it "reuses… **adapted** to the module convention" |
+| **F-053** `KnowledgeAssistant` | **inject deps + test** | hard-wires `new ConfigService/PromptRenderer/AIClient`; **no test constructs it** |
+| **F-054** agent layer | **add suites** | `tests/{agent,api,handbook}/` all **0 files**; live via n8n |
+| **F-055** two config systems | **document/bound** (scope guard) | two transports; merging is a redesign, deferred |
+
+**Two of four duplication findings are "keep parallel"** — the expected shape when duplication is
+treated as evidence. The one defect (F-050) is decoupled and fixed regardless.
+
+## Protected outcomes — one per task
+
+| Task | **Protected outcome** | Findings | Gated on |
+|------|---|---|---|
+| [REX-401](tasks/REX-401.md) | duplication evaluated against the criteria; genuine drift fixed | F-049, F-050, F-051, F-052 | **REX-D3** |
+| [REX-402](tasks/REX-402.md) | `KnowledgeAssistant` constructible with injected deps, and tested | F-053 | — |
+| [REX-403](tasks/REX-403.md) | the live agent layer & handbook writer have suites | F-054 | — |
+| [REX-404](tasks/REX-404.md) | the two config systems documented and bounded, not merged | F-055 | — |
+
 ## Task Progress
 
-_Task breakdown authored at M4 Planning. Findings: F-049..F-055._
+| Task | Description | Status |
+|------|-------------|--------|
+| REX-401 | Duplication adjudicated (F-049/052 keep, F-051 consolidate in-module) & F-050 drift fixed | ⬜ ready |
+| REX-402 | KnowledgeAssistant DI + tests (F-053) | ⬜ ready |
+| REX-403 | Agent-layer & handbook test suites (F-054) | ⬜ ready |
+| REX-404 | Config-system boundary documented (F-055) | ⬜ ready |
+
+_Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. **REX-D3 ruled** — F-049 keep,
+F-050 fix independently, F-051 consolidate (context-builder boundary only), F-052 keep. All evidence
+re-measured against `HEAD`. **REX-401 first** (later tasks benefit from its decisions), then REX-402 ∥
+REX-403, then REX-404 concludes. **REX-401 is the highest-risk task in the package** (security-relevant
+path code) — characterization-first is mandatory._
+
+### Ratified at the M4 Planning Review (AJ, 2026-07-17)
+
+| # | Decision | Outcome |
+|---|---|---|
+| 1 | **[REX-D3](decisions/REX-D3.md)** — shared-ownership criteria per item | **Accepted.** F-049 keep · F-050 fix independently · F-051 consolidate (context-builder boundary only) · F-052 keep. |
+| 2 | Outcome-based decomposition (401 duplication/drift · 402 constructibility · 403 verification of untested paths · 404 config documentation) | **Approved.** Independent outcomes, kept separate. |
+| 3 | Characterization-first for REX-401 + live n8n paths before/after | **Approved** — *"the strongest validation strategy proposed so far."* |
 
 ## Dependencies
 
 ### Requires
 - M2 (a safety net for the highest-risk code changes in the package)
-- REX-D1 (the agent layer's status), REX-D3
+- REX-D1 (the agent layer's status), **[REX-D3](decisions/REX-D3.md)**
 
 ### Enables
 - M5
@@ -959,12 +1002,84 @@ _Task breakdown authored at M4 Planning. Findings: F-049..F-055._
 
 ## Definition of Done
 
-- [ ] REX-D3 recorded, with **the EOS-005 tension explicitly addressed either way**.
-- [ ] `end-of-session/contracts/immutable.ts` **untouched** (EOS-005).
-- [ ] `KnowledgeAssistant` constructible with injected dependencies, and **tested**.
-- [ ] The live capability is intact.
-- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
-- [ ] Retrospective created.
+- [x] REX-D3 recorded, with the EOS-005 tension addressed per item (F-049/F-052 keep, F-051 consolidate in-boundary, F-050 fixed).
+- [x] `end-of-session/contracts/immutable.ts` **untouched** (EOS-005) — verified by `git diff`.
+- [x] `KnowledgeAssistant` constructible with injected dependencies, and **tested** (REX-402, 3 tests).
+- [x] The live capability is intact — full suite green throughout; auth gate on both routes characterized.
+- [x] Freeze Review completed; **Milestone Freeze declared by the reviewer (AJ) on 2026-07-17.** _(§7 weighed and ruled: **F-054 partial closure approved** — F-030-class, no test harness required before freeze; the **format-gate incident ruled evidence the verification layer works** — process functioning as designed, not an argument against freeze.)_
+- [x] Retrospective created (§4.7 stage 7) — [retrospectives/RETROSPECTIVE-M4.md](retrospectives/RETROSPECTIVE-M4.md).
+
+---
+
+## M4 Freeze Review — Evidence (prepared for the reviewer)
+
+> **M4 stays ⬜ until the reviewer declares the freeze** (§5.3/§5.4). Including §8 — the case
+> *against*.
+
+### 1. Tasks complete
+
+REX-401, REX-402, REX-403, REX-404 — all done. **Five commits** (`1116ff1..a311b96`): planning
+freeze, then one per task.
+
+### 2. Findings — 6 closed, 1 partial
+
+| Finding | Disposition |
+|---|---|
+| F-049 | **keep parallel** (REX-D3) — different roots, opposite canonicality |
+| F-050 | **fixed** — WikiStore guard → `realpathIfExists`/`isInside`; the escape error can no longer be swallowed |
+| F-051 | **consolidated** — 5 `deepFreeze` → 1 in context-builder; `immutable.ts` untouched (EOS-005) |
+| F-052 | **keep parallel** (EOS-005) — the code documents "adapted" |
+| F-053 | **closed** — `KnowledgeAssistant` DI + 3-test suite (constructed with fakes, no real IO) |
+| F-054 | 🔨 **partial** — dispatcher + auth gate characterized (11 tests); env-bound end-to-end recorded as a boundary |
+| F-055 | **documented and bounded** — not merged (scope guard) |
+
+### 3. Behaviour preserved — the milestone's core claim
+
+| Property | Evidence |
+|---|---|
+| Suite | **738 tests / 63 files** (723 → 738; +15 new, none removed or weakened) |
+| Security behaviour | the WikiStore guard still rejects every escape class (symlink, `..`, absolute, **+ a new NUL characterization test**); characterization-first |
+| Production wiring | `ask.ts`'s `new KnowledgeAssistant()` unchanged — real deps via `defaultKnowledgeAssistantDeps()` |
+| `deepFreeze` | freeze semantics identical; a mutation attempt still throws |
+| Gates | format · lint · typecheck · build — all green |
+
+### 4. Characterization-first (the reviewer's required strategy)
+
+REX-401's guard refactor was preceded by confirming the escape suite covers symlink / `..` / absolute
+/ ENOENT-walk-up, and **adding the missing NUL test proven green first**. The two live routes' guard
+(`registerAuth`) is characterized before-and-independent-of any change.
+
+### 5. Frozen work untouched
+
+`immutable.ts` untouched (EOS-005); no `docs/architecture/**`, `docs/standards/**`, `archive/**`,
+`decisions/EOS-*`/`CB-*` touched. No ADR authored.
+
+### 6. Decisions
+
+**REX-D3** (Accepted — F-049 keep · F-050 fix · F-051 consolidate in-boundary · F-052 keep).
+
+### 7. What the reviewer should weigh — the case *against* a freeze
+
+- **F-054 closes only partially, and it is the milestone's weakest point.** The agent layer's
+  *zero-coverage* state is resolved (dispatcher contract + auth gate, 11 tests), but `loop.ts`, the
+  route handlers end-to-end, and `handbook/writer.ts` remain uncharacterized because `env` is frozen
+  at import (`appEnv.ts`) — end-to-end tests need `HANDBOOK_PATH` set at import and would risk
+  polluting the real vault. **A reviewer could reasonably require a test-env harness before accepting
+  the milestone**, or accept the boundary as F-030-class (a recorded tooling limit) and defer the
+  harness. I chose the deterministic, non-polluting coverage and recorded the boundary rather than
+  build the harness inside M4.
+- **The auth test exercises `registerAuth` on a purpose-built app, not the real `server.ts` wiring.**
+  It characterizes the guard's behaviour, not the server's full assembly. `server.ts` remains
+  uncovered (same env boundary).
+- **`defaultKnowledgeAssistantDeps()` constructs the real deps even when a test overrides them** — a
+  negligible waste, but it means "constructs without a real key" relies on `AIClient`/`ConfigService`
+  construction being side-effect-free (true today, and unchanged from the prior field initializers).
+- **A SonarLint "move to outer scope" advisory on the WikiStore's pre-existing nested
+  `assertNoSymlinkEscape` was left as-is** — IDE-only, not the biome gate, and outside F-050's hazard.
+
+### 8. Definition of Done
+
+Four of six satisfied; the remaining two are the freeze itself and the retrospective that follows it.
 
 ---
 
@@ -1020,7 +1135,7 @@ Ruled at the package Planning Review, or scheduled for their milestone's Plannin
 | **REX-D0** | Findings Inventory substitutes for §4.2 Specification Decomposition; §7.7 Tailoring applied deliberately and its result recorded | all | ✅ **Accepted** — ratified by the package Planning Freeze (AJ, 2026-07-17) |
 | **REX-D1** | Where does the agent layer live architecturally? ARCH-001 amendment (needs an ADR, §3) vs. README/CONTRIBUTING only? | **M1** (REX-106), M3-B, M4 | ✅ **Accepted** — ruled at the M1 Planning Review (AJ, 2026-07-17). Document + recommend; **amend no architecture**. |
 | **[REX-D2](decisions/REX-D2.md)** | File naming rule — codify the role-based convention; rule the 4 PascalCase-factory files (camelCase vs concept-name). | M3-B (REX-304) | ✅ **Accepted** — ruled at the M3-B Planning Review (AJ, 2026-07-17). Role-based rule; the 4 → **camelCase** (no exception); **F-047 a non-violation**. |
-| **REX-D3** | Shared-ownership criteria applied to the path guard, model-JSON-parse, and the error base | M4, M5 | ⬜ M4 Planning |
+| **[REX-D3](decisions/REX-D3.md)** | Shared-ownership criteria applied to the path guard, `deepFreeze`, and model-JSON-parse | M4 (REX-401), M5 | ✅ **Accepted** — ruled at the M4 Planning Review (AJ, 2026-07-17). **F-049 keep · F-050 fix independently · F-051 consolidate (context-builder only) · F-052 keep.** |
 | **REX-D4** | Consolidate test helpers, or reaffirm per-suite inlining? | M5 | ⬜ M5 Planning |
 | **[REX-D5](decisions/REX-D5.md)** | Frozen-surface dead code — remove (FPCP), implement, or document? Per item (F-041/042/043). | M3-A (REX-301) | ✅ **Accepted** — ruled at the M3-A Planning Review (AJ, 2026-07-17). F-041 document-reserved; F-042 document-ADR-006-staging; F-043 document-or-FPCP-remove per SPEC-005. **No removal authorised for F-041/F-042.** |
 | **REX-D6** | The rule separating a load-bearing comment from noise | M5 | ⬜ M5 Planning |
