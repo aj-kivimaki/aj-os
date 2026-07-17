@@ -785,15 +785,55 @@ the agent layer, with its expected lifetime stated.
 - CONTRIBUTING's architecture rule covering 100% of `src/`
 - README's subsystem table including the agent layer
 
+## Evidence Review — the milestone is smaller and different than the inventory frames
+
+Measured against `HEAD` (`5033f8e`) at M3-B Planning:
+
+- **Not "converge three casings to one."** The repository has an **implicit role-based rule** —
+  PascalCase ⇒ eponymous type/class, camelCase ⇒ factory/function — that **22 of 26 PascalCase files
+  already follow.** REX-D2 **codifies** it; it does not invent one.
+- **F-048 understated the lowercase category.** It named 2 files; measurement found **59** — of which
+  **32 are the universal `types.ts`/`schema.ts` convention** a rule must bless, not fix.
+- **The real violations are narrow: 7 files.** **F-046 is 4 files, not 2** (`FilesystemReviewStore`,
+  `FilesystemWikiStore`, **`FilesystemSourceConnector`, `AnthropicKnowledgeCompiler`** — the last two
+  the inventory never named) + **3 kebab files** (`system-prompt.ts`, `agent-env.ts`, `app-env.ts`).
+- **F-047 is probably a non-violation:** `wikiKnowledgeProvider.ts` exports a factory, so camelCase is
+  *correct* under the rule. Recommend reclassifying, not renaming.
+- **F-023 confirmed:** CONTRIBUTING names 3 of 11 top-level modules; 8 lack a slot.
+
+## Protected outcomes — one per task
+
+| Task | **Protected outcome** | Findings | Gated on |
+|------|---|---|---|
+| [REX-304](tasks/REX-304.md) | **every `src/` file conforms to one role-based naming rule, or is a recorded exception** | F-045, F-046, F-047, F-048 | **REX-D2 ruling** |
+| [REX-305](tasks/REX-305.md) | **the architecture docs have a slot for every top-level module, with its lifetime** | F-023 (+ F-022 doc half) | REX-D1 (accepted) |
+
 ## Task Progress
 
-_Task breakdown authored at M3-B Planning. Findings: F-023, F-045..F-048._
+| Task | Description | Status |
+|------|-------------|--------|
+| REX-304 | One file-naming rule applied — 7 renames (4 PascalCase-factory → camelCase + 3 kebab), F-047 a non-violation, rule into CONTRIBUTING | ⬜ ready |
+| REX-305 | Architecture taxonomy — CONTRIBUTING covers 11/11 modules with lifetimes; README subsystem table adds the agent layer | ⬜ ready |
+
+_Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. **REX-D2 ruled** — role-based
+rule adopted; the 4 PascalCase-factory files rename to camelCase (Option A); **F-047 confirmed a
+non-violation.** All finding evidence re-measured against `HEAD` — the inventory's pointers predate
+M2's formatter. **REX-304 and REX-305 are independent protected outcomes; orderable either way.**_
+
+### Ratified at the M3-B Planning Review (AJ, 2026-07-17)
+
+| # | Decision | Outcome |
+|---|---|---|
+| 1 | **[REX-D2](decisions/REX-D2.md)** — the file-naming rule | **Accepted.** Role-based rule adopted (*"names communicate semantic role rather than visual consistency"*); the 4 PascalCase-factory files → camelCase, **no concept-name exception**; F-047 a non-violation. |
+| 2 | Naming (REX-304) vs taxonomy (REX-305) as separate outcomes | **Approved.** Distinct protected outcomes; kept separate. |
+| 3 | Carry M3-A's rename-safety lessons | **Approved.** REX-303 manifests as rename proof; restore-by-rewrite, not `git checkout`. |
 
 ## Dependencies
 
 ### Requires
-- **M3-A frozen** — a rename and an export change are indistinguishable in a barrel diff
-- REX-D1 (the lifetime taxonomy)
+- **M3-A frozen** (done) — a rename and an export change are indistinguishable in a barrel diff; **the
+  REX-303 manifests now make a stray export go red**, so a pure rename is provably pure.
+- **[REX-D2](decisions/REX-D2.md)** (the naming rule) · **REX-D1** (the lifetime taxonomy, accepted).
 
 ### Enables
 - M4, M5
@@ -911,7 +951,7 @@ Ruled at the package Planning Review, or scheduled for their milestone's Plannin
 |---|---|---|---|
 | **REX-D0** | Findings Inventory substitutes for §4.2 Specification Decomposition; §7.7 Tailoring applied deliberately and its result recorded | all | ✅ **Accepted** — ratified by the package Planning Freeze (AJ, 2026-07-17) |
 | **REX-D1** | Where does the agent layer live architecturally? ARCH-001 amendment (needs an ADR, §3) vs. README/CONTRIBUTING only? | **M1** (REX-106), M3-B, M4 | ✅ **Accepted** — ruled at the M1 Planning Review (AJ, 2026-07-17). Document + recommend; **amend no architecture**. |
-| **REX-D2** | File naming rule; converge classes-vs-factories or not? | M3-B | ⬜ M3-B Planning |
+| **[REX-D2](decisions/REX-D2.md)** | File naming rule — codify the role-based convention; rule the 4 PascalCase-factory files (camelCase vs concept-name). | M3-B (REX-304) | ✅ **Accepted** — ruled at the M3-B Planning Review (AJ, 2026-07-17). Role-based rule; the 4 → **camelCase** (no exception); **F-047 a non-violation**. |
 | **REX-D3** | Shared-ownership criteria applied to the path guard, model-JSON-parse, and the error base | M4, M5 | ⬜ M4 Planning |
 | **REX-D4** | Consolidate test helpers, or reaffirm per-suite inlining? | M5 | ⬜ M5 Planning |
 | **[REX-D5](decisions/REX-D5.md)** | Frozen-surface dead code — remove (FPCP), implement, or document? Per item (F-041/042/043). | M3-A (REX-301) | ✅ **Accepted** — ruled at the M3-A Planning Review (AJ, 2026-07-17). F-041 document-reserved; F-042 document-ADR-006-staging; F-043 document-or-FPCP-remove per SPEC-005. **No removal authorised for F-041/F-042.** |
