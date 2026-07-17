@@ -1,23 +1,14 @@
+import { AjError } from "../platform/AjError.js";
 import { realpathSync, statSync } from "node:fs";
 import path from "node:path";
 
 import { env } from "../config/appEnv.js";
 
 /** Thrown when a requested path would escape its allowed subtree. */
-export class PathEscapeError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "PathEscapeError";
-  }
-}
+export class PathEscapeError extends AjError {}
 
 /** Thrown when a handbook file or directory does not exist. */
-export class HandbookNotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "HandbookNotFoundError";
-  }
-}
+export class HandbookNotFoundError extends AjError {}
 
 /** The two subtrees the agent is allowed to touch, relative to the vault root. */
 const WIKI_SUBDIR = "wiki";
@@ -35,7 +26,7 @@ export function getVaultRoot(): string {
   }
 
   if (!env.HANDBOOK_PATH) {
-    throw new Error("HANDBOOK_PATH is not configured");
+    throw new Error("HANDBOOK_PATH is not configured.");
   }
 
   let resolved: string;
@@ -64,7 +55,7 @@ export function getVaultRoot(): string {
  */
 function resolveInside(base: string, relativePath: string): string {
   if (relativePath.includes("\0")) {
-    throw new PathEscapeError("Path must not contain NUL bytes");
+    throw new PathEscapeError("Path must not contain NUL bytes.");
   }
   if (path.isAbsolute(relativePath)) {
     throw new PathEscapeError(`Path must be relative: ${relativePath}`);

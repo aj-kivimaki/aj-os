@@ -9,7 +9,7 @@ export function registerErrorHandler(app: FastifyInstance): void {
     if (error instanceof z.ZodError) {
       reply.status(400).send({
         error: "invalid_request",
-        message: "Request body failed validation",
+        message: "Request body failed validation.",
         issues: error.issues.map((issue) => ({
           path: issue.path.join("."),
           message: issue.message,
@@ -40,7 +40,7 @@ export function registerErrorHandler(app: FastifyInstance): void {
     request.log.error(error);
     reply.status(500).send({
       error: "internal_error",
-      message: "An unexpected error occurred",
+      message: "An unexpected error occurred.",
     });
   });
 }

@@ -1,3 +1,4 @@
+import { AjError } from "../AjError.js";
 import type { Stats } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -26,12 +27,7 @@ const DEFAULT_REVIEW_PATH = "knowledge-review";
  * The product catches this to print a friendly explanation, while letting
  * unexpected errors surface loudly.
  */
-export class ConfigError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ConfigError";
-  }
-}
+export class ConfigError extends AjError {}
 
 /**
  * Reads and validates `aj.config.json`.
@@ -79,8 +75,8 @@ export class ConfigService {
   private parseJson(raw: string): unknown {
     try {
       return JSON.parse(raw);
-    } catch {
-      throw new ConfigError(`Invalid JSON in ${CONFIG_FILE_NAME}.`);
+    } catch (error) {
+      throw new ConfigError(`Invalid JSON in ${CONFIG_FILE_NAME}.`, { cause: error });
     }
   }
 

@@ -14,6 +14,7 @@
  * - `locate` resolves the destination to its canonical (realpath) root and requires
  *   it to exist and be a directory.
  */
+import { AjError } from "../../platform/AjError.js";
 import {
   appendFile,
   mkdir,
@@ -32,12 +33,7 @@ import type { WikiLocation, WikiStore } from "./WikiStore.js";
 const LOG_FILE = "log.md";
 
 /** Raised on misconfiguration or a guarded-path violation. */
-export class WikiStoreError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "WikiStoreError";
-  }
-}
+export class WikiStoreError extends AjError {}
 
 export interface FilesystemWikiStoreOptions {
   /** Directory the wiki is persisted to (e.g. `handbook/wiki`). Must exist. */
@@ -156,7 +152,7 @@ export function createFilesystemWikiStore(
       throw new WikiStoreError("Path must be a non-empty string.");
     }
     if (relPath.includes("\0")) {
-      throw new WikiStoreError("Path must not contain null bytes.");
+      throw new WikiStoreError("Path must not contain NUL bytes.");
     }
     const root = await getRoot();
     const candidate = path.resolve(root, relPath);

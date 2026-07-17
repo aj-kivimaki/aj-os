@@ -3,8 +3,8 @@ import {
   resetGeneratedWiki,
 } from "../../knowledge/composition/index.js";
 import type { GenerationReport } from "../../knowledge/wiki-generator/index.js";
-import { ConfigError, ConfigService } from "../../platform/config/index.js";
-import { AIError } from "../../platform/ai/index.js";
+import { AjError } from "../../platform/AjError.js";
+import { ConfigService } from "../../platform/config/index.js";
 
 /** Options parsed off the `wiki build` command line. */
 export interface WikiBuildOptions {
@@ -38,9 +38,12 @@ export async function wikiBuildCommand(options: WikiBuildOptions = {}): Promise<
     );
     report = await generator.run({ mode });
   } catch (error) {
-    // Known, user-facing problems (missing config, missing API key) print a
-    // friendly message; anything unexpected surfaces loudly.
-    if (error instanceof ConfigError || error instanceof AIError) {
+    // Every AJ-OS domain error is a known, user-facing problem (missing config,
+    // missing API key, a handbook missing `foundation/`, …): print its message
+    // friendly. Anything else surfaces loudly. Matching `AjError` rather than an
+    // enumerated list is what closes F-060 — `SourceConnectorError` used to fall
+    // through to a raw stack trace here.
+    if (error instanceof AjError) {
       console.log();
       console.log(error.message);
       console.log();

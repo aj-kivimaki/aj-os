@@ -21,6 +21,7 @@
  * reverse index (`source → [pages]`) and a per-page generated-region hash (for
  * future in-region drift detection) — never knowledge.
  */
+import { AjError } from "../../platform/AjError.js";
 import { createHash } from "node:crypto";
 
 import type { SourceRecord } from "../../ingestion/index.js";
@@ -48,12 +49,7 @@ const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---\n?/;
 const STALE_KEY_RE = /^(status|stale_reason|stale_since):/;
 
 /** Raised on generator misconfiguration or corrupt state. */
-export class WikiGeneratorError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "WikiGeneratorError";
-  }
-}
+export class WikiGeneratorError extends AjError {}
 
 interface SourceState {
   readonly hash: string;
