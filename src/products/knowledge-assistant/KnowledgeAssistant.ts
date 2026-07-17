@@ -33,6 +33,39 @@ export interface AskOptions {
 type StageTimings = Record<string, number>;
 
 /**
+ * The platform capabilities the Knowledge Assistant consumes.
+ *
+ * Injected so the product is constructible — and testable — without a real
+ * filesystem or API key (REX-402). Production wires the real capabilities via
+ * {@link defaultKnowledgeAssistantDeps}; a test injects fakes. `HandbookService`
+ * and `RetrievalService` are built per question from runtime config, so they
+ * enter as factories rather than instances.
+ */
+export interface KnowledgeAssistantDeps {
+  readonly config: ConfigService;
+  readonly promptRenderer: PromptRenderer;
+  readonly ai: AIClient;
+  readonly createHandbook: (path: string, generatedWikiPath: string) => HandbookService;
+  readonly createRetrieval: (wikiPath: string) => RetrievalService;
+}
+
+/**
+ * The product's production dependencies — the real platform wiring. Constructing
+ * `config`/`ai` here touches no filesystem and requires no key (keys are
+ * validated only when an answer is first requested), so this is side-effect-free.
+ */
+export function defaultKnowledgeAssistantDeps(): KnowledgeAssistantDeps {
+  return {
+    config: new ConfigService(),
+    promptRenderer: new PromptRenderer(),
+    ai: new AIClient(),
+    createHandbook: (path, generatedWikiPath) =>
+      new HandbookService(path, generatedWikiPath),
+    createRetrieval: (wikiPath) => new RetrievalService(wikiPath),
+  };
+}
+
+/**
  * The Knowledge Assistant product.
  *
  * The product owns the entire interactive experience: it renders the
@@ -57,27 +90,27 @@ export class KnowledgeAssistant {
   private static readonly PRODUCT_VERSION = "1.0.0";
 
   /**
-   * Configuration is a platform capability the product consumes. The
-   * dependency points product → platform; the Config Service knows nothing
-   * about this product.
+   * Platform capabilities the product consumes (product → platform; the platform
+   * knows nothing about this product). Injected via the constructor so the
+   * product is testable without a real filesystem or key; production supplies the
+   * real wiring through {@link defaultKnowledgeAssistantDeps}. `HandbookService`
+   * and `RetrievalService` are built per question from runtime config, so they
+   * are held as factories.
    */
-  private readonly config = new ConfigService();
+  private readonly config: ConfigService;
+  private readonly promptRenderer: PromptRenderer;
+  private readonly ai: AIClient;
+  private readonly createHandbook: (path: string, generatedWikiPath: string) => HandbookService;
+  private readonly createRetrieval: (wikiPath: string) => RetrievalService;
 
-  /**
-   * Prompt rendering is a platform capability the product consumes. The renderer
-   * turns a Context Package into an AI-ready prompt; it calls no AI and knows no
-   * provider. Connecting an AI client to that prompt arrives in the next
-   * milestone.
-   */
-  private readonly promptRenderer = new PromptRenderer();
-
-  /**
-   * The AI client is a platform capability the product consumes. It owns the
-   * provider, model selection, SDK and transport; the product hands it a rendered
-   * prompt and displays the answer. Constructing it never requires a configured
-   * key — that is validated when an answer is first requested.
-   */
-  private readonly ai = new AIClient();
+  constructor(deps: Partial<KnowledgeAssistantDeps> = {}) {
+    const resolved = { ...defaultKnowledgeAssistantDeps(), ...deps };
+    this.config = resolved.config;
+    this.promptRenderer = resolved.promptRenderer;
+    this.ai = resolved.ai;
+    this.createHandbook = resolved.createHandbook;
+    this.createRetrieval = resolved.createRetrieval;
+  }
 
   /**
    * Start an interactive session and run it until the user leaves.
@@ -168,13 +201,13 @@ export class KnowledgeAssistant {
       const config = await measure(timings, "config", () => this.config.load());
       handbookPath = config.handbook.path;
 
-      const handbook = new HandbookService(
+      const handbook = this.createHandbook(
         config.handbook.path,
         config.handbook.generatedWikiPath,
       );
       const info = await measure(timings, "handbook", () => handbook.locateWiki());
 
-      const retrieval = new RetrievalService(info.wikiPath);
+      const retrieval = this.createRetrieval(info.wikiPath);
       results = await measure(timings, "retrieval", () => retrieval.search(question));
 
       if (results.length > 0) {
