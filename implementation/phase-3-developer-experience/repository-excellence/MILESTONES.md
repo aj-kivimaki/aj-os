@@ -1002,12 +1002,84 @@ path code) — characterization-first is mandatory._
 
 ## Definition of Done
 
-- [ ] REX-D3 recorded, with **the EOS-005 tension explicitly addressed either way**.
-- [ ] `end-of-session/contracts/immutable.ts` **untouched** (EOS-005).
-- [ ] `KnowledgeAssistant` constructible with injected dependencies, and **tested**.
-- [ ] The live capability is intact.
+- [x] REX-D3 recorded, with the EOS-005 tension addressed per item (F-049/F-052 keep, F-051 consolidate in-boundary, F-050 fixed).
+- [x] `end-of-session/contracts/immutable.ts` **untouched** (EOS-005) — verified by `git diff`.
+- [x] `KnowledgeAssistant` constructible with injected dependencies, and **tested** (REX-402, 3 tests).
+- [x] The live capability is intact — full suite green throughout; auth gate on both routes characterized.
 - [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
 - [ ] Retrospective created.
+
+---
+
+## M4 Freeze Review — Evidence (prepared for the reviewer)
+
+> **M4 stays ⬜ until the reviewer declares the freeze** (§5.3/§5.4). Including §8 — the case
+> *against*.
+
+### 1. Tasks complete
+
+REX-401, REX-402, REX-403, REX-404 — all done. **Five commits** (`1116ff1..a311b96`): planning
+freeze, then one per task.
+
+### 2. Findings — 6 closed, 1 partial
+
+| Finding | Disposition |
+|---|---|
+| F-049 | **keep parallel** (REX-D3) — different roots, opposite canonicality |
+| F-050 | **fixed** — WikiStore guard → `realpathIfExists`/`isInside`; the escape error can no longer be swallowed |
+| F-051 | **consolidated** — 5 `deepFreeze` → 1 in context-builder; `immutable.ts` untouched (EOS-005) |
+| F-052 | **keep parallel** (EOS-005) — the code documents "adapted" |
+| F-053 | **closed** — `KnowledgeAssistant` DI + 3-test suite (constructed with fakes, no real IO) |
+| F-054 | 🔨 **partial** — dispatcher + auth gate characterized (11 tests); env-bound end-to-end recorded as a boundary |
+| F-055 | **documented and bounded** — not merged (scope guard) |
+
+### 3. Behaviour preserved — the milestone's core claim
+
+| Property | Evidence |
+|---|---|
+| Suite | **738 tests / 63 files** (723 → 738; +15 new, none removed or weakened) |
+| Security behaviour | the WikiStore guard still rejects every escape class (symlink, `..`, absolute, **+ a new NUL characterization test**); characterization-first |
+| Production wiring | `ask.ts`'s `new KnowledgeAssistant()` unchanged — real deps via `defaultKnowledgeAssistantDeps()` |
+| `deepFreeze` | freeze semantics identical; a mutation attempt still throws |
+| Gates | format · lint · typecheck · build — all green |
+
+### 4. Characterization-first (the reviewer's required strategy)
+
+REX-401's guard refactor was preceded by confirming the escape suite covers symlink / `..` / absolute
+/ ENOENT-walk-up, and **adding the missing NUL test proven green first**. The two live routes' guard
+(`registerAuth`) is characterized before-and-independent-of any change.
+
+### 5. Frozen work untouched
+
+`immutable.ts` untouched (EOS-005); no `docs/architecture/**`, `docs/standards/**`, `archive/**`,
+`decisions/EOS-*`/`CB-*` touched. No ADR authored.
+
+### 6. Decisions
+
+**REX-D3** (Accepted — F-049 keep · F-050 fix · F-051 consolidate in-boundary · F-052 keep).
+
+### 7. What the reviewer should weigh — the case *against* a freeze
+
+- **F-054 closes only partially, and it is the milestone's weakest point.** The agent layer's
+  *zero-coverage* state is resolved (dispatcher contract + auth gate, 11 tests), but `loop.ts`, the
+  route handlers end-to-end, and `handbook/writer.ts` remain uncharacterized because `env` is frozen
+  at import (`appEnv.ts`) — end-to-end tests need `HANDBOOK_PATH` set at import and would risk
+  polluting the real vault. **A reviewer could reasonably require a test-env harness before accepting
+  the milestone**, or accept the boundary as F-030-class (a recorded tooling limit) and defer the
+  harness. I chose the deterministic, non-polluting coverage and recorded the boundary rather than
+  build the harness inside M4.
+- **The auth test exercises `registerAuth` on a purpose-built app, not the real `server.ts` wiring.**
+  It characterizes the guard's behaviour, not the server's full assembly. `server.ts` remains
+  uncovered (same env boundary).
+- **`defaultKnowledgeAssistantDeps()` constructs the real deps even when a test overrides them** — a
+  negligible waste, but it means "constructs without a real key" relies on `AIClient`/`ConfigService`
+  construction being side-effect-free (true today, and unchanged from the prior field initializers).
+- **A SonarLint "move to outer scope" advisory on the WikiStore's pre-existing nested
+  `assertNoSymlinkEscape` was left as-is** — IDE-only, not the biome gate, and outside F-050's hazard.
+
+### 8. Definition of Done
+
+Four of six satisfied; the remaining two are the freeze itself and the retrospective that follows it.
 
 ---
 
