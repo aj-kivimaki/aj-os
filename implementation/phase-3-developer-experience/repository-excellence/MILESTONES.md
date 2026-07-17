@@ -99,8 +99,16 @@ Every completed milestone leaves the repository buildable, testable, and behavio
 ## Objective
 
 Make every document describe the repository that exists **today**, and discharge SPEC-003's two
-outstanding AJS-007 deliverables. **No source file changes** — this milestone's diff touches no
-`src/` or `tests/` file, and that is a testable claim.
+outstanding AJS-007 deliverables.
+
+**This milestone introduces no implementation or behavioural changes. Changes under `src/` or
+`tests/` are limited to documentation (README files) and do not modify executable source.**
+
+> *Amended by **[REX-D9](decisions/REX-D9.md)** (FPCP, accepted by the reviewer 2026-07-17). The
+> original wording — "this milestone's diff touches no `src/` or `tests/` file" — contradicted
+> REX-105's frozen scope and its own acceptance criterion. **The protected property is no
+> implementation or behavioural change, not the filesystem path in which documentation happens to
+> live.***
 
 ## Deliverables
 
@@ -119,7 +127,7 @@ outstanding AJS-007 deliverables. **No source file changes** — this milestone'
 | REX-102 | Apply the SPEC-003 specification-hygiene backlog (F-019) | ✅ |
 | REX-103 | Root documentation truth pass — README, ROADMAP, CHANGELOG (F-001, F-008, F-009, F-010) + the assertion inventory | ✅ |
 | REX-104 | Guides truth pass — installation, configuration, development (F-002, F-013..F-017) | ✅ |
-| REX-105 | Module & package README truth pass (F-005, F-006, F-007, F-011, F-012, **F-020**, F-021, F-024) | 🛑 **HALTED — [REX-D9](decisions/REX-D9.md) FPCP pending** |
+| REX-105 | Module & package README truth pass (F-005, F-006, F-007, F-011, F-012, **F-020**, F-021, F-024) | ✅ _(halted on [REX-D9](decisions/REX-D9.md); unhalted on its acceptance)_ |
 | REX-106 | The "owns git commits" contradiction + agent-layer representation (F-003, F-004, F-022) | ⬜ |
 
 _Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. **REX-D1 ruled at the same
@@ -157,20 +165,39 @@ ordering stay explicit: **repository review → recommendation; architecture →
   and authority-citation requirement are untouched; only the location moved.
   **Not an FPCP** — same reasoning as F-020, below the threshold ruled at the REX-101 review.
 
-- **📌 For the M1 retrospective — the planning lesson behind both collisions.** Ruled by the
-  reviewer (AJ) at the REX-103 review to be *"a planning observation, not an implementation
-  problem"*, and to be recorded here rather than to trigger any change during implementation. In the
-  reviewer's words:
+- **[REX-D9](decisions/REX-D9.md) — the first REX FPCP, raised by REX-105 and accepted.** M1's
+  Objective and Validation contradicted REX-105's frozen scope and its own acceptance criterion.
+  **Raised before any edit; ruled before dependent work began** — §7.2 working as designed. Reading B
+  adopted; the Objective and Validation are amended above; **no finding moved**.
 
-  > **Repository findings are not guaranteed to partition the repository. Future review planning
+- **📌 For the M1 retrospective — the planning lesson behind all three collisions.** Ruled by the
+  reviewer (AJ) — at the REX-103 review as *"a planning observation, not an implementation
+  problem"*, and restated in its general form at the REX-D9 ruling. **Record as an evidence-based
+  planning lesson.** In the reviewer's words:
+
+  > **Repository review planning should allocate work by protected outcome (behaviour,
+  > documentation, architecture), not by filesystem boundaries or finding identifiers. Paths and IDs
+  > are useful navigation aids, but they are not reliable ownership boundaries.**
+
+  Earlier formulation, from the REX-103 review:
+
+  > *Repository findings are not guaranteed to partition the repository. Future review planning
   > should allocate ownership by intended outcome rather than assuming each finding maps cleanly
-  > onto an isolated section of text.**
+  > onto an isolated section of text.*
 
-  Both M1 collisions (F-020, F-004/F-008) share this one cause: **the plan allocated findings by
-  identifier**, and implementation revealed that **one edit can legitimately affect multiple
-  findings**. Two of six M1 tasks hit it, and **both were caught by validation rather than review** —
-  each surfaced as an acceptance criterion that could not be met honestly. Carries forward to
-  M2–M5 planning.
+  **Three occurrences in one milestone, one root cause:**
+
+  | # | Collision | Kind | Found by |
+  |---|---|---|---|
+  | 1 | **F-020** — assigned to both REX-101 and REX-105 | finding ↔ finding | REX-101 validation |
+  | 2 | **F-004 / F-008** — the same two ROADMAP lines | finding ↔ finding | REX-103 validation |
+  | 3 | **[REX-D9](decisions/REX-D9.md)** — M1's path-based objective vs. REX-105's scope | **milestone property ↔ task scope** | REX-105 planning, **before any edit** |
+
+  The first two were **findings colliding with each other**; the third was a **milestone-level
+  property colliding with task scope**. All three trace to the same defect: **the plan reasoned about
+  paths and identifiers rather than protected outcomes.** Notably, **all three were caught by
+  validation or by reading the plan against itself — never by review**, because each surfaced as an
+  acceptance criterion that could not be satisfied honestly. Carries forward to M2–M5 planning.
 
 ## Dependencies
 
@@ -186,7 +213,10 @@ ordering stay explicit: **repository review → recommendation; architecture →
 
 - Every Blocking documentation claim in `FINDINGS.md` is **re-verified against the code** that
   falsifies the old text — the same command that found it now passes.
-- `git diff --stat src/ tests/` is **empty**.
+- **Changes under `src/` and `tests/` are limited to README documentation. No executable
+  implementation files (`.ts` or equivalent) are modified.** *(Amended by
+  [REX-D9](decisions/REX-D9.md); intent-based rather than path-based. Verified **able to fail** —
+  touch a `.ts`, confirm the check reports it.)*
 - Link crawl holds its clean baseline (0 broken across the repository).
 
 ## Definition of Done

@@ -139,7 +139,9 @@ Result:
 Review:
 
 - README
-- MILESTONES (the roadmap of record — there is no separate ROADMAP document)
+- MILESTONES (the implementation package's roadmap of record — a package has no
+  separate ROADMAP document of its own; the top-level `ROADMAP.md` covers the
+  project, not this package)
 - implementation README
 - task status
 - milestone status

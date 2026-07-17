@@ -16,7 +16,6 @@ npm run test:watch
 
 The suite is deterministic and fast: no filesystem, network, randomness or
 timing dependencies; fixed literal timestamps; it runs in well under a second.
-Current size: **205 tests across 15 files**.
 
 ## What is tested
 
@@ -88,8 +87,8 @@ scope-negative guarantees (no rendering, no computed explainability, no phantom
 sections). No internal mapping, title table or private helper is imported. The
 `ContextPackage` *contract* itself (runtime validation, rejection of duplicate
 ids/kinds and dangling references) is owned by `package.test.ts` (CB-003) and is
-not re-authored — CB-024 consolidates, it does not duplicate. **Milestone 4
-implementation complete — pending Freeze Review.**
+not re-authored — CB-024 consolidates, it does not duplicate. **Milestone 4 is
+complete and frozen.**
 
 ## Build integration
 

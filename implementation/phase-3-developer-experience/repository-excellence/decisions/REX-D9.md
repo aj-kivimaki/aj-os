@@ -1,7 +1,8 @@
 # REX-D9 — FPCP: M1's "no `src/` or `tests/` file" Objective Contradicts REX-105's Frozen Scope
 
-> **Status:** **PROPOSED** — Frozen Plan Change Proposal (AJS-007 §7.2). **Awaiting the reviewer.**
-> **REX-105 is halted until this is ruled.**
+> **Status:** ✅ **ACCEPTED** — Frozen Plan Change Proposal (AJS-007 §7.2), **approved by the reviewer (AJ) on 2026-07-17**. **Reading B adopted.** REX-105 unhalted and proceeds under it.
+>
+> The reviewer's holding: *"The Repository Excellence Review exists to improve repository truth without changing implementation behaviour. The protected property of M1 is therefore: no implementation changes, no behavioural changes — **not the filesystem path in which documentation happens to live**."* And on why the specific governs the general: *"Because the more specific task scope and acceptance criteria clearly define the intended behaviour, they **clarify** the broader milestone objective rather than contradicting the milestone's purpose."*
 >
 > **Type:** Repository Excellence Frozen Plan Change Proposal — alters an **objective** and an
 > **acceptance criterion**, two of the five triggers the reviewer ruled at the REX-101 review.
@@ -73,36 +74,41 @@ the reviewer's.
 
 ---
 
-# Decision requested
+# Decision — ✅ Reading B, approved by the reviewer (AJ, 2026-07-17)
 
-**The reviewer is asked to rule which statement governs**, and to accept or reject the proposed
-correction.
+## The approved amendment, as ruled
 
-## Proposed (Reading B)
+**M1's Objective** is amended from:
 
-1. **M1's Objective** is corrected from:
-   > *"**No source file changes** — this milestone's diff touches no `src/` or `tests/` file"*
+> *"this milestone's diff touches no `src/` or `tests/` file"*
 
-   to:
-   > *"**No code changes** — this milestone's diff touches no `.ts` file anywhere. Documentation
-   > that lives beside code (`src/*/README.md`, `tests/*/README.md`) is in scope; behaviour is not."*
+to:
 
-2. **M1's Validation** is corrected from `git diff --stat src/ tests/` is **empty** to:
-   > `git diff --name-only src/ tests/` contains **only `.md` files** — **no `.ts` file is touched
-   > by M1**, and that remains a testable claim.
+> **"this milestone introduces no implementation or behavioural changes. Changes under `src/` or
+> `tests/` are limited to documentation (README files) and do not modify executable source."**
 
-3. **REX-105 proceeds as frozen**; its existing acceptance criterion (*"README files only, no `.ts`
-   file"*) already states the corrected property and needs no change.
+**M1's Validation** is amended from:
 
+> *"`git diff --stat src/ tests/` is **empty**"*
+
+to an intent-based validation:
+
+> **"Changes under `src/` and `tests/` are limited to README documentation. No executable
+> implementation files (`.ts` or equivalent) are modified."**
+
+**Consequences of the ruling:**
+
+3. **REX-105 proceeds as frozen** and is **unhalted**. Its existing acceptance criterion (*"README
+   files only, no `.ts` file"*) already stated the corrected property and needs no change — *"This
+   aligns the milestone objective with the already-frozen REX-105 acceptance criterion."*
 4. **No finding moves.** F-005, F-011, F-012 close in M1 as planned.
 
-## If the reviewer rules Reading A instead
+## Reading A — rejected
 
-REX-105 is re-scoped to the four findings outside `src/`+`tests/` (F-006, F-007, F-020, F-021,
-F-024), and **F-005, F-011, F-012 are deferred** — with F-005 recorded as a Blocking finding
-knowingly left open, since `src/end-of-session/README.md` would continue to state that a shipped,
-frozen module *"has no behavior."* **The author recommends against this**, but it is a coherent
-outcome and is the reviewer's to choose.
+Reading A (literal: no file under those paths at all) would have re-scoped REX-105 to the findings
+outside `src/`+`tests/` and **deferred F-005, F-011, F-012** — leaving F-005, a **Blocking** finding,
+knowingly open while `src/end-of-session/README.md` continued to state that a shipped, frozen module
+*"has no behavior."* Not adopted.
 
 ---
 
@@ -181,10 +187,13 @@ make the Objective say what the plan's own acceptance criteria already say.**
 
 # Validation
 
-- **If B:** `git diff --name-only src/ tests/` at the M1 Freeze Review lists **only `.md` files** —
-  and the check is run to confirm it *can* fail (touch a `.ts`, confirm it reports).
-- **If A:** `git diff --stat src/ tests/` is empty, and `FINDINGS.md` shows F-005/F-011/F-012 as
-  deferred with a recorded reason.
+At the M1 Freeze Review, per the approved intent-based criterion:
+
+- `git diff --name-only <M1-base>..HEAD -- src/ tests/` lists **only README `.md` files**.
+- **No `.ts` file is modified anywhere by M1.**
+- The check is run against a deliberate violation first — touch a `.ts`, confirm it **reports** —
+  so the guarantee is known to be able to fail rather than assumed to hold. *(SPEC-003's standard:
+  a proof that cannot fail is not evidence.)*
 
 ---
 
@@ -211,6 +220,7 @@ Implementation
 
 | Date       | Version | Description      |
 | ---------- | ------- | ---------------- |
+| 2026-07-17 | 1.1     | ✅ **ACCEPTED by the reviewer (AJ) — Reading B adopted.** The protected property of M1 is *"no implementation changes, no behavioural changes — not the filesystem path in which documentation happens to live."* The more specific task scope and acceptance criteria **clarify** the broader objective rather than contradicting the milestone's purpose. M1's Objective and Validation amended to the reviewer's wording; REX-105 **unhalted** and proceeds as frozen; **no finding moves**. Reviewer also directed that the third occurrence of the allocation defect be recorded in the M1 retrospective as an evidence-based planning lesson. **The first REX FPCP, and the mechanism worked: raised before any edit, ruled before dependent work began (§7.2).** |
 | 2026-07-17 | 1.0     | **PROPOSED.** Raised by REX-105 before any edit. The M1 Objective/Validation ("touches no `src/` or `tests/` file" / "diff is empty") contradicts REX-105's frozen scope (three findings in `src/*/README.md` and `tests/*/README.md`) and REX-105's own acceptance criterion ("README files only, no `.ts` file"). Both frozen at the same review, same layer — §3 offers no resolution. **Not implemented; REX-105 halted pending the ruling.** |
 
 ---
