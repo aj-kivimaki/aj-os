@@ -319,8 +319,21 @@ it.
 
 ## Objective
 
-Make every objectively measurable property machine-verified on every PR, and non-regressible.
-**No runtime behaviour changes.** This is the ratchet the rest of the review depends on.
+Make every objectively measurable property machine-verified on every PR, and non-regressible. This
+is the ratchet the rest of the review depends on.
+
+**Runtime behaviour is intentionally unchanged.** Unlike M1, executable source **legitimately
+changes** — so the protected property is an **outcome**, not a path:
+
+- **production source changes are mechanical only** — formatter output, or diagnostics-driven
+  corrections;
+- **no test is removed, skipped, or weakened**;
+- **behaviour preservation is demonstrated by the existing validation suite**, not asserted.
+
+> *Amended by **[REX-D10](decisions/REX-D10.md)** (FPCP, accepted by the reviewer 2026-07-17,
+> **during Planning — before any implementation**). The original wording — *"No runtime behaviour
+> changes"* — was correct in intent but **not falsifiable** after a diff that touches nearly every
+> file. **Protect the outcome, not the path.***
 
 ## Deliverables
 
@@ -334,28 +347,82 @@ Make every objectively measurable property machine-verified on every PR, and non
 
 ## Task Progress
 
-_Task breakdown authored at M2 Planning. Findings: F-025..F-036._
+**Allocated by protected outcome, not by filesystem path** — applying M1's principal planning lesson
+at the reviewer's requirement, *before* the Planning Freeze.
+
+| Task | **Protected outcome** | Description | Findings | Status |
+|------|---|-------------|---|--------|
+| REX-201 | governance — **enforcement** | CI runs typecheck + build + test on push and PR | F-025 | ⬜ |
+| REX-202 | governance — **visibility** | `tsconfig.test.json` so typecheck reaches `tests/`. **Makes the errors visible; does not fix them.** | F-026 | ⬜ |
+| REX-203 | ⚠️ **executable behaviour boundary** | Resolve the **40** hidden errors. **The only M2 task changing executable source for non-mechanical reasons.** | F-027 | ⬜ |
+| REX-204 | **mechanical** (provable) | Formatter + `.editorconfig`. Isolated commit; proven by re-running the formatter on the pre-M2 tree. | F-029 | ⬜ |
+| REX-205 | **configuration truth** (behaviour risk) | Linter + the six dormant strictness flags + the dead `jsx` config | F-028, F-031, F-034 | ⬜ |
+| REX-206 | **documentation** | `package.json` metadata, `engines`, `.nvmrc`, `SECURITY.md`, `CODE_OF_CONDUCT.md` | F-032, F-033, F-035 | ⬜ |
+| REX-207 | governance — **process** | PR template, `dependabot.yml`, `CODEOWNERS` | F-036 | ⬜ |
+| REX-208 | governance — **measurement** | Coverage **measured, not gated** | F-030 | ⬜ |
+
+_Task breakdown authored at M2 Planning; **awaiting the M2 Planning Review**._
+
+### The ownership-boundary re-read (reviewer requirement, 2026-07-17)
+
+Required before this Planning Freeze, per the M1 lesson. **It found the defect it was looking for**,
+plus two evidence corrections:
+
+**The defect — three paths, each carrying multiple protected outcomes:**
+
+| Path | Findings | Outcomes tangled |
+|---|---|---|
+| `tsconfig.json` | F-026, F-031, F-034 | **governance** (what is checked) + **behaviour risk** (flags surface real issues) + **hygiene** (dead config) |
+| `.github/` | F-025, F-036 | **enforcement** (CI gates) + **process** (templates) — and **F-035 is the same outcome as F-036 but lives at root**, so path-allocation orphaned it |
+| `package.json` | F-032, F-033 | co-owned; genuinely fine |
+
+**Resolved** by the allocation above: each task now protects exactly one property.
+
+**Correction 1 — the hidden-error count is 40, not 46** *(below the FPCP threshold: no scope,
+sequencing, or acceptance change)*. The frozen inventory's **46** came from ad-hoc flags
+(`--target es2022` without the matching `lib`), inventing six false errors in
+`src/platform/retrieval/RetrievalService.ts` because `toSorted` is es2023. **The real `tsconfig`
+sets `target: esnext`.** Verified honest count: **40 errors, all in `tests/`, zero in `src/`.** The
+original exploration said 40; the author introduced the error while "verifying" it.
+
+**Correction 2 — F-031 has no coupling to M3-A.** The frozen plan warns `noUnusedLocals` *"may fail
+on the two orphaned identity resolvers"* (F-042). **Verified false** — exported symbols are not
+unused locals. Actual damage: **one** unused type, `ProviderMetadata` at
+`src/context-builder/providers/schema.ts:22`. **A cross-milestone dependency the plan assumed does
+not exist.**
+
+**Design constraint the plan omitted:** `tsconfig.test.json` **must widen `rootDir`**. Inheriting
+`rootDir: ./src` yields **58× TS6059** and never reaches typechecking at all.
 
 ## Dependencies
 
 ### Requires
 - M1 (gates are documented truthfully; CONTRIBUTING's stated policy becomes enforceable)
+- **[REX-D7](decisions/REX-D7.md)** — Biome (accepted) · **[REX-D10](decisions/REX-D10.md)** — the
+  protected outcome (accepted FPCP)
 
 ### Enables
 - M3-A, M3-B, M4, M5 — every subsequent large diff is verified rather than trusted
 
 ## Validation
 
-- **`tsc --listFiles | grep -c '/tests/'` > 0** — the direct falsifier of F-026.
-- Each gate is demonstrated **failing** on a deliberate violation, then passing. *A gate never
-  seen red is not known to work* — the standard SPEC-003 set with its canonical-unchanged proof.
-- All existing tests pass, with **no test removed, skipped, or weakened** to make a gate green.
+Per **[REX-D10](decisions/REX-D10.md)** — each clause carries a falsifier:
+
+| Clause | Falsifier |
+|---|---|
+| Typecheck reaches tests | **`tsc --listFiles \| grep -c '/tests/'` > 0** — the direct falsifier of F-026 |
+| **Formatting is mechanical** | **`format(pre-M2 tree) == post-M2 tree`.** A formatter is deterministic, so a formatting commit containing a semantic edit **fails this check**. |
+| **No test removed, skipped, or weakened** | test count does not fall; no `.skip`/`.only`/`todo` introduced; `expect` count does not fall |
+| Every non-mechanical `src/` change is **diagnostics-driven** | each traceable to the compiler or linter diagnostic that demanded it |
+| Gates work | each demonstrated **failing** on a deliberate violation, then passing. *A gate never seen red is not known to work.* |
+| Behaviour preserved | all existing tests pass |
 
 ## Definition of Done
 
 - [ ] Every measurable property in the README table green in CI.
-- [ ] Any of the 46 that prove to be **real test defects** are recorded as findings and fixed
+- [ ] Any of the **40** that prove to be **real test defects** are recorded as findings and fixed
       failing-test-first — **not silently `!`-ed away**.
+- [ ] Every clause of the protected outcome demonstrated **and shown able to fail**.
 - [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
 - [ ] Retrospective created.
 
