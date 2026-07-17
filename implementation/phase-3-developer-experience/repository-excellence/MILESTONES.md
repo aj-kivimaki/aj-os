@@ -616,33 +616,78 @@ around them. An export is a **promise to a consumer**; this milestone treats it 
 
 - Zero `export *` in `src/`
 - Barrels pruned to what consumers need
-- One FPCP per frozen-surface item, each with the reviewer's ruling
-- Dead-export inventory
+- One FPCP per frozen-surface item (F-041/F-042/F-043), each ruled by the reviewer via REX-D5
+- Public-surface **pins** for the settled modules — the enforcement, not just an inventory (REX-D8)
 - REX-D5, REX-D8
+
+## Protected outcomes — one per task (M1's allocation lesson, applied)
+
+**Allocated by protected outcome, not by module or finding ID.** F-039 and F-041 are both
+`context-builder` but different outcomes; F-037 and F-038 are different modules but one outcome. Path-
+and ID-based allocation is the defect that produced M1's three collisions.
+
+| Task | **Protected outcome** | Findings | Gated on |
+|------|---|---|---|
+| [REX-301](tasks/REX-301.md) | **frozen surface — changed only through ruled FPCPs** | F-041, F-042, F-043 | **REX-D5 rulings** |
+| [REX-302](tasks/REX-302.md) | **every non-frozen barrel exports what consumers use, and says so truthfully** | F-037, F-038, F-039, F-040 | — (carries *document* items from 301) |
+| [REX-303](tasks/REX-303.md) | **the settled surface is machine-pinned, not merely reviewed** | F-044 | **REX-D8 ruling; 301 + 302 settled** |
 
 ## Task Progress
 
-_Task breakdown authored at M3-A Planning. Findings: F-037..F-044._
+| Task | Description | Status |
+|------|-------------|--------|
+| REX-301 | Frozen-surface adjudication — F-041 **document-reserved**, F-042 **document-ADR-006-staging**, F-043 **document-or-FPCP-remove per SPEC-005 evidence** | ⬜ ready |
+| REX-302 | Non-frozen barrel truth — `export *`→explicit, prune, privacy-claim, dead file (F-037/038/039/040) | ⬜ ready |
+| REX-303 | Surface enforcement — extend the `foundation.test.ts` manifest pattern per REX-D8 **Option A** (F-044) | ⬜ last by construction |
+
+_Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. **REX-D5 ruled**
+(document/document/document-or-remove) and **REX-D8 Option A accepted** at the M3-A Planning Review.
+All finding evidence re-measured against `HEAD` (`a9f8d48`), not the inventory's `9bd051d` — M2's
+formatter (REX-204) moved every line number after the inventory froze. **REX-301 and REX-302 proceed
+in parallel; REX-303 follows once the surface is settled.**_
+
+### Ratified at the M3-A Planning Review (AJ, 2026-07-17)
+
+| # | Decision | Outcome |
+|---|---|---|
+| 1 | **[REX-D5](decisions/REX-D5.md)** — frozen-surface dead code, per item | **Accepted.** F-041 document as reserved (do not remove); F-042 document as ADR-006 Phase 1 staging (do not remove); F-043 document **if** SPEC-005 evidence supports the declaration, **else** FPCP-remove — REX-301 determines which. **No frozen-surface removal authorised for F-041/F-042.** |
+| 2 | **[REX-D8](decisions/REX-D8.md)** — surface enforcement scope | **Accepted — Option A.** Pin only the surfaces M3-A settles; B is scope creep, C leaves a closable gap open. |
+| 3 | Outcome-based decomposition + FPCP-first sequencing | **Approved.** *"A task that legitimately concludes 'the correct implementation is no code change' should be considered just as successful as one that removes or rewrites source. The protected outcome — not the amount of code changed — is the measure of completion."* |
 
 ## Dependencies
 
 ### Requires
-- M2 (CI catches an accidental surface change)
+- M2 — **with a measured caveat.** CI catches a surface change that **breaks a consumer**
+  (typecheck/build/test go red). It does **not** catch a **dead export** that breaks nothing: no
+  dead-export detector is installed and `noUnusedLocals` cannot see exports (REX-D8). **That gap is
+  exactly what REX-303 closes** — until it lands, M3-A's *"no dead export"* outcome is reviewed, not
+  enforced.
 
 ### Enables
-- **M3-B** — the surface must be settled before files move underneath it
+- **M3-B** — the surface must be settled *and pinned* before files move underneath it; a rename that
+  alters an export then turns REX-303's manifest red instead of hiding in a barrel diff.
 
 ## Validation
 
+- **FPCP-first:** every REX-D5 *remove* ruling is a recorded FPCP dated **before** REX-301 touches
+  the file (§7.2).
 - **The surface diff is reviewed export-by-export and contains no renames**, so every line is a
-  deliberate contract decision.
-- Public-surface pins in `foundation.test.ts:29-56` updated **deliberately, never incidentally**.
+  deliberate contract decision (renames belong to M3-B).
+- **`grep -rl 'export \*' src/` → empty**, proven able to fail by reintroducing one.
+- **Each REX-303 manifest proven able to fail** — a stray export turns it red, then green (the M2
+  gate lesson). Public-surface pins are updated **deliberately, never incidentally**; the exemplar is
+  `foundation.test.ts`'s `EXPECTED_OPERATIONS` (`:27-53` at HEAD — the inventory's `:29-56` predates
+  the formatter).
+- Behaviour unchanged: **713 tests green** throughout.
 
 ## Definition of Done
 
 - [ ] `context-builder/index.ts:5-6`'s privacy claim is **either true or deleted**.
-- [ ] Every FPCP ruled **before** its dependent change (§7.2).
-- [ ] Every dead export removed or **justified in writing**.
+- [ ] Every FPCP ruled **before** its dependent change (§7.2); an **all-document** REX-D5 outcome
+      (zero frozen-surface code change) is a **valid result**, per REX-D3.
+- [ ] Zero `export *` in `src/`; every dead export removed or **justified in writing**.
+- [ ] Every module M3-A settled is **pinned** by a manifest proven able to fail (REX-D8 Option A), or
+      REX-D8 recorded the reasoned decision not to.
 - [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
 - [ ] Retrospective created.
 
@@ -790,10 +835,10 @@ Ruled at the package Planning Review, or scheduled for their milestone's Plannin
 | **REX-D2** | File naming rule; converge classes-vs-factories or not? | M3-B | ⬜ M3-B Planning |
 | **REX-D3** | Shared-ownership criteria applied to the path guard, model-JSON-parse, and the error base | M4, M5 | ⬜ M4 Planning |
 | **REX-D4** | Consolidate test helpers, or reaffirm per-suite inlining? | M5 | ⬜ M5 Planning |
-| **REX-D5** | Frozen-surface dead code — remove (FPCP), implement, or document? Per item. | M3-A | ⬜ M3-A Planning |
+| **[REX-D5](decisions/REX-D5.md)** | Frozen-surface dead code — remove (FPCP), implement, or document? Per item (F-041/042/043). | M3-A (REX-301) | ✅ **Accepted** — ruled at the M3-A Planning Review (AJ, 2026-07-17). F-041 document-reserved; F-042 document-ADR-006-staging; F-043 document-or-FPCP-remove per SPEC-005. **No removal authorised for F-041/F-042.** |
 | **REX-D6** | The rule separating a load-bearing comment from noise | M5 | ⬜ M5 Planning |
 | **[REX-D7](decisions/REX-D7.md)** | Toolchain: ESLint+Prettier vs Biome | M2 | ✅ **Accepted** — ruled at the M2 Planning Review (AJ, 2026-07-17). One binary, one config, nothing to migrate. |
-| **REX-D8** | Extend `foundation.test.ts`'s public-surface enforcement beyond `end-of-session`? | M3-A | ⬜ M3-A Planning |
+| **[REX-D8](decisions/REX-D8.md)** | Extend `foundation.test.ts`'s public-surface enforcement beyond `end-of-session`? | M3-A (REX-303) | ✅ **Accepted — Option A** — ruled at the M3-A Planning Review (AJ, 2026-07-17). Pin only the surfaces M3-A settles. Measured basis: no dead-export detector exists; `noUnusedLocals` cannot see exports. |
 | **[REX-D9](decisions/REX-D9.md)** | 🛑 **FPCP** — M1's Objective/Validation (*"touches no `src/` or `tests/` file"* / *"diff is **empty**"*) contradicted REX-105's frozen scope (F-005/F-011/F-012 live under `src/` and `tests/`) **and REX-105's own acceptance criterion**. Which governs? | **M1** — REX-105 **halted** | ✅ **Accepted (FPCP)** — ruled at the M1 Planning Review (AJ, 2026-07-17). **Reading B** adopted (*"no code changes — no `.ts` file anywhere"*); M1's Objective and Validation amended to be intent-based; REX-105 unhalted. **The package's first FPCP**, raised before any edit and ruled before dependent work. |
 | **[REX-D10](decisions/REX-D10.md)** | 🛑 **FPCP** — M2 legitimately changes executable source, so M1's path-based invariant does not transfer; M2's *"no runtime behaviour changes"* is the right intent but **not falsifiable** after a diff touching nearly every file. How is the protected property expressed and proven? | **M2** (all tasks; REX-203/205 carry the weight) | ✅ **Accepted (FPCP)** — ruled at the M2 Planning Re-read (AJ, 2026-07-17), **during Planning, before any implementation**. Protected property re-expressed as an **outcome** (mechanical-only source changes; no test weakened; behaviour preserved by the existing suite), each clause given a falsifier — chiefly the **formatter proof**. **The first REX plan defect caught before implementation rather than during it.** *(Added by the register reconciliation, 2026-07-17 — the decision was ratified in the M2 freeze but never entered this register.)* |
 
