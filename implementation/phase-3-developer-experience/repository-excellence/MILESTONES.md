@@ -846,10 +846,78 @@ M2's formatter. **REX-304 and REX-305 are independent protected outcomes; ordera
 
 ## Definition of Done
 
-- [ ] Every file conforms to REX-D2 or is listed as a **reasoned exception**.
-- [ ] CONTRIBUTING names every top-level `src/` module with its expected lifetime.
+- [x] Every file conforms to REX-D2 or is a reasoned exception (F-047 recorded as a non-violation);
+      zero kebab-case in `src/` (REX-304).
+- [x] CONTRIBUTING names every top-level `src/` module with its expected lifetime, **enforced by a
+      test proven able to fail** (REX-305).
 - [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
 - [ ] Retrospective created.
+
+---
+
+## M3-B Freeze Review — Evidence (prepared for the reviewer)
+
+> **M3-B stays ⬜ until the reviewer declares the freeze** (§5.3/§5.4). Including §8 — the case
+> *against*.
+
+### 1. Tasks complete
+
+REX-304, REX-305 — both ✅. **Three commits** (`6b10b3c..b8fff62`): planning freeze, naming, taxonomy.
+
+### 2. Findings closed — 5 M3-B findings + F-022's documentation half
+
+| Finding | Disposition |
+|---|---|
+| F-045 | role-based rule codified in CONTRIBUTING and applied |
+| F-046 | **4** PascalCase-factory files renamed to camelCase `create*` (2 more than the inventory named) |
+| F-047 | **not a violation** — factory file correctly camelCase (reviewer-ruled) |
+| F-048 | 3 kebab files renamed; the "fourth style" reframed (59 files, 32 conventional the rule blesses) |
+| F-023 | CONTRIBUTING module map covers 11/11 modules with lifetimes; test-enforced |
+| F-022 (doc half) | agent layer on README subsystem table + module map; **no architecture doc amended** |
+
+### 3. Behaviour and surface unchanged
+
+| Property | Evidence |
+|---|---|
+| Renames are pure | all 7 at **100% git similarity** — zero content change |
+| Public surface unchanged | REX-303 manifests + `foundation.test.ts` **green across every rename** (a moved export would turn them red) |
+| Suite | **723 tests / 60 files** (722 + 1 new taxonomy test); none removed or weakened |
+| Gates | format · lint · typecheck · build — all green |
+
+### 4. Enforcement proven able to fail
+
+The module-taxonomy test went red on an undocumented module, then green — restored by `rm`, **not
+`git checkout`** (the M3-A lesson, applied). No `git checkout` was used to revert any probe this
+milestone.
+
+### 5. Frozen work untouched
+
+`git diff --name-only 6b10b3c^..HEAD` touches no `docs/architecture/**` (ARCH-001, ADR-*), no
+`docs/standards/**`, no `archive/**`. **No ADR authored** — the agent layer's ARCH-001 home remains a
+REX-D1 recommendation.
+
+### 6. Decisions
+
+**REX-D2** (Accepted — role-based rule, camelCase for the 4, F-047 a non-violation).
+
+### 7. What the reviewer should weigh — the case *against* a freeze
+
+- **The 3 kebab files were de-kebabed to camelCase, a judgement.** `system-prompt.ts` exports a
+  `const SYSTEM_PROMPT` (data, not a factory), so camelCase `systemPrompt.ts` is a reasonable de-kebab
+  but not the only one — a reviewer might prefer a different role classification for a const-only
+  module. The rule's lowercase category is for `index`/`types`/`schema`/`errors`, which these are not,
+  so camelCase was the closest fit.
+- **The taxonomy test is a presence check, not a completeness check.** It asserts each `src/mod/`
+  string appears in CONTRIBUTING — it would pass if a module were merely mentioned without a proper
+  lifetime row. It guards against an *undocumented* module, not a *poorly*-documented one. A stronger
+  assertion (a row per module with a lifetime column) was judged over-engineering for the risk.
+- **The `config/` row touches M4 territory.** Its description notes `src/config` is distinct from
+  `platform/config`'s service and cites F-055 — factual, but F-055 (two config systems) is M4's to
+  resolve. The row documents the split; it does not pre-empt the M4 decision.
+
+### 8. Definition of Done
+
+Two of four satisfied; the remaining two are the freeze itself and the retrospective that follows it.
 
 ---
 
