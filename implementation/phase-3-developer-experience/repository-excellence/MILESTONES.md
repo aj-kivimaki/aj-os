@@ -4,7 +4,7 @@
 >
 > **Related Specification:** _None._ Non-specification quality package; see [README § Why this package has no SPEC](README.md#why-this-package-has-no-spec) and [REX-D0](decisions/REX-D0.md).
 >
-> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on **2026-07-17**. **Milestone 1 (Documentation Truth & SPEC-003 Lifecycle Closure) COMPLETE and FROZEN** (reviewer: AJ, 2026-07-17) — REX-101..106 delivered; 20 findings closed; assertion inventory 13/13; **no executable source modified**; SPEC-003's AJS-007 debt discharged. **REX-D0, REX-D1 accepted; REX-D9 accepted (the package's first FPCP).** M1 retrospective complete. **Next: M2 — Automated Quality Gates.** ⚠️ **Reviewer requirement for M2:** *before the M2 Planning Freeze, the planning must be reviewed explicitly for the ownership-boundary defects identified during M1.*
+> **Status:** **Package Planning FROZEN** (AJ, 2026-07-17). **M1 (Documentation Truth) and M2 (Automated Quality Gates) COMPLETE and FROZEN** (AJ, 2026-07-17) — *M1 established repository truth; M2 established repository verification.* **Next: M3-A — Public Surface.** ⚠️ **Start M3 from these artefacts, not from conversational context** — reviewer's direction. **M1 (Documentation Truth & SPEC-003 Lifecycle Closure) COMPLETE and FROZEN** (reviewer: AJ, 2026-07-17) — REX-101..106 delivered; 20 findings closed; assertion inventory 13/13; **no executable source modified**; SPEC-003's AJS-007 debt discharged. **REX-D0, REX-D1 accepted; REX-D9 accepted (the package's first FPCP).** M1 retrospective complete. **Next: M2 — Automated Quality Gates.** ⚠️ **Reviewer requirement for M2:** *before the M2 Planning Freeze, the planning must be reviewed explicitly for the ownership-boundary defects identified during M1.*
 
 ---
 
@@ -53,7 +53,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 | Milestone | Name | Goal | Status |
 | --------- | ---- | ---- | ------ |
 | M1 | Documentation Truth & SPEC-003 Lifecycle Closure | Every document describes the repository that exists today; SPEC-003's two outstanding AJS-007 deliverables discharged | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | 🔨 **Implementation complete — awaiting the Freeze Review** |
+| M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ⬜ |
 | M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ⬜ |
 | M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ⬜ |
@@ -319,8 +319,16 @@ it.
 
 ## Objective
 
-Make every objectively measurable property machine-verified on every PR, and non-regressible. This
-is the ratchet the rest of the review depends on.
+Make the repository **machine-verifiable on every PR**, and non-regressible. This is the ratchet the
+rest of the review depends on.
+
+> **Wording tightened at the M2 Freeze Review (AJ, 2026-07-17).** The original — *"every objectively
+> measurable property machine-verified"* — **overclaimed**, and the milestone's own evidence proved
+> it: repository-wide coverage is **not** measurable with supported Vitest 4 tooling (F-030), and
+> `noPropertyAccessFromIndexSignature` is deliberately deferred (F-031). **The demonstrated
+> boundary** is five gates — format, lint, typecheck (incl. `tests/`), build, test — plus coverage
+> **reported within a documented limit**. Per the reviewer: *"Repository Excellence should always
+> describe the property actually established, not the one originally hoped for."*
 
 **Runtime behaviour is intentionally unchanged.** Unlike M1, executable source **legitimately
 changes** — so the protected property is an **outcome**, not a path:
@@ -508,8 +516,8 @@ Per **[REX-D10](decisions/REX-D10.md)** — each clause carries a falsifier:
 - [x] Any of the **40** that prove to be **real test defects** recorded and fixed failing-test-first.
       *(Result: **zero** behavioural defects; **two design questions** surfaced instead.)*
 - [x] Every clause of the protected outcome demonstrated **and shown able to fail**.
-- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**. _(Evidence below.)_
-- [ ] Retrospective created (§4.7 stage 7 — follows the freeze).
+- [x] Freeze Review completed; **Milestone Freeze declared by the reviewer (AJ) on 2026-07-17.** _(All five §8 reservations weighed and ruled; the freeze granted on the milestone's protected outcome.)_
+- [x] Retrospective created (§4.7 stage 7) — [retrospectives/RETROSPECTIVE-M2.md](retrospectives/RETROSPECTIVE-M2.md).
 
 ---
 
