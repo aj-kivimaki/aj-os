@@ -355,7 +355,7 @@ at the reviewer's requirement, *before* the Planning Freeze.
 | REX-201 | governance — **enforcement** | CI runs typecheck + build + test on push and PR | F-025 | ✅ |
 | REX-202 | governance — **visibility** | `tsconfig.test.json` so typecheck reaches `tests/`. **Makes the errors visible; does not fix them.** | F-026 | ✅ |
 | REX-203 | ⚠️ **executable behaviour boundary** | Resolve the **40** hidden errors. **The only M2 task changing executable source for non-mechanical reasons.** | F-027 | ✅ |
-| REX-204 | **mechanical** (provable) | Formatter + `.editorconfig`. Isolated commit; proven by re-running the formatter on the pre-M2 tree. | F-029 | ⬜ |
+| REX-204 | **mechanical** (provable) | Formatter + `.editorconfig`. Isolated commit; proven by re-running the formatter on the pre-M2 tree. | F-029 | ✅ |
 | REX-205 | **configuration truth** (behaviour risk) | Linter + the six dormant strictness flags + the dead `jsx` config | F-028, F-031, F-034 | ⬜ |
 | REX-206 | **documentation** | `package.json` metadata, `engines`, `.nvmrc`, `SECURITY.md`, `CODE_OF_CONDUCT.md` | F-032, F-033, F-035 | ⬜ |
 | REX-207 | governance — **process** | PR template, `dependabot.yml`, `CODEOWNERS` | F-036 | ⬜ |
