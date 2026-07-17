@@ -115,7 +115,7 @@ outstanding AJS-007 deliverables. **No source file changes** — this milestone'
 
 | Task | Description | Status |
 |------|-------------|--------|
-| REX-101 | SPEC-003 Retrospective (reconstructed; F-018, F-020) | ⬜ |
+| REX-101 | SPEC-003 Retrospective (reconstructed; F-018) | ✅ |
 | REX-102 | Apply the SPEC-003 specification-hygiene backlog (F-019) | ⬜ |
 | REX-103 | Root documentation truth pass — README, ROADMAP, CHANGELOG (F-001, F-008, F-009, F-010) | ⬜ |
 | REX-104 | Guides truth pass — installation, configuration, development (F-002, F-013..F-017) | ⬜ |
@@ -134,6 +134,16 @@ ordering stay explicit: **repository review → recommendation; architecture →
 |---|---|---|---|
 | 1 | [REX-D1](decisions/REX-D1.md) — agent-layer architectural representation | REX-106 | **Accepted as recommended.** REX has no authority to amend frozen architecture. Document at README/CONTRIBUTING; represent via the lifetime taxonomy; recommend an ADR rather than author one; amend no architecture document. |
 | 2 | M1 scope — documentation truth, lifecycle completion, retrospective, hygiene backlog, **no source changes** | all | **Approved.** Acceptance criteria ruled objective and aligned with the objective; the scope guard ruled sufficient to prevent drift into implementation work. |
+
+### Recorded during M1 implementation
+
+- **F-020 was double-assigned** to REX-101 and REX-105 by the M1 plan — an authoring error, caught
+  by REX-101's validation rather than its review. **Resolved: REX-101 closes F-018 and creates the
+  `retrospectives/` directory; REX-105 owns the README text.** The directory's existence does not
+  make `spec-003-end-of-session/README.md:203`'s *"(added at each Milestone Freeze)"* annotation
+  true — it was added **once, late**. **Not an FPCP**: no scope, objective, or acceptance boundary
+  moved, and the finding still closes within M1. Recorded per `implementation/CLAUDE.md` — *"Do not
+  silently choose."*
 
 ## Dependencies
 
