@@ -53,7 +53,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 | Milestone | Name | Goal | Status |
 | --------- | ---- | ---- | ------ |
 | M1 | Documentation Truth & SPEC-003 Lifecycle Closure | Every document describes the repository that exists today; SPEC-003's two outstanding AJS-007 deliverables discharged | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | ⬜ |
+| M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | 🔨 **Planning FROZEN** (AJ, 2026-07-17) — in progress |
 | M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ⬜ |
 | M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ⬜ |
 | M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ⬜ |
@@ -352,7 +352,7 @@ at the reviewer's requirement, *before* the Planning Freeze.
 
 | Task | **Protected outcome** | Description | Findings | Status |
 |------|---|-------------|---|--------|
-| REX-201 | governance — **enforcement** | CI runs typecheck + build + test on push and PR | F-025 | ⬜ |
+| REX-201 | governance — **enforcement** | CI runs typecheck + build + test on push and PR | F-025 | ✅ |
 | REX-202 | governance — **visibility** | `tsconfig.test.json` so typecheck reaches `tests/`. **Makes the errors visible; does not fix them.** | F-026 | ⬜ |
 | REX-203 | ⚠️ **executable behaviour boundary** | Resolve the **40** hidden errors. **The only M2 task changing executable source for non-mechanical reasons.** | F-027 | ⬜ |
 | REX-204 | **mechanical** (provable) | Formatter + `.editorconfig`. Isolated commit; proven by re-running the formatter on the pre-M2 tree. | F-029 | ⬜ |
@@ -361,7 +361,33 @@ at the reviewer's requirement, *before* the Planning Freeze.
 | REX-207 | governance — **process** | PR template, `dependabot.yml`, `CODEOWNERS` | F-036 | ⬜ |
 | REX-208 | governance — **measurement** | Coverage **measured, not gated** | F-030 | ⬜ |
 
-_Task breakdown authored at M2 Planning; **awaiting the M2 Planning Review**._
+_Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. The M2 Planning Review passed:
+the outcome-based allocation was ruled *"a materially stronger planning model because each task has a
+single invariant it is responsible for protecting and validating"* — and *"a direct application of
+M1's retrospective rather than a redesign of the milestone."* **REX-D7** (Biome) and **REX-D10**
+(protected outcome, FPCP) accepted._
+
+### Ratified at the M2 Planning Review (AJ, 2026-07-17)
+
+| # | Decision | Outcome |
+|---|---|---|
+| 1 | **REX-202 + REX-203 ship together** | **Approved as proposed.** *"Working Increment applies at the **merge boundary**, not necessarily at the task boundary."* They stay **separate tasks**, are **reviewed separately**, and **merge in one PR** — preserving both clean ownership and a healthy repository state. |
+| 2 | **[REX-D7](decisions/REX-D7.md)** — Biome | **Accepted.** One binary, one config, nothing to migrate. |
+| 3 | **[REX-D10](decisions/REX-D10.md)** — protected outcome as an outcome, not a path | **Accepted (FPCP).** The formatter proof singled out: *"Mechanical changes should be demonstrably mechanical."* |
+| 4 | **REX-208 — no coverage threshold** | **Approved.** *"Repository Excellence should establish facts before establishing policy."* And: *"The report is the canonical measurement. The documentation should describe the process, not today's number."* |
+| 5 | Planning corrections (40 not 46; no M3-A coupling; `rootDir` constraint) | **Approved** as *"planning-quality improvements, not milestone changes."* |
+
+### ⚠️ Reviewer expectation carried into implementation — REX-203
+
+> **When reviewing fixes, optimise for preserving intent over minimising diagnostics. If resolving
+> one diagnostic exposes a deeper design question, prefer surfacing that question over forcing the
+> repository back to zero warnings as quickly as possible. Repository Excellence exists to improve
+> repository quality, not merely repository metrics.**
+
+The reviewer also ruled on what success looks like there: *"If one of those casts turns out to hide a
+genuine behavioural defect, **discovering that is success, not failure**."* **REX-203's objective is
+not "make TypeScript happy" — it is to determine, per diagnostic, whether it represents a typing
+deficiency or a behavioural defect.**
 
 ### The ownership-boundary re-read (reviewer requirement, 2026-07-17)
 

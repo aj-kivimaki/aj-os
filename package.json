@@ -12,6 +12,7 @@
     "serve:prod": "node dist/server.js",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "ci": "npm run typecheck && npm run build && npm test",
     "test": "vitest run",
     "test:watch": "vitest",
     "infra:up": "cd infrastructure && docker compose up -d",
