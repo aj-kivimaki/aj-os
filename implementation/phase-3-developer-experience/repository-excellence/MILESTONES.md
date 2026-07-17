@@ -636,9 +636,9 @@ and ID-based allocation is the defect that produced M1's three collisions.
 
 | Task | Description | Status |
 |------|-------------|--------|
-| REX-301 | Frozen-surface adjudication — F-041 **document-reserved**, F-042 **document-ADR-006-staging**, F-043 **document-or-FPCP-remove per SPEC-005 evidence** | ⬜ ready |
-| REX-302 | Non-frozen barrel truth — `export *`→explicit, prune, privacy-claim, dead file (F-037/038/039/040) | ⬜ ready |
-| REX-303 | Surface enforcement — extend the `foundation.test.ts` manifest pattern per REX-D8 **Option A** (F-044) | ⬜ last by construction |
+| REX-301 | Frozen-surface adjudication — F-041 document-reserved, F-042 document-ADR-006-staging, F-043 **documented-as-declared** (SPEC-005 evidence supports it) | ✅ |
+| REX-302 | Non-frozen barrel truth — 4 barrels→explicit (F-037), privacy-claim made true (F-039), 0-byte file deleted (F-040); **F-038 "keep, justified"** by measurement | ✅ |
+| REX-303 | Surface enforcement — `tests/architecture/public-surface.test.ts`, per REX-D8 Option A (F-044); each guard proven able to fail | ✅ |
 
 _Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. **REX-D5 ruled**
 (document/document/document-or-remove) and **REX-D8 Option A accepted** at the M3-A Planning Review.
