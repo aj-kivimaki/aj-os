@@ -176,17 +176,32 @@ repository-excellence/
 
 # Definition of Done
 
-- [ ] [FINDINGS.md](FINDINGS.md) exhausted: every finding actioned, deferred with reason, or ruled
-      won't-fix.
-- [ ] M1, M2, M3-A, M3-B, M4, M5 each Freeze-Reviewed and frozen **by the reviewer**.
-- [ ] A retrospective exists for every milestone (plus SPEC-003's reconstructed one).
-- [ ] Every measurable property green in CI, on every PR.
-- [ ] Every judgement call has a recorded decision naming the **reasoning**, not just the outcome.
-- [ ] Zero frozen decisions violated; every frozen-surface change traces to a ruled FPCP.
-- [ ] The architecture documents describe what is **actually supported today**.
-- [ ] Behaviour unchanged except where a recorded defect fix required it.
-- [ ] SPEC-004 begins on a repository whose docs are true and whose quality is **enforced rather
-      than asserted**.
+> ✅ **MET** — verified against the repository at `61be42a` on 2026-07-18 (evidence, not assertion —
+> the programme's own standard).
+
+- [x] [FINDINGS.md](FINDINGS.md) exhausted: **66 findings — 63 closed, 3 partial (F-030, F-031, F-054,
+      each a reviewer-ruled deferral with a documented reason), 0 open.** "Keep, justified" recorded as
+      a result wherever the evidence led (F-038, F-049, F-052, F-064).
+- [x] M1, M2, M3-A, M3-B, M4, M5 each Freeze-Reviewed and frozen **by the reviewer** (2026-07-17..18).
+- [x] A retrospective exists for every milestone (six) **plus SPEC-003's reconstructed one** — seven.
+- [x] Every measurable property green in CI, on every PR — five gates (`format · lint · typecheck ·
+      build · test`), and **`verify` is a required status check on `main`** (F-025 closed; enforced,
+      not merely running). **744 tests green.**
+- [x] Every judgement call has a recorded decision naming the **reasoning** — **REX-D0..D10** (eleven),
+      each with its rationale.
+- [x] Zero frozen decisions violated; every frozen-surface change traces to a ruled FPCP. **Verified:
+      `git diff 9bd051d..HEAD` touches no `docs/architecture/**`, `docs/standards/**`, `archive/**`,
+      SPEC-002/003 decisions, or `VISION.md` — empty.** The two FPCPs (**REX-D9**, **REX-D10**) were
+      raised before dependent work and ruled.
+- [x] The architecture documents describe what is **actually supported today** (M1 truth pass; M3-B
+      module taxonomy covering 11/11 modules, test-enforced).
+- [x] Behaviour unchanged except where a recorded defect fix required it — **F-050** (the WikiStore
+      symlink-guard hazard) was the single behavioural fix, characterization-first; everything else is
+      behaviour-neutral, proven by the suite.
+- [x] SPEC-004 begins on a repository whose docs are true and whose quality is **enforced rather than
+      asserted** — the required `verify` gate makes the guarantee mechanical.
+
+**The Repository Excellence programme is complete.** SPEC-004 (Knowledge Review) may now begin.
 
 ---
 
