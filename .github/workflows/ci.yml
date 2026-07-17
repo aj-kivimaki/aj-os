@@ -24,7 +24,11 @@ permissions:
 
 jobs:
   verify:
-    name: typecheck · build · test
+    # This name is a contract, not a label: the `main` ruleset requires a status
+    # check named exactly `verify`. A descriptive name ("typecheck · build ·
+    # test") went stale the moment format and lint were added, and would have to
+    # be renamed — and the required check re-pointed — every time a gate joins.
+    name: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
