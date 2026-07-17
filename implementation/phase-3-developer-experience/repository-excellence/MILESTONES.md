@@ -1165,11 +1165,83 @@ errors benefit from stable documentation; test infra validates the completed imp
 
 ## Definition of Done
 
-- [ ] Zero comments describing code that no longer exists.
-- [ ] `catch (e) { if (e instanceof AjError) }` is possible, or REX-D3 records why not.
-- [ ] **Every protected comment intact.**
+- [x] Zero comments describing code that no longer exists (F-056/057; REX-501).
+- [x] `catch (e) { if (e instanceof AjError) }` is possible (REX-502; proven by `aj-error.test.ts`).
+- [x] **Every protected comment intact** — all six verified present after REX-501 (the grep check is the falsifiable proof).
 - [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
 - [ ] Retrospective created.
+
+---
+
+## M5 Freeze Review — Evidence (prepared for the reviewer)
+
+> **M5 stays ⬜ until the reviewer declares the freeze** (§5.3/§5.4). Including §8 — the case
+> *against*. **This freeze completes the Repository Excellence programme.**
+
+### 1. Tasks complete
+
+REX-501, REX-502, REX-503 — all done. **Four commits** (`78c151c..6a1800f`): planning freeze, then
+one per task.
+
+### 2. Findings — 11 of 11 closed
+
+| Finding | Disposition |
+|---|---|
+| F-056/057/058 | stale/noise comments deleted or made true (REX-501) |
+| F-059 | barrel-header duplication collapsed; decision-ref prose kept |
+| F-066 | **one** genuine constraint documented (loop.ts tool-ordering); routes needed none (REX-D6) |
+| F-060 | shared `AjError` base; `instanceof AjError` proven; `wiki.ts` gap closed (REX-502) |
+| F-061/062 | one NUL spelling; terminal punctuation normalized |
+| F-063 | `cause` chaining at the 4 diagnostic wrap sites |
+| F-064 | **keep, justified** (REX-D4) — already-shared or suite-tuned |
+| F-065 | `formatWikiReport` testable, matching `session.ts`'s exemplar |
+
+### 3. The preserve-list held — M5's core safety claim
+
+**All six protected comments intact**, verified after the pass. The refresh caught that comment #1 had
+drifted to `createFilesystemReviewStore.ts:157-163` (M3-B rename) — the exact miss the refresh exists
+to prevent. **`session.ts` was deliberately NOT narrowed to a catch-all**, protecting the `AIError`-absent design.
+
+### 4. Behaviour preserved
+
+| Property | Evidence |
+|---|---|
+| Suite | **744 tests / 65 files** (738 → 744; +6, none removed or weakened) |
+| Errors | every concrete `instanceof` still holds; the base only *adds* `instanceof AjError` + `cause` |
+| Comments/report | comments don't execute; `formatWikiReport` output identical to the old `printReport` |
+| Gates | full `npm run ci` green (format · lint · typecheck · build · test) |
+
+### 5. Frozen work untouched
+
+No `docs/architecture/**`, `docs/standards/**`, `archive/**`, `decisions/EOS-*`/`CB-*`. No ADR
+authored. The REX-303 public-surface manifests stayed green (AjError is imported by path, not added to a barrel).
+
+### 6. Decisions
+
+**REX-D6** (Accepted — the comment rule) · **REX-D4** (Accepted — helper criteria).
+
+### 7. What the reviewer should weigh — the case *against* a freeze
+
+- **F-064 closed as "keep" on my measurement, not your ruling in the particular.** REX-D4 authorised
+  consolidating genuinely-identical stubs; measurement found none that both were identical *and* that
+  the `support.ts` convention didn't already keep inline. A reviewer may want to confirm the two
+  identical `makeProvider`s should stay inline rather than share — I judged the convention (REX-D4's
+  governing boundary) decisive.
+- **F-063 added `cause` to 4 wrap sites, not every wrap.** I scoped it to the diagnostic-rich sites
+  (SDK + JSON-parse errors); the filesystem realpath catches (ENOENT) were left, since their domain
+  message already states the condition. A reviewer could want it everywhere for uniformity.
+- **F-066 added exactly one comment.** Faithful to your ruling ("never for density"), but a reviewer
+  who reads "two documentation cultures" as needing more may disagree with the restraint.
+- **A `perl \x{}` escape corrupted REX-503's task-file UTF-8 mid-edit** — caught immediately, restored
+  clean from the planning commit, re-applied via the edit tool, and verified with the full `npm run ci`
+  (not a truncated tail — the M4 lesson applied). No corruption reached a gate or `main`. Same class as
+  M4's format slip: a tooling mistake intercepted before history.
+
+### 8. Definition of Done
+
+Three of five satisfied; the remaining two are the freeze itself and the retrospective that follows it.
+**On this freeze, the Repository Excellence programme reaches its Definition of Done** — see [README §
+Definition of Done](README.md#definition-of-done).
 
 ---
 
