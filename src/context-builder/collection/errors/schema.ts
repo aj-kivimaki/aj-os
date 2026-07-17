@@ -12,7 +12,7 @@
 
 import { z } from "zod";
 
-import type { DeepReadonly } from "../../package/types.js";
+import { deepFreeze } from "../../package/deepFreeze.js";
 
 import type { CollectionError } from "./types.js";
 
@@ -54,16 +54,6 @@ export const collectionErrorSchema = z
  * Recursively freeze a value, returning it typed as deeply immutable, so a
  * parsed contract is immutable at runtime as well as in the types.
  */
-function deepFreeze<T>(value: T): DeepReadonly<T> {
-  if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
-    Object.freeze(value);
-    for (const key of Object.keys(value)) {
-      deepFreeze((value as Record<string, unknown>)[key]);
-    }
-  }
-  return value as DeepReadonly<T>;
-}
-
 /**
  * Validate an unknown value against the `CollectionError` contract and return a
  * deeply-immutable error. Throws a `ZodError` if validation fails (invalid
