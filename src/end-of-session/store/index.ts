@@ -9,5 +9,5 @@ export type { ReviewStore, ReviewLocation } from "./ReviewStore.js";
 export {
   createFilesystemReviewStore,
   ReviewStoreError,
-} from "./FilesystemReviewStore.js";
-export type { FilesystemReviewStoreOptions } from "./FilesystemReviewStore.js";
+} from "./createFilesystemReviewStore.js";
+export type { FilesystemReviewStoreOptions } from "./createFilesystemReviewStore.js";

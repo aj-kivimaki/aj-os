@@ -10,7 +10,7 @@ export { CompilerError } from "./KnowledgeCompiler.js";
 export {
   createAnthropicKnowledgeCompiler,
   type AnthropicKnowledgeCompilerConfig,
-} from "./AnthropicKnowledgeCompiler.js";
+} from "./createAnthropicKnowledgeCompiler.js";
 export {
   sourceExtractionSchema,
   parseExtraction,

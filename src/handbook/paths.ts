@@ -1,7 +1,7 @@
 import { realpathSync, statSync } from "node:fs";
 import path from "node:path";
 
-import { env } from "../config/app-env.js";
+import { env } from "../config/appEnv.js";
 
 /** Thrown when a requested path would escape its allowed subtree. */
 export class PathEscapeError extends Error {

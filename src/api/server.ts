@@ -1,6 +1,6 @@
 import Fastify, { type FastifyInstance } from "fastify";
 
-import type { AgentEnv } from "../config/agent-env.js";
+import type { AgentEnv } from "../config/agentEnv.js";
 import { registerAuth } from "./auth.js";
 import { registerErrorHandler } from "./errors.js";
 import { agentRoutes } from "./routes/agent.js";

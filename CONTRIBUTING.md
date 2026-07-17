@@ -78,6 +78,18 @@ Before opening a pull request, ensure `npm run typecheck`, `npm run build`, and
 
 - **Code:** strong TypeScript typing, focused single-responsibility modules,
   clear separation of concerns, readability over cleverness.
+- **File names describe the role of the file's primary export**, in that
+  export's own casing:
+  - **PascalCase** when the file *is* a type, class, or interface —
+    `ConfigService.ts` exports `class ConfigService`.
+  - **camelCase** when the file's primary export is a factory, function, or
+    executable module — `createContextBuilder.ts`, `wikiKnowledgeProvider.ts`,
+    `systemPrompt.ts`. A factory named `createX` lives in `createX.ts`, even when
+    it also exports a `XError` or `XOptions`.
+  - **lowercase** for conventional role-files: `index.ts`, `types.ts`,
+    `schema.ts`, `errors.ts`.
+  - **No kebab-case.** A name communicates the export's semantic role, not visual
+    uniformity.
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org)
   (`feat(context-builder): …`, `docs: …`, `refactor(retrieval): …`).
 - **Pull requests:** solve one problem, preserve the architecture, keep the
