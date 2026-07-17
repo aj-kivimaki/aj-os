@@ -40,6 +40,33 @@ not a product-specific shortcut. The platform and each product are versioned
 independently — see
 [versioning & releases](docs/project/versioning-and-releases.md).
 
+## Where every module lives
+
+The platform/products rule above is the *dependency* constraint. This table
+places **every** top-level `src/` module and states its **expected lifetime**, so
+a reader can tell not just where code goes but whether to build on it. Lifetimes
+follow the taxonomy in [REX-D1](implementation/phase-3-developer-experience/repository-excellence/decisions/REX-D1.md);
+the agent layer's architectural home is a **recommendation** for a future ADR, not
+a settled ARCH-001 decision.
+
+| Module | Role | Expected lifetime |
+| --- | --- | --- |
+| `src/platform/` | Reusable platform capabilities (config service, handbook access, prompt, retrieval) | **Durable** |
+| `src/context-builder/` | Platform capability — deterministic context assembly (SPEC-002) | **Durable** |
+| `src/knowledge/` | Platform capability — knowledge compilation and wiki generation (ARCH-002, SPEC-005/006) | **Durable** |
+| `src/end-of-session/` | Platform capability — the end-of-session workflow (SPEC-003) | **Durable** |
+| `src/ingestion/` | Platform capability — source ingestion contracts and connectors | **Durable** |
+| `src/handbook/` | Durable capability layer — framework-agnostic handbook access, reusable by a future MCP transport | **Durable** |
+| `src/products/` | Products composed on the platform (Knowledge Assistant) | **Durable** |
+| `src/cli/` | Entry point — the `aj` command (`CLI → Product → Platform`) | **Durable** |
+| `src/agent/` | Durable capability layer — the first AI agent (handbook Q&A + inbox capture) | **Durable** |
+| `src/config/` | Process/environment configuration (dotenv + Zod) used by the agent and API transport | **Durable** (distinct from `platform/config`'s `aj.config.json` service; see REX F-055) |
+| `src/api/` | **Temporary transport** — the HTTP surface for the agent, supported until an MCP transport replaces it | **Transitional** — supported, not deprecated |
+
+Every top-level `src/` module appears in this table. A test enforces that
+(`tests/architecture/module-taxonomy.test.ts`): add a module without a row here
+and it turns red.
+
 ---
 
 # Workflow
