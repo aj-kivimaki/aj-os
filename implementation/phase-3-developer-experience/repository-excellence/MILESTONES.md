@@ -119,7 +119,7 @@ outstanding AJS-007 deliverables. **No source file changes** — this milestone'
 | REX-102 | Apply the SPEC-003 specification-hygiene backlog (F-019) | ✅ |
 | REX-103 | Root documentation truth pass — README, ROADMAP, CHANGELOG (F-001, F-008, F-009, F-010) + the assertion inventory | ✅ |
 | REX-104 | Guides truth pass — installation, configuration, development (F-002, F-013..F-017) | ✅ |
-| REX-105 | Module & package README truth pass (F-005, F-006, F-007, F-011, F-012, F-021, F-024) | ⬜ |
+| REX-105 | Module & package README truth pass (F-005, F-006, F-007, F-011, F-012, **F-020**, F-021, F-024) | 🛑 **HALTED — [REX-D9](decisions/REX-D9.md) FPCP pending** |
 | REX-106 | The "owns git commits" contradiction + agent-layer representation (F-003, F-004, F-022) | ⬜ |
 
 _Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. **REX-D1 ruled at the same
@@ -434,6 +434,39 @@ Ruled at the package Planning Review, or scheduled for their milestone's Plannin
 | **REX-D6** | The rule separating a load-bearing comment from noise | M5 | ⬜ M5 Planning |
 | **REX-D7** | Toolchain: ESLint+Prettier vs Biome | M2 | ⬜ M2 Planning |
 | **REX-D8** | Extend `foundation.test.ts`'s public-surface enforcement beyond `end-of-session`? | M3-A | ⬜ M3-A Planning |
+| **[REX-D9](decisions/REX-D9.md)** | 🛑 **FPCP** — M1's Objective/Validation (*"touches no `src/` or `tests/` file"* / *"diff is **empty**"*) contradicts REX-105's frozen scope (F-005/F-011/F-012 live under `src/` and `tests/`) **and REX-105's own acceptance criterion** (*"README files only, no `.ts` file"*). Both frozen at the same review, same layer — §3 offers no resolution. Which governs? | **M1** — REX-105 **halted** | ⬜ **PROPOSED — awaiting the reviewer.** Proposes **Reading B**: *"No **code** changes — no `.ts` file anywhere"*. Reading A would defer three findings, one **Blocking** (F-005: a shipped, frozen module's README still says it has *"no behavior"*). **The first REX FPCP** — clears the threshold on two counts: **objective** and **acceptance criteria**. |
+
+## The two dimensions of repository truth — ruled by the reviewer (AJ, 2026-07-17)
+
+Recorded at the REX-104 review, after following `installation.md` end to end found a defect that no
+amount of reading it could have.
+
+> **Repository truth has two dimensions.**
+>
+> - **Declarative truth:** what the repository explicitly claims.
+> - **Operational truth:** what actually happens when someone follows those claims.
+>
+> **A professional repository needs both.**
+
+**The validation techniques are complementary, not competing** — and this is the boundary the
+assertion inventory turned out to have:
+
+| Technique | Verifies | Blind to |
+|---|---|---|
+| **The assertion inventory** | **Explicit claims** — every statement a document makes about the code | **Omitted assumptions.** It can only check the claims a document *chose to make*. |
+| **End-to-end execution** | **Omitted assumptions** — the unstated prerequisites a reader hits when they actually do the thing | Nothing about intent; it only shows what happens. |
+
+**The evidence.** `installation.md` was internally consistent. The implementation was internally
+consistent. **Neither was wrong about anything it said.** The defect was a prerequisite
+(`HANDBOOK_SOURCES = ["foundation", "library"]`) that *no document mentioned* — so no assertion
+could exist for it, and static review could not have found it. Only running the guide did.
+
+**Carries into every remaining milestone:** a documentation claim is verified by assertion; a
+documented *workflow* is verified by running it. **The assertion inventory remains a durable output —
+with an explicitly defined boundary rather than an assumed one.** Preserve this distinction in the
+M1 retrospective.
+
+---
 
 ## Documentation preserves intent, not just implementation — ruled by the reviewer (AJ, 2026-07-17)
 
