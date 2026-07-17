@@ -28,6 +28,14 @@ serve the [loop](docs/VISION.md) — it does not restate the vision behind them.
 > automatically" exists; **the governance half — deciding what becomes durable —
 > does not yet.** That is SPEC-004, and it is why the loop is not closed twice.
 
+> ⬜ **Nobody owns git commits — deliberately, and this is a known gap.**
+> **ADR-002** holds that *version control belongs to orchestration*. The Wiki
+> Generator never commits; the End-of-Session Workflow never commits. **The
+> orchestration layer that would own it does not exist**, so today AJ-OS writes
+> files and a human commits them. This is recorded rather than assigned: no
+> specification currently claims the role, and one should not acquire it by
+> default. See ADR-002 and AJS-005 §7.
+
 1. **Repository Excellence Review (REX)** — **in progress**, and deliberately
    before SPEC-004. A non-specification engineering-quality milestone: the
    documentation is brought in line with what actually ships, and quality is made

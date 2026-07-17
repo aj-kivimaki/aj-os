@@ -202,6 +202,60 @@ layer that owns it. It is Option C's restraint with Option A's honesty.
 
 ---
 
+# Recommendation to the Architecture layer
+
+> **Delivered by REX-106 (2026-07-17), per this decision's clause 3.** This is a **recommendation,
+> not a change.** AJS-007 §3: *"a retrospective may surface evidence recommending a change to a
+> higher layer… but it does not itself change any layer. It produces a recommendation, which the
+> receiving layer accepts or rejects through that layer's own change process."* REX has recorded it
+> and stopped.
+
+**Recommendation: author an ADR giving the agent layer an architectural home.**
+
+**The evidence, gathered by REX and verified 2026-07-17:**
+
+1. **The layer is live.** n8n calls `/agent/ask` and `/inbox/note` in production
+   (`infrastructure/n8n/workflows/*.json`).
+2. **It is architecturally invisible.** It appears in **no** ARCH document. `ARCH-001` describes the
+   platform; the agent layer is not in it.
+3. **It is not legacy, and the evidence is unambiguous** — built 2026-07-06, survived the v1→v2
+   transition deliberately (`16e66da`), and `src/handbook/` **holds its locked decision**
+   (`grep -rn "fastify\|@anthropic-ai" src/handbook/` → nothing) specifically so a future MCP
+   transport can reuse it. **It is the most forward-looking code in the repository, and the least
+   documented.**
+4. **`CONTRIBUTING.md:31-38`'s "one rule" covers about a third of `src/`** — no slot for
+   `src/agent/`, `src/handbook/`, `src/api/`, `src/config/`, `src/knowledge/`, `src/end-of-session/`,
+   or `src/ingestion/`.
+5. **The gap has already caused one concrete error.** REX's own planning proposed **archiving the
+   layer as a "legacy Fastify stack"** — a proposal that would have deleted a live capability, and
+   was only stopped by evidence. **An architecture document that omits a subsystem does not merely
+   fail to describe it; it invites others to conclude it does not matter.**
+
+**What the ADR would need to settle** — each is an architecture-layer question REX cannot answer:
+
+- Is the agent layer a **platform capability**, a **product**, or a **third thing** the current
+  taxonomy has no name for? `CONTRIBUTING`'s rule is CLI → Product → Platform; the agent layer is a
+  transport over a capability, and fits none cleanly.
+- Does `src/handbook/`'s framework-agnostic constraint become an **architectural invariant** (it is
+  currently a locked decision recorded only in a session memory and honoured by convention), or does
+  it stay a local choice?
+- What is the architectural status of a **transport with a known replacement** (`src/api/` → MCP)?
+  ARCH-001 has no vocabulary for "supported until replaced", and that is precisely the distinction
+  that stopped REX from archiving it.
+
+**Suggested triggers** — do not author it on REX's account:
+
+- **The MCP transport landing.** It would force the question anyway, and would answer the third
+  bullet with evidence rather than prediction.
+- **A second consumer of `src/handbook/` appearing.** That would make the capability layer's
+  architectural status impossible to leave implicit.
+
+**Until then**, the gap is **recorded, not filled**: M3-B documents the layer at README/CONTRIBUTING
+level using the lifetime taxonomy, which needs no ADR. That is not a fix — it is an honest holding
+position, and it should be recognised as one.
+
+---
+
 # Future Review
 
 **Yes — at the architecture layer, not here.**

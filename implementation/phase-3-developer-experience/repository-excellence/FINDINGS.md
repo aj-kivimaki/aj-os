@@ -79,6 +79,29 @@ table.
 **Not automated in M1.** These are commands a reviewer runs. Automating them is a quality gate, and
 **M2 owns quality gates** — noted there rather than built here.
 
+> ### ⚠️ Read this before automating these in M2
+>
+> **A naive `grep` gives wrong answers on markdown prose, and gave three during M1.** Every case was
+> a **false result about a correct document** — the dangerous direction, because it invites
+> "fixing" text that was already right.
+>
+> 1. **Line wrapping** splits a claim across lines. `reviewPath ... (default **knowledge-review**)`
+>    spans two lines, so a single-line `grep` reported the guide as missing a default it documented
+>    correctly (REX-102).
+> 2. **Blockquote markers survive a naive join.** After `tr '\n' ' '`, *"so no component performs
+>    it"* becomes *"so no **>** component performs it"* — the assertion fails on correct text
+>    (REX-106).
+> 3. **`sed 's/^\s*>\s\?//'` silently does nothing on macOS** — BSD `sed` does not support `\?` in
+>    BRE. **No error; it just doesn't strip.** The check then "fails" while appearing to normalise.
+>
+> **The fix:** normalise before matching — strip blockquote markers, unwrap lines, squeeze
+> whitespace — with a real parser or Python, **not** a `sed`/`tr` pipeline. The working
+> implementation is in REX-106's validation.
+>
+> **The deeper point for M2:** an assertion that reports a false failure trains its reader to ignore
+> it. **A flaky gate is worse than no gate**, because it converts a signal into noise and teaches
+> the team to override it.
+
 | ID | Assertion | Documented in | Command | Expect |
 |---|---|---|---|---|
 | A-01 | SPEC-003 is shipped, not "next" | `README.md` | `grep -q '\*\*Next:\*\* the workflows.*SPEC-003' README.md` | **no match** |
@@ -87,21 +110,39 @@ table.
 | A-04a | SPEC-003 is recorded as shipped | `CHANGELOG.md` | `sed -n '/^### Added/,/^### Planned/p' CHANGELOG.md \| grep -q 'SPEC-003'` | **match** |
 | A-04b | SPEC-003 is no longer listed as Planned | `CHANGELOG.md` | `sed -n '/^### Planned/,/^---/p' CHANGELOG.md \| grep -q 'SPEC-003'` | **no match** |
 | A-05 | No **live** hard-coded test count | root docs | `grep -nE '\*\*[0-9]{2,4} tests\*\*' README.md ROADMAP.md CHANGELOG.md` | **only** matches under a released `## [x.y.z]` heading — those are history, not drift |
-| A-06 | No document credits SPEC-003 with owning git commits | `docs/README.md`, `ROADMAP.md` | `grep -rn "owns commits\|owns git commits" docs/README.md ROADMAP.md` | **no match** — ⬜ **REX-106**; ROADMAP half already clear |
+| A-06a | **No component is credited** with owning git commits | `docs/README.md`, `ROADMAP.md` | `grep -rn "owns commits\|owns git commits" docs/README.md ROADMAP.md \| grep -v "Nobody owns git commits"` | **no match** — ✅ **REX-106** |
+| A-06b | **The deferral is positively recorded**, with its authority | `docs/README.md`, `ROADMAP.md` | both cite **ADR-002** and state that **no component performs the commit** | **match** — ✅ **REX-106**. *Deletion alone would have passed A-06a and lost the intent; this row is why.* |
 | A-07 | The wiki generator is not described as unwired | `docs/guides/installation.md` | `grep -rn "not yet wired\|known limitation" docs/guides/` | **no match** — ✅ **REX-104** |
 | A-08 | Every shipped `handbook` config key is documented | `docs/guides/configuration.md` | each of `path`, `generatedWikiPath`, `reviewPath` appears; cross-check `src/platform/config/ConfigService.ts` | **all three** — ✅ **REX-104** |
 | A-09 | No module README understates its module's status | `src/*/README.md`, `tests/*/README.md` | `grep -rn "No behavior\|pending Freeze Review" src/ tests/ --include="*.md"` | **no match** — ✅ **REX-105**. *Caught **two instances the finding did not name** (`src/context-builder/README.md:1104,1118`) — the assertion outperformed the inventory row that spawned it.* |
 | A-10 | Documented CLI flags match the code | guides, specs | compare against `src/cli/index.ts` | **exact** — ✅ REX-102 (spec), ✅ REX-104 (guides) |
 | **A-11** | **The handbook layout `aj wiki build` requires is documented** | `docs/guides/installation.md`, `README.md` | both `foundation` and `library` named as required; cross-check `HANDBOOK_SOURCES` at `src/knowledge/composition/createKnowledgePipeline.ts:41` | **match** — ✅ **REX-104**. *Added by REX-104: the guide described "a directory of notes" and `aj wiki build` crashed on one. **No assertion existed for a prerequisite nobody had written down.*** |
 
-**Status at REX-104:** A-01..A-05, A-07, A-08, A-10, A-11 **pass**. A-06 correctly **fails** —
-REX-106's. A-09 is REX-105's.
+**Status at M1 completion (REX-106):** **every assertion passes.**
 
-**A-11 is the inventory's first self-correction, and the more interesting kind.** A-01..A-10 all
-assert against claims a document *makes*. A-11 asserts a prerequisite **no document made** — found
-only by running the guide end to end. **An inventory built by reading documents can only ever check
-the claims those documents chose to make**; it is blind to the ones they should have made. That is a
-real limit of the artifact and belongs in the M1 retrospective.
+## Two lessons the inventory taught about itself
+
+**1. A-11 — an inventory built by reading documents is blind to what they never said.** A-01..A-10
+all assert against claims a document *makes*. A-11 asserts a prerequisite **no document made**
+(`foundation/`+`library/`), found only by running the guide end to end. **No assertion could have
+existed for it**, because assertions are derived from text. This is the reviewer's *declarative vs.
+operational truth* distinction, discovered the hard way.
+
+**2. A-06 fired on the correct answer, and had to be split.** The original assertion grepped for
+`owns commits|owns git commits` and expected no match. REX-106's **correct** replacement text —
+*"**Nobody** owns git commits — deliberately"* — contains that string, so the assertion **failed on
+the very fix it was written to verify.** It was matching a **string**, not a **claim**.
+
+Split into **A-06a** (no component is *credited*) and **A-06b** (the deferral is *positively
+recorded*, citing ADR-002). **A-06b exists because deletion alone would have passed A-06a** — the
+document would have been silent about commits, which is exactly the failure the reviewer's
+intent-preservation principle names.
+
+**The general lesson, for M2 when these are automated:** an assertion written against a falsehood
+can fire on the truth that replaces it. **A negative assertion (`grep` → no match) is only as
+precise as its pattern**, and a pattern derived from broken text tends to encode the breakage. Pair
+every "the falsehood is gone" check with a "the truth is present" check — the first alone cannot
+distinguish *corrected* from *deleted*.
 
 ---
 
@@ -116,8 +157,8 @@ Judgement — the reframing that makes "docs are accurate" testable.
 |---|---|---|---|---|---|
 | F-001 | M | Blocking | No | ✅ **CLOSED** (REX-103) — README now records SPEC-003 as **Captured** and names SPEC-004 as Next. — `README.md:90-91` — *"**Next:** … End-of-Session (SPEC-003) and Knowledge Review (SPEC-004)"*. SPEC-003 shipped. | `grep -n "Next:" README.md`; `git log --oneline 9bd051d` |
 | F-002 | M | Blocking | No | ✅ **CLOSED** (REX-104) — limitation text and Troubleshooting entry removed; `aj wiki build` documented as the answer. Verified by running it. — `docs/guides/installation.md:51-56` — the wiki generator is *"implemented but **not yet wired to a runnable command**"*, and *"no generated wiki" is a "**known limitation**"*. **README:58 documents `aj wiki build`. The two docs contradict each other.** | `grep -n "not yet wired\|known limitation" docs/guides/installation.md`; `src/cli/commands/wiki.ts` |
-| F-003 | M | Blocking | No | `docs/README.md:74` — *"SPEC-003 \| End-of-Session (**owns commits**)"*. **Contradicts a frozen decision**: ADR-002 / AJS-005 §7 exclude git writes from v1, verified absent at the M5 freeze. | `grep -n "owns commits" docs/README.md`; ADR-002 |
-| F-004 | M | Blocking | No | 🔨 **Falsehood removed** (REX-103) — the claim lived *inside* "Resume Here" item 1, which F-008 deleted as stale. **Not yet closed:** deletion removes the error but not the omission. **REX-106 must positively record** that the commit role is deferred (ADR-002 / AJS-005 §7) and that **no component owns it**, per the reviewer's intent-preservation principle. — `ROADMAP.md:26` — *"**owns git commits** (the engine never commits)"*. | `grep -n "owns git commits" ROADMAP.md` → now no match |
+| F-003 | M | Blocking | No | ✅ **CLOSED** (REX-106) — the credit is gone **and** the deferral is positively recorded: `docs/README.md` now states that ADR-002 puts version control with orchestration, that **no component performs it**, and that this is a **deliberate gap, recorded rather than filled**. — `docs/README.md:74` — *"SPEC-003 \| End-of-Session (**owns commits**)"*. **Contradicts a frozen decision**: ADR-002 / AJS-005 §7 exclude git writes from v1, verified absent at the M5 freeze. | `grep -n "owns commits" docs/README.md`; ADR-002 |
+| F-004 | M | Blocking | No | ✅ **CLOSED** (REX-106) — falsehood removed by REX-103 (it lived inside the stale Resume Here item); **the deferral positively recorded by REX-106**: ROADMAP now carries an explicit ⬜ marker — *"Nobody owns git commits — deliberately, and this is a known gap"* — citing ADR-002 and AJS-005 §7. **Deletion alone would have left the document silent**, which is why A-06b exists. — *(REX-103 note: falsehood removed)* — the claim lived *inside* "Resume Here" item 1, which F-008 deleted as stale. **Not yet closed:** deletion removes the error but not the omission. **REX-106 must positively record** that the commit role is deferred (ADR-002 / AJS-005 §7) and that **no component owns it**, per the reviewer's intent-preservation principle. — `ROADMAP.md:26` — *"**owns git commits** (the engine never commits)"*. | `grep -n "owns git commits" ROADMAP.md` → now no match |
 | F-005 | M | Blocking | No | ✅ **CLOSED** (REX-105) — status block now records all five milestones frozen; the *"arrives later"* table replaced with per-milestone freeze dates; a **permanent** *"what this module does not do"* section added (no git write, no wiki generation, never modifies canonical). — `src/end-of-session/README.md:5,7,54` — *"Status: Milestone M1 … **No behavior yet** — collection, extraction, generation, persistence, projection, and the `aj session end` CLI arrive in M2–M5."* All five milestones are frozen; `aj session end` ships. | `grep -n "No behavior" src/end-of-session/README.md` |
 | F-006 | M | Blocking | No | ✅ **CLOSED** (REX-105) — now records the pipeline as wired end to end via `aj wiki build` through the composition root. — `implementation/phase-2-core-platform/README.md` — *"**no CLI command or service currently invokes `WikiGenerator.run()`**"*. False. | `src/cli/commands/wiki.ts` |
 | F-007 | M | Blocking | No | ✅ **CLOSED** (REX-105) — SPEC-003 moved to a *Completed Phase 2 work* section with its freeze dates and the ADR-002 deferral. — `implementation/phase-2-core-platform/README.md` — *"SPEC-003 … **Planning frozen; Milestone 1 ready to implement**"*. SPEC-003 is complete and merged. | `MILESTONES.md` v1.33 |

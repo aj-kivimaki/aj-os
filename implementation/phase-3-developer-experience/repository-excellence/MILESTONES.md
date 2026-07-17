@@ -128,7 +128,7 @@ outstanding AJS-007 deliverables.
 | REX-103 | Root documentation truth pass — README, ROADMAP, CHANGELOG (F-001, F-008, F-009, F-010) + the assertion inventory | ✅ |
 | REX-104 | Guides truth pass — installation, configuration, development (F-002, F-013..F-017) | ✅ |
 | REX-105 | Module & package README truth pass (F-005, F-006, F-007, F-011, F-012, **F-020**, F-021, F-024) | ✅ _(halted on [REX-D9](decisions/REX-D9.md); unhalted on its acceptance)_ |
-| REX-106 | The "owns git commits" contradiction + agent-layer representation (F-003, F-004, F-022) | ⬜ |
+| REX-106 | The "owns git commits" contradiction + agent-layer representation (F-003, F-004; **F-022 recommendation half** — documentation half is M3-B's, per the frozen plan) | ✅ |
 
 _Task breakdown **PLANNING-FROZEN** by the reviewer (AJ) on 2026-07-17. **REX-D1 ruled at the same
 review and accepted as recommended**, unblocking REX-106: REX documents at README/CONTRIBUTING level
@@ -465,6 +465,32 @@ Ruled at the package Planning Review, or scheduled for their milestone's Plannin
 | **REX-D7** | Toolchain: ESLint+Prettier vs Biome | M2 | ⬜ M2 Planning |
 | **REX-D8** | Extend `foundation.test.ts`'s public-surface enforcement beyond `end-of-session`? | M3-A | ⬜ M3-A Planning |
 | **[REX-D9](decisions/REX-D9.md)** | 🛑 **FPCP** — M1's Objective/Validation (*"touches no `src/` or `tests/` file"* / *"diff is **empty**"*) contradicts REX-105's frozen scope (F-005/F-011/F-012 live under `src/` and `tests/`) **and REX-105's own acceptance criterion** (*"README files only, no `.ts` file"*). Both frozen at the same review, same layer — §3 offers no resolution. Which governs? | **M1** — REX-105 **halted** | ⬜ **PROPOSED — awaiting the reviewer.** Proposes **Reading B**: *"No **code** changes — no `.ts` file anywhere"*. Reading A would defer three findings, one **Blocking** (F-005: a shipped, frozen module's README still says it has *"no behavior"*). **The first REX FPCP** — clears the threshold on two counts: **objective** and **acceptance criteria**. |
+
+## Three complementary validation mechanisms — recorded by the reviewer (AJ, 2026-07-17)
+
+Observed at the REX-105 review, **for the M1 Freeze Review**. The reviewer:
+
+> **The Repository Excellence Review has now demonstrated three complementary validation
+> mechanisms: evidence-based findings, repeatable assertion checks, and end-to-end execution.
+> Each has discovered defects the others could not.**
+>
+> *That layered validation approach is becoming one of the most valuable engineering outcomes of the
+> review itself.*
+
+**The evidence, per mechanism — each row is a defect the other two missed:**
+
+| Mechanism | Found | Could the others have? |
+|---|---|---|
+| **Evidence-based findings** | The `[2.0.0]` CHANGELOG counts are **legitimate history, not drift** — and the `src/handbook` ↔ `src/platform/handbook` "duplication" was **rejected outright**, no finding raised. | **No.** Both required *judgement about what the evidence means*. An assertion would have flagged the counts; execution would have said nothing. |
+| **Repeatable assertion checks** | **A-09** found **two** stale claims (`src/context-builder/README.md:1104,1118`) that **F-012 never named** — it was written to check a finding and ended up checking the file. **A-06** proved REX-106's work was still outstanding rather than silently absorbed by REX-103. | **No.** The finding was blind to them; execution does not read READMEs. |
+| **End-to-end execution** | `aj wiki build` **crashed** on a handbook built from the guide's own description — an unstated `foundation/`+`library/` prerequisite (**A-11**), plus the uncaught `SourceConnectorError` (**F-060 live**). | **No.** No document *claimed* the prerequisite, so **no assertion could exist for it**, and no finding named it. |
+
+**The layering is the point, and the mechanisms fail in different directions:** findings capture
+what a human noticed once; assertions make that repeatable and catch neighbours the human missed;
+execution finds what nobody wrote down at all. **Assertions verify declarative truth; execution
+verifies operational truth** (see below). Neither subsumes the other.
+
+---
 
 ## The two dimensions of repository truth — ruled by the reviewer (AJ, 2026-07-17)
 
