@@ -168,6 +168,12 @@ function markPageStale(content: string, reason: string, since: string): string {
   return `---\n${frontmatter}\n---\n${body}`;
 }
 
+/**
+ * Placeholder for the declared-but-unimplemented LINT operation (SPEC-005 §8).
+ * Returns a structurally valid, empty report so `GenerationReport.lint` and the
+ * `lint()` method honour their contract until the Linting stage lands. An empty
+ * report therefore means "LINT has not run", not "no findings" (REX-D5, F-043).
+ */
 async function noLint(): Promise<LintReport> {
   return { findings: [] };
 }

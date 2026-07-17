@@ -10,6 +10,12 @@
  * The LLM (behind {@link TextGenerator}) is the only non-deterministic step; the
  * shortlist and thresholds are deterministic. Any parse failure or out-of-shortlist
  * answer falls back to `new`, never a risky merge.
+ *
+ * **Staging status (ADR-005/ADR-006, Accepted):** this resolver is the semantic
+ * matcher ADR-006 builds its Phase 1 alias-learning on. It is implemented and
+ * tested but **not yet wired into the composition root** — the only pipeline
+ * (`createKnowledgePipeline`) currently uses `createSlugIdentityResolver`. It is
+ * deliberate staging ahead of its phase, not dead code (REX-D5, F-042).
  */
 import { z } from "zod";
 

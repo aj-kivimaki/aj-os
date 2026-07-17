@@ -4,7 +4,7 @@
 >
 > **Related Specification:** _None._ This is a **non-specification engineering quality package**. See [Why this package has no SPEC](#why-this-package-has-no-spec).
 >
-> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on 2026-07-17. The Review Findings Inventory, milestone roadmap, governing principles, sequencing, and package-level decisions are frozen. **Each milestone still runs its own Planning → Planning Review → Planning Freeze.** **Milestone 1 COMPLETE and FROZEN** (AJ, 2026-07-17) — 20 findings closed, assertion inventory 13/13, no executable source modified, SPEC-003's AJS-007 debt discharged. **Next: M2 — Automated Quality Gates.**
+> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on 2026-07-17. The Review Findings Inventory, milestone roadmap, governing principles, sequencing, and package-level decisions are frozen. **Each milestone still runs its own Planning → Planning Review → Planning Freeze.** **M1, M2, and M3-A COMPLETE and FROZEN** (AJ, 2026-07-17) — *M1 established Repository Truth; M2 established Repository Verification; M3-A established Public Contract Governance.* M3-A closed 8/8 findings — **five with no code removed** (three frozen items documented, one large barrel measured and kept, one doc-comment corrected) — added mechanical surface enforcement proven able to fail, and changed no behaviour (722 tests green). **Next: M3-B — Naming & Readability.**
 
 ---
 
@@ -131,8 +131,8 @@ See [MILESTONES.md](MILESTONES.md) for the frozen roadmap.
 | Milestone | Name | Status |
 | --------- | ---- | ------ |
 | M1 | Documentation Truth & SPEC-003 Lifecycle Closure | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M2 | Automated Quality Gates | ⬜ |
-| M3-A | Public Surface *(contractual)* | ⬜ |
+| M2 | Automated Quality Gates | ✅ **FROZEN** (AJ, 2026-07-17) |
+| M3-A | Public Surface *(contractual)* | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-B | Naming & Readability | ⬜ |
 | M4 | Structural Consistency & Genuine Duplication | ⬜ |
 | M5 | Comments, Errors & Test Craft | ⬜ |
