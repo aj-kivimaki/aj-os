@@ -1,9 +1,20 @@
 /**
- * Context Builder module — public entry point.
+ * Context Builder module — public surface.
  *
  * The Context Builder assembles the smallest, highest-value Context Package a
- * coding agent needs to complete a single task. This is the module's sole public
- * surface; internal components stay private and are re-exported here.
+ * coding agent needs to complete a single task. This barrel is the module's
+ * whole public surface: nothing outside it is public.
+ *
+ * It exposes `createContextBuilder` — the single entry point for *running* the
+ * full Collection → Selection → Assembly pipeline (CB-018's `build(request)`) —
+ * alongside the three engine service boundaries (`createCollectionEngine`,
+ * `createSelectionEngine`, `createAssemblyEngine`) and the data contracts it
+ * composes. The engines are public deliberately: each is an independently
+ * constructable, separately tested boundary (see `tests/context-builder/`), not
+ * a private internal. Earlier text here claimed "internal components stay
+ * private" — false, since the engines are exported; corrected per REX-302
+ * (F-039). Reducing the surface to hide them would break their suites and is a
+ * contract change, not a truth pass.
  */
 
 /** Identity metadata for the Context Builder agent. */
