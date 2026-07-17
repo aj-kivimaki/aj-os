@@ -4,7 +4,7 @@
 >
 > **Related Specification:** _None._ Non-specification quality package; see [README § Why this package has no SPEC](README.md#why-this-package-has-no-spec) and [REX-D0](decisions/REX-D0.md).
 >
-> **Status:** **Package Planning FROZEN** (AJ, 2026-07-17). **M1 (Documentation Truth) and M2 (Automated Quality Gates) COMPLETE and FROZEN** (AJ, 2026-07-17) — *M1 established repository truth; M2 established repository verification.* **Next: M3-A — Public Surface.** ⚠️ **Start M3 from these artefacts, not from conversational context** — reviewer's direction. **M1 (Documentation Truth & SPEC-003 Lifecycle Closure) COMPLETE and FROZEN** (reviewer: AJ, 2026-07-17) — REX-101..106 delivered; 20 findings closed; assertion inventory 13/13; **no executable source modified**; SPEC-003's AJS-007 debt discharged. **REX-D0, REX-D1 accepted; REX-D9 accepted (the package's first FPCP).** M1 retrospective complete. **Next: M2 — Automated Quality Gates.** ⚠️ **Reviewer requirement for M2:** *before the M2 Planning Freeze, the planning must be reviewed explicitly for the ownership-boundary defects identified during M1.*
+> **Status:** **Package Planning FROZEN** (AJ, 2026-07-17). **M1, M2, and M3-A COMPLETE and FROZEN** (AJ, 2026-07-17) — *M1 established Repository Truth; M2 established Repository Verification; M3-A established Public Contract Governance.* **Next: M3-B — Naming & Readability.** ⚠️ **Plan M3-B from these artefacts using the Evidence Review methodology** — reviewer's direction. **M3-A froze with 8/8 findings closed, five of them with no code removed; 722 tests green; no behavioural change.** **M1 (Documentation Truth & SPEC-003 Lifecycle Closure) COMPLETE and FROZEN** (reviewer: AJ, 2026-07-17) — REX-101..106 delivered; 20 findings closed; assertion inventory 13/13; **no executable source modified**; SPEC-003's AJS-007 debt discharged. **REX-D0, REX-D1 accepted; REX-D9 accepted (the package's first FPCP).** M1 retrospective complete. **Next: M2 — Automated Quality Gates.** ⚠️ **Reviewer requirement for M2:** *before the M2 Planning Freeze, the planning must be reviewed explicitly for the ownership-boundary defects identified during M1.*
 
 ---
 
@@ -54,7 +54,7 @@ Discipline** applied at review level — cite it **by name** when it bites.
 | --------- | ---- | ---- | ------ |
 | M1 | Documentation Truth & SPEC-003 Lifecycle Closure | Every document describes the repository that exists today; SPEC-003's two outstanding AJS-007 deliverables discharged | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M2 | Automated Quality Gates | Every measurable property machine-verified on every PR, and non-regressible | ✅ **FROZEN** (AJ, 2026-07-17) |
-| M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ⬜ |
+| M3-A | Public Surface *(contractual)* | One export discipline; frozen-surface dead code resolved through FPCPs | ✅ **FROZEN** (AJ, 2026-07-17) |
 | M3-B | Naming & Readability | One naming rule; an architectural taxonomy covering all of `src/` | ⬜ |
 | M4 | Structural Consistency & Genuine Duplication | Duplication evaluated against the shared-ownership criteria; DI and testability brought to standard | ⬜ |
 | M5 | Comments, Errors & Test Craft | Comments state constraints; errors share a taxonomy and a voice | ⬜ |
@@ -690,8 +690,8 @@ in parallel; REX-303 follows once the surface is settled.**_
       breadth measured as pinned-intentional).
 - [x] Every surface M3-A settled is **pinned** by a manifest proven able to fail (REX-303, REX-D8
       Option A); untouched modules deliberately not pinned.
-- [ ] Freeze Review completed; **Milestone Freeze declared by the reviewer**.
-- [ ] Retrospective created.
+- [x] Freeze Review completed; **Milestone Freeze declared by the reviewer (AJ) on 2026-07-17.** _(All §8 reservations weighed and ruled: F-038's keep-judgement explicitly ratified; F-039's truth-over-reduction approved; the context-builder presence-pin approved as proportional; both process incidents ruled to strengthen confidence, not weaken it.)_
+- [x] Retrospective created (§4.7 stage 7) — [retrospectives/RETROSPECTIVE-M3-A.md](retrospectives/RETROSPECTIVE-M3-A.md).
 
 ---
 
