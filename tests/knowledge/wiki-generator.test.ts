@@ -53,7 +53,7 @@ function makePage(
   body: string,
 ): CompiledPage {
   const fm = [
-    "type: " + kind,
+    `type: ${kind}`,
     'title: "T"',
     "sources:",
     ...sources.map((s) => `  - ${s}`),

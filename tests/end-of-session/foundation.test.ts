@@ -91,11 +91,7 @@ describe("module foundation — public-surface-only imports", () => {
       const source = readFileSync(join(testDir, file), "utf8");
       for (const match of source.matchAll(/from\s+["']([^"']+)["']/g)) {
         const specifier = match[1];
-        if (
-          specifier !== undefined &&
-          specifier.includes("end-of-session") &&
-          !allowedSpecifiers.has(specifier)
-        ) {
+        if (specifier?.includes("end-of-session") && !allowedSpecifiers.has(specifier)) {
           violations.push(`${file} → ${specifier}`);
         }
       }

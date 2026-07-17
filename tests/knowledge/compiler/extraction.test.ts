@@ -19,7 +19,7 @@ describe("parseExtraction", () => {
   });
 
   it("tolerates a ```json code fence around the JSON", () => {
-    const result = parseExtraction("```json\n" + VALID + "\n```");
+    const result = parseExtraction(`\`\`\`json\n${VALID}\n\`\`\``);
     expect(result.concepts[0]!.name).toBe("LLM Wiki");
   });
 

@@ -18,7 +18,6 @@ import {
   parseChangeSet,
   ExtractionError,
   type ChangeSet,
-  type KnowledgeExtractor,
   type TextGenerator,
 } from "../../src/end-of-session/index.js";
 

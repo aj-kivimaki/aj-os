@@ -50,7 +50,7 @@ const asJson = (value: unknown): string => JSON.stringify(value);
 
 /** Wrap JSON in a ```json … ``` fence, as a model often does. */
 const asFencedJson = (value: unknown): string =>
-  "```json\n" + JSON.stringify(value, null, 2) + "\n```";
+  `\`\`\`json\n${JSON.stringify(value, null, 2)}\n\`\`\``;
 
 describe("parseExtractionResponse — valid responses", () => {
   it("parses a bare-JSON response and preserves its values verbatim", () => {
@@ -64,7 +64,7 @@ describe("parseExtractionResponse — valid responses", () => {
   });
 
   it("strips a bare ``` fence and tolerates surrounding whitespace", () => {
-    const raw = "\n\n```\n" + asJson(validExtraction) + "\n```\n\n";
+    const raw = `\n\n\`\`\`\n${asJson(validExtraction)}\n\`\`\`\n\n`;
     expect(parseExtractionResponse(raw)).toEqual(validExtraction);
   });
 

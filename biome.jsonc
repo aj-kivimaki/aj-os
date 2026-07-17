@@ -21,16 +21,40 @@
       "trailingCommas": "all"
     }
   },
-  // Linting arrives in REX-205. Landing it here would make this diff
-  // unreviewable — the point of an isolated formatting commit is that every
-  // line in it is mechanical.
-  "linter": { "enabled": false },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        // OFF, deliberately. REX-203 established — and the reviewer approved —
+        // that `arr[0]!` is the honest expression *after* a length assertion:
+        // the guard fails first, with a clear message, and the `!` says "the
+        // guard already proved this". Biome forbids `!` categorically. Where a
+        // rule and a reviewed decision disagree, the config states the
+        // repository's actual position rather than quietly re-opening the
+        // decision. Unguarded `!` is caught by review, not by this rule.
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        // OFF. This rule advised `!archive/` over `!archive/**` — and that form
+        // does NOT exclude the folder. Applying its advice re-enabled formatting
+        // of frozen v1 history. Verified both ways; `**` excludes, `/` does not.
+        "useBiomeIgnoreFolder": "off"
+      }
+    }
+  },
   "files": {
     // `archive/` is FROZEN BY CONVENTION — docs/archive/README.md: "not
     // maintained or updated". A formatter reaching into it would rewrite ~200
     // files of preserved v1 history. Found by running it: the first config had
     // comments in `biome.json`, which Biome CANNOT parse — it reported parse
     // errors, fell back to DEFAULTS, and formatted the archive anyway.
+    // `!archive/**`, NOT `!archive/`. Biome's own `useBiomeIgnoreFolder` rule
+    // advises the latter — and following that advice SILENTLY RE-ENABLED
+    // formatting of the frozen archive (36 files rewritten before it was caught).
+    // The rule is suppressed below. The linter is a discovery tool, not an
+    // authority: this form is kept because it is PROVEN to exclude, not because
+    // a rule approves of it.
     "includes": [
       "**",
       "!archive/**",

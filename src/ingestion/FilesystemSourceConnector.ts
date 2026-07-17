@@ -16,6 +16,7 @@
  * - Output is deterministic: records are returned sorted by `id`.
  */
 import { createHash } from "node:crypto";
+import type { Stats } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -122,7 +123,7 @@ export function createFilesystemSourceConnector(
     for (const source of sources) {
       const absDir = resolveSource(source);
 
-      let info;
+      let info: Stats;
       try {
         info = await stat(absDir);
       } catch {

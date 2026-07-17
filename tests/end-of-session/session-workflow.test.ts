@@ -186,7 +186,7 @@ function stubs(options: StubOptions = {}): Stubs {
   };
 
   const extractor: KnowledgeExtractor = {
-    async extract(changeSet, sessionNotes): Promise<KnowledgeExtraction> {
+    async extract(_changeSet, sessionNotes): Promise<KnowledgeExtraction> {
       trace.push(`extraction(notes=${sessionNotes ?? "none"})`);
       boom("extraction");
       return EXTRACTION;

@@ -1,3 +1,4 @@
+import type { Stats } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -151,7 +152,7 @@ export class ConfigService {
   private async validateHandbookPath(handbookPath: string): Promise<void> {
     const resolved = resolve(this.projectRoot, handbookPath);
 
-    let stats;
+    let stats: Stats;
     try {
       stats = await stat(resolved);
     } catch (error) {
