@@ -1,4 +1,4 @@
-import { requireAgentEnv } from "./config/agent-env.js";
+import { requireAgentEnv } from "./config/agentEnv.js";
 import { getVaultRoot } from "./handbook/index.js";
 import { buildServer } from "./api/index.js";
 

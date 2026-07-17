@@ -39,6 +39,7 @@ does not replace them. Each subsystem serves one part of the loop:
 | **End-of-Session** | Keeps the context current as work happens | [SPEC-003](docs/specifications/SPEC-003-End-of-Session-Workflow.md) |
 | **Knowledge Review** | Governs what becomes durable knowledge | [SPEC-004](docs/specifications/SPEC-004-Knowledge-Review-Workflow.md) |
 | **Project Kickoff** | Starts new projects from a consistent baseline | [SPEC-001](docs/specifications/SPEC-001-Project-Kickoff-Workflow.md) |
+| **Agent Layer** | Answers handbook questions and captures inbox notes — the first live AI agent (`src/agent/`, served over HTTP by `src/api/`, a transport supported until MCP replaces it) | [CONTRIBUTING § module map](CONTRIBUTING.md#where-every-module-lives) |
 
 The architecture, its principles, and its platform contracts are described once,
 canonically, in **[ARCH-001 — Platform Architecture](docs/architecture/ARCH-001-AJ-OS-Platform-Architecture.md)**.

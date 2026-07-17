@@ -3,5 +3,5 @@ export type { WikiStore, WikiLocation } from "./WikiStore.js";
 export {
   createFilesystemWikiStore,
   WikiStoreError,
-} from "./FilesystemWikiStore.js";
-export type { FilesystemWikiStoreOptions } from "./FilesystemWikiStore.js";
+} from "./createFilesystemWikiStore.js";
+export type { FilesystemWikiStoreOptions } from "./createFilesystemWikiStore.js";
