@@ -4,7 +4,7 @@
 >
 > **Related Specification:** _None._ This is a **non-specification engineering quality package**. See [Why this package has no SPEC](#why-this-package-has-no-spec).
 >
-> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on 2026-07-17. The Review Findings Inventory, milestone roadmap, governing principles, sequencing, and package-level decisions are frozen. **Each milestone still runs its own Planning → Planning Review → Planning Freeze.** **Milestone 1 Planning FROZEN (AJ, 2026-07-17)** — REX-D1 accepted; M1 implementation in progress.
+> **Status:** **Package Planning FROZEN** by the reviewer (AJ) on 2026-07-17. The Review Findings Inventory, milestone roadmap, governing principles, sequencing, and package-level decisions are frozen. **Each milestone still runs its own Planning → Planning Review → Planning Freeze.** **Milestone 1 implementation complete** — REX-101..106 done, 20 findings closed, assertion inventory 13/13, no `.ts` modified. **Awaiting the M1 Freeze Review.**
 
 ---
 
@@ -130,7 +130,7 @@ See [MILESTONES.md](MILESTONES.md) for the frozen roadmap.
 
 | Milestone | Name | Status |
 | --------- | ---- | ------ |
-| M1 | Documentation Truth & SPEC-003 Lifecycle Closure | 🔨 **Planning FROZEN** (AJ, 2026-07-17) — in progress |
+| M1 | Documentation Truth & SPEC-003 Lifecycle Closure | 🔨 **Implementation complete — awaiting Freeze Review** |
 | M2 | Automated Quality Gates | ⬜ |
 | M3-A | Public Surface *(contractual)* | ⬜ |
 | M3-B | Naming & Readability | ⬜ |
