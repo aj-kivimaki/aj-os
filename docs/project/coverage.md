@@ -10,7 +10,7 @@ a standard.
 
 **The reported percentage covers the files that appear in the report — not the codebase.**
 
-At the time of writing, the report lists **46 of the 167 files** matched by `src/**/*.ts`. The
+At the time of writing, the report lists **43 of the 168 files** matched by `src/**/*.ts`. The
 headline is therefore *"coverage of the files represented in the report"*, which is **a different
 claim** from *"coverage of AJ-OS"*. Quoting it as the latter would be false.
 
@@ -20,17 +20,21 @@ claim** from *"coverage of AJ-OS"*. Quoting it as the latter would be false.
 consequence:
 
 - A file with **no tests** still appears at **0%** — *provided something in its module graph was
-  loaded.* `src/agent/`, `src/api/`, `src/config/` and `server.ts` all show 0% correctly.
+  loaded.* `server.ts`, `src/agent/client.ts`, `src/api/errors.ts` and `src/config/agentEnv.ts` all
+  show 0% correctly.
 - A file in a module graph that **nothing imports at all** does not appear as 0%. **It disappears
   from the report entirely.**
 
 **The report is not incapable of reporting bad news. Its limitation is that completely unreachable
 module graphs vanish rather than reading zero.**
 
-The clearest case: **`src/products/knowledge-assistant/KnowledgeAssistant.ts` — 410 lines, zero
-tests — is absent from the report altogether.** It is the repository's largest known untested
-surface, and the report cannot see it, because nothing imports it. That is exactly the file whose
-absence would most inflate the headline.
+The clearest case *was* **`src/products/knowledge-assistant/KnowledgeAssistant.ts`** — for a long
+time the repository's largest untested surface: zero tests, and **absent from the report
+altogether**, because nothing imported it. That was exactly the file whose absence would most
+inflate the headline. **REX-402 (F-053) has since given it injected dependencies and a test suite,
+so something now imports it and it appears in the report as a genuine per-file row instead of
+vanishing** — the vanishing-file problem made concrete, and then fixed. The mechanism it illustrated
+still holds for any module graph that nothing imports at all.
 
 ## This is a tooling limit, not a configuration mistake
 
@@ -51,7 +55,9 @@ Established by investigation (REX-208), not assumption:
 
 ## What would fix it
 
-Coverage becomes repository-wide when the unreachable graphs get tests — most of all
-`KnowledgeAssistant.ts`, which **REX M4 owns** (F-053: it hard-wires its dependencies, so it cannot
-be constructed in a test without a real filesystem and a real API key). **The measurement gap and
-the testing gap are the same gap.**
+Coverage becomes repository-wide when the unreachable graphs get tests. The largest one,
+`KnowledgeAssistant.ts`, is already done: **REX M4 closed it (F-053)** — it once hard-wired its
+dependencies and could not be constructed in a test without a real filesystem and a real API key; it
+now takes injected dependencies and has a suite, so it enters the report instead of vanishing. The
+remaining unreachable graphs are what still stands between the headline and a repository-wide figure.
+**The measurement gap and the testing gap are the same gap.**
