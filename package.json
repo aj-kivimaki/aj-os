@@ -49,11 +49,11 @@
     "infra:ps": "cd infrastructure && docker compose ps"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.110.0",
+    "@anthropic-ai/sdk": "^0.128.0",
     "commander": "^15.0.0",
-    "dotenv": "^17.0.0",
-    "fastify": "^5.10.0",
-    "zod": "^4.0.0"
+    "dotenv": "^18.0.4",
+    "fastify": "^5.12.5",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.4",
